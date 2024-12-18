@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-2n7t6r73utoio=at_k8yb7_2)k8w5+wd1c=b$6b9kkac68cuh1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['app.surplusindex.com']
+ALLOWED_HOSTS = ['127.0.0.1','app.surplusindex.com']
 
 
 # Application definition
