@@ -16,11 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from . import views
+
 
 urlpatterns = [
+    path('',include('auction_calendar.urls')),
     path('admin/', admin.site.urls),
-    path('auction_calendar/', include('auction_calendar.urls')),
-    path('',views.dashboard, name='dashboard' ),
-
 ]
