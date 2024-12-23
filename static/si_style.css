@@ -20,7 +20,7 @@ h1 {
 }
 
 body {
-    font-family: 'popping', sans-serif;
+    font-family: 'poppins', sans-serif;
 }
 
 .wrapper {
@@ -55,11 +55,11 @@ body {
     background-color: transparent;
     cursor: pointer;
     border: 0;
-    padding: 1rem 1.5rem;
+    padding: 1rem;
 }
 
 #toggle-btn i {
-    font-size: 1.5rem;
+    font-size: 2.2rem;
     color: #fff;
 }
 
@@ -69,8 +69,13 @@ body {
 
 .sidebar-logo a {
     color: #fff;
-    font-size: 1.15rem;
+    font-size: 1.5rem;
     font-weight: 600;
+    text-decoration: none;
+}
+
+.sidebar-logo a:hover {
+    color: #08c88e;
 }
 
 #sidebar:not(.expand) .sidebar-logo,
@@ -84,22 +89,24 @@ body {
 }
 
 a.sidebar-link {
-    padding: .625rem 1.625rem;
+    padding: .625rem 1rem;
     color: #fff;
     display: block;
-    font-size: 0.9rem;
+    font-size: 1.1rem;
     white-space: nowrap;
+    text-decoration: none;
     border-left: 3px solid transparent;
 }
 
 .sidebar-link i {
-    font-size: 1.1rem;
+    font-size: 1.8rem;
     margin-right: .75rem;
 }
 
 a.sidebar-link:hover {
     background-color: rgba(255, 255, 255, .075);
-    border-left: 3px solid #3b7ddd;
+    border-left: 3px solid #08c88e;
+    color: #08c88e;
 }
 
 .sidebar-item {
@@ -139,4 +146,9 @@ a.sidebar-link:hover {
 #sidebar.expand .sidebar-link[data-bs-toggle="collapse"].collapsed::after {
     transform: rotate(45deg);
     transition: all .2s ease-out;
+}
+
+a span {
+    margin: 2px 5px;
+    position: absolute;
 }
