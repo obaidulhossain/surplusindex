@@ -19,7 +19,6 @@ from django.urls import path, include
 
 
 urlpatterns = [
-    path('',include('auction_calendar.urls')),
     path('admin/', admin.site.urls),
-    
+    path('',include('si_user.urls')),
     ]

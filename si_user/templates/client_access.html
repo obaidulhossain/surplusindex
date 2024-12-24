@@ -15,7 +15,7 @@
             width: 450px;
             height: 550px;
             border: 1px solid #adc7bd7b;
-
+            border-radius: 5px;
         }
 
         /* Style the tab */
@@ -36,6 +36,7 @@
             transition: 0.3s;
             font-size: 17px;
             width: 50%;
+
         }
 
         /* Change background color of buttons on hover */
@@ -112,7 +113,7 @@
 
         }
     </style>
-    <title></title>
+    <title>SurplusIndex</title>
 
 </head>
 
@@ -141,12 +142,16 @@
                 </div>
 
                 <div id="Register" class="tabcontent">
-                    <h3>Register</h3>
-                    <p>content goes here</p>
-                    <p>content goes here</p>
-                    <p>content goes here</p>
-                    <p>content goes here</p>
-                    <p>content goes here</p>
+                    <h3>Create an account</h3>
+                    <form method="POST" autocomplete="off">
+
+                        {% csrf_token %}
+
+                        {{registerform.as_p}}
+
+                        <input type="submit" value="Register" />
+
+                    </form>
 
                 </div>
 
