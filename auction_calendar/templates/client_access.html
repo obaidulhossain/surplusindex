@@ -6,23 +6,23 @@
     <style>
         body {
             background-image: url("static/images/main-background.jpg");
-            color: #fff;
+            margin: 0px;
+
         }
 
         .login-module {
-            background-color: rgba(0, 0, 0, 0.75);
+            background-color: #001c2e;
             width: 450px;
             height: 550px;
-            border-radius: 20px;
-            border: 3px solid #adc7bd;
-            border-width: 3px;
+            border: 1px solid #adc7bd7b;
+
         }
 
         /* Style the tab */
         .tab {
             overflow: hidden;
             background-color: #f1f1f1;
-            border-radius: 17px 17px 0px 0px;
+
         }
 
         /* Style the buttons inside the tab */
@@ -54,6 +54,7 @@
             padding: 6px 12px;
             -webkit-animation: fadeEffect 1s;
             animation: fadeEffect 1s;
+            color: #91d0bd;
         }
 
         /* Fade in tabs */
@@ -76,50 +77,100 @@
                 opacity: 1;
             }
         }
+
+        #right-column {
+
+            min-height: 100%;
+            padding: 20px;
+            width: 35%;
+            margin-top: 40px;
+            display: inline-block;
+            position: fixed;
+        }
+
+        #left-column {
+            width: 64%;
+
+            display: inline-block;
+            color: #fbfbfb;
+            font-family: sans-serif;
+            margin-top: 200px;
+        }
+
+        #left-column h1 {
+            font-size: 100px;
+            font-family: sans-serif;
+            line-height: 37px;
+
+        }
+
+        #left-column h2 {
+            font-size: 30px;
+            font-family: sans-serif;
+            line-height: 50px;
+
+
+        }
     </style>
     <title></title>
+
 </head>
 
 <body>
-    <center>
-        <h1>Welcome to surplusindex.com</h1>
-        <div class="login-module">
-            <div class="tab">
-                <button class="tablinks" onclick="openCity(event, 'London')" id="defaultOpen">Log in</button>
-                <button class="tablinks" onclick="openCity(event, 'Paris')">Register</button>
+    <div id="left-column">
+        <center>
+            <h1>SurplusIndex</h1>
+            <h2>The Largest Surplus Funds Database Module </br> Tailored for Recovery Agents</h2>
+        </center>
+    </div>
+    <div id="right-column">
+        <center>
+            <div class="login-module">
+                <div class="tab">
+                    <button class="tablinks" onclick="openTab(event, 'LogIn')" id="defaultOpen">Log
+                        in</button>
+                    <button class="tablinks" onclick="openTab(event, 'Register')">Register</button>
+                </div>
+                <div id="LogIn" class="tabcontent">
+                    <h3>Login</h3>
+                    <p>content goes here</p>
+                    <p>content goes here</p>
+                    <p>content goes here</p>
+                    <p>content goes here</p>
+                    <p>content goes here</p>
+                </div>
 
-            </div>
+                <div id="Register" class="tabcontent">
+                    <h3>Register</h3>
+                    <p>content goes here</p>
+                    <p>content goes here</p>
+                    <p>content goes here</p>
+                    <p>content goes here</p>
+                    <p>content goes here</p>
 
-            <div id="London" class="tabcontent">
-                <h3>Login</h3>
-                <p>London is the capital city of England.</p>
-            </div>
-
-            <div id="Paris" class="tabcontent">
-                <h3>Register</h3>
-                <p>Paris is the capital of France.</p>
-            </div>
+                </div>
 
 
-            <script>
-                function openCity(evt, cityName) {
-                    var i, tabcontent, tablinks;
-                    tabcontent = document.getElementsByClassName("tabcontent");
-                    for (i = 0; i < tabcontent.length; i++) {
-                        tabcontent[i].style.display = "none";
-                    }
-                    tablinks = document.getElementsByClassName("tablinks");
-                    for (i = 0; i < tablinks.length; i++) {
-                        tablinks[i].className = tablinks[i].className.replace(" active", "");
-                    }
-                    document.getElementById(cityName).style.display = "block";
-                    evt.currentTarget.className += " active";
-                }
-                // Get the element with id="defaultOpen" and click on it
-                document.getElementById("defaultOpen").click();
-            </script>
-        </div>
-    </center>
+
+        </center>
+    </div>
+    <script>
+        function openTab(evt, tabname) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabname).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpen").click();
+    </script>
 </body>
 
 </html>
