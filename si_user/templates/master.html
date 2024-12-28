@@ -3,6 +3,7 @@
 <html>
 
 <head>
+    {% block st %}{% endblock %}
     <link rel="stylesheet" href="{% static 'si_style.css' %}">
     <link rel="stylesheet" href="https://cdn.lineicons.com/5.0/lineicons.css" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
@@ -84,13 +85,13 @@
                     </a>
                     <ul id="auth" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
                         <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">
+                            <a href="/profile/" class="sidebar-link">
                                 <i class="lni lni-user-4"></i>
                                 <span>Profile</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a href="#" class="sidebar-link">
+                            <a href="/my-subscription/" class="sidebar-link">
                                 <i class="lni lni-crown-3"></i>
                                 <span>Subscription</span>
                             </a>
@@ -108,7 +109,6 @@
         </aside>
         <div class='main p-3'>
             <div class="text-center">
-                <h2>Welcome to the largest surplus database</h2>
                 {% block content %}
                 {% endblock %}
             </div>
