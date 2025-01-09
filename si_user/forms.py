@@ -4,10 +4,7 @@ from django import forms
 from django.forms.widgets import PasswordInput, TextInput
 from .models import subscription
 #-- 
-class subs_form():
-    class Meta:
-        model = subscription
-        fields = ['monthly_free_credit', 'purchased_credit_balance', 'pay_as_you_go']
+
 # - update user form
 class UpdateUserForm(UserChangeForm):
     class Meta:

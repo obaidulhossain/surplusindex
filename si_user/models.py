@@ -26,7 +26,7 @@ class foreclosure(models.Model):
     si_next_update = models.DateField()
     
 class subscription(models.Model):
-    user_id = models.OneToOneField(User, primary_key=True, on_delete=models.CASCADE)
+    user_name = models.ForeignKey(User, on_delete=models.CASCADE)
     monthly_free_credit = models.IntegerField(default=20)
     purchased_credit_balance = models.IntegerField(default=0)
     pay_as_you_go = models.BooleanField(default=False)

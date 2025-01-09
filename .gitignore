@@ -1,0 +1,7 @@
+si_venv/
+media/
+static/
+node/
+__pycache__/
+.env
+db.sqlite3
