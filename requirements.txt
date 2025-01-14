@@ -8,8 +8,14 @@ django-bootstrap-icons==0.8.7
 django-bootstrap-v5==1.0.11
 django-widget-tweaks==1.5.0
 idna==3.10
+mysqlclient==2.2.6
+PyMySQL==1.1.1
+python-decouple==3.8
+python-dotenv==1.0.1
 requests==2.32.3
 soupsieve==2.6
 sqlparse==0.5.3
 typing_extensions==4.12.2
+tzdata==2024.2
 urllib3==2.3.0
+validate_email==1.3
