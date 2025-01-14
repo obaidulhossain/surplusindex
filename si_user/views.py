@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from . forms import CreateUserForm, LoginForm, UpdateUserForm
+from . forms import CreateUserForm, LoginForm, UpdateUserForm, AddPropertyForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -87,3 +87,20 @@ def register (request):
 def dashboard(request):
     
     return render(request, 'dashboard.html')
+
+
+
+def addProperty(request):
+    form = AddPropertyForm()
+    if request.method == 'POST':
+        form = AddPropertyForm(request.POST)
+        if form.is_valid():
+           form.save()
+           return redirect('add-property')
+    context = {'form':form}    
+    return render(request, 'leads/add_property.html', context)
+
+def  leads(request):
+
+    context = {}
+    return render(request, 'leads/leads.html', context )
