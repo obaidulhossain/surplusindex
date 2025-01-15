@@ -9,6 +9,8 @@ from django.core.mail import EmailMessage
 
 
 # Create your views here.
+def homepage(request):
+    return render(request, 'index.html')
 
 class EmailValidationView(View):
     def post(self, request):

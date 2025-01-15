@@ -43,8 +43,6 @@ def update_user(request):
         return redirect('my-login')
 # -- End of Update User function --
 
-def homepage(request):
-    return render(request, 'index.html')
     
 # ------------------------------------- Login View
 def user_login(request):

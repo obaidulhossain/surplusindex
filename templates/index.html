@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="{% static 'css/front.css' %}" rel="stylesheet">
+    <title>SurplusIndex</title>
+</head>
+
+<body>
+    <center>
+        <h1>SurplusIndex</h1>
+        <h5>The Largest Surplus Funds Database</br>Tailored for Recovery Agents</h5> </br>
+    </center>
+    <center>
+        <div class="card card-large">
+            <a href="/login/" class="button button-large" role="button">Log In</a>
+            <a href="{% url 'register' %}" class="button button-large" role="button">Create an Account</a>
+        </div>
+    </center>
+
+</body>
+
+</html>
