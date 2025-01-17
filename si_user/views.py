@@ -41,7 +41,7 @@ def update_user(request):
     else:
         messages.success(request, "You must be logged in to access this page!")
         return redirect('my-login')
-# -- End of Update User function --
+# -- End of Update User functi on --
 
     
 # ------------------------------------- Login View
@@ -63,9 +63,7 @@ def user_login(request):
     return render(request, 'login.html', context=context)
 
 # ------------------------------------- Logout View
-def user_logout(request):
-    auth.logout(request)
-    return redirect("homepage")
+
 
 # ------------------------------------- Register View
 def register (request):

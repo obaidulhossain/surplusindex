@@ -1,1 +1,6 @@
-console.log("1111", 1111);
+document.querySelector("#sidebar").classList.toggle("expand");
+const hamburger = document.querySelector("#toggle-btn");
+hamburger.addEventListener("click", function () {
+    document.querySelector("#sidebar").classList.toggle("expand");
+})
+
