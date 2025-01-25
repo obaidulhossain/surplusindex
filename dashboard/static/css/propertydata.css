@@ -1,0 +1,388 @@
+.filter-section {
+    position: relative;
+}
+
+.filters-header {
+    border-radius: 5px 5px 0px 0px;
+    background-color: #ededed;
+    border: 1px solid #ababab;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+}
+
+
+.toogle-button {
+    padding: 5px 20px;
+    cursor: pointer;
+    background-color: #0b9056;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    transition: ease-in-out 500ms;
+}
+
+.toogle-button:hover {
+    transition: 500ms;
+    background-color: #10be73;
+
+}
+
+.filter-body {
+    height: auto;
+    overflow: hidden;
+    padding: 10px;
+    border: 1px solid #ababab;
+    background-color: #f9f9f9;
+    transition: all 0.25s ease-in-out;
+
+}
+
+.filter-body.collapsing {
+    height: 0;
+    padding: 0;
+}
+
+
+
+.filters {
+    width: -webkit-fill-available;
+    height: auto;
+    background-color: #6d6d6d17;
+    border: 1px solid grey;
+    border-radius: 5px;
+    float: left;
+    display: block;
+    padding: 10px;
+    margin: 20px 20px 20px 20px;
+    position: relative;
+}
+
+
+h6 {
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    width: auto;
+}
+
+.filter-item {
+    display: inline-block;
+    padding: 5px;
+    margin: 5px;
+    min-width: 300px;
+
+}
+
+.filter-item label {
+    min-width: 120px;
+    font-weight: 600;
+}
+
+.filter-item select {
+    min-width: 200px;
+}
+
+.filter-item select:hover {
+    border: 1px solid #0b9056;
+}
+
+.filter-item select:focus>option:checked {
+    background-color: #0b905646;
+    color: #000;
+}
+
+#range-slider,
+#possible-range-slider,
+#verified-range-slider {
+    margin: 15px 0;
+    width: 300px;
+}
+
+.range-values {
+    display: flex;
+    justify-content: space-between;
+    width: 300px;
+}
+
+.range-section {
+
+    justify-content: space-between;
+    align-items: center;
+    display: flex;
+    border-top: 1px solid rgba(0, 0, 0, 0.286);
+}
+
+.range-section label {
+    padding: 0px 10px;
+    display: inline-block;
+    width: 140px;
+    margin: 0px 5px;
+    text-align: left;
+}
+
+
+.action-section {
+    float: right;
+    margin: 0px 10px;
+}
+
+.action-section button {
+    padding: 10px 20px;
+    background-color: #0b9056;
+    text-decoration: none;
+    color: #ffffff;
+    border-radius: 5px;
+    border: 1px solid #566787;
+    margin-bottom: 20px;
+    transition: 500ms;
+}
+
+.action-section button:hover {
+    background-color: #10be73;
+    transition: 500ms;
+}
+
+button:disabled,
+button[disabled] {
+    border: 1px solid #999999;
+    background-color: #afafaf;
+    color: #001e0e;
+}
+
+button:disabled:hover {
+    border: 1px solid #999999;
+    background-color: #7e7d7d;
+    color: #001e0e;
+}
+
+
+.section div {
+    margin: 10px 0px;
+
+}
+
+.table-wrapper {
+    background: #fff;
+    padding: 20px 25px;
+    margin: 0px;
+    border-radius: 3px;
+    border: 1px solid black;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+}
+
+
+table.table tr th,
+table.table tr td {
+    border-color: #e9e9e9;
+    padding: 5px 10px;
+    vertical-align: middle;
+    text-wrap-mode: nowrap;
+}
+
+table.table tr th:first-child {
+    width: 48px;
+}
+
+table.table tr th:last-child {
+    width: 100px;
+}
+
+table.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #fcfcfc;
+}
+
+table.table-striped.table-hover tbody tr:hover {
+    background: #f5f5f5;
+}
+
+table.table th i {
+    font-size: 13px;
+    margin: 0 5px;
+    cursor: pointer;
+}
+
+table.table td:last-child i {
+    opacity: 0.9;
+    font-size: 22px;
+    margin: 0 5px;
+}
+
+table.table td a {
+    font-weight: bold;
+    color: #566787;
+    display: inline-block;
+    text-decoration: none;
+    outline: none !important;
+}
+
+table.table td a:hover {
+    color: #2196F3;
+}
+
+table.table td a.edit {
+    color: #FFC107;
+}
+
+table.table td a.delete {
+    color: #F44336;
+}
+
+table.table td i {
+    font-size: 19px;
+}
+
+table.table .avatar {
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-right: 10px;
+}
+
+.pagination {
+    float: right;
+    margin: 0 0 5px;
+}
+
+.pagination li a {
+    border: none;
+    font-size: 13px;
+    min-width: 30px;
+    min-height: 30px;
+    color: #999;
+    margin: 0 2px;
+    line-height: 30px;
+    border-radius: 2px !important;
+    text-align: center;
+    padding: 0 6px;
+}
+
+.pagination li a:hover {
+    color: #666;
+}
+
+.pagination li.active a,
+.pagination li.active a.page-link {
+    background: #0b9056;
+}
+
+.pagination li.active a:hover {
+    background: #10be73;
+}
+
+.pagination li.disabled i {
+    color: #ccc;
+}
+
+.pagination li i {
+    font-size: 16px;
+    padding-top: 6px
+}
+
+.hint-text {
+    float: left;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+/* Custom checkbox */
+.custom-checkbox {
+    position: relative;
+}
+
+.custom-checkbox input[type="checkbox"] {
+    opacity: 0;
+    position: absolute;
+    margin: 5px 0 0 3px;
+    z-index: 9;
+}
+
+.custom-checkbox label:before {
+    width: 18px;
+    height: 18px;
+}
+
+.custom-checkbox label:before {
+    content: '';
+    margin-right: 10px;
+    display: inline-block;
+    vertical-align: text-top;
+    background: white;
+    border: 1px solid #bbb;
+    border-radius: 2px;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+.custom-checkbox input[type="checkbox"]:checked+label:after {
+    content: '';
+    position: absolute;
+    left: 6px;
+    top: 3px;
+    width: 6px;
+    height: 11px;
+    border: solid #000;
+    border-width: 0 3px 3px 0;
+    transform: inherit;
+    z-index: 3;
+    transform: rotateZ(45deg);
+}
+
+.custom-checkbox input[type="checkbox"]:checked+label:before {
+    border-color: #03A9F4;
+    background: #03A9F4;
+}
+
+.custom-checkbox input[type="checkbox"]:checked+label:after {
+    border-color: #fff;
+}
+
+.custom-checkbox input[type="checkbox"]:disabled+label:before {
+    color: #b8b8b8;
+    cursor: auto;
+    box-shadow: none;
+    background: #ddd;
+}
+
+/* Modal styles */
+.modal .modal-dialog {
+    max-width: 400px;
+}
+
+.modal .modal-header,
+.modal .modal-body,
+.modal .modal-footer {
+    padding: 20px 30px;
+}
+
+.modal .modal-content {
+    border-radius: 3px;
+}
+
+.modal .modal-footer {
+    background: #ecf0f1;
+    border-radius: 0 0 3px 3px;
+}
+
+.modal .modal-title {
+    display: inline-block;
+}
+
+.modal .form-control {
+    border-radius: 2px;
+    box-shadow: none;
+    border-color: #dddddd;
+}
+
+.modal textarea.form-control {
+    resize: vertical;
+}
+
+.modal .btn {
+    border-radius: 2px;
+    min-width: 100px;
+}
+
+.modal form label {
+    font-weight: normal;
+}
