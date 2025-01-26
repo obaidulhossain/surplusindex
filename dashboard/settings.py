@@ -147,11 +147,20 @@ MESSAGE_TAGS = {
 }
 
 
-# email stuff
-EMAIL_USE_TLS = True
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'myonjobs@gmail.com'
-DEFAULT_FROM_EMAIL = 'myonjobs@gmail.com'
-EMAIL_POST = 587
-EMAIL_HOST_PASSWORD = 'Obaidul@11307'
-EMAIL_TIMEOUT = 100
+# Enable debugging to see detailed email backend logs.
+import logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}

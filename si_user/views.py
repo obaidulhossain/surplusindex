@@ -62,7 +62,7 @@ def user_login(request):
     
     return render(request, 'login.html', context=context)
 
-# ------------------------------------- Logout View
+# ------------------------------------- Logout View  
 
 
 # ------------------------------------- Register View
@@ -83,3 +83,6 @@ def register (request):
 def dashboard(request):
     
     return render(request, 'dashboard.html')
+
+
+

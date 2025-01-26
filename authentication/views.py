@@ -2,7 +2,7 @@ from django.contrib import messages, auth
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.models import User, auth
 
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage, send_mail
 
 from django.http import JsonResponse
 
@@ -13,6 +13,15 @@ from django.views import View
 from validate_email import validate_email
 
 import json
+
+from dashboard.functions import sendActivationMail
+
+from django.utils.encoding import force_bytes, force_str, DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.urls import reverse
+from .utils import token_generator
+from django.contrib.sites.shortcuts import get_current_site
+
 
 # Create your views here.
 def homepage(request):
@@ -68,20 +77,58 @@ class RegistrationView(View):
                 user.set_password(password)
                 user.is_active=False
                 user.save()
+
+                #activation token
+                uidb64=urlsafe_base64_encode(force_bytes(user.pk))
+                domain = get_current_site(request).domain
+                link = reverse('activate',kwargs={'uidb64':uidb64, 'token':token_generator.make_token(user)})
+                activate_url='https://'+domain+link
+                
+                email_body='Hi '+user.username+' Please use this link to verify your email and activate your account.\n'+activate_url
+                email_subject = 'Verify Email and Activate SurplusIndex Account'
+
+                sendActivationMail(email, email_subject, email_body)
                 # email_subject = 'Activate your SurplusIndex account'
                 # email_body='test body'
                 # email = EmailMessage(
                 #     email_subject,
                 #     email_body,
-                #     'noreply@surplusindec.com',
+                #     'noreply@surplusindex.com',
                 #     [email],
-                #     )
-                # email.send()
+                #  )
+                # email.send(fail_silently=False)
                 messages.success(request,'Account Successfully Created')
                 return render(request, 'authentication/login.html')
 
         return render(request, 'authentication/registration.html')
     
+
+class VerificationView(View):
+    def get(self, request, uidb64, token):
+        
+        
+        try:
+            id = force_str(urlsafe_base64_decode(uidb64))
+            user = User.objects.get(pk=id)
+
+            if not token_generator.check_token(user, token):
+                return redirect ('login'+'?message='+'User already activated')
+            
+
+            if user.is_active:
+                return redirect('login')
+            user.is_active=True
+            user.save()
+            messages.success(request,'Account Successfully Activated')
+            return redirect ('login')
+        except Exception as ex:
+            pass
+        
+        
+
+        return redirect('login')
+
+
 class LoginView(View):
     def get(self,request):
         return render(request,'authentication/login.html')
