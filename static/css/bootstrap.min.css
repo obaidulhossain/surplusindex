@@ -235,8 +235,8 @@ h3,
 h4,
 h5,
 h6 {
-    margin-top: 0;
-    margin-bottom: .5rem;
+
+    margin: .5rem;
     font-weight: 400;
     line-height: 1.2;
     color: var(--bs-heading-color)
@@ -611,7 +611,7 @@ legend+* {
 
 ::file-selector-button {
     font: inherit;
-    -webkit-appearance: button
+    -webkit-appearance: button;
 }
 
 output {
@@ -619,12 +619,12 @@ output {
 }
 
 iframe {
-    border: 0
+    border: 0;
 }
 
 summary {
     display: list-item;
-    cursor: pointer
+    cursor: pointer;
 }
 
 progress {

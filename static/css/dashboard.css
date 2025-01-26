@@ -1,5 +1,35 @@
 body {
     font-size: .875rem;
+
+
+}
+
+.full {
+    display: flex;
+    flex-wrap: wrap;
+    float: inline-start;
+
+}
+
+.sidebar {
+    width: 20%;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    overflow-x: hidden;
+    z-index: 1000;
+    transition: all 0.25s ease-in-out;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    width: 100%;
+    min-height: 100vh;
+    overflow: hidden;
+    transition: all 0.35s ease-in-out;
+    display: block;
 }
 
 .feather {
@@ -8,11 +38,8 @@ body {
     vertical-align: text-bottom;
 }
 
-/*
-   * Sidebar
-   */
 
-.sidebar {
+.sidebar1 {
     position: fixed;
     top: 0;
     /* rtl:raw:
