@@ -14,8 +14,6 @@ from validate_email import validate_email
 
 import json
 
-from dashboard.functions import sendActivationMail
-
 from django.utils.encoding import force_bytes, force_str, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.urls import reverse
@@ -82,21 +80,12 @@ class RegistrationView(View):
                 uidb64=urlsafe_base64_encode(force_bytes(user.pk))
                 domain = get_current_site(request).domain
                 link = reverse('activate',kwargs={'uidb64':uidb64, 'token':token_generator.make_token(user)})
-                activate_url='https://'+domain+link
+                activate_url='http://'+domain+link
                 
                 email_body='Hi '+user.username+' Please use this link to verify your email and activate your account.\n'+activate_url
                 email_subject = 'Verify Email and Activate SurplusIndex Account'
+                send_mail(email_subject,email_body,'contact@surplusindex.com',[email], fail_silently=False)
 
-                sendActivationMail(email, email_subject, email_body)
-                # email_subject = 'Activate your SurplusIndex account'
-                # email_body='test body'
-                # email = EmailMessage(
-                #     email_subject,
-                #     email_body,
-                #     'noreply@surplusindex.com',
-                #     [email],
-                #  )
-                # email.send(fail_silently=False)
                 messages.success(request,'Account Successfully Created')
                 return render(request, 'authentication/login.html')
 
@@ -156,9 +145,3 @@ def user_logout(request):
     auth.logout(request)
     return redirect("homepage")
 
-# class LogoutView(View):
-#     def post(self, request):
-#         auth.logout(request)
-#         messages.success(request, 'You have been logged out')
-#         return redirect('login')
-    
