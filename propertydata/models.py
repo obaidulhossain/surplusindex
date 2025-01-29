@@ -175,13 +175,13 @@ class Status(models.Model):
         (WAITING_FOR_COURTS_DECISION, 'Waiting for Courts Decision'),
         (FUND_DISBURSED, 'Fund Disbursed')
         )
-    client = models.ManyToManyField(User, blank=True, related_name='user_as_client')
-    lead = models.ManyToManyField(Foreclosure, blank=True, related_name='status_for_lead')
+    client = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name='user_as_client', default=1)
+    lead = models.ForeignKey(Foreclosure, blank=True, related_name='foreclosure_as_lead', on_delete=models.CASCADE, default=1)
     call_status = models.CharField(max_length=255, blank=True, default='Need to Call')
     call_comment = models.TextField(max_length=500, blank=True)
     agreement_status = models.CharField(max_length=255, blank=True, choices=AG_STATUS, default='Not Signed')
     agreement_comment = models.TextField(max_length=500, blank=True)
     claim_status = models.CharField(max_length=255, blank=True, choices=CLAIM_SATUS, default='Not Signed')
     claim_comment = models.TextField(max_length=500, blank=True)
-    
+    archived = models.BooleanField(default=False)
 

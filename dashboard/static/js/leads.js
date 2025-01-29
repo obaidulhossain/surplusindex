@@ -252,11 +252,12 @@ document.addEventListener("DOMContentLoaded", function () {
 // -------------------------Update filters and table-----(end)-----------------------------
 
 // -------------------------toggle filters button-----(start)-----------------------------
+// Reuseable function
 // -------------------------toggle filters button-----(start)-----------------------------
 
-function toggleFilters() {
-    const x = document.getElementById("filter-section");
-    const y = document.getElementById("toggle-filters");
+function toggleFilters(togglebtn, hide_id) {
+    const x = document.getElementById(hide_id); // hide_id = section id to be hidden
+    const y = document.getElementById(togglebtn); // togglebtn = button id that will perform the action
 
     if (x.style.display === "flex") {
         x.style.display = "none";
@@ -270,3 +271,5 @@ function toggleFilters() {
 
 // -------------------------toggle filters button-----(end)-----------------------------
 // -------------------------toggle filters button-----(end)-----------------------------
+
+

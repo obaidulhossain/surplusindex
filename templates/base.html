@@ -24,13 +24,13 @@
             </div>
             <ul class="sidebar-nav">
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link">
+                    <a href="{% url 'dashboard' %}" class="sidebar-link">
                         <i class="lni lni-dashboard-square-1"></i>
                         <span>Dashboard</span>
                     </a>
                 </li>
                 <li class="sidebar-item">
-                    <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse"
+                    <a href="{% url 'leads' %}" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse"
                         data-bs-target="#leads" aria-expanded="false" aria-controls="leads">
                         <i class="lni lni-agenda"></i>
                         <span>Leads</span>
@@ -43,20 +43,20 @@
                             </a>
                         </li>
                         <li class="sidebar-item child">
-                            <a href="#" class="sidebar-link collapsed" data-bs-toggle="collapse"
+                            <a href="{% url 'myleads' %}" class="sidebar-link collapsed" data-bs-toggle="collapse"
                                 data-bs-target="#my-leads" aria-expanded="false" aria-controls="my-leads">
                                 <i class="lni lni-layout-9"></i>
                                 <span>My Leads</span>
                             </a>
                             <ul id="my-leads" class="sidebar-dropdown List-unstyled collapse">
                                 <li class="sidebar-item child-next">
-                                    <a href="#" class="sidebar-link">
+                                    <a href="{% url 'myleads' %}" class="sidebar-link">
                                         <i class=" lni lni-check-circle-1"></i>
                                         <span>Active Leads</span>
                                     </a>
                                 </li>
                                 <li class="sidebar-item child-next">
-                                    <a href="#" class="sidebar-link">
+                                    <a href="{% url 'archived' %}" class="sidebar-link">
                                         <i class="lni lni-box-archive-1"></i>
                                         <span>Archive</span>
                                     </a>

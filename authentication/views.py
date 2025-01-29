@@ -133,7 +133,7 @@ class LoginView(View):
                 if user.is_active:
                     auth.login(request, user)
                     messages.success(request, 'Welcome, '+user.username+' you are now logged in')
-                    return redirect('propertydata')
+                    return redirect('dashboard')
                 messages.error(request,'Account is not active, please check your email to activate account')
                 return render(request,'authentication/login.html')
             messages.error(request,'Invalid Credentials')

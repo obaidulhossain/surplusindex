@@ -146,8 +146,6 @@ MESSAGE_TAGS = {
     messages.ERROR:'danger'
 }
 
-
-
 EMAIL_HOST = "surplusindex.com"
 EMAIL_PORT = 465
 EMAIL_HOST_USER = "contact@surplusindex.com"

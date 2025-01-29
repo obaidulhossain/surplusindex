@@ -1,5 +1,4 @@
 si_venv/
-
 node/
 __pycache__/
 .env
