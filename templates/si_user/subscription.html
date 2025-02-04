@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block title %}User Profile{% endblock title %}
+{% load static %}
+{% block content%}
+
+
+<h1>Welcome {{user.first_name}}</h1>
+
+<div class="full-section">
+    <h2 class="Hcenter">PAY AS YOU GO</h2>
+    <div class="mid-section">
+        <h4>How Pay As you Go Works?</h4>
+        <p>Our pay as you go subscription allows you to get access to leads of your choices. You will be able import
+            leads you like, from "All Leads" section to your "My Leads" section and be able to access details (property
+            detail, contacts etc) using credits.</p>
+        <h4>What does Credit Mean inside SurplusIndex App?</h4>
+        <p>Credits are points required to unlock details of a lead. It usually used to move leads from All Leads tab to
+            My Leads Tab</p>
+    </div>
+    <div class="small-section">
+        <a href="#" id="buy_now_btn" class="button button-large" role="button">Buy 10 Credits for $10</a>
+        <a href="#" id="buy_now_btn" class="button button-large" role="button">Buy 50 Credits for $50</a>
+        <a href="#" id="buy_now_btn" class="button button-large" role="button">Buy 100 Credits for $95</a>
+        <a href="#" id="buy_now_btn" class="button button-large" role="button">Buy 300 Credits for $270</a>
+    </div>
+    <div class="mid-section">
+
+        <script src="https://js.stripe.com/v3/"></script>
+        <script>
+
+            const buy_now_button = document.querySelector('#buy_now_btn')
+            buy_now_button.addEventListener('click', event => {
+                fetch('/checkout/')
+                    .then((result) => { return result.json() })
+                    .then((data) => {
+                        var stripe = Stripe(data.stripe_public_key);
+                        stripe.redirectToCheckout({
+                            sessionId: data.session_id
+                        }).then(function (result) {
+                        });
+                    })
+            })
+        </script>
+    </div>
+</div>
+
+
+
+
+
+
+{% endblock content%}

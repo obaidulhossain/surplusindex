@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %}User Settings{% endblock title %}
+{% load static %}
+{% block content%}
+
+
+<h1>Settings | SurplusIndex</h1>
+<div class="full-section">
+    <h2>USER CREDENTIALS</h2>
+
+    <form method="post" autocomplete="off" action="{% url 'updateuserDetail' %}">
+        <div class=" sec-small">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="first_name" class="form-label">First Name: </label>
+                {{ user_form.first_name|add_class:"form-control"}}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_email" class="form-label">Email</label>
+                {{ user_form.email|add_class:"form-control" }}
+            </div>
+        </div>
+        <div class="sec-small">
+            <div class="mb-3">
+                <label for="id_last_name" class="form-label">Last Name: </label>
+                {{ user_form.last_name|add_class:"form-control" }}
+            </div>
+            <div class="mb-3">
+                <label for="id_phone" class="form-label">Contact Number: </label>
+                {{ detail_form.phone|add_class:"form-control" }}
+            </div>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Update Information</button>
+        </div>
+
+    </form>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+{% endblock content%}

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}User Profile{% endblock title %}
+{% load static %}
+{% block content%}
+
+
+<h1>Welcome {{user.first_name}}</h1>
+
+<div class="full-section">
+    <h2 class="Hcenter">CREDIT BALANCE</h2>
+    <div class="cir-section">
+        <div class="circle">
+            <h3>{{ user.credits.free_credit_balance }}</h3>
+        </div>
+        <h3>Free Credits</h3>
+    </div>
+    <div class="cir-section">
+        <div class="circle">
+            <h3>{{ user.credits.purchased_credit_balance }}</h3>
+        </div>
+        <h3>Purchased Credits</h3>
+    </div>
+    <div class="cir-section">
+        <div class="circle">
+            <h3>{{ user.credits.total_credits }}</h3>
+        </div>
+        <h3>Total Credits</h3>
+    </div>
+
+
+</div>
+
+
+
+
+
+
+{% endblock content%}
