@@ -141,42 +141,81 @@ def userSubscription(request):
     return render(request, 'si_user/subscription.html')
 
 
+# @login_required
+# @csrf_exempt
+# def checkout(request):
+#     user = request.user
+
+#     if not request.user.credits.stripe_customer_id:
+#         try:
+#             # Create a Stripe customer
+#             customer = stripe.Customer.create(
+#                 email=request.user.email,
+#                 name=f"{request.user.first_name} {request.user.last_name}",
+#             )
+#             request.user.credits.stripe_customer_id = customer.id
+#             request.user.credits.save()
+#         except stripe.error.StripeError as e:
+#             # Handle Stripe API errors
+#             return JsonResponse({'error': str(e)}, status=400)
+
+#     session = stripe.checkout.Session.create(
+#     payment_method_types=['card'],
+#     line_items=[{
+#         'price' : 'price_1QoOCJG4c6thWCjhpEhUuWtH',
+#         'quantity' : 1,
+#     }],
+#     mode = 'payment',
+#     success_url = request.build_absolute_uri(reverse('subscriptions')) + '?session_id={CHECKOUT_SESSION_ID}',
+#     cancel_url = request.build_absolute_uri(reverse('subscriptions')),
+#     customer=user.credits.stripe_customer_id,  # Link the customer ID
+#     client_reference_id=user.id,
+#     )
+
+#     return JsonResponse({
+#         'session_id':session.id,
+#         'stripe_public_key':settings.STRIPE_PUBLISHABLE_KEY,
+#     })
+    
 @login_required
 @csrf_exempt
 def checkout(request):
     user = request.user
 
-    if not request.user.credits.stripe_customer_id:
-        try:
-            # Create a Stripe customer
-            customer = stripe.Customer.create(
-                email=request.user.email,
-                name=f"{request.user.first_name} {request.user.last_name}",
-            )
-            request.user.credits.stripe_customer_id = customer.id
-            request.user.credits.save()
-        except stripe.error.StripeError as e:
-            # Handle Stripe API errors
-            return JsonResponse({'error': str(e)}, status=400)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        price_id = data.get('price_id')
+        leads = data.get('leads')
+        amount = data.get('amount')
 
-    session = stripe.checkout.Session.create(
-    payment_method_types=['card'],
-    line_items=[{
-        'price' : 'price_1QoOCJG4c6thWCjhpEhUuWtH',
-        'quantity' : 1,
-    }],
-    mode = 'payment',
-    success_url = request.build_absolute_uri(reverse('subscriptions')) + '?session_id={CHECKOUT_SESSION_ID}',
-    cancel_url = request.build_absolute_uri(reverse('subscriptions')),
-    customer=user.credits.stripe_customer_id,  # Link the customer ID
-    client_reference_id=user.id,
-    )
+        if not user.credits.stripe_customer_id:
+            try:
+                customer = stripe.Customer.create(
+                    email=user.email,
+                    name=f"{user.first_name} {user.last_name}",
+                )
+                user.credits.stripe_customer_id = customer.id
+                user.credits.save()
+            except stripe.error.StripeError as e:
+                return JsonResponse({'error': str(e)}, status=400)
 
-    return JsonResponse({
-        'session_id':session.id,
-        'stripe_public_key':settings.STRIPE_PUBLISHABLE_KEY,
-    })
-    
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+                'price': price_id,  # Use dynamic price_id here
+                'quantity': 1,
+            }],
+            mode='payment',
+            success_url=request.build_absolute_uri(reverse('subscriptions')) + '?session_id={CHECKOUT_SESSION_ID}',
+            cancel_url=request.build_absolute_uri(reverse('subscriptions')),
+            customer=user.credits.stripe_customer_id,
+            client_reference_id=user.id,
+        )
+
+        return JsonResponse({
+            'session_id': session.id,
+            'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
+        })
 
 
 @csrf_exempt
@@ -206,16 +245,30 @@ def stripe_webhook(request):
     #Handle the checkout.session.completed event
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        # print(json.dumps(session,indent=4))
-        
-        customer_id = session.get('customer')
-        checkout_id = session.get('id')
-        amount_paid = session.get('amount_total') / 100  # Stripe uses cents
-        currency = session.get('currency')
-        user_id = session.get('client_reference_id')  # Pass this in the checkout creation
-        num_leads = 100  # This could vary depending on your logic
-
         try:
+            # Fetch the line items using Stripe API
+            line_items = stripe.checkout.Session.list_line_items(session['id'])
+            price_id = line_items['data'][0]['price']['id']
+
+            # Determine the number of leads based on the price ID
+            if price_id == 'price_1QojYpG4c6thWCjhaNxkWBYH':  # Example price ID
+                num_leads = 10
+            elif price_id == 'price_1QojZ9G4c6thWCjh9Ye4cxI9':
+                num_leads = 50
+            elif price_id == 'price_1QoOCJG4c6thWCjhpEhUuWtH':
+                num_leads = 100
+            elif price_id == 'price_1QojZNG4c6thWCjh4c4ljD2U':
+                num_leads = 300
+            else:
+                num_leads = 0
+                    # Extract other session data
+            customer_id = session.get('customer')
+            checkout_id = session.get('id')
+            amount_paid = session.get('amount_total') / 100  # Stripe uses cents
+            currency = session.get('currency')
+            user_id = session.get('client_reference_id')
+
+            # Update user details and create payment record
             user = User.objects.get(id=user_id)
             UserPayment.objects.create(
                 user=user,
@@ -226,17 +279,95 @@ def stripe_webhook(request):
                 currency=currency,
                 has_paid=True,
             )
-            update_user_detail = get_object_or_404(UserDetail,user=user)
-            update_user_detail.purchased_credit_balance += num_leads
-            update_user_detail.update_total_credits()
-            # update_user_detail.save()
+            user_detail = get_object_or_404(UserDetail, user=user)
+            user_detail.purchased_credit_balance += num_leads
+            user_detail.update_total_credits()
 
-            logger.info(f"Payment successfully recorded for user {user.username}")
-        except User.DoesNotExist:
-            logger.error(f"User with ID {user_id} does not exist.")
-            return HttpResponse("User does not exist", status=400)
+        except Exception as e:
+            logger.error(f"Error processing Stripe webhook: {str(e)}", exc_info=True)
+            return HttpResponse("Error processing webhook", status=400)
+
+
+        # customer_id = session.get('customer')
+        # checkout_id = session.get('id')
+        # amount_paid = session.get('amount_total') / 100  # Stripe uses cents
+        # currency = session.get('currency')
+        # user_id = session.get('client_reference_id')
+
+        # # Determine number of leads based on the price ID or other logic
+        # price_id = session.get('line_items')['data'][0].get('price')['id']
+        # if price_id == 'price_1QojYpG4c6thWCjhaNxkWBYH':
+        #     num_leads = 10
+        # elif price_id == 'price_1QojZ9G4c6thWCjh9Ye4cxI9':
+        #     num_leads = 50
+        # elif price_id == 'price_1QoOCJG4c6thWCjhpEhUuWtH':
+        #     num_leads = 100
+        # elif price_id == 'price_1QojZNG4c6thWCjh4c4ljD2U':
+        #     num_leads = 300
+        # else:
+        #     num_leads = 0  # Default or error case
+
+        # try:
+        #     user = User.objects.get(id=user_id)
+        #     UserPayment.objects.create(
+        #         user=user,
+        #         stripe_customer_id=customer_id,
+        #         stripe_checkout_id=checkout_id,
+        #         amount=amount_paid,
+        #         number_of_leads=num_leads,
+        #         currency=currency,
+        #         has_paid=True,
+        #     )
+        #     update_user_detail = get_object_or_404(UserDetail, user=user)
+        #     update_user_detail.purchased_credit_balance += num_leads
+        #     update_user_detail.update_total_credits()
+        # except User.DoesNotExist:
+        #     logger.error(f"User with ID {user_id} does not exist.")
+        #     return HttpResponse("User does not exist", status=400)
+        
+
+
+
+
+
+
+        # session = event['data']['object']
+        # # print(json.dumps(session,indent=4))
+        
+        # customer_id = session.get('customer')
+        # checkout_id = session.get('id')
+        # amount_paid = session.get('amount_total') / 100  # Stripe uses cents
+        # currency = session.get('currency')
+        # user_id = session.get('client_reference_id')  # Pass this in the checkout creation
+        # num_leads = 100  # This could vary depending on your logic
+
+        # try:
+        #     user = User.objects.get(id=user_id)
+        #     UserPayment.objects.create(
+        #         user=user,
+        #         stripe_customer_id=customer_id,
+        #         stripe_checkout_id=checkout_id,
+        #         amount=amount_paid,
+        #         number_of_leads=num_leads,
+        #         currency=currency,
+        #         has_paid=True,
+        #     )
+        #     update_user_detail = get_object_or_404(UserDetail,user=user)
+        #     update_user_detail.purchased_credit_balance += num_leads
+        #     update_user_detail.update_total_credits()
+        #     # update_user_detail.save()
+
+        #     logger.info(f"Payment successfully recorded for user {user.username}")
+        # except User.DoesNotExist:
+        #     logger.error(f"User with ID {user_id} does not exist.")
+        #     return HttpResponse("User does not exist", status=400)
     
     return HttpResponse(status=200)
+
+
+
+
+
 
 
 from django.db.models.signals import post_save

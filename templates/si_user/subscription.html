@@ -18,15 +18,19 @@
             My Leads Tab</p>
     </div>
     <div class="small-section">
-        <a href="#" id="buy_now_btn" class="button button-large" role="button">Buy 10 Credits for $10</a>
-        <a href="#" id="buy_now_btn" class="button button-large" role="button">Buy 50 Credits for $50</a>
-        <a href="#" id="buy_now_btn" class="button button-large" role="button">Buy 100 Credits for $95</a>
-        <a href="#" id="buy_now_btn" class="button button-large" role="button">Buy 300 Credits for $270</a>
+        <a href="#" class="button button-large" role="button" data-price-id="price_1QojYpG4c6thWCjhaNxkWBYH"
+            data-leads="10" data-amount="10">Buy 10 Credits for $10</a>
+        <a href="#" class="button button-large" role="button" data-price-id="price_1QojZ9G4c6thWCjh9Ye4cxI9"
+            data-leads="50" data-amount="50">Buy 50 Credits for $50</a>
+        <a href="#" class="button button-large" role="button" data-price-id="price_1QoOCJG4c6thWCjhpEhUuWtH"
+            data-leads="100" data-amount="95">Buy 100 Credits for $95</a>
+        <a href="#" class="button button-large" role="button" data-price-id="price_1QojZNG4c6thWCjh4c4ljD2U"
+            data-leads="300" data-amount="270">Buy 300 Credits for $270</a>
     </div>
     <div class="mid-section">
 
         <script src="https://js.stripe.com/v3/"></script>
-        <script>
+        <!-- <script>
 
             const buy_now_button = document.querySelector('#buy_now_btn')
             buy_now_button.addEventListener('click', event => {
@@ -40,6 +44,34 @@
                         });
                     })
             })
+        </script> -->
+        <script>
+            const buyButtons = document.querySelectorAll('.button');
+
+            buyButtons.forEach(button => {
+                button.addEventListener('click', function (event) {
+                    event.preventDefault();
+
+                    const priceId = this.getAttribute('data-price-id');
+                    const leads = this.getAttribute('data-leads');
+                    const amount = this.getAttribute('data-amount');
+
+                    fetch('/checkout/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for Django
+                        },
+                        body: JSON.stringify({ price_id: priceId, leads: leads, amount: amount })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            const stripe = Stripe(data.stripe_public_key);
+                            stripe.redirectToCheckout({ sessionId: data.session_id });
+                        })
+                        .catch(error => console.error('Error:', error));
+                });
+            });
         </script>
     </div>
 </div>
