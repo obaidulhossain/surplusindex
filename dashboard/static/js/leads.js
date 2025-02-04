@@ -272,4 +272,32 @@ function toggleFilters(togglebtn, hide_id) {
 // -------------------------toggle filters button-----(end)-----------------------------
 // -------------------------toggle filters button-----(end)-----------------------------
 
+function confirmHideLeads() {
+    // Get the count of selected checkboxes
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
 
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to hide ${selectedLeads} selected leads?`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+function confirmAddToMyLeads() {
+    // Get the count of selected checkboxes
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to ' + action + '.');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to move ${selectedLeads} selected leads to My Leads Section for ${selectedLeads} credits?`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}

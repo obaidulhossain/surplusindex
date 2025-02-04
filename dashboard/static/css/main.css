@@ -44,7 +44,7 @@ a {
     background-color: #049560;
     border: 2px solid #154531;
     border-radius: 5px;
-    color: #1a1a1a;
+    color: #ffffff;
     text-align: center;
     display: inline-block;
     cursor: pointer;
@@ -54,7 +54,8 @@ a {
 
 .button:hover {
     background-color: #04c981;
-    box-shadow: 0 12px 16px 0 rgba(0, 0, 0, 0.24), 0 17px 50px 0 rgba(0, 0, 0, 0.19);
+    color: #ffffff;
+
 }
 
 .button-large {

@@ -78,12 +78,13 @@ Leads
             {% csrf_token %}
             <div class="table-wrapper">
                 <div class="action-section">
-                    <button class="button" id="add-button" disabled="disabled" type="submit">
+                    <button class="button" id="add-button" disabled="disabled" type="submit"
+                        onclick="return confirmAddToMyLeads()">
                         Add <span id="selected-count">0</span> to My Leads</button>
                 </div>
                 <div class="action-section">
                     <button class="button" id="hide-button" disabled="disabled" type="submit"
-                        formaction="{% url 'hide-leads' %}">
+                        formaction="{% url 'hide-leads' %}" onclick="return confirmHideLeads()">
                         Hide <span id="selected-count-hide">0</span> Selected</button>
                 </div>
                 <table id="leads-table" class="table table-striped table-hover">
@@ -160,6 +161,7 @@ Leads
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script> -->
     <script src="{% static 'js/nouislider.min.js' %}"></script>
     <script src="{% static 'js/leads.js' %}"></script>
+
 </div>
 
 {% endblock content%}

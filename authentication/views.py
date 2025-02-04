@@ -87,6 +87,7 @@ class RegistrationView(View):
                 send_mail(email_subject,email_body,'contact@surplusindex.com',[email], fail_silently=False)
 
                 messages.success(request,'Account Successfully Created')
+                messages.info(request, 'Account Inactive! Please Check your email to activate account')
                 return render(request, 'authentication/login.html')
 
         return render(request, 'authentication/registration.html')
