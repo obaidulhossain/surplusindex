@@ -301,3 +301,44 @@ function confirmAddToMyLeads() {
     const message = `Are you sure you want to move ${selectedLeads} selected leads to My Leads Section for ${selectedLeads} credits?`;
     return confirm(message); // Returns true if OK is clicked, false otherwise
 }
+
+
+function confirmUnhideLeads() {
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to unhide ${selectedLeads} selected leads?`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+function confirmArchive() {
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to Archive ${selectedLeads} selected leads? These leads can be found and unarchived from Archived Leads Section.`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+function confirmUnarchive() {
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to Unarchive ${selectedLeads} selected leads? These leads can be found in My Leads Section.`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
