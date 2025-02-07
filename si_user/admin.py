@@ -7,6 +7,7 @@ class UserDetailAdmin(admin.ModelAdmin):
 class UserPaymentAdmin(admin.ModelAdmin):
     list_display = ('stripe_customer_id','stripe_checkout_id', 'amount','number_of_leads','has_paid','currency')
 
+
 admin.site.register(UserDetail, UserDetailAdmin)
 admin.site.register(UserPayment, UserPaymentAdmin)
 

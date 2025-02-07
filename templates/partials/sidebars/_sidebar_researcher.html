@@ -1,0 +1,63 @@
+<div class="d-flex">
+    <button id="toggle-btn" type="button">
+        <i class="lni lni-shield-dollar"></i>
+    </button>
+    <div class="sidebar-logo">
+        <a href="#">Surplus Index</a>
+    </div>
+</div>
+<div class="user-grp-name">
+    <center>
+        <small>DA</small>
+    </center>
+</div>
+<ul class="sidebar-nav">
+    <li class="sidebar-item">
+        <a href="{% url 'dashboard' %}" class="sidebar-link">
+            <i class="lni lni-bar-chart-4"></i>
+            <span>Dashboard</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
+        <a href="" class="sidebar-link">
+            <i class="lni lni-pen-to-square"></i>
+            <span>Active Tasks</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
+        <a href="" class="sidebar-link">
+            <i class="lni lni-check-square-2"></i>
+            <span>Delivered Tasks</span>
+        </a>
+    </li>
+
+    <li class="sidebar-item">
+        <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#auth"
+            aria-expanded="false" aria-controls="auth">
+            <i class="lni lni-shield-2-check"></i>
+            <span>Account</span>
+        </a>
+        <ul id="auth" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
+            <li class="sidebar-item child">
+                <a href="{% url 'profile' %}" class="sidebar-link">
+                    <i class="lni lni-user-4"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+            <li class="sidebar-item child">
+                <a href="{% url 'settings' %}" class="sidebar-link">
+                    <i class="lni lni-gear-1"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+
+
+    <li class="sidebar-item">
+        <a href="{% url  'user-logout' %}" class="sidebar-link">
+            <i class="lni lni-exit"></i>
+            <span>Logout</span>
+        </a>
+    </li>
+</ul>

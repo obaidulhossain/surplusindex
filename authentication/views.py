@@ -1,6 +1,6 @@
 from django.contrib import messages, auth
 from django.contrib.auth import logout, login, authenticate
-from django.contrib.auth.models import User, auth
+from django.contrib.auth.models import User, auth, Group
 
 from django.core.mail import EmailMessage, send_mail
 
@@ -19,6 +19,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.urls import reverse
 from .utils import token_generator
 from django.contrib.sites.shortcuts import get_current_site
+
 
 
 # Create your views here.
@@ -74,6 +75,7 @@ class RegistrationView(View):
                 user = User.objects.create_user(username=username, email=email)
                 user.set_password(password)
                 user.is_active=False
+                user.groups.add(Group.objects.get(name='clients'))
                 user.save()
 
                 #activation token

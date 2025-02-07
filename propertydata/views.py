@@ -6,12 +6,13 @@ from django.http import HttpResponse
 from django.core.paginator import Paginator
 from si_user.models import UserDetail
 from django.contrib import messages
+from authentication.decorators import allowed_users
 
 
 # Create your views here.
 @login_required(login_url="login")
-def index(request):
-    return render(request, 'propertydata/index.html')
+def dashboard(request):
+    return render(request, 'propertydata/dashboard.html')
 
 @login_required(login_url="login")
 def addProperty(request):
@@ -28,6 +29,7 @@ def addProperty(request):
 
 #--------------view for All leads page ---------------------------------start
 @login_required(login_url="login")
+@allowed_users(allowed_roles=['admin', 'clients'])
 def allLeads(request):
     user = request.user
     #fcl = Foreclosure.objects.exclude(hidden_for=user).exclude(purchased_by=user)
