@@ -19,9 +19,10 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path('', views.homepage, name="homepage"),
     path('admin/', admin.site.urls),
+    path('', views.homepage, name="homepage"),
     path('', include('propertydata.urls')),
-    path('authentication/', include('authentication.urls')),
+    path('', include('authentication.urls')),
     path('', include('si_user.urls')),
+    path('', include('realestate_directory.urls')),
     ]

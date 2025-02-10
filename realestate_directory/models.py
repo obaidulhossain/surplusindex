@@ -1,0 +1,36 @@
+from django.db import models
+
+# Create your models here.
+
+
+class foreclosure_Events(models.Model):
+    state = models.CharField(max_length=255, blank=True)
+    county = models.CharField(max_length=255, blank=True)
+    population = models.IntegerField(blank=True)
+    recorder = models.URLField(blank=True)
+    assessor = models.URLField(blank=True)
+    tax_collector = models.URLField(blank=True)
+    gis = models.URLField(blank=True)
+    district = models.URLField(blank=True)
+    civil = models.URLField(blank=True)
+    municipal = models.URLField(blank=True)
+    probate = models.URLField(blank=True)
+    superior = models.URLField(blank=True)
+    supreme = models.URLField(blank=True)
+    surrogate = models.URLField(blank=True)
+    excess_funds_list = models.URLField(blank=True)
+    efl_updated_from = models.DateField(blank=True, null=True)
+    efl_updated_to = models.DateField(blank=True, null=True)
+    tax_sale = models.URLField(blank=True)
+    tax_sale_data_status = models.CharField(max_length=255, blank=True)
+    tax_sale_case_search = models.URLField(blank=True)
+    tax_sale_next = models.DateField(blank=True, null=True)
+    tax_sale_updated_from = models.DateField(blank=True, null=True)
+    tax_sale_updated_to = models.DateField(blank=True, null=True)
+    mortgage_sale = models.URLField(blank=True)
+    mortgage_sale_data_status = models.CharField(max_length=255, blank=True)
+    mortgage_sale_case_search = models.URLField(blank=True)
+    mortgage_sale_next = models.DateField(blank=True, null=True)
+    mortgage_sale_updated_from = models.DateField(blank=True, null=True)
+    mortgage_sale_updated_to = models.DateField(blank=True, null=True)
+    public_notice = models.URLField(blank=True)

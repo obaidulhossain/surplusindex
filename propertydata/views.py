@@ -65,7 +65,7 @@ def addtoMyList(request):
         user_details = UserDetail.objects.get(user=request.user)
         free_credit = user_details.free_credit_balance
         purchased_credit = user_details.purchased_credit_balance
-
+        
         # Check if user has enough credits
         total_credit = free_credit + purchased_credit
         if lead_count > total_credit:

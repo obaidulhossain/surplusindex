@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'si_user',
     'propertydata',
     'authentication',
+    'realestate_directory',
 ]
 
 MIDDLEWARE = [
@@ -145,7 +146,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DATE_FORMAT = "mm/dd/yyyy"
+DATE_FORMAT = "m/d/Y"  # For mm/dd/yyyy display in templates
 
 MESSAGE_TAGS = {
     messages.ERROR:'danger'

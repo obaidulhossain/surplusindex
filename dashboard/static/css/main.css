@@ -410,3 +410,15 @@ a.sidebar-link:hover {
     border: 1px solid black;
     font-weight: bold;
 }
+
+.copyButton,
+.small-button,
+.save-button {
+    transition: all 0.3s ease;
+    /* Apply smooth transition on hover or state change */
+    padding: 4px;
+    font-size: 14px;
+    cursor: pointer;
+    width: 65px;
+    border-radius: 5px;
+}
