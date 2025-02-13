@@ -25,18 +25,43 @@
             <div class="filter-body" id="filter-section" style="display: flex;">
                 <div style=" width: 35%; display: inline-block;">
                     <form method="get" action="">
-                        <label for="filter">Filter Events:</label>
-                        <select name="filter" id="filter" onchange="this.form.submit()">
-                            <option value="all" {{option1}}>
-                                All auction events
-                            </option>
-                            <option value="past" {{option2}}>Past auctions
-                            </option>
-                            <option value="upcoming" {{option3}}>Upcoming
-                                auctions</option>
-                        </select>
-
+                        <div class="filter-item">
+                            <label for="filter">Filter Events:</label>
+                            <select name="filter" id="filter" onchange="this.form.submit()">
+                                <option value="all" {{option1}}>
+                                    All auction events
+                                </option>
+                                <option value="past" {{option2}}>Past auctions
+                                </option>
+                                <option value="upcoming" {{option3}}>Upcoming
+                                    auctions</option>
+                            </select>
+                        </div>
+                        <!-- <div class="filter-item">
+                            <label for="state-filter">State:</label>
+                            <select name="state-filter" id="state-filter" onchange="this.form.submit()">
+                                <option value="all" {{option4}}>
+                                    All States
+                                </option>
+                                {% for state in all_states %}
+                                <option value="{{ state|lower }}" {{option5}}>{{ state }}</option>
+                                {% endfor %}
+                            </select>
+                        </div> -->
+                        <div class="filter-item">
+                            <label for="states">Filter States:</label>
+                            <input id="select-state" name="states" type="text" list="state-filter" value="{{ option4 }}"
+                                placeholder="Write States Name" onchange="this.form.submit()" />
+                            <datalist id="state-filter">
+                                <option value="All">All States</option>
+                                {% for state in all_states %}
+                                <option value="{{ state }}"></option>
+                                {% endfor %}
+                            </datalist>
+                        </div>
                     </form>
+
+
                     <!-- <div class="filter-item">
                         <label for="county-filter">County:</label>
                         <select id="county-filter">
@@ -82,7 +107,7 @@
 
         </div>
         <div class="table-wrapper">
-            <table class="table table-striped table-hover">
+            <table id="events-table" class="table table-striped table-hover">
                 <thead>
                     <tr>
                         <th>State</th>
@@ -100,7 +125,7 @@
                     {% for event in events %}
 
                     <tr data-id="{{ event.id }}">
-                        <td>{{event.state}}</td>
+                        <td class="state">{{event.state}}</td>
                         <td>{{event.county}}</td>
                         <td>{{event.population}}</td>
                         <td>Tax</td>

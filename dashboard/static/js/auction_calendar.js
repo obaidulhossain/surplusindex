@@ -1,23 +1,3 @@
-// function copyToClipboard(url) {
-//     navigator.clipboard.writeText(url).then(() => {
-//         // Get the button element by ID
-//         const button = document.getElementById('copyButton');
-
-//         // Change the text and color of the button
-//         button.value = "Copied!";
-//         button.style.backgroundColor = "#4CAF50"; // Change to green for 'Copied'
-//         button.style.transition = "background-color 0.5s ease, color 0.3s ease";
-//         // Reset the button back to original text and color after 5 seconds
-//         setTimeout(() => {
-//             button.value = "Copy";
-//             button.style.backgroundColor = ""; // Reset to original color
-//             button.style.transition = "background-color 0.5s ease, color 0.3s ease"; // Ensure transition when resetting
-//         }, 2000); // 5000 milliseconds = 5 seconds
-//     }).catch(err => {
-//         alert("Failed to copy URL: " + err);
-//     });
-// }
-
 function copyToClipboard(button) {
     const url = button.getAttribute('data-url'); // Get the URL from the data attribute
     navigator.clipboard.writeText(url).then(() => {
@@ -96,32 +76,47 @@ function saveRow(button) {
 
 // end new code
 
+document.addEventListener("DOMContentLoaded", function () {
+    const stateFilter = document.getElementById("state-filter");
+    const tableRows = document.querySelectorAll("tbody tr");
 
+    // Populate state filter dropdown
+    function populateStateFilter() {
+        const states = new Set();
 
+        // Loop through table rows to extract states
+        tableRows.forEach((row) => {
+            const stateCell = row.querySelector(".state")?.textContent.trim();
+            if (stateCell) {
+                states.add(stateCell);
+            }
+        });
+        // Add options to the state filter dropdown
+        states.forEach((state) => {
+            const option = document.createElement("option");
+            option.value = state.toLowerCase();
+            option.textContent = state;
+            stateFilter.appendChild(option);
+        });
+    }
+    // Filter the table rows based on selected state and county
+    function filterTableByState() {
+        const selectedState = stateFilter.value.toLowerCase();
 
+        tableRows.forEach((row) => {
+            const stateCell = row.querySelector(".state").textContent.toLowerCase();
+            row.style.display = selectedState === "" || stateCell === selectedState ? "" : "none";
+        });
+    }
+    // Attach event listener to the state filter dropdown
+    stateFilter.addEventListener("change", filterTableByState);
 
+    // Initialize the state filter dropdown
+    populateStateFilter();
 
+});
 
+document.getElementById('select-state').addEventListener('click', function () {
+    this.value = '';
+});
 
-
-
-
-
-
-//         .then(response => {
-
-//             return response.json();
-//         })
-//         .then(data => {
-
-//             if (data.status === 'success') {
-//                 alert('Row updated successfully!');
-//             } else {
-//                 alert('Failed to update row: ' + data.message);
-//             }
-//         })
-//         .catch(error => {
-//             console.error('Fetch Error:', error);
-//             alert('An error occurred. Please try again.');
-//         });
-// }

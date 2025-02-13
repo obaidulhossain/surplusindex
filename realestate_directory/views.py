@@ -12,28 +12,51 @@ from tablib import Dataset
 import pandas as pd
 from django.contrib import messages
 from .resources import ForeclosureEventsResource, ForeclosureEventsExportResource
+
+
 # Create your views here.
 
 def auctionCalendar(request):
 
     user = request.user
-
+    all_states = foreclosure_Events.objects.values_list('state', flat=True).distinct()
     # Get the filter option from the query parameters
     filter_option = request.GET.get('filter', 'all')
+    state_selected = request.GET.get('states', 'All')
     option1 = ""
     option2 = ""
     option3 = ""
+    option4 = ""
     
     # Determine the queryset based on the filter option
     if filter_option == 'past':
-        events_queryset = foreclosure_Events.objects.filter(tax_sale_next__lt=now().date())
-        option2="selected"
+        if state_selected == 'All' or state_selected == '':
+            events_queryset = foreclosure_Events.objects.filter(tax_sale_next__lt=now().date())
+            option2="selected"
+            option4 = 'All'
+        else:
+            events_queryset = foreclosure_Events.objects.filter(tax_sale_next__lt=now().date(), state=state_selected)
+            option2="selected"
+            option4=state_selected
     elif filter_option == 'upcoming':
-        events_queryset = foreclosure_Events.objects.filter(tax_sale_next__gte=now().date())
-        option3="selected"
+        if state_selected == 'All' or state_selected == '':
+            events_queryset = foreclosure_Events.objects.filter(tax_sale_next__gte=now().date())
+            option3="selected"
+            option4='All'
+        else:
+            events_queryset = foreclosure_Events.objects.filter(tax_sale_next__gte=now().date(), state=state_selected)
+            option3="selected"
+            option4=state_selected
     else:  # Default to 'all'
-        events_queryset = foreclosure_Events.objects.all()
-        option1="selected"
+        if state_selected == 'All' or state_selected == '':
+            events_queryset = foreclosure_Events.objects.all()
+            option1="selected"
+            option4='All'
+        else:
+            events_queryset = foreclosure_Events.objects.filter(state=state_selected)
+            option1="selected"
+            option4=state_selected
+
 
     
     # Paginate the results
@@ -47,11 +70,15 @@ def auctionCalendar(request):
 
     context = {
         'events':events,
+        'all_states':all_states,
         'second_previous':second_previous,
         'filter_option':filter_option, # Pass the current filter option to the template
         'option1':option1,
         'option2':option2,
-        'option3':option3
+        'option3':option3,
+        'option4':option4,
+        
+
         }
 
     return render(request, 'auction_calendar/auction_calendar.html', context)
@@ -145,3 +172,4 @@ def export_data(request):
     response = HttpResponse(dataset.xlsx, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
     response['Content-Disposition'] = 'attachment; filename=Realestate_Directory_Database.xlsx'
     return response
+

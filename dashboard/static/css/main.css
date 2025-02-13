@@ -437,3 +437,22 @@ a.sidebar-link:hover {
     float: right;
     display: flex;
 }
+
+
+.suggestions {
+    position: absolute;
+    border: 1px solid #ccc;
+    background: #fff;
+    max-height: 150px;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.suggestions div {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.suggestions div:hover {
+    background: #f0f0f0;
+}
