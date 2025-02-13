@@ -1,5 +1,5 @@
 from django.template import loader
-from django.shortcuts import redirect, render, get_object_or_404
+from django.shortcuts import redirect, render, get_object_or_404, HttpResponse
 from . models import *
 from django.utils.timezone import now
 from django.core.paginator import Paginator
@@ -7,8 +7,12 @@ from django.http import JsonResponse
 
 from django.views.decorators.csrf import csrf_exempt
 import json
-# Create your views here.
 
+from tablib import Dataset
+import pandas as pd
+from django.contrib import messages
+from .resources import ForeclosureEventsResource, ForeclosureEventsExportResource
+# Create your views here.
 
 def auctionCalendar(request):
 
@@ -52,17 +56,7 @@ def auctionCalendar(request):
 
     return render(request, 'auction_calendar/auction_calendar.html', context)
 
-# def update_event(request):
-#     if request.method == 'POST':
-#         event_id = request.POST.get('id')
-#         new_next_sale_date = request.post.get('next_date')
-#         new_to_date = request.post.get('to_date')
-#         event = get_object_or_404(foreclosure_Events, id=event_id)
-#         event.tax_sale_next = new_next_sale_date
-#         event.tax_sale_uldated_to = new_to_date
-#         event.save()
-#         return JsonResponse({'status': 'success', 'message': 'Dates updated successfully.'})
-#     return JsonResponse({'status': 'error', 'message': 'Invalid request.'})
+
 
 
 
@@ -115,3 +109,39 @@ def update_row(request):
 
 def calendarSettings(request):
     return render(request, 'auction_calendar/calendar_settings.html')
+
+
+
+
+def upload_file(request):
+    if request.method == "POST":
+        dataset = Dataset()
+        new_file = request.FILES['file']
+
+        event_resource = ForeclosureEventsResource()
+        try:
+            imported_data = dataset.load(new_file.read(), format='xlsx')
+            result = event_resource.import_data(dataset, dry_run=True)
+
+            if not result.has_errors():
+                event_resource.import_data(dataset, dry_run=False)
+                messages.success(request, 'Data import Successful!')
+            else:
+                messages.success(request, 'Error occured during import!')
+        
+        except Exception as e:
+            messages.error(request, f"Error: {str(e)}")
+        return redirect('upload_calendar_data')
+    return render(request, 'auction_calendar/upload_file.html')
+    
+
+def export_data(request):
+    resource = ForeclosureEventsExportResource()
+    dataset = Dataset()# Export all data
+
+    dataset = resource.export()
+
+   # Prepare HTTP response for file download
+    response = HttpResponse(dataset.xlsx, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    response['Content-Disposition'] = 'attachment; filename=Realestate_Directory_Database.xlsx'
+    return response

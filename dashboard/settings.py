@@ -21,7 +21,7 @@ load_dotenv()
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 
-
+IMPORT_EXPORT_USE_TRANSACTIONS = True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'propertydata',
     'authentication',
     'realestate_directory',
+    'import_export',
 ]
 
 MIDDLEWARE = [

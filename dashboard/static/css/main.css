@@ -422,3 +422,18 @@ a.sidebar-link:hover {
     width: 65px;
     border-radius: 5px;
 }
+
+
+.header-main {
+    display: block;
+}
+
+.left-section {
+    float: left;
+    display: flex;
+}
+
+.right-section {
+    float: right;
+    display: flex;
+}

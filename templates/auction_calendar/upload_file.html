@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Auction Calendar{% endblock title %}
+
+{% block content%}
+{% load static %}
+<h1>Upload Auction Calendar Data from Excel</h1>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="file" required>
+    <button type="submit">Upload</button>
+</form>
+<a href="{% url 'calendar_settings' %}">Back to Calendar Settings</a>
+
+
+
+{% endblock content%}

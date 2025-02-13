@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
-{% block title %}Auction Calendar{% endblock title %}
+{% block title %}Auction Calendar Settings{% endblock title %}
 
 {% block content%}
 {% load static %}
-
-
-
-
-
+<div class="header-main">
+    <div class="left-section">
+        <h1>Auction Calendar Settings</h1>
+    </div>
+    <div class="right-section">
+        <a class="button button-small" href="{% url 'upload_calendar_data' %}">Upload Calendar Data</a>
+        <a class="button button-small" href="{% url 'export_data' %}">Export Calendar Data</a>
+    </div>
+</div>
 
 
 
