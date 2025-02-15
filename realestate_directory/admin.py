@@ -8,4 +8,4 @@ from .resources import ForeclosureEventsResource
 class ForeclosureEventsAdmin(ImportExportModelAdmin):
     # list_display = ('state','county','population')
     resource_class = ForeclosureEventsResource
-    list_display = ('state', 'county', 'population','tax_sale_next','tax_sale_updated_to','mortgage_sale_next','mortgage_sale_updated_to')
+    list_display = ('state', 'county', 'population','sale_type','event_next','event_updated_from','event_updated_to')

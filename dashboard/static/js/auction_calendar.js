@@ -23,14 +23,14 @@ function copyToClipboard(button) {
 function saveRow(button) {
     const row = button.closest('tr');
     const rowId = row.getAttribute('data-id');
-    const taxSaleNext = row.querySelector('.tax-sale-next').value;
-    const taxSaleUpdatedTo = row.querySelector('.tax-sale-updated-to').value;
+    const eventNext = row.querySelector('.event_next').value;
+    const eventUpdatedTo = row.querySelector('.event_updated_to').value;
 
     // Prepare data for updating
     const updatedData = {
         id: rowId,
-        tax_sale_next: taxSaleNext,
-        tax_sale_updated_to: taxSaleUpdatedTo
+        event_next: eventNext,
+        event_updated_to: eventUpdatedTo
     };
 
     // Send data to the server using fetch
@@ -76,47 +76,46 @@ function saveRow(button) {
 
 // end new code
 
-document.addEventListener("DOMContentLoaded", function () {
-    const stateFilter = document.getElementById("state-filter");
-    const tableRows = document.querySelectorAll("tbody tr");
+// document.addEventListener("DOMContentLoaded", function () {
+//     const stateFilter = document.getElementById("state-filter");
+//     const tableRows = document.querySelectorAll("tbody tr");
 
-    // Populate state filter dropdown
-    function populateStateFilter() {
-        const states = new Set();
+//     // Populate state filter dropdown
+//     function populateStateFilter() {
+//         const states = new Set();
 
-        // Loop through table rows to extract states
-        tableRows.forEach((row) => {
-            const stateCell = row.querySelector(".state")?.textContent.trim();
-            if (stateCell) {
-                states.add(stateCell);
-            }
-        });
-        // Add options to the state filter dropdown
-        states.forEach((state) => {
-            const option = document.createElement("option");
-            option.value = state.toLowerCase();
-            option.textContent = state;
-            stateFilter.appendChild(option);
-        });
-    }
-    // Filter the table rows based on selected state and county
-    function filterTableByState() {
-        const selectedState = stateFilter.value.toLowerCase();
+//         // Loop through table rows to extract states
+//         tableRows.forEach((row) => {
+//             const stateCell = row.querySelector(".state")?.textContent.trim();
+//             if (stateCell) {
+//                 states.add(stateCell);
+//             }
+//         });
+//         // Add options to the state filter dropdown
+//         states.forEach((state) => {
+//             const option = document.createElement("option");
+//             option.value = state.toLowerCase();
+//             option.textContent = state;
+//             stateFilter.appendChild(option);
+//         });
+//     }
+//     // Filter the table rows based on selected state and county
+//     function filterTableByState() {
+//         const selectedState = stateFilter.value.toLowerCase();
 
-        tableRows.forEach((row) => {
-            const stateCell = row.querySelector(".state").textContent.toLowerCase();
-            row.style.display = selectedState === "" || stateCell === selectedState ? "" : "none";
-        });
-    }
-    // Attach event listener to the state filter dropdown
-    stateFilter.addEventListener("change", filterTableByState);
+//         tableRows.forEach((row) => {
+//             const stateCell = row.querySelector(".state").textContent.toLowerCase();
+//             row.style.display = selectedState === "" || stateCell === selectedState ? "" : "none";
+//         });
+//     }
+//     // Attach event listener to the state filter dropdown
+//     stateFilter.addEventListener("change", filterTableByState);
 
-    // Initialize the state filter dropdown
-    populateStateFilter();
+//     // Initialize the state filter dropdown
+//     populateStateFilter();
 
-});
+// });
 
 document.getElementById('select-state').addEventListener('click', function () {
     this.value = '';
 });
-

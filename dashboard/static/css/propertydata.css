@@ -83,6 +83,7 @@ h6 {
 
 .filter-item select {
     min-width: 200px;
+    min-height: 30px;
 }
 
 .filter-item select:hover {

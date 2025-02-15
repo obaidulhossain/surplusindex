@@ -12,7 +12,7 @@ from tablib import Dataset
 import pandas as pd
 from django.contrib import messages
 from .resources import ForeclosureEventsResource, ForeclosureEventsExportResource
-
+from itertools import chain
 
 # Create your views here.
 
@@ -23,39 +23,94 @@ def auctionCalendar(request):
     # Get the filter option from the query parameters
     filter_option = request.GET.get('filter', 'all')
     state_selected = request.GET.get('states', 'All')
+    selected_sale_types = request.GET.getlist('sale_type')
+
+
     option1 = ""
     option2 = ""
     option3 = ""
     option4 = ""
+    saletypetax = False
+    saletypemtg = False
+    saletypeoth = False
+
+    if 'Tax' in selected_sale_types:
+        saletypetax = True
     
+    if 'Mtg' in selected_sale_types:
+        saletypemtg = True
+
+    if 'Oth' in selected_sale_types:
+        saletypeoth = True
+    
+    saletype_selected = []
+    if saletypetax:
+        saletype_selected.append('Tax')
+    if saletypemtg:
+        saletype_selected.append('Mortgage')
+    if saletypeoth:
+        saletype_selected.append('Others')
     # Determine the queryset based on the filter option
+    
     if filter_option == 'past':
         if state_selected == 'All' or state_selected == '':
-            events_queryset = foreclosure_Events.objects.filter(tax_sale_next__lt=now().date())
-            option2="selected"
-            option4 = 'All'
+            if saletype_selected:
+                events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), sale_type__in=saletype_selected)
+                option2="selected"
+                option4 = 'All'
+            else:
+                events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date())
+                option2="selected"
+                option4 = 'All'
         else:
-            events_queryset = foreclosure_Events.objects.filter(tax_sale_next__lt=now().date(), state=state_selected)
-            option2="selected"
-            option4=state_selected
+            if saletype_selected:
+                events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), state=state_selected, sale_type__in=saletype_selected)
+                option2="selected"
+                option4=state_selected
+            else:
+                events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), state=state_selected)
+                option2="selected"
+                option4=state_selected
     elif filter_option == 'upcoming':
         if state_selected == 'All' or state_selected == '':
-            events_queryset = foreclosure_Events.objects.filter(tax_sale_next__gte=now().date())
-            option3="selected"
-            option4='All'
+            if saletype_selected:
+                events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), sale_type__in=saletype_selected)
+                option3="selected"
+                option4='All'
+            else:    
+                events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date())
+                option3="selected"
+                option4='All'
         else:
-            events_queryset = foreclosure_Events.objects.filter(tax_sale_next__gte=now().date(), state=state_selected)
-            option3="selected"
-            option4=state_selected
+            if saletype_selected:
+                events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), state=state_selected, sale_type__in=saletype_selected)
+                option3="selected"
+                option4=state_selected
+            else:    
+                events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), state=state_selected)
+                option3="selected"
+                option4=state_selected
     else:  # Default to 'all'
         if state_selected == 'All' or state_selected == '':
-            events_queryset = foreclosure_Events.objects.all()
-            option1="selected"
-            option4='All'
+            if saletype_selected:
+                events_queryset = foreclosure_Events.objects.filter(sale_type__in=saletype_selected)
+                option1="selected"
+                option4='All'                
+            else:
+                events_queryset = foreclosure_Events.objects.all()
+                option1="selected"
+                option4='All'
         else:
-            events_queryset = foreclosure_Events.objects.filter(state=state_selected)
-            option1="selected"
-            option4=state_selected
+            if saletype_selected:
+                events_queryset = foreclosure_Events.objects.filter(state=state_selected, sale_type__in=saletype_selected)
+                option1="selected"
+                option4=state_selected    
+            else:
+                events_queryset = foreclosure_Events.objects.filter(state=state_selected)
+                option1="selected"
+                option4=state_selected
+
+
 
 
     
@@ -77,7 +132,10 @@ def auctionCalendar(request):
         'option2':option2,
         'option3':option3,
         'option4':option4,
-        
+        'selected_sale_types':selected_sale_types,
+        'saletypetax':saletypetax,
+        'saletypemtg':saletypemtg,
+        'saletypeoth':saletypeoth,
 
         }
 
@@ -96,18 +154,17 @@ def update_row(request):
             
             
             event_id = data.get('id')
-            tax_sale_next = data.get('tax_sale_next')
-            tax_sale_updated_to = data.get('tax_sale_updated_to')
+            event_next = data.get('event_next')
+            event_updated_to = data.get('event_updated_to')
 
             # Fetch the corresponding event object from the database
             event = foreclosure_Events.objects.get(id=event_id)
 
             # Update the fields
-            if tax_sale_next:
-                event.tax_sale_next = tax_sale_next
-            if tax_sale_updated_to:
-                event.tax_sale_updated_to = tax_sale_updated_to
-
+            if event_next:
+                event.event_next = event_next
+            if event_updated_to:
+                event.event_updated_to = event_updated_to
             # Save the updated object
             event.save()
 
@@ -170,6 +227,6 @@ def export_data(request):
 
    # Prepare HTTP response for file download
     response = HttpResponse(dataset.xlsx, content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    response['Content-Disposition'] = 'attachment; filename=Realestate_Directory_Database.xlsx'
+    response['Content-Disposition'] = 'attachment; filename=Auction_Event_Data.xlsx'
     return response
 

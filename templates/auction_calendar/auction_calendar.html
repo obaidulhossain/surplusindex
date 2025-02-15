@@ -23,10 +23,24 @@
             </div>
 
             <div class="filter-body" id="filter-section" style="display: flex;">
-                <div style=" width: 35%; display: inline-block;">
+                <div>
                     <form method="get" action="">
+                        <div class="filter-item right-section">
+                            <label for="sale-type">Sale Type:</label>
+                            <input name="sale_type" type="checkbox" class="sale-type" value="Tax"
+                                onchange="this.form.submit()" {% if saletypetax %}checked{% endif %} />
+                            Tax Foreclosure<br>
+                            <label for="sale-type"></label>
+                            <input name="sale_type" type="checkbox" class="sale-type" value="Mtg"
+                                onchange="this.form.submit()" {% if saletypemtg %}checked{% endif %} />
+                            Mortgage Foreclosure <br>
+                            <label for="sale-type"></label>
+                            <input name="sale_type" type="checkbox" class="sale-type" value="Oth"
+                                onchange="this.form.submit()" {% if saletypeoth %}checked{% endif %} />
+                            Other Auction Sites<br>
+                        </div>
                         <div class="filter-item">
-                            <label for="filter">Filter Events:</label>
+                            <label for="filter">Filter Events:</label><br>
                             <select name="filter" id="filter" onchange="this.form.submit()">
                                 <option value="all" {{option1}}>
                                     All auction events
@@ -37,19 +51,9 @@
                                     auctions</option>
                             </select>
                         </div>
-                        <!-- <div class="filter-item">
-                            <label for="state-filter">State:</label>
-                            <select name="state-filter" id="state-filter" onchange="this.form.submit()">
-                                <option value="all" {{option4}}>
-                                    All States
-                                </option>
-                                {% for state in all_states %}
-                                <option value="{{ state|lower }}" {{option5}}>{{ state }}</option>
-                                {% endfor %}
-                            </select>
-                        </div> -->
+
                         <div class="filter-item">
-                            <label for="states">Filter States:</label>
+                            <label for="states">Filter States:</label><br>
                             <input id="select-state" name="states" type="text" list="state-filter" value="{{ option4 }}"
                                 placeholder="Write States Name" onchange="this.form.submit()" />
                             <datalist id="state-filter">
@@ -59,49 +63,9 @@
                                 {% endfor %}
                             </datalist>
                         </div>
+
                     </form>
 
-
-                    <!-- <div class="filter-item">
-                        <label for="county-filter">County:</label>
-                        <select id="county-filter">
-                            <option value="">All</option>
-                        </select>
-                    </div>
-                    <div class="filter-item">
-                        <label for="saletype-filter">Sale Type:</label>
-                        <select id="saletype-filter">
-                            <option value="">All</option>
-                        </select>
-                    </div> -->
-                </div>
-                <!-- Range Slider Filter -->
-                <div style="width: 50%; display: inline-block;">
-                    <!-- <h6>Amount Filters</h6>
-                    <div class="filter-item">
-                        <div class="range-section">
-                            <label style="padding: 0px !important;">Sale Price:</label>
-                            <label>Min <span id="range-min">1000</span></label>
-                            <div id="range-slider"></div>
-                            <label>Max <span id="range-max">1000000</span></label>
-                        </div>
-                    </div>
-                    <div class="filter-item">
-                        <div class="range-section">
-                            <label style="padding: 0px !important;">Possible Surplus:</label>
-                            <label>Min <span id="possible-min">1000</span></label>
-                            <div id="possible-range-slider"></div>
-                            <label>Max <span id="possible-max">1000000</span></label>
-                        </div>
-                    </div>
-                    <div class="filter-item">
-                        <div class="range-section">
-                            <label style="padding: 0px !important;">Verified Surplus:</label>
-                            <label>Min <span id="verified-min">1000</span></label>
-                            <div id="verified-range-slider"></div>
-                            <label>Max <span id="verified-max">1000000</span></label>
-                        </div>
-                    </div> -->
                 </div>
             </div>
 
@@ -122,34 +86,39 @@
                     </tr>
                 </thead>
                 <tbody>
+
+
+
+
                     {% for event in events %}
 
                     <tr data-id="{{ event.id }}">
                         <td class="state">{{event.state}}</td>
                         <td>{{event.county}}</td>
                         <td>{{event.population}}</td>
-                        <td>Tax</td>
+                        <td>{{event.sale_type}}</td>
                         <td>
-                            <input type="date" class="form-control tax-sale-next"
-                                value="{{ event.tax_sale_next|date:'Y-m-d' }}">
+                            <input type="date" class="form-control event_next"
+                                value="{{ event.event_next|date:'Y-m-d' }}">
                         </td>
-                        <td>{{event.tax_sale_updated_from}}</td>
+                        <td>{{event.event_updated_from}}</td>
                         <td>
-                            <input type="date" class="form-control tax-sale-updated-to"
-                                value="{{ event.tax_sale_updated_to|date:'Y-m-d' }}">
+                            <input type="date" class="form-control event_updated_to"
+                                value="{{ event.event_updated_to|date:'Y-m-d' }}">
                         </td>
                         <td>
-                            <input type="button" class="copyButton" value="Copy" data-url="{{ event.tax_sale }}"
+                            <input type="button" class="copyButton" value="Copy" data-url="{{ event.event_site }}"
                                 onclick="copyToClipboard(this);">
 
 
                             <input TYPE="button" class="small-button" VALUE="Visit"
-                                onclick="window.open('{{ event.tax_sale }}');">
+                                onclick="window.open('{{ event.event_site }}');">
                         </td>
                         <td>
                             <button class="save-button" onclick="saveRow(this)">Save</button>
                         </td>
                     </tr>
+
                     {% endfor %}
                 </tbody>
             </table>
@@ -158,9 +127,15 @@
                         {{ events.paginator.num_pages }}</b> Pages</div>
                 <ul class="pagination">
                     {% if events.has_previous %}
-                    <li class="page-item"><a href="?page=1" class="page-link">First</a></li>
-                    <li class="page-item"><a href="?page={{ events.previous_page_number }}">Previous</a></li>
-                    <li class="page-item"><a href="?page={{ events.previous_page_number }}" class="page-link">
+                    <li class="page-item"><a
+                            href="?page=1&filter={{ filter_option }}&states={{ option4 }}{% for type in selected_sale_types %}&sale_type={{ type }}{% endfor %}"
+                            class="page-link">First</a></li>
+                    <li class="page-item"><a
+                            href="?page={{ events.previous_page_number }}&filter={{ filter_option }}&states={{ option4 }}{% for type in selected_sale_types %}&sale_type={{ type }}{% endfor %}">Previous</a>
+                    </li>
+                    <li class="page-item"><a
+                            href="?page={{ events.previous_page_number }}&filter={{ filter_option }}&states={{ option4 }}{% for type in selected_sale_types %}&sale_type={{ type }}{% endfor %}"
+                            class="page-link">
                             {{ events.previous_page_number }}</a></li>
                     {% endif %}
 
@@ -170,13 +145,21 @@
 
 
                     {% if events.has_next %}
-                    <li class="page-item"><a href="?page={{ events.next_page_number }}" class="page-link">
+                    <li class="page-item"><a
+                            href="?page={{ events.next_page_number }}&filter={{ filter_option }}&states={{ option4 }}{% for type in selected_sale_types %}&sale_type={{ type }}{% endfor %}"
+                            class="page-link">
                             {{ events.next_page_number }}</a></li>
-                    <li class="page-item"><a href="?page={{ second_previous }}" class="page-link">
+                    <li class="page-item"><a
+                            href="?page={{ second_previous }}&filter={{ filter_option }}&states={{ option4 }}{% for type in selected_sale_types %}&sale_type={{ type }}{% endfor %}"
+                            class="page-link">
                             {{ second_previous }}</a></li>
-                    <li class="page-item"><a href="?page={{events.next_page_number}}" class="page-link">Next</a>
+                    <li class="page-item"><a
+                            href="?page={{events.next_page_number}}&filter={{ filter_option }}&states={{ option4 }}{% for type in selected_sale_types %}&sale_type={{ type }}{% endfor %}"
+                            class="page-link">Next</a>
                     </li>
-                    <li class="page-item"><a href="?page={{ events.paginator.num_pages }}">Last</a></li>
+                    <li class="page-item"><a
+                            href="?page={{ events.paginator.num_pages }}&filter={{ filter_option }}&states={{ option4 }}{% for type in selected_sale_types %}&sale_type={{ type }}{% endfor %}">Last</a>
+                    </li>
                     {% endif %}
 
                 </ul>

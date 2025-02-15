@@ -7,14 +7,9 @@ class ForeclosureEventsResource(resources.ModelResource):
         model = foreclosure_Events
         import_id_fields = ('id',)
         exclude = [
-            'efl_updated_from',
-            'efl_updated_to',
-            'tax_sale_next',
-            'tax_sale_updated_from',
-            'tax_sale_updated_to',
-            'mortgage_sale_next',
-            'mortgage_sale_updated_from',
-            'mortgage_sale_updated_to'
+            'event_updated_from',
+            'event_updated_to',
+            'event_next',
             ]
 
         # fields = [
