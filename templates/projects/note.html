@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}
+Checklists
+{% endblock title %}
+
+
+{% block content%}
+{% load static %}
+<link href="{% static 'css/propertydata.css' %}" rel="stylesheet">
+
+
+<form method="post" action="">
+    {% csrf_token %}
+    <div class="filter-section">
+        <div class="filters-header">
+            {% if pk %}
+            <h4>Update Foreclosure</h4>
+            {% else %}
+            <h4>Create Foreclosure</h4>
+            {% endif %}
+        </div>
+        <div class="filter-body" id="filter-section" style="display: flex;">
+            <div style=" width: 35%; display: inline-block;">
+                <div class="filter-item">
+                    <label for="case_number">Case Number:</label><br>
+                    <input type="text" id="case_number" name="case_number" list="case_number_list"
+                        oninput="fetchCaseNumbers()" onchange="this.form.submit()" />
+                    <datalist id="case_number_list">
+                        <!-- Options will be dynamically populated here -->
+                    </datalist>
+                </div>
+            </div>
+            <div style=" width: 35%; display: inline-block;">
+                <div class="filter-item">
+                    {% if properties and properties.exist %}
+                    <label for="property">Foreclosing Properties</label><br>
+                    <select name="properties" id="properties" multiple>
+                        {% for property in properties %}
+                        <option {% if property in form.instance.property.all %}selected{% endif%}
+                            value="{{property.id}}">
+                            {{property.parcel}} | {{property.house_number}} {{property.road_name}}
+                            {{property.road_type}} {{property.direction}} {{property.apt_unit}} {{property.extention}},
+                            {{property.city}}, {{property.state}} {{property.zip_code}}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    {% else %}
+
+
+                </div>
+            </div>
+        </div>
+        <div class="filters-header" style="margin-top: 20px;">
+            {% if pk %}
+            <h4>Update Foreclosure</h4>
+            {% else %}
+            <h4>No property associated | Create New</h4>
+            {% endif %}
+            {% if properties and properties.exist %}
+            <select name="properties" id="properties" multiple>
+                {% for property in properties %}
+                <option {% if property in form.instance.property.all %}selected{% endif%} value="{{property.id}}">
+                    {{property.parcel}} | {{property.house_number}} {{property.road_name}}
+                    {{property.road_type}} {{property.direction}} {{property.apt_unit}} {{property.extention}},
+                    {{property.city}}, {{property.state}} {{property.zip_code}}
+                </option>
+                {% endfor %}
+            </select>
+            {% endif %}
+
+        </div>
+        <div class="filter-body" id="filter-section" style="display: flex; flex-wrap: wrap;">
+            <div class="filter-item">
+                <label for="parcel">Parcel Id</label><br>
+                {{propertyform.parcel}}
+            </div>
+            <div class="filter-item">
+                <label for="house_number">House Number</label><br>
+                {{propertyform.house_number}}
+            </div>
+            <div class="filter-item">
+                <label for="road_name">Road Name</label><br>
+                {{propertyform.road_name}}
+            </div>
+            <div class="filter-item">
+                <label for="road_type">Road Type</label><br>
+                {{propertyform.road_type}}
+            </div>
+            <div class="filter-item">
+                <label for="direction">Direction</label><br>
+                {{propertyform.direction}}
+            </div>
+            <div class="filter-item">
+                <label for="apt_unit">Unit/Bld/Apt</label><br>
+                {{propertyform.apt_unit}}
+            </div>
+            <div class="filter-item">
+                <label for="extention">Extension</label><br>
+                {{propertyform.extention}}
+            </div>
+            <div class="filter-item">
+                <label for="city">City Name</label><br>
+                {{propertyform.city}}
+            </div>
+            <div class="filter-item">
+                <label for="zip_code">Zip Code</label><br>
+                {{propertyform.zip_code}}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <button type="submit">Save</button>
+</form>
+
+{{ form.as_p }}
+
+<label for="case_number">Case Number:</label>
+<input type="text" id="case_number" name="case_number" list="case_number_list">
+<datalist id="case_number_list"></datalist>
+
+<div id="property_section">
+    <label>Properties:</label>
+    <ul id="property_list">
+        {# List of current properties will be added here by JavaScript #}
+    </ul>
+    <input type="text" id="property_search" placeholder="Search Properties...">
+    <datalist id="property_suggestions"></datalist>
+    <button type="button" id="add_property_button">Add Existing Property</button>
+    <button type="button" id="new_property_button">Create New Property</button>
+    {{ form.property }} {# Hidden field. Values will be populated by javascript #}
+</div>
+
+{# Repeat similar blocks for plaintiff and defendant #}
+
+<!-- <button type="submit">Save</button>
+</form> -->
+
+
+<div id="property_modal" class="modal">
+    <div class="modal-content">
+        <span class="close">×</span>
+        <h2>Create New Property</h2>
+        <form id="new_property_form">
+            {{ property_form.as_p }}
+            <button type="button" id="save_property">Save Property</button>
+        </form>
+    </div>
+    <script src="{% static 'js/foreclosure_form.js' %}"></script>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{% endblock content%}

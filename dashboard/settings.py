@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'django_bootstrap_icons',
     'si_user',
+    'projects',
     'propertydata',
     'authentication',
     'realestate_directory',

@@ -25,4 +25,5 @@ urlpatterns = [
     path('', include('authentication.urls')),
     path('', include('si_user.urls')),
     path('', include('realestate_directory.urls')),
+    path('', include('projects.urls')),
     ]

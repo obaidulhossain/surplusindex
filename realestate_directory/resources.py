@@ -10,6 +10,8 @@ class ForeclosureEventsResource(resources.ModelResource):
             'event_updated_from',
             'event_updated_to',
             'event_next',
+            'assigned_to',
+            'directory',
             ]
 
         # fields = [

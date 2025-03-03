@@ -12,7 +12,7 @@ from tablib import Dataset
 import pandas as pd
 from django.contrib import messages
 from .resources import ForeclosureEventsResource, ForeclosureEventsExportResource
-from itertools import chain
+
 
 # Create your views here.
 

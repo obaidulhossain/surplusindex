@@ -1,21 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
-
-
-class foreclosure_Events(models.Model):
-    state = models.CharField(max_length=255, blank=True)
-    county = models.CharField(max_length=255, blank=True)
-    population = models.IntegerField(blank=True)
-    event_site = models.URLField(blank=True)
-    sale_type = models.CharField(max_length=100, null=True)
-    event_updated_from = models.DateField(blank=True, null=True)
-    event_updated_to = models.DateField(blank=True, null=True)
-    event_status = models.CharField(max_length=255, blank=True)
-    event_case_search = models.URLField(blank=True)
-    event_next = models.DateField(blank=True, null=True)
-    
-
 
 class directoryData(models.Model):
     state = models.CharField(max_length=255, blank=True)
@@ -32,3 +18,20 @@ class directoryData(models.Model):
     supreme = models.URLField(blank=True)
     surrogate = models.URLField(blank=True)
     public_notice = models.URLField(blank=True)
+
+
+class foreclosure_Events(models.Model):
+    state = models.CharField(max_length=255, blank=True)
+    county = models.CharField(max_length=255, blank=True)
+    population = models.IntegerField(blank=True)
+    event_site = models.URLField(blank=True)
+    sale_type = models.CharField(max_length=100, null=True)
+    event_updated_from = models.DateField(blank=True, null=True)
+    event_updated_to = models.DateField(blank=True, null=True)
+    event_status = models.CharField(max_length=255, blank=True)
+    event_case_search = models.URLField(blank=True)
+    event_next = models.DateField(blank=True, null=True)
+    assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
+    directory = models.ForeignKey(directoryData, on_delete=models.CASCADE, blank=True, null=True)
+    
+

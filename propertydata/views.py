@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .forms import AddPropertyForm
-from .models import Court_Record, Foreclosure, Status
+from .models import *
 from django.http import HttpResponse
 from django.core.paginator import Paginator
 from si_user.models import UserDetail
@@ -225,3 +225,7 @@ def unhideLeads(request):
     else:
         return HttpResponse("Invalid Request", status=400)
 #--------------unhide button action for Hidden Leads Section ----------------end
+
+
+def all_data(request):
+    return render(request,'data/all_data.html')

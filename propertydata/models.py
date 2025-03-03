@@ -55,7 +55,7 @@ class Email(models.Model):
     class Meta:
         verbose_name = "Email"
         verbose_name_plural = "Emails"
-    
+
 # ------------------------------------------------------------- #
 
 class Wireless_Number(models.Model):
@@ -82,36 +82,44 @@ class Landline_Number(models.Model):
         verbose_name_plural = 'Landline Numbers'
 
 # ------------------------------------------------------------- #
+
+class ForeclosingEntity(models.Model):
+    individual_name = models.CharField(max_length=255, blank=True)
+    business_name = models.CharField(max_length=255, blank=True)
+    dba = models.CharField(max_length=255, blank=True)
+
+
 # ------------------------------------------------------------- #
 
 class Contact(OperationStat):
+    business_name = models.CharField(max_length=255, blank=True, verbose_name='Business Name')
+    designation = models.CharField(max_length=100, blank=True, verbose_name='Designation')
+    name_prefix = models.CharField(max_length=10, blank=True, verbose_name='Prefix')
     first_name = models.CharField(max_length=255, blank=True, verbose_name='First Name')
     middle_name = models.CharField(max_length=255, blank=True, verbose_name='Middle Name')
     last_name = models.CharField(max_length=255, blank=True, verbose_name='Last Name')
-    name_suffix = models.CharField(max_length=255, blank=True, verbose_name='Suffix')
+    name_suffix = models.CharField(max_length=10, blank=True, verbose_name='Suffix')
     mailing_address = models.ManyToManyField(Property, related_name='contacts_as_mailing_address', blank=True, verbose_name='Mailing Address')
     wireless = models.ManyToManyField(Wireless_Number, related_name='contact_as_wireless', blank=True, verbose_name='Wireless Numbers')
     landline = models.ManyToManyField(Landline_Number, related_name='contact_as_landline', blank=True, verbose_name='Landline Numbers')
     emails = models.ManyToManyField(Email, related_name='contact_as_email', blank=True, verbose_name='Email Addresses')
+    related_contacts = models.ManyToManyField('self', blank=True, symmetrical=True)
+    skiptraced = models.BooleanField(default=False)
+
+
     class Meta:
         verbose_name = 'Contact'
         verbose_name_plural = 'Contacts'
 
 # ------------------------------------------------------------- #
 
-class Court_Record(OperationStat):
-    state = models.CharField(max_length=100, blank=True, verbose_name='State')
-    county = models.CharField(max_length=100, blank=True, verbose_name='County')
-    case_number = models.CharField(max_length=255, blank=True, verbose_name='Case Number')
-    court_name = models.CharField(max_length=255, blank=True, verbose_name='Court Name')
-    case_type = models.CharField(max_length=255, blank=True, verbose_name='Case Type')
-    property = models.ManyToManyField(Property, blank=True, related_name='court_records', verbose_name='Property')
-    case_status = models.CharField(max_length=255, blank=True, verbose_name='Case Status')
-    plaintiff = models.ForeignKey(Contact, blank=True, related_name='court_records_as_plaintiff', default="", on_delete=models.CASCADE, verbose_name='Plaintiff')
-    defendant = models.ForeignKey(Contact, blank=True, related_name='court_records_as_defendant', default="", on_delete=models.CASCADE, verbose_name='Defendant')
-    class Meta:
-        verbose_name = 'Court Record'
-        verbose_name_plural = 'Court Records'
+# class Court_Record(OperationStat):
+#     state = models.CharField(max_length=100, blank=True, verbose_name='State')
+#     county = models.CharField(max_length=100, blank=True, verbose_name='County')
+
+#     class Meta:
+#         verbose_name = 'Court Record'
+#         verbose_name_plural = 'Court Records'
 
 # ------------------------------------------------------------- #
 
@@ -126,6 +134,7 @@ class Transaction(OperationStat):
         (LIEN, 'Lien'),
         (RELEASE, 'Release')
         )
+    transaction_date = models.DateField(blank=True, null=True)
     property = models.ManyToManyField(Property, related_name='transactions_as_property', verbose_name='Property')
     transaction_type = models.CharField(max_length=255, choices=TR_TYPE, default='Transaction Type', verbose_name='Transaction Type')
     instrument_no = models.CharField(max_length=255, blank=True, verbose_name='Instrument No')
@@ -140,20 +149,56 @@ class Transaction(OperationStat):
 
 
 class Foreclosure(OperationStat):
+    NOT_DETERMINED = 'not determined'
+    POSSIBLE_SURPLUS = 'possible surplus'
+    FUND_AVAILABLE = 'fund available'
+    MOTION_FILED = 'motion filed'
+    FUND_CLAIMED = 'fund claimed'
+    NO_SURPLUS = 'no surplus'
+    SURPLUS_STATUS = (
+        (NOT_DETERMINED, 'Not Determined'),
+        (POSSIBLE_SURPLUS, 'Possible Surplus'),
+        (FUND_AVAILABLE, 'Fund Available'),
+        (MOTION_FILED, 'Motion Filed'),
+        (FUND_CLAIMED, 'Fund Claimed'),
+        (NO_SURPLUS, 'No Surplus'),
+        )
     state = models.CharField(max_length=225)
     county = models.CharField(max_length=225)
-    court_record_id = models.ForeignKey(Court_Record, blank=True, related_name='court_record_id_for_foreclosure', default="", on_delete=models.CASCADE, verbose_name='Case id')
-    sale_date = models.DateField(blank=True)
-    sale_type = models.CharField(max_length=225)
-    sale_status = models.CharField(max_length=225)
-    fcl_final_judgment = models.DecimalField(decimal_places=2, max_digits=10)
-    sale_price = models.DecimalField(decimal_places=2, max_digits=10)
-    possible_surplus = models.DecimalField(decimal_places=2, max_digits=10)
-    verified_surplus = models.DecimalField(decimal_places=2, max_digits=10)
+    case_number = models.CharField(max_length=255, blank=True, verbose_name='Case Number')
+    case_number_ext = models.CharField(max_length=10, blank=True, null=True, verbose_name='Case Extension')
+    court_name = models.CharField(max_length=255, blank=True, verbose_name='Court Name')
+    case_type = models.CharField(max_length=255, blank=True, verbose_name='Case Type')
+    property = models.ManyToManyField(Property, blank=True, related_name='court_records', verbose_name='Property')
+    case_status = models.CharField(max_length=255, blank=True, verbose_name='Case Status')
+    plaintiff = models.ManyToManyField(ForeclosingEntity, blank=True, related_name='plaintiff_for_foreclosure', default="", verbose_name='Plaintiff')
+    defendant = models.ManyToManyField(Contact, blank=True, related_name='defendant_for_foreclosure', default="", verbose_name='Defendant')
+    sale_date = models.DateField(blank=True, null=True)
+    sale_type = models.CharField(max_length=225, null=True, blank=True)
+    sale_status = models.CharField(max_length=225, null=True, blank=True)
+    fcl_final_judgment = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
+    sale_price = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
+    possible_surplus = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
+    verified_surplus = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
+    surplus_status = models.CharField(max_length=100, choices=SURPLUS_STATUS, default="Not Determined", null=True, blank=True)
     comment = models.CharField(max_length=225, blank=True)
     hidden_for = models.ManyToManyField(User, related_name='hidden_leads', blank=True)
     purchased_by = models.ManyToManyField(User, related_name='purchased_leads', blank=True)
     archived_by = models.ManyToManyField(User, related_name='archived_leads', blank=True)
+    case_search_assigned_to = models.ForeignKey(User,related_name='case_assigned_to',blank=True, null=True, on_delete=models.CASCADE)
+    case_search_status = models.CharField(max_length=100,blank=True)
+    published = models.BooleanField(default=False)
+    
+    class Meta:
+        verbose_name = 'Foreclosure'
+        verbose_name_plural = 'Foreclosures'
+
+    def __str__(self):
+        return f"{self.case_number} | {self.state} {self.county}"
+
+
+
+
 
 class Status(models.Model):
     NOT_SIGNED = 'not signed'
@@ -184,4 +229,5 @@ class Status(models.Model):
     claim_status = models.CharField(max_length=255, blank=True, choices=CLAIM_SATUS, default='Not Signed')
     claim_comment = models.TextField(max_length=500, blank=True)
     archived = models.BooleanField(default=False)
+
 

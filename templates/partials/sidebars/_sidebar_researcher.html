@@ -19,9 +19,21 @@
         </a>
     </li>
     <li class="sidebar-item">
-        <a href="" class="sidebar-link">
+        <a href="{% url 'events_calendar' %}" class="sidebar-link">
+            <i class="lni lni-calendar-days"></i>
+            <span>Events Calendar</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
+        <a href="{% url 'active_tasks' %}" class="sidebar-link">
             <i class="lni lni-pen-to-square"></i>
             <span>Active Tasks</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
+        <a href="{% url 'add_edit_fcl' %}" class="sidebar-link">
+            <i class="lni lni-map-marker-1"></i>
+            <span>Foreclosure Manager</span>
         </a>
     </li>
     <li class="sidebar-item">

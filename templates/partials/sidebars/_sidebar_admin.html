@@ -143,7 +143,7 @@
         </a>
         <ul id="data" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
             <li class="sidebar-item child">
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'all-data' %}" class="sidebar-link">
                     <i class="lni lni-cloud-check-circle"></i>
                     <span>All Data</span>
                 </a>
@@ -154,7 +154,12 @@
                     <span>Edit Data</span>
                 </a>
             </li>
-
+            <li class="sidebar-item child">
+                <a href="{% url 'foreclosures' %}" class="sidebar-link">
+                    <i class="lni lni-cloud-refresh-clockwise"></i>
+                    <span>Foreclosure</span>
+                </a>
+            </li>
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
                     <i class="lni lni-cloud-iot-2"></i>

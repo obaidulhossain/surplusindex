@@ -1,5 +1,7 @@
 from django.contrib import admin
 from .models import *
+from import_export.admin import ImportExportModelAdmin
+from .resources import ForeclosingEntityResource
  
 
 # Register your models here.
@@ -17,8 +19,8 @@ class PropertyAdmin(admin.ModelAdmin):
 class ContactAdmin(admin.ModelAdmin):
     list_display = ("first_name", "middle_name", "last_name", "name_suffix")
 
-class CourtRecordAdmin(admin.ModelAdmin):
-    list_display = ("case_number", "court_name", "case_type", "case_status")
+# class CourtRecordAdmin(admin.ModelAdmin):
+#     list_display = ("case_number", "court_name", "case_type", "case_status")
 
 class LandlineAdmin(admin.ModelAdmin):
     list_display = ("l_number", "l_caller_id", "l_status")
@@ -34,7 +36,7 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = ('transaction_type', 'instrument_no', 'amount', 'reference_transaction', 'comment')
 
 class ForeclosureAdmin(admin.ModelAdmin):
-    list_display = ('state', 'county', 'sale_date', 'sale_type', 'sale_status', 'sale_price', 'possible_surplus','verified_surplus')
+    list_display = ('id', 'state', 'county', 'case_search_assigned_to', 'sale_date', 'sale_type', 'sale_status', 'sale_price', 'possible_surplus','verified_surplus')
 
 class StatusAdmin(admin.ModelAdmin):
     list_display = ('call_status', 'agreement_status', 'claim_status')
@@ -45,7 +47,15 @@ admin.site.register(Contact, ContactAdmin)
 admin.site.register(Email, EmailAdmin)
 admin.site.register(Wireless_Number, WirelessAdmin)
 admin.site.register(Landline_Number, LandlineAdmin)
-admin.site.register(Court_Record, CourtRecordAdmin)
+# admin.site.register(Court_Record, CourtRecordAdmin)
 admin.site.register(Transaction, TransactionAdmin)
 admin.site.register(Foreclosure, ForeclosureAdmin)
 admin.site.register(Status, StatusAdmin)
+
+
+
+
+@admin.register(ForeclosingEntity)
+class ForeclosingEntityAdmin(ImportExportModelAdmin):
+    resource_class = ForeclosingEntityResource
+    list_display = ('individual_name', 'business_name', 'dba')
