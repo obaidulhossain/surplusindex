@@ -157,7 +157,7 @@ MESSAGE_TAGS = {
 EMAIL_HOST = "surplusindex.com"
 EMAIL_PORT = 465
 EMAIL_HOST_USER = "contact@surplusindex.com"
-EMAIL_HOST_PASSWORD = "Surplusindex@pc11c"
+EMAIL_HOST_PASSWORD = "Obaidul@11307"
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 

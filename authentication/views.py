@@ -22,10 +22,13 @@ from django.contrib.sites.shortcuts import get_current_site
 
 
 
-# Create your views here.
+# Shows the homepage surplusindex.com ----------
 def homepage(request):
     return render(request, 'index.html')
 
+
+
+# validates email while registering ------------
 class EmailValidationView(View):
     def post(self, request):
         data = json.loads(request.body)
