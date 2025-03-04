@@ -3,10 +3,10 @@ from django.contrib.auth.models import User
 
 # Create your models here.
     
-class subscription(models.Model):
-    user_name = models.ForeignKey(User, on_delete=models.CASCADE)
-    monthly_free_credit = models.IntegerField(default=20)
-    pay_as_you_go = models.BooleanField(default=False)
+# class subscription(models.Model):
+#     user_name = models.ForeignKey(User, on_delete=models.CASCADE)
+#     monthly_free_credit = models.IntegerField(default=20)
+#     pay_as_you_go = models.BooleanField(default=False)
 
 class UserDetail(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True, related_name='credits')
