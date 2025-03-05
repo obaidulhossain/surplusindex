@@ -21,6 +21,7 @@ load_dotenv()
 STRIPE_PUBLISHABLE_KEY = os.getenv('STRIPE_PUBLISHABLE_KEY')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 
+
 IMPORT_EXPORT_USE_TRANSACTIONS = True
 
 # Quick-start development settings - unsuitable for production
