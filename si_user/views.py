@@ -217,14 +217,14 @@ def checkout(request):
             'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
         })
 
-
+from django.db import transaction
+import logging #cgpt code
+logger = logging.getLogger(__name__) #cgpt code
 @csrf_exempt
 def stripe_webhook(request):
-    import os #cgpt code
-    import logging #cgpt code
-    logger = logging.getLogger(__name__) #cgpt code
+    stripe.api_key = settings.STRIPE_SECRET_KEY
     # You can find your endpoint's secret in your webhook settings
-    endpoint_secret = 'whsec_03c33e2abac5493e1a5f30ae7f72a9be6e34bd155db08d6febaf67936e5bfcb8'
+    endpoint_secret = 'whsec_53LCGPSZ7vhmDNOLGZ375sCmi5iwom7P'
  
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE','') #.get and ,'' is added by cgpt
@@ -270,18 +270,35 @@ def stripe_webhook(request):
 
             # Update user details and create payment record
             user = User.objects.get(id=user_id)
-            UserPayment.objects.create(
-                user=user,
-                stripe_customer_id=customer_id,
-                stripe_checkout_id=checkout_id,
-                amount=amount_paid,
-                number_of_leads=num_leads,
-                currency=currency,
-                has_paid=True,
-            )
-            user_detail = get_object_or_404(UserDetail, user=user)
-            user_detail.purchased_credit_balance += num_leads
-            user_detail.update_total_credits()
+
+            with transaction.atomic():
+                UserPayment.objects.create(
+                    user=user,
+                    stripe_customer_id=customer_id,
+                    stripe_checkout_id=checkout_id,
+                    amount=amount_paid,
+                    number_of_leads=num_leads,
+                    currency=currency,
+                    has_paid=True,
+                )
+                user_detail = get_object_or_404(UserDetail, user=user)
+                user_detail.purchased_credit_balance += num_leads
+                user_detail.update_total_credits()
+                user_detail.save()
+
+
+            # UserPayment.objects.create(
+            #     user=user,
+            #     stripe_customer_id=customer_id,
+            #     stripe_checkout_id=checkout_id,
+            #     amount=amount_paid,
+            #     number_of_leads=num_leads,
+            #     currency=currency,
+            #     has_paid=True,
+            # )
+            # user_detail = get_object_or_404(UserDetail, user=user)
+            # user_detail.purchased_credit_balance += num_leads
+            # user_detail.update_total_credits()
 
         except Exception as e:
             logger.error(f"Error processing Stripe webhook: {str(e)}", exc_info=True)
