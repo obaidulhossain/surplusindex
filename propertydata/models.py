@@ -163,6 +163,24 @@ class Foreclosure(OperationStat):
         (FUND_CLAIMED, 'Fund Claimed'),
         (NO_SURPLUS, 'No Surplus'),
         )
+    
+    PENDING = 'pending'
+    COMPLETED = 'completed'
+    CASE_SEARCH_STATUS = (
+        (PENDING, 'Pending'),
+        (COMPLETED, 'Completed'),
+    )
+
+    ACTIVE = 'pending'
+    SOLD = 'completed'
+    CANCELLED = 'cancelled'
+    SALE_STATUS = (
+        (ACTIVE, 'Active'),
+        (SOLD, 'Sold'),
+        (CANCELLED, 'Cancelled'),
+    )
+    
+
     state = models.CharField(max_length=225)
     county = models.CharField(max_length=225)
     case_number = models.CharField(max_length=255, blank=True, verbose_name='Case Number')
@@ -175,7 +193,7 @@ class Foreclosure(OperationStat):
     defendant = models.ManyToManyField(Contact, blank=True, related_name='defendant_for_foreclosure', default="", verbose_name='Defendant')
     sale_date = models.DateField(blank=True, null=True)
     sale_type = models.CharField(max_length=225, null=True, blank=True)
-    sale_status = models.CharField(max_length=225, null=True, blank=True)
+    sale_status = models.CharField(max_length=225, choices=SALE_STATUS, null=True, blank=True)
     fcl_final_judgment = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
     sale_price = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
     possible_surplus = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
@@ -186,7 +204,7 @@ class Foreclosure(OperationStat):
     purchased_by = models.ManyToManyField(User, related_name='purchased_leads', blank=True)
     archived_by = models.ManyToManyField(User, related_name='archived_leads', blank=True)
     case_search_assigned_to = models.ForeignKey(User,related_name='case_assigned_to',blank=True, null=True, on_delete=models.CASCADE)
-    case_search_status = models.CharField(max_length=100,blank=True)
+    case_search_status = models.CharField(max_length=100, choices=CASE_SEARCH_STATUS, blank=True)
     published = models.BooleanField(default=False)
     
     class Meta:

@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'authentication',
     'realestate_directory',
     'import_export',
+    'Admin',
 ]
 
 MIDDLEWARE = [
