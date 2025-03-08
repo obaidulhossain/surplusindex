@@ -21,7 +21,12 @@ Checklists
         {% else %}
         <h4>Update Foreclosure</h4>
         {% endif %}
+        <div>
+        {% if researcher %}
+        <a class="headerbutton" href="{% url 'active_tasks' %}">Go to Active Tasks</a>
+        {% endif %}
         <a class="headerbutton" href="{% url 'add_edit_fcl' %}">Start New Entry</a>
+        </div>
     </div>
     <div class="section-body-full">
         <form id="fcl-search" method="post" action="{% url 'create_update_fcl' %}">
@@ -38,18 +43,27 @@ Checklists
             </div>
 
             <div class="input-item onefifth">
-            <label for="f_state">State</label></br>
-            <input type="text" name="f_state" id="f_state" placeholder="State" value="{{ current_fcl_instance.state }}">
+                <label for="f_state">State</label></br>
+                <input type="text" name="f_state" id="f_state" placeholder="State" value="{{ current_fcl_instance.state }}">
             </div>
 
             <div class="input-item onefifth">
-            <label for="sale_type">Sale Type</label><br>
-            <input type="text" name="sale_type" id="sale_type" placeholder="Sale Type" value="{{ current_fcl_instance.sale_type }}">
+                <label for="sale_type">Sale Type</label><br>
+                <select name="sale_type" id="sale_type">
+                    <option value="">Select Sale Type</option>
+                    <option value="Tax" {% if current_fcl_instance.sale_type == "Tax" %}selected{% endif %}>Tax</option>
+                    <option value="Mortgage" {% if current_fcl_instance.sale_type == "Mortgage" %}selected{% endif %}>Mortgage</option>
+                </select>            
             </div>
 
             <div class="input-item onefifth">
-            <label for="sale_status">Sale Status</label><br>
-            <input type="text" name="sale_status" id="sale_status" placeholder="Sale Status" value="{{ current_fcl_instance.sale_status }}"><br>
+                <label for="sale_status">Sale Status</label><br>
+                <select name="sale_status" id="sale_status">
+                    <option value="">Select Sale Status</option>
+                    <option value="Active" {% if current_fcl_instance.sale_status == "Active" %}selected{% endif %}>Active</option>
+                    <option value="Sold" {% if current_fcl_instance.sale_status == "Sold" %}selected{% endif %}>Sold</option>
+                    <option value="Cancelled" {% if current_fcl_instance.sale_status == "Cancelled" %}selected{% endif %}>Cancelled</option>
+                </select>  
             </div>
             {% if not selected_foreclosure == "" %}
             <div class="subsection-header">
@@ -83,7 +97,15 @@ Checklists
                 
                 <div class="input-item onesixth">
                     <label for="surplus_status">Surplus Status</label><br>
-                    <input type="text" name="surplus_status" id="surplus_status" placeholder="Surplus Status" value="{{ current_fcl_instance.surplus_status }}"><br>
+                        <select name="surplus_status" id="surplus_status">
+                            <option value="">Select Status</option>
+                            <option value="Not Determined" {% if current_fcl_instance.surplus_status == "Not Determined" %}selected{% endif %}>Not Determined</option>
+                            <option value="Possible Surplus" {% if current_fcl_instance.surplus_status == "Possible Surplus" %}selected{% endif %}>Possible Surplus</option>
+                            <option value="No Surplus" {% if current_fcl_instance.surplus_status == "No Surplus" %}selected{% endif %}>No Surplus</option>
+                            <option value="Fund Available" {% if current_fcl_instance.surplus_status == "Fund Available" %}selected{% endif %}>Fund Available</option>
+                            <option value="Motion Filed" {% if current_fcl_instance.surplus_status == "Motion Filed" %}selected{% endif %}>Motion Filed</option>
+                            <option value="Fund Claimed" {% if current_fcl_instance.surplus_status == "Fund Claimed" %}selected{% endif %}>Fund Claimed</option>
+                    </select>
                 </div>
             </div>
 

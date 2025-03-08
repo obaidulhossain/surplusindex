@@ -183,6 +183,8 @@ def ActiveTasks(request):
 #--------------Foreclosure views------------------------
 
 def fclview(request):
+    researcher = request.user.groups.filter(name="researcher").exists()
+    
     all_foreclosure = Foreclosure.objects.all().distinct()
     if request.method == 'POST':
         selected_foreclosure = request.POST.get('caseid','')
@@ -207,6 +209,7 @@ def fclview(request):
         'all_prop':all_prop,
         'all_plt':all_plt,
         'all_def':all_def,
+        'researcher':researcher,
     }
     return render(request, 'projects/add_edit_foreclosure.html', context)
 
