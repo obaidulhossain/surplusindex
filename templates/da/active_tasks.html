@@ -65,10 +65,7 @@ Checklists
                             <td class="possible-surplus">{{i.possible_surplus}}</td>
                             <td class="verified-surplus">{{i.verified_surplus}}</td>
                             <td>
-                                <form method="get" action="{% url 'add_edit_fcl' %}">
-                                        <input type="hidden" name="fcl_id" value="{{i.id}}">
-                                        <input type="submit" value="Edit">
-                                    </form>
+                                <a href="/add_edit_foreclosure/?fcl_id={{ i.id }}">Edit</a>
                             </td>
                         </tr>
                         {% endfor %}
