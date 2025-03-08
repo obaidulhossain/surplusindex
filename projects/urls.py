@@ -7,10 +7,13 @@ path('events_calendar', views.EventsCalendar, name="events_calendar"),
 path('active_tasks', views.ActiveTasks, name="active_tasks"),
 
 
-path('foreclosures/', views.ForeclosureView, name='foreclosures'),
-path('save_fcl', views.update_foreclosure, name="save_fcl"),
+
+# Urls for Foreclosure Section
+
+path('add_edit_foreclosure/', views.fclview, name="add_edit_fcl"),
 path('filter-fcl', views.filter_foreclosure, name="filter-fcl"),
-path('select_fcl', views.select_fcl, name="select_fcl"),
+path('create_update_fcl', views.update_foreclosure, name="create_update_fcl"),
+
 
 
 
@@ -19,8 +22,7 @@ path('select_fcl', views.select_fcl, name="select_fcl"),
 
 
 # views for property section
-path('add_edit_foreclosure/', views.fclview, name="add_edit_fcl"),
-path('save_foreclosure/', views.save_foreclosure, name='save_foreclosure'),
+
 
 
 

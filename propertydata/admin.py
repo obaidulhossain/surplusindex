@@ -36,7 +36,7 @@ class TransactionAdmin(admin.ModelAdmin):
     list_display = ('transaction_type', 'instrument_no', 'amount', 'reference_transaction', 'comment')
 
 class ForeclosureAdmin(admin.ModelAdmin):
-    list_display = ('id', 'state', 'county', 'case_search_assigned_to', 'sale_date', 'sale_type', 'sale_status', 'sale_price', 'possible_surplus','verified_surplus')
+    list_display = ('id', 'state', 'county', 'case_number', 'case_search_assigned_to', 'sale_date', 'sale_type', 'sale_status', 'sale_price', 'possible_surplus','verified_surplus')
 
 class StatusAdmin(admin.ModelAdmin):
     list_display = ('call_status', 'agreement_status', 'claim_status')

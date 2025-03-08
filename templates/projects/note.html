@@ -1,165 +1,270 @@
 {% extends 'base.html' %}
 {% block title %}
-Checklists
+Foreclosures
 {% endblock title %}
 
 
 {% block content%}
 {% load static %}
-<link href="{% static 'css/propertydata.css' %}" rel="stylesheet">
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/nouislider.min.css' %}" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-
-<form method="post" action="">
-    {% csrf_token %}
-    <div class="filter-section">
-        <div class="filters-header">
-            {% if pk %}
-            <h4>Update Foreclosure</h4>
-            {% else %}
-            <h4>Create Foreclosure</h4>
-            {% endif %}
-        </div>
-        <div class="filter-body" id="filter-section" style="display: flex;">
-            <div style=" width: 35%; display: inline-block;">
-                <div class="filter-item">
-                    <label for="case_number">Case Number:</label><br>
-                    <input type="text" id="case_number" name="case_number" list="case_number_list"
-                        oninput="fetchCaseNumbers()" onchange="this.form.submit()" />
-                    <datalist id="case_number_list">
-                        <!-- Options will be dynamically populated here -->
-                    </datalist>
-                </div>
-            </div>
-            <div style=" width: 35%; display: inline-block;">
-                <div class="filter-item">
-                    {% if properties and properties.exist %}
-                    <label for="property">Foreclosing Properties</label><br>
-                    <select name="properties" id="properties" multiple>
-                        {% for property in properties %}
-                        <option {% if property in form.instance.property.all %}selected{% endif%}
-                            value="{{property.id}}">
-                            {{property.parcel}} | {{property.house_number}} {{property.road_name}}
-                            {{property.road_type}} {{property.direction}} {{property.apt_unit}} {{property.extention}},
-                            {{property.city}}, {{property.state}} {{property.zip_code}}
-                        </option>
-                        {% endfor %}
-                    </select>
-                    {% else %}
-
-
-                </div>
-            </div>
-        </div>
-        <div class="filters-header" style="margin-top: 20px;">
-            {% if pk %}
-            <h4>Update Foreclosure</h4>
-            {% else %}
-            <h4>No property associated | Create New</h4>
-            {% endif %}
-            {% if properties and properties.exist %}
-            <select name="properties" id="properties" multiple>
-                {% for property in properties %}
-                <option {% if property in form.instance.property.all %}selected{% endif%} value="{{property.id}}">
-                    {{property.parcel}} | {{property.house_number}} {{property.road_name}}
-                    {{property.road_type}} {{property.direction}} {{property.apt_unit}} {{property.extention}},
-                    {{property.city}}, {{property.state}} {{property.zip_code}}
-                </option>
-                {% endfor %}
-            </select>
-            {% endif %}
-
-        </div>
-        <div class="filter-body" id="filter-section" style="display: flex; flex-wrap: wrap;">
-            <div class="filter-item">
-                <label for="parcel">Parcel Id</label><br>
-                {{propertyform.parcel}}
-            </div>
-            <div class="filter-item">
-                <label for="house_number">House Number</label><br>
-                {{propertyform.house_number}}
-            </div>
-            <div class="filter-item">
-                <label for="road_name">Road Name</label><br>
-                {{propertyform.road_name}}
-            </div>
-            <div class="filter-item">
-                <label for="road_type">Road Type</label><br>
-                {{propertyform.road_type}}
-            </div>
-            <div class="filter-item">
-                <label for="direction">Direction</label><br>
-                {{propertyform.direction}}
-            </div>
-            <div class="filter-item">
-                <label for="apt_unit">Unit/Bld/Apt</label><br>
-                {{propertyform.apt_unit}}
-            </div>
-            <div class="filter-item">
-                <label for="extention">Extension</label><br>
-                {{propertyform.extention}}
-            </div>
-            <div class="filter-item">
-                <label for="city">City Name</label><br>
-                {{propertyform.city}}
-            </div>
-            <div class="filter-item">
-                <label for="zip_code">Zip Code</label><br>
-                {{propertyform.zip_code}}
-            </div>
-        </div>
+<!-- <form method="post" id="foreclosures"> -->
+<div style="margin-top: 20px;" class="body-section">
+    <div class="section-header">
+        {% if selected_foreclosure == "" %}
+        <h4 name="updatefcl">Create Foreclosure</h4>
+        {% else %}
+        <h4>Update Foreclosure</h4>
+        {% endif %}
     </div>
-    {% endif %}
+    <div class="section-body-full">
+        <form id="fcl-search" method="post" action="{% url 'save_fcl' %}">
+            {% csrf_token %}
+            <input type="hidden" name="caseid" value="{{ current_fcl_instance.pk }}">
 
-    <button type="submit">Save</button>
-</form>
+            <input type="text" name="case_num" id="case_num" placeholder="Case Number" value="{{ current_fcl_instance.case_number }}">
+            <input type="text" name="f_county" id="f_county" placeholder="County" value="{{ current_fcl_instance.county }}">
+            <input type="text" name="f_state" id="f_state" placeholder="State" value="{{ current_fcl_instance.state }}">
+            <input type="date" id="sale_date" placeholder="" value="{{ current_fcl_instance.sale_date|date:'Y-m-d' }}" name="sale_date">
+            <input type="text" id="sale_type" placeholder="Sale Type" value="{{ current_fcl_instance.sale_type }}" name="sale_type">
+            <input type="text" id="sale_status" placeholder="Sale Status" value="{{ current_fcl_instance.sale_status }}" name="sale_status"><br>
+        
+            <h6>Financial Information</h6>
+            <input type="number" id="judgment" placeholder="Judgment Amount" value="{{ current_fcl_instance.fcl_final_judgment }}" name="judgment">
+            <input type="number" id="saleprice" placeholder="Sale Price" value="{{ current_fcl_instance.sale_price }}" name="saleprice">
+            <input type="number" id="possible_sf" placeholder="Possible Surplus" value="{{ current_fcl_instance.possible_surplus }}" name="possible_sf">
+            <input type="number" id="verified_sf" placeholder="Verified Surplus" value="{{ current_fcl_instance.verified_surplus }}" name="verified_sf">
+            <input type="text" id="surplus_status" placeholder="Surplus Status" value="{{ current_fcl_instance.surplus_status }}" name="surplus_status"><br>
+            <h6>Additional Fields</h6>
+            <input type="text" id="case_ext" placeholder="Case Extension" value="{{ current_fcl_instance.case_number_ext }}" name="case_ext">
+            <input type="text" id="court_name" placeholder="Court Name" value="{{ current_fcl_instance.court_name }}" name="court_name">
+            <input type="text" id="case_type" placeholder="Case Type" value="{{ current_fcl_instance.case_type }}" name="case_type">
+            <input type="text" id="case_status" placeholder="Case Status" value="{{ current_fcl_instance.case_status }}" name="case_status"><br>
 
-{{ form.as_p }}
 
-<label for="case_number">Case Number:</label>
-<input type="text" id="case_number" name="case_number" list="case_number_list">
-<datalist id="case_number_list"></datalist>
-
-<div id="property_section">
-    <label>Properties:</label>
-    <ul id="property_list">
-        {# List of current properties will be added here by JavaScript #}
-    </ul>
-    <input type="text" id="property_search" placeholder="Search Properties...">
-    <datalist id="property_suggestions"></datalist>
-    <button type="button" id="add_property_button">Add Existing Property</button>
-    <button type="button" id="new_property_button">Create New Property</button>
-    {{ form.property }} {# Hidden field. Values will be populated by javascript #}
+            <input type="submit" value="{% if selected_foreclosure == "" %}Create Foreclosure Instance{% else %}Update Foreclosure{% endif %}">
+            <!--<input type="text" id="" placeholder="" value="" name="">-->           
+        </form>    
+    </div>
+    <div class="section-body-full">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Sale Type</th>
+                    <th>Sale Status</th>
+                    <th>Select</th>
+                </tr>
+            </thead>
+            <tbody id="fcl-results">
+            </tbody>
+        </table>
+    </div>
 </div>
+<script>
+    $(document).ready(function () {
+        // Function to fetch and update search results
+        function fclResults() {
+            const state = $('#f_state').val();
+            const county = $('#f_county').val();
+            const case_num = $('#case_num').val();
+            const saletype = $('#sale_type').val();
+            const salestatus = $('#sale_status').val();
 
-{# Repeat similar blocks for plaintiff and defendant #}
+            $.ajax({
+                url: "{% url 'filter-fcl' %}",
+                data: {
+                    f_state: state,
+                    f_county: county,
+                    case_num: case_num,
+                    sale_type: saletype,
+                    sale_status: salestatus
+                },
+                success: function (data) {
+                    const foreclosure = data.foreclosure;
+                    const fclresultcontainer = $('#fcl-results');
+                    fclresultcontainer.empty();
 
-<!-- <button type="submit">Save</button>
-</form> -->
+                    if (foreclosure.length > 0) {
+                        foreclosure.forEach(foreclosure => {
+                            fclresultcontainer.append(`
+
+                            <tr>
+                                <td>${foreclosure.state}</td>
+                                <td>${foreclosure.county}</td>
+                                <td>${foreclosure.case_number}</td>
+                                <td>${foreclosure.sale_date}</td>
+                                <td>${foreclosure.sale_type}</td>
+                                <td>${foreclosure.sale_status}</td>
+                                <td>
+                                    <form method="get" action="{% url 'add_edit_fcl' %}">
+                                        <input type="hidden" name="fcl_id" value="${foreclosure.id}">
+                                        <input type="submit" value="Edit">
+                                    </form>
+                                </td>
+                            </tr>
+
+                            `);
+                        });
+                    } else {
+                        fclresultcontainer.append('<tr><th colspan="6"><center>No Foreclosure Record found</center></th></tr>');
+                    }
+                }
+            });
+        }
+        // Trigger AJAX call on input change
+        $('#f_state, #f_county, #case_num, #sale_type, #sale_status').on('input', fclResults);
+    });
+</script>
 
 
-<div id="property_modal" class="modal">
-    <div class="modal-content">
-        <span class="close">×</span>
-        <h2>Create New Property</h2>
-        <form id="new_property_form">
-            {{ property_form.as_p }}
-            <button type="button" id="save_property">Save Property</button>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="filter-section">
+    <div class="filters-header">
+        {% if selected_foreclosure == "" %}
+        <h4 name="updatefcl">Create Foreclosure</h4>
+        {% else %}
+        <h4>Update Foreclosure</h4>
+        {% endif %}
+
+        <form method="get" action="">
+            <input placeholder="Search Case" type="text" id="search_case" name="search_case" list="case-number-suggestions" onchange="this.form.submit()">
+            <datalist id="case-number-suggestions">
+                {% for case in all_foreclosure %}
+                <option value="{{ case.id }}">{{case.case_number}} {{case.state}}</option>
+                {% endfor %}
+            </datalist>
         </form>
     </div>
-    <script src="{% static 'js/foreclosure_form.js' %}"></script>
+    <div class="filter-body" id="filter-section" style="display: flex;">
+        <div style=" width: 35%; display: inline-block;">
+            <form method="post" id="foreclosures" action="{% url 'save_foreclosure' %}">
+                {% csrf_token %}
+                {% if current_fcl_instance %}
+                <input type="hidden" name="case_id" value="{{ current_fcl_instance.pk }}">
+                {% endif %}
+                <div class="filter-item">
+                    <label for="{{ fclform.case_number.id_for_label }}">Case Number:</label>
+                    {{ fclform.case_number }}
+                    {{ fclform.case_number.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.case_number_ext.id_for_label }}">Case Ext:</label>
+                    {{ fclform.case_number_ext }}
+                    {{ fclform.case_number_ext.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.state.id_for_label }}">State:</label>
+                    {{ fclform.state }}
+                    {{ fclform.state.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.county.id_for_label }}">County:</label>
+                    {{ fclform.county }}
+                    {{ fclform.county.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.sale_date.id_for_label }}">Sale Date:</label>
+                    {{ fclform.sale_date }}
+                    {{ fclform.sale_date.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.sale_type.id_for_label }}">Sale Type:</label>
+                    {{ fclform.sale_type }}
+                    {{ fclform.sale_type.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.sale_status.id_for_label }}">Sale Status:</label>
+                    {{ fclform.sale_status }}
+                    {{ fclform.sale_status.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.fcl_final_judgment.id_for_label }}">Judgment Amt:</label>
+                    {{ fclform.fcl_final_judgment }}
+                    {{ fclform.fcl_final_judgment.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.sale_price.id_for_label }}">Sale Price:</label>
+                    {{ fclform.sale_price }}
+                    {{ fclform.sale_price.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.possible_surplus.id_for_label }}">Possible Surplus:</label>
+                    {{ fclform.possible_surplus }}
+                    {{ fclform.possible_surplus.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.verified_surplus.id_for_label }}">Verified Surplus:</label>
+                    {{ fclform.verified_surplus }}
+                    {{ fclform.verified_surplus.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.surplus_status.id_for_label }}">Surplus Status:</label>
+                    {{ fclform.surplus_status }}
+                    {{ fclform.surplus_status.errors }}
+                </div>
+                <div class="filter-item">
+                    <label for="{{ fclform.comment.id_for_label }}">Comment:</label>
+                    {{ fclform.comment }}
+                    {{ fclform.comment.errors }}
+                </div>
+                <button type="submit">{% if selected_foreclosure == "" %}Add Foreclosure{% else %}
+                    Update Foreclosure{% endif %}</button>
+            </form>
+        </div>
+    </div>
 </div>
 
+<script>
+    $(document).ready(function () {
+        // Submit foreclosure form
+        $('#foreclosures').on('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission
+            const formData = new FormData(this);
+            const url = $(this).attr('action'); // Form action URL
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    alert('Foreclosure saved successfully!');
+                },
+                error: function (error) {
+                    alert('Error saving foreclosure!');
+                }
+            });
+        });
 
 
-
-
-
-
-
-
-
-
-
+    });
+</script>
 
 
 

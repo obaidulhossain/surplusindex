@@ -1,5 +1,5 @@
 from django.template import loader
-from django.shortcuts import redirect, render, get_object_or_404, HttpResponse
+from django.shortcuts import redirect, render, get_object_or_404, HttpResponseRedirect, HttpResponse
 
 from django.utils.timezone import now
 from django.core.paginator import Paginator
@@ -181,28 +181,39 @@ def ActiveTasks(request):
 
 
 #--------------Foreclosure views------------------------
-from django.shortcuts import HttpResponseRedirect
-def ForeclosureView(request):
-    sel_fcl = None
+
+def fclview(request):
+    all_foreclosure = Foreclosure.objects.all().distinct()
     if request.method == 'POST':
-        sel_fcl = request.POST.get('p_caseid')
-        sel_fcl_ins = get_object_or_404(Foreclosure, pk=sel_fcl)
+        selected_foreclosure = request.POST.get('caseid','')
     else:
-        sel_fcl_ins = Foreclosure.objects.all().distinct()
+        selected_foreclosure = request.GET.get('fcl_id','')
+    if selected_foreclosure:
+        current_fcl_instance = get_object_or_404(Foreclosure, pk=selected_foreclosure)
+        all_prop = current_fcl_instance.property.all()
+        all_plt = current_fcl_instance.plaintiff.all()
+        all_def = current_fcl_instance.defendant.all()
+    else:
+        current_fcl_instance = None
+        all_prop = None
+        all_plt = None
+        all_def = None    
+
     
     context = {
-        'sel_fcl':sel_fcl,
-        'sel_fcl_ins':sel_fcl_ins,
+        'all_foreclosure':all_foreclosure,
+        'selected_foreclosure':selected_foreclosure,
+        'current_fcl_instance':current_fcl_instance,
+        'all_prop':all_prop,
+        'all_plt':all_plt,
+        'all_def':all_def,
     }
-    return render(request, 'projects/foreclosures.html', context)
-    
-
+    return render(request, 'projects/add_edit_foreclosure.html', context)
 
 def filter_foreclosure(request):
-    state = request.GET.get('state','')
-    county = request.GET.get('county','')
-    case = request.GET.get('case','')
-#    sale_date = request.GET.get('sale_date','')
+    state = request.GET.get('f_state','')
+    county = request.GET.get('f_county','')
+    case_num = request.GET.get('case_num','')
     sale_type = request.GET.get('sale_type','')
     sale_status = request.GET.get('sale_status','')
     
@@ -213,72 +224,100 @@ def filter_foreclosure(request):
         foreclosure = foreclosure.filter(state__icontains=state)
     if county:
         foreclosure = foreclosure.filter(county__icontains=county)
-    if case:
-        foreclosure = foreclosure.filter(case_number__icontains=case)
-    # if sale_date:
-    #     foreclosure = foreclosure.filter(sale_date__icontains=sale_date)
+    if case_num:
+        foreclosure = foreclosure.filter(case_number__icontains=case_num)
     if sale_type:
         foreclosure = foreclosure.filter(sale_type__icontains=sale_type)
     if sale_status:
         foreclosure = foreclosure.filter(sale_status__icontains=sale_status)
 
     # Return results as JSON
-    results = list(foreclosure.values('id', 'state','county','case_number', 'sale_date', 'sale_type', 'sale_status'))
+    results = list(foreclosure.values('id', 'state', 'county', 'case_number', 'sale_date', 'sale_type', 'sale_status'))
     return JsonResponse({'foreclosure': results})
 
-def select_fcl(request):
-    if request.method == 'GET':
-        selected = request.GET.get('fcl_id')
-        return HttpResponseRedirect(f"/foreclosures/?g_caseid={selected}")
+
+    
+
 
 def update_foreclosure(request):
-    sel_fcl = request.POST.get('p_caseid','newfcl')
-    sel_prop = request.POST.get('p_propid','newprop')
-    state = request.POST.get('state','')
-    county = request.POST.get('county','')
-    case = request.POST.get('case','')
-    sale_date = request.POST.get('sale_date','')
+    sel_fcl = request.POST.get('caseid','')
+    
+    case = request.POST.get('case_num','')
+    county = request.POST.get('f_county','')
+    state = request.POST.get('f_state','')
+    sale_date = request.POST.get('sale_date', '')
     sale_type = request.POST.get('sale_type','')
     sale_status = request.POST.get('sale_status','')
+
+    judgment = request.POST.get('judgment', '')
+    saleprice = request.POST.get('saleprice', '')
+    possible_sf = request.POST.get('possible_sf', '')
+    verified_sf = request.POST.get('verified_sf', '')
+    surplus_status = request.POST.get('surplus_status', '')
+
     case_ext = request.POST.get('case_ext','')
     court_name = request.POST.get('court_name','')
     case_type = request.POST.get('case_type','')
     case_status = request.POST.get('case_status','')
-    judgment = request.POST.get('judgment','')
-    saleprice = request.POST.get('saleprice','')
-    possible_sf = request.POST.get('possible_sf','')
-    verified_sf = request.POST.get('verified_sf','')
-    surplus_status = request.POST.get('surplus_status', '')
     
-    if request.method == 'POST':
-        if sel_fcl == "newfcl":
-            add_fcl = Foreclosure(state=state, county=county, case_number=case, case_number_ext=case_ext,
-                                  court_name=court_name, case_type=case_type, case_status=case_status,
-                                  sale_date=sale_date, sale_type=sale_type, sale_status=sale_status,
-                                  fcl_final_judgment=judgment, sale_price=saleprice, possible_surplus=possible_sf,
-                                  verified_surplus=verified_sf, surplus_status=surplus_status)
-        else:
-            add_fcl = Foreclosure.objects.get(pk=sel_fcl)
-            add_fcl.state = state
-            add_fcl.county = county
-            add_fcl.case_number = case
-            add_fcl.case_number_ext=case_ext
-            add_fcl.court_name = court_name
-            add_fcl.case_type = case_type
-            add_fcl.case_status = case_status
-            add_fcl.sale_date = sale_date
-            add_fcl.sale_type = sale_type
-            add_fcl.sale_status = sale_status
-            add_fcl.fcl_final_judgment = judgment
-            add_fcl.sale_price = saleprice
-            add_fcl.possible_surplus = possible_sf
-            add_fcl.verified_surplus = verified_sf
-            add_fcl.surplus_status = surplus_status
+    
+    
+    if sel_fcl:
+        fcl_instance = Foreclosure.objects.get(pk=sel_fcl)
+        
+        fcl_instance.case_number = case
+        fcl_instance.county = county
+        fcl_instance.state = state
+        if not sale_date == "":
+            fcl_instance.sale_date = sale_date
+        fcl_instance.sale_type = sale_type
+        fcl_instance.sale_status = sale_status
+        
+        if not judgment == "":
+            fcl_instance.fcl_final_judgment = judgment
+        if not saleprice == "":
+            fcl_instance.sale_price = saleprice
+        if not possible_sf == "":
+            fcl_instance.possible_surplus = possible_sf
+        if not verified_sf == "":
+            fcl_instance.verified_surplus = verified_sf
+        fcl_instance.surplus_status = surplus_status
+        
+        fcl_instance.case_number_ext = case_ext
+        fcl_instance.court_name = court_name
+        fcl_instance.case_type = case_type
+        fcl_instance.case_status = case_status
+        
+    
+    else:
+        fcl_instance = Foreclosure(
+            state=state,
+            county=county,
+            case_number=case,
+            sale_type=sale_type,
+            sale_status=sale_status
+            # case_number_ext=case_ext,
+            # court_name=court_name,
+            # case_type=case_type,
+            # case_status=case_status,
+            # sale_date=sale_date,
 
-        add_fcl.save()
-        sel_fcl = add_fcl.pk
+            # fcl_final_judgment=judgment,
+            # sale_price=saleprice,
+            # possible_surplus=possible_sf,
+            # verified_surplus=verified_sf,
+            # surplus_status=surplus_status,
+            )
+        
+    fcl_instance.save()
+    if sel_fcl:
+        messages.success(request, 'Foreclosure Instance Updated Successfully!!')
+    else:
+        messages.success(request, 'New Foreclosure Instance Created!!')
+    sel_fcl = fcl_instance.pk
 
-    return HttpResponseRedirect(f"/foreclosures/?g_caseid={sel_fcl}&g_propid={sel_prop}")
+    # return redirect('add_edit_fcl')
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={sel_fcl}")
 
 #---------------foreclosureview---------end---------------
 
@@ -293,7 +332,7 @@ def add_defendant(request):
         fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
         fcl_instance.defendant.add(def_instance)
         messages.success(request, "Defendant Added to Foreclosure Instance!")
-        return HttpResponseRedirect(f"/add_edit_foreclosure/?search_case={foreclosure}")
+        return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
 
 
 def defendant_search(request):
@@ -348,7 +387,7 @@ def search_create_defendant(request):
             fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
             fcl_instance.defendant.add(add_defendant)
             messages.info(request, 'Defendant Added to Current Foreclosure Instance')
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?search_case={foreclosure}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
 
 def update_defendant(request):
     if request.method == 'POST':
@@ -375,7 +414,7 @@ def update_defendant(request):
         def_instance.designation = designation
         def_instance.save()
         messages.success(request, "Defendant Updated Successfully!")
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?search_case={foreclosure}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
 
 #--------------defendant Section----------------end----------
 #--------------Plaintiff Section----------------Start----------
@@ -385,7 +424,7 @@ def create_update_plaintiff(request):
     if request.method == 'POST':
 
         foreclosure = request.POST.get('caseid')
-        property = request.POST.get('propertyid')
+        # property = request.POST.get('propertyid')
         contact_nm = request.POST.get('contact_name')
         business_nm = request.POST.get('business_name')
         dba = request.POST.get('dba')
@@ -396,13 +435,13 @@ def create_update_plaintiff(request):
             fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
             fcl_instance.plaintiff.add(add_plaintiff)
             messages.info(request, 'Foreclosing Entity Added to Current Foreclosure Instance')
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?search_case={foreclosure}&property-selected={property}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
 
 
 def update_plaintiff(request):
     if request.method == 'POST':
         foreclosure = request.POST.get('caseid')
-        property = request.POST.get('propertyid')
+        # property = request.POST.get('propertyid')
         plaintiff = request.POST.get('plt-id')
         contact_nm = request.POST.get('u_contact')
         business_nm = request.POST.get('u_business')
@@ -412,18 +451,18 @@ def update_plaintiff(request):
         plt_instance.business_name = business_nm
         plt_instance.dba = dba
         plt_instance.save()
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?search_case={foreclosure}&property-selected={property}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
 
 def add_plaintiff(request):
     if request.method == 'POST':
         foreclosure = request.POST.get('caseid')
-        property = request.POST.get('propertyid')
+        # property = request.POST.get('propertyid')
         plaintiff = request.POST.get('pltid')
         plt_instance = get_object_or_404(ForeclosingEntity, pk=plaintiff)
         fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
         fcl_instance.plaintiff.add(plt_instance)
         messages.success(request, "Plaintiff Added to Foreclosure Instance")
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?search_case={foreclosure}&property-selected={property}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
 
 def plaintiff_search(request):
     business = request.GET.get('business_name', '')
@@ -446,66 +485,7 @@ def plaintiff_search(request):
 
 #--------------Plaintiff Section----------------End----------
 
-
-
-
-
-def fclview(request):
-    all_foreclosure = Foreclosure.objects.all().distinct()          #values_list('case_number', flat=True).distinct()
-    
-    if request.method == 'POST':
-        selected_foreclosure = request.POST.get('caseid','')
-    else:
-        selected_foreclosure = request.GET.get('search_case','')
-    if selected_foreclosure:
-        current_fcl_instance = get_object_or_404(Foreclosure, pk=selected_foreclosure)
-        fclform = ForeclosureForm(instance=current_fcl_instance)
-        all_prop = current_fcl_instance.property.all()
-        all_plt = current_fcl_instance.plaintiff.all()
-        all_def = current_fcl_instance.defendant.all()
-
-    else:
-        fclform = ForeclosureForm()
-        current_fcl_instance = None
-        all_prop = None
-        all_plt = None
-        all_def = None
-    
-
-    context = {
-        'all_foreclosure':all_foreclosure,
-        'selected_foreclosure':selected_foreclosure,
-        'fclform':fclform,
-        'all_prop':all_prop,
-        'current_fcl_instance':current_fcl_instance,
-        'all_plt':all_plt,
-        'all_def':all_def,
-        
-
-
-    }
-
-
-    return render (request, 'projects/add_edit_foreclosure.html', context)
-
-
-def save_foreclosure(request):
-    if request.method == 'POST':
-        update = request.POST.get('case_id')
-        print (update)
-        if update:  # Update existing
-            foreclosure = get_object_or_404(Foreclosure, pk=update)
-            form = ForeclosureForm(request.POST, instance=foreclosure)
-            
-        else:  # Create new
-            form = ForeclosureForm(request.POST)
-
-        if form.is_valid():
-            form.save()
-            return JsonResponse({'success': True, 'message': 'Foreclosure saved successfully!'})
-        else:
-            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
-        
+       
 
 #------------------property-------------start
 def search_create_property(request):
@@ -529,7 +509,7 @@ def search_create_property(request):
             foreclosure = Foreclosure.objects.get(pk=foreclosure)
             foreclosure.property.add(add_property)
             messages.info(request, 'Property Added to Current Foreclosure Instance')
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?search_case={foreclosure.pk}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure.pk}")
 
             
 
@@ -564,7 +544,7 @@ def update_property(request):
             property_instance.save()
             messages.success(request, 'Property Record Saved')
 
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?search_case={foreclosure}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
 
 def address_search(request):
 # Fetch search parameters from GET request
@@ -596,7 +576,7 @@ def address_search(request):
 
 def fcl_add_property(request):
     if request.method == 'POST':
-        update = request.POST.get('case_id')
+        update = request.POST.get('caseid')
         add_prop = request.POST.get('property_id')
         fclinstance = Foreclosure.objects.get(pk=update)
         propinstance = Property.objects.get(pk=add_prop)
@@ -604,7 +584,7 @@ def fcl_add_property(request):
         messages.success(request,'Property successfully added to current foreclosure')
 
     #return HttpResponseRedirect(f"/foreclosures/?g_caseid={selected}")
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?search_case={update}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={update}")
 
 
 #------------------property-------------start
