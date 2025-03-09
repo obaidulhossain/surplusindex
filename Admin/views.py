@@ -63,5 +63,23 @@ def update_case_search_status(request):
 
     return redirect('new_leads')
 
+def update_publish_status(request):
+    publish = request.POST.get('publish')
+    state = request.POST.get('sel_state')
+    # user = User.objects.get(username=assign_to)
+    if state:
+        if publish == "Publish":
+            leads_to_update = Foreclosure.objects.filter(case_search_status="Pending", state=state) | Foreclosure.objects.filter(case_search_status="Completed", state=state)
+            for lead in leads_to_update:
+                lead.published = True
+                lead.save()
+        else:
+            leads_to_update = Foreclosure.objects.filter(case_search_status="Pending", state=state) | Foreclosure.objects.filter(case_search_status="Completed", state=state)
+            for lead in leads_to_update:
+                lead.published = False
+                lead.save()
+    else:
+            messages.info(request, 'Please select a state to to update')
 
+    return redirect('new_leads')
 #----------------Data--------------------end

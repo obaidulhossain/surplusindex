@@ -19,7 +19,6 @@ New Leads
         <div>
             <form method="post" action="{% url 'new_leads' %}">
             {% csrf_token %}
-            <label for="sel_state">Select State:</label>
             <select name="sel_state" id="sel_state" onchange="this.form.submit()">
                 <option value="">-- Select State --</option>
                 {% for state in States %}
@@ -58,6 +57,19 @@ New Leads
             </select>
             <input type="submit" id="updatestatus" value="Update Status" disabled>
         </form>
+        </div>
+        <div class="onefourth" style="padding:10px; display:inline-block;">
+            <form method="post", action="{% url 'update_publish_status' %}">
+                {% csrf_token %}
+                <input type="hidden" name="sel_state" value="{{sel_state}}">
+                
+                <select style="width:100%;" name="publish" id="publish">
+                    <option value="">-- Select Publish Status --</option>
+                    <option value="Publish">Publish</option>
+                    <option value="Unpublish">Unpublish</option>
+                </select>
+                <input type="submit" id="updatepublish" value="Update Status" disabled>
+            </form>
         </div>
     </div>
     <div class="section-body-full">
@@ -121,6 +133,16 @@ New Leads
         const submitButton = document.getElementById('submitBtn');
         const selectStatus = document.getElementById('status');
         const statusButton = document.getElementById('updatestatus');
+        const selectPublish = document.getElementById('publish');
+        const publishButton = document.getElementById('updatepublish');
+
+        selectPublish.addEventListener('change', function(){
+            if (selectPublish.value === "") {
+                publishButton.disabled = true;
+            } else {
+                publishButton.disabled = false;
+            }
+        })
 
         selectStatus.addEventListener('change', function(){
             if (selectStatus.value === "") {
@@ -141,13 +163,18 @@ New Leads
 
 
         // Check on page load in case of form resubmission with an empty value
+        if (selectElement.value === "") {
+            submitButton.disabled = true;
+        }
+        
+        
         if (selectStatus.value === "") {
             statusButton.disabled = true;
         }
         
         
-        if (selectElement.value === "") {
-            submitButton.disabled = true;
+        if (selectPublish.value === "") {
+            publishButton.disabled = true;
         }
 
 </script>
