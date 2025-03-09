@@ -156,7 +156,7 @@ def EventsCalendar(request):
 
 def ActiveTasks(request):
     current_user=request.user
-    p=Paginator(Foreclosure.objects.filter(case_search_assigned_to=current_user, changed_at__lt=now().date() - timedelta(days=7)) | Foreclosure.objects.filter(case_search_assigned_to=current_user, published=False), 50)
+    p=Paginator(Foreclosure.objects.filter(case_search_assigned_to=current_user, changed_at__lt=now().date() - timedelta(days=7)) | Foreclosure.objects.filter(case_search_assigned_to=current_user, case_search_status="Pending"), 50)
     states=Foreclosure.objects.values_list("state", flat=True).distinct()
     counties=Foreclosure.objects.values_list("county", flat=True).distinct()
     saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
@@ -243,6 +243,7 @@ def filter_foreclosure(request):
 
 
 def update_foreclosure(request):
+    current_user = request.user        #.groups.filter(name="researcher").exists()
     sel_fcl = request.POST.get('caseid','')
     
     case = request.POST.get('case_num','')
@@ -262,7 +263,7 @@ def update_foreclosure(request):
     court_name = request.POST.get('court_name','')
     case_type = request.POST.get('case_type','')
     case_status = request.POST.get('case_status','')
-    
+    case_search_status = request.POST.get('case_search_status','')
     
     
     if sel_fcl:
@@ -290,7 +291,10 @@ def update_foreclosure(request):
         fcl_instance.court_name = court_name
         fcl_instance.case_type = case_type
         fcl_instance.case_status = case_status
-        
+        if current_user.groups.filter(name="researcher").exists() and case_search_status == "Verified":
+            fcl_instance.case_search_status = "Completed"
+        else:
+            fcl_instance.case_search_status = case_search_status
     
     else:
         fcl_instance = Foreclosure(
@@ -298,7 +302,8 @@ def update_foreclosure(request):
             county=county,
             case_number=case,
             sale_type=sale_type,
-            sale_status=sale_status
+            sale_status=sale_status,
+            case_search_status="Pending"
             # case_number_ext=case_ext,
             # court_name=court_name,
             # case_type=case_type,

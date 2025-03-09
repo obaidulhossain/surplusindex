@@ -113,21 +113,30 @@ Checklists
                 <h6>Optional Information</h6>
             </div>
             <div class="subsection-body">
-                <div class="input-item onefourth">
+                <div class="input-item onefifth">
                     <label for="case_ext">Case Extension</label><br>
                     <input type="text" name="case_ext" id="case_ext" placeholder="Case Extension" value="{{ current_fcl_instance.case_number_ext }}">
                 </div>
-                <div class="input-item onefourth">
+                <div class="input-item onefifth">
                     <label for="court_name">Court Name</label><br>
                     <input type="text" name="court_name" id="court_name" placeholder="Court Name" value="{{ current_fcl_instance.court_name }}">
                 </div>
-                <div class="input-item onefourth">
+                <div class="input-item onefifth">
                     <label for="case_type">Case Type</label><br>
                     <input type="text" name="case_type" id="case_type" placeholder="Case Type" value="{{ current_fcl_instance.case_type }}">
                 </div>
-                <div class="input-item onefourth">
+                <div class="input-item onefifth">
                     <label for="case_status">Case Status</label><br>
                     <input type="text" name="case_status" id="case_status" placeholder="Case Status" value="{{ current_fcl_instance.case_status }}"><br>
+                </div>
+                <div class="input-item onefifth">
+                    <label for="case_search_status">Case Search Status</label><br>
+                    <select name="case_search_status" id="case_search_status">
+                        <option value="">Case Search Status</option>
+                        <option value="Pending" {% if current_fcl_instance.case_search_status == "Pending" %}selected{% endif %}>Pending</option>
+                        <option value="Completed" {% if current_fcl_instance.case_search_status == "Completed" %}selected{% endif %}>Completed</option>
+                        <option value="Verified" {% if current_fcl_instance.case_search_status == "Verified" %}selected{% endif %}>Verified</option>
+                    </select>
                 </div>
             </div>
             {% endif %}

@@ -166,9 +166,11 @@ class Foreclosure(OperationStat):
     
     PENDING = 'pending'
     COMPLETED = 'completed'
+    VERIFIED = 'verified'
     CASE_SEARCH_STATUS = (
         (PENDING, 'Pending'),
         (COMPLETED, 'Completed'),
+        (VERIFIED, 'Verified'),
     )
 
     ACTIVE = 'pending'
