@@ -46,5 +46,22 @@ def assign_leads(request):
 
     return redirect('new_leads')
 
+def update_case_search_status(request):
+    status = request.POST.get('status')
+    state = request.POST.get('sel_state')
+    # user = User.objects.get(username=assign_to)
+    if state:
+        leads_to_update = Foreclosure.objects.filter(published=False, state=state)
+        if status:
+            for lead in leads_to_update:
+                lead.case_search_status = status
+                lead.save()
+        else:
+            messages.info(request, 'Please select a status to to update')
+    else:
+            messages.info(request, 'Please select a status to to update')
+
+    return redirect('new_leads')
+
 
 #----------------Data--------------------end

@@ -156,7 +156,7 @@ def EventsCalendar(request):
 
 def ActiveTasks(request):
     current_user=request.user
-    p=Paginator(Foreclosure.objects.filter(case_search_assigned_to=current_user, changed_at__lt=now().date() - timedelta(days=7)) | Foreclosure.objects.filter(case_search_assigned_to=current_user, case_search_status="Pending"), 50)
+    p=Paginator(Foreclosure.objects.filter(case_search_assigned_to=current_user, changed_at__lt=now().date() - timedelta(days=7)) | Foreclosure.objects.filter(case_search_assigned_to=current_user, case_search_status="Pending"), 20)
     states=Foreclosure.objects.values_list("state", flat=True).distinct()
     counties=Foreclosure.objects.values_list("county", flat=True).distinct()
     saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
