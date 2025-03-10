@@ -177,8 +177,24 @@ def ActiveTasks(request):
     return render(request,'da/active_tasks.html',context)
 
 
+def deliveredtasks(request):
+    current_user=request.user
+    p=Paginator(Foreclosure.objects.filter(case_search_assigned_to=current_user, case_search_status = "Completed"), 20)
+    # states=Foreclosure.objects.values_list("state", flat=True).distinct()
+    # counties=Foreclosure.objects.values_list("county", flat=True).distinct()
+    # saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
+    page = request.GET.get('page')
+    deliveredlist = p.get_page(page)
+    current_page = int(deliveredlist.number)
+    second_previous = current_page + 2
+    context = {
+        'deliveredlist':deliveredlist,
+        'current_page':current_page,
+        'second_previous':second_previous,
 
 
+    }
+    return render(request,'da/delivered_tasks.html',context)
 
 #--------------Foreclosure views------------------------
 
