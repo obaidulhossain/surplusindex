@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
 path('events_calendar', views.EventsCalendar, name="events_calendar"),
 path('active_tasks', views.ActiveTasks, name="active_tasks"),
+path('deliveredtasks', views.deliveredtasks, name="deliveredtasks"),
 
 
 

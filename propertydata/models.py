@@ -35,6 +35,9 @@ class Property(OperationStat):
     city = models.CharField(max_length=255, blank=True, verbose_name='City')
     zip_code = models.CharField(max_length=255, blank=True, verbose_name='Zip')
 
+    def __str__(self):
+        return f"{self.house_number} {self.road_name} {self.road_type} {self.direction} {self.apt_unit} {self.extention} | {self.city}, {self.zip_code}"
+    
     class Meta:
         verbose_name = 'Property'
         verbose_name_plural = 'Properties'
@@ -88,6 +91,9 @@ class ForeclosingEntity(models.Model):
     business_name = models.CharField(max_length=255, blank=True)
     dba = models.CharField(max_length=255, blank=True)
 
+    def __str__(self):
+        return f"{self.business_name} | {self.individual_name}"
+
 
 # ------------------------------------------------------------- #
 
@@ -105,7 +111,9 @@ class Contact(OperationStat):
     emails = models.ManyToManyField(Email, related_name='contact_as_email', blank=True, verbose_name='Email Addresses')
     related_contacts = models.ManyToManyField('self', blank=True, symmetrical=True)
     skiptraced = models.BooleanField(default=False)
-
+    
+    def __str__(self):
+        return f"{self.name_prefix} {self.first_name} {self.middle_name} {self.last_name} {self.name_suffix} | {self.designation} : {self.business_name}"
 
     class Meta:
         verbose_name = 'Contact'
