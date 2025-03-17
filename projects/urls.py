@@ -5,8 +5,30 @@ from . import views
 urlpatterns = [
 path('events_calendar', views.EventsCalendar, name="events_calendar"),
 path('active_tasks', views.ActiveTasks, name="active_tasks"),
+path('skiptracing_checklist', views.assign_skp, name="skiptracing_checklist"),
 path('deliveredtasks', views.deliveredtasks, name="deliveredtasks"),
 
+# Urls for Skipptracing Section
+path('skiptrace/', views.skiptrace, name="skiptrace"),
+path('create_update_contact', views.CreateUpdateContact, name="create_update_contact"),
+path('filter-con', views.filter_contact, name="filter-con"),
+path('update_contact', views.update_contact, name="update_contact"),
+path('add_mailing', views.addMailing, name="add_mailing"),
+
+path('update_email', views.update_email, name="update_email"),
+path('search_create_email', views.search_create_email, name="search_create_email"),
+path('filteremail', views.filterEmail, name="filteremail"),
+path('add_email',views.add_email, name="add_email"),
+
+path('update_wireless', views.update_wireless, name="update_wireless"),
+path('create_wireless', views.create_wireless, name="create_wireless"),
+path('filterwireless', views.filterWireless, name="filterwireless"),
+path('add_wireless',views.add_wireless, name="add_wireless"),
+
+path('update_landline', views.updateLandline, name="update_landline"),
+path('create_landline', views.createLandline, name="create_landline"),
+path('filter_landline', views.filterLandline, name="filter_landline"),
+path('add_landline', views.addLandline, name="add_landline"),
 
 
 # Urls for Foreclosure Section

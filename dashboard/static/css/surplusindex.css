@@ -28,52 +28,36 @@ h6 {
 
 input,
 select {
-
-    padding: 5px;
-    margin: 5px;
+    padding: 0px 5px;
+    margin: 2px 0px;
     display: inline-block;
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-    min-width: 200px;
     min-height: 35px;
 }
 
 input[type=submit] {
-    width: 100%;
     background-color: #0b9056;
     color: white;
-    padding: 5px;
-    margin: 5px;
-    border: none;
+    border: 2px solid black;
     border-radius: 4px;
     cursor: pointer;
+    font-weight: bold;
+    padding: 0px 20px;
+    width: -webkit-fill-available;
 }
 
 input[type=submit]:hover {
     background-color: #10be73;
+    transition: ease-in-out 350ms;
 }
 
 input:disabled {
     background-color: #c8c8c8;
 }
 
-table.table tr th,
-table.table tr td {
-    border-color: #e9e9e9;
-    padding: 4px 2px;
-    vertical-align: middle;
-    text-wrap-mode: nowrap;
-}
-
-.input-item {
-    display: inline-block;
-    padding: 5px;
-    margin: 5px;
-
-}
-
-.input-item label {
+label {
     font-weight: bold;
 }
 
@@ -82,11 +66,13 @@ table.table tr td {
 }
 
 .onehalf {
-    min-width: 48%;
+    max-width: 48%;
 }
 
 .onethird {
-    min-width: 32%;
+    max-width: 33%;
+    display: inline-block;
+    vertical-align: top;
 }
 
 .onefourth {
@@ -106,6 +92,20 @@ table.table tr td {
     position: relative;
 }
 
+table.table tr th {
+    border: 1px solid #d3d3d3;
+    padding: 5px 15px;
+    vertical-align: middle;
+    text-wrap-mode: nowrap;
+}
+
+table.table tr td {
+    border: 1px solid #d3d3d3;
+    padding: 0px 2px;
+    vertical-align: middle;
+    text-wrap-mode: nowrap;
+}
+
 .section-header {
     border-radius: 5px 5px 0px 0px;
     background-color: #1db170;
@@ -114,14 +114,14 @@ table.table tr td {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 10px 20px;
+    padding: 5px 15px;
 }
 
 .headerbutton {
     background-color: #55c796;
     color: #0f1105;
     text-decoration: none;
-    padding: 8px 35px;
+    padding: 6px 20px;
     border: 2px solid #0a1103;
     border-radius: 5px;
     font-weight: bold;
@@ -133,11 +133,21 @@ table.table tr td {
     transition: ease-in-out 400ms;
 }
 
+.section-filter-full {
+    background-color: #eeeeee;
+    border: 1px solid #ababab;
+    display: flex;
+    padding: 10px 20px;
+    overflow-x: auto;
+    width: 100%;
+    transition: ease-in-out 500ms;
+}
+
 .section-body-full {
     background-color: #eeeeee;
     border: 1px solid #ababab;
     display: block;
-    padding: 10px 20px;
+    padding: 10px;
     overflow-x: auto;
     width: 100%;
 }
@@ -154,7 +164,21 @@ table.table tr td {
     border: 2px solid #6f6f6f;
 }
 
+.button {
+    padding: 4px 20px;
+    cursor: pointer;
+    background-color: #0b9056;
+    color: #fff;
+    border: 2px solid #464646;
+    border-radius: 6px;
+    transition: ease-in-out 500ms;
+}
 
+.button:hover {
+    transition: 500ms;
+    background-color: #10be73;
+
+}
 
 
 /* new css properties */
@@ -170,21 +194,7 @@ table.table tr td {
 
 
 
-.toogle-button {
-    padding: 5px 20px;
-    cursor: pointer;
-    background-color: #0b9056;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    transition: ease-in-out 500ms;
-}
 
-.toogle-button:hover {
-    transition: 500ms;
-    background-color: #10be73;
-
-}
 
 .filter-body {
     height: auto;

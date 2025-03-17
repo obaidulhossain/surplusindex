@@ -473,16 +473,7 @@ th {
     text-align: -webkit-match-parent
 }
 
-tbody,
-td,
-tfoot,
-th,
-thead,
-tr {
-    border-color: inherit;
-    border-style: solid;
-    border-width: 0
-}
+
 
 label {
     display: inline-block

@@ -20,21 +20,6 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 # Create your views here.
 
 
-# -- subscription view --
-# @login_required(login_url="login")
-# def userSubscription(request):
-#     if request.user.is_authenticated:
-#         return render(request, 'si_user/subscription.html')
-#     else:
-#         messages.error(request, "Must be logged in to update subscription settings!")
-#         return redirect('login')
-
-
-# -- end of subscription view --
-
-# -- Update User --
-
-# -- End of Update User functi on --
 
     
 # ------------------------------------- Login View

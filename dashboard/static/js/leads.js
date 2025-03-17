@@ -6,21 +6,43 @@ $(document).ready(function () {
     //----------------------------------------------------------------------------------------------------
     // -------------------------Select Deselect and Select All Checkboxes---------------------------------
     // -------------------------Select Deselect and Select All Checkboxes---------------------------------
+    // var checkbox = $('table tbody tr:visible input[type="checkbox"]');
+    // $("#selectAll").click(function () {
+    //     if (this.checked) {
+    //         checkbox.each(function () {
+    //             this.checked = true;
+    //         });
+    //     } else {
+    //         checkbox.each(function () {
+    //             this.checked = false;
+    //         });
+    //     }
+    // });
+    // checkbox.click(function () {
+    //     if (!this.checked) {
+    //         $("#selectAll").prop("checked", false);
+    //     }
+    // });
 
 
-    var checkbox = $('table tbody input[type="checkbox"]');
+
+
+
+
+    var visibleCheckboxes = $('table tbody tr:visible input[type="checkbox"]');
     $("#selectAll").click(function () {
+
         if (this.checked) {
-            checkbox.each(function () {
+            visibleCheckboxes.each(function () {
                 this.checked = true;
             });
         } else {
-            checkbox.each(function () {
+            visibleCheckboxes.each(function () {
                 this.checked = false;
             });
         }
     });
-    checkbox.click(function () {
+    visibleCheckboxes.click(function () {
         if (!this.checked) {
             $("#selectAll").prop("checked", false);
         }
@@ -252,7 +274,9 @@ document.addEventListener("DOMContentLoaded", function () {
 // -------------------------Update filters and table-----(end)-----------------------------
 
 // -------------------------toggle filters button-----(start)-----------------------------
-// Reuseable function
+
+
+// Reuseable function (copied to surplusindex.js)
 // -------------------------toggle filters button-----(start)-----------------------------
 
 function toggleFilters(togglebtn, hide_id) {

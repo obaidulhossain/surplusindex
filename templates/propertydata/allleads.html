@@ -92,8 +92,8 @@ Leads
                         <tr>
                             <th>
                                 <span class="custom-checkbox">
-                                    <input type="checkbox" id="selectAll">
-                                    <label for="selectAll"></label>
+                                    <input type="checkbox" id="selectAll" disabled>
+                                    
                                 </span>
                             </th>
                             <th>State</th>
@@ -158,6 +158,7 @@ Leads
             </div>
         </form>
     </div>
+    <a href="{% url 'export_filtered_data' %}" class="btn btn-primary">Export Data</a>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script> -->
     <script src="{% static 'js/nouislider.min.js' %}"></script>
     <script src="{% static 'js/leads.js' %}"></script>

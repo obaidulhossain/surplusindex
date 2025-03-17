@@ -32,7 +32,7 @@ def addProperty(request):
 @allowed_users(allowed_roles=['admin', 'clients'])
 def allLeads(request):
     user = request.user
-    #fcl = Foreclosure.objects.exclude(hidden_for=user).exclude(purchased_by=user)
+
     p=Paginator(Foreclosure.objects.exclude(hidden_for=user).exclude(purchased_by=user), 50)
     states=Foreclosure.objects.values_list("state", flat=True).distinct()
     counties=Foreclosure.objects.values_list("county", flat=True).distinct()

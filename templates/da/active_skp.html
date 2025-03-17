@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-Checklists
+Active SkipTracing
 {% endblock title %}
 
 
@@ -16,12 +16,10 @@ Checklists
     <div class="container">
         <div class="filter-section">
             <div class="filters-header">
-                <h2>Foreclosure Data | Checklist for {{current_user|upper}}</h2>
+                <h2>Skiptracing | Checklist for {{current_user|upper}}</h2>
                 <button id="toggle-filters" class="toogle-button"
                     onclick="toggleFilters(this.id, 'filter-section')">Hide Filters</button>
             </div>
-
-
         </div>
         <form id="add-to-myleads" method="POST">
             {% csrf_token %}
@@ -30,30 +28,25 @@ Checklists
                     <thead>
                         <tr>
                             <th>Action</th>
-                            <th>State</th>
-                            <th>County</th>
-                            <th>Sale Date</th>
-                            <th>Sale Type</th>
-                            <th>Status</th>
-                            <th>Sale Price</th>
-                            <th>Possible Surplus</th>
-                            <th>Verified Surplus</th>
-                            
+                            <th>Mailing Address</th>
+                            <th>Contact Name</th>
+                            <th>Designation</th>
+                            <th>Business Name</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for i in checklist %}
 
                         <tr>
-                            <td><a href="/add_edit_foreclosure/?fcl_id={{ i.id }}">Edit</a></td>
-                            <td class="state">{{i.state}}</td>
-                            <td class="county">{{i.county}}</td>
-                            <td>{{i.sale_date}}</td>
-                            <td class="saletype">{{i.sale_type}}</td>
-                            <td>{{i.sale_status}}</td>
-                            <td class="amount">{{i.sale_price}}</td>
-                            <td class="possible-surplus">{{i.possible_surplus}}</td>
-                            <td class="verified-surplus">{{i.verified_surplus}}</td>
+                            <td><a href="/skiptrace/?con_id={{ i.id }}">Edit</a></td>
+                            <td>
+                                {% for p in i.mailing_address.all %}
+                                {{p.house_number}} {{p.road_name}} {{p.road_type}} {{p.direction}} {{p.apt_unit}} {{p.extention}}, {{p.city}} {{p.state}} {{p.zip_code}}<br>
+                                {% endfor %}
+                            </td>
+                            <td>{{i.name_prefix}} {{i.first_name}} {{i.middle_name}} {{i.last_name}} {{i.name_suffix}}</td>
+                            <td>{{i.designation}}</td>
+                            <td>{{i.business_name}}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

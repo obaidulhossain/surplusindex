@@ -58,7 +58,9 @@ class Email(models.Model):
     class Meta:
         verbose_name = "Email"
         verbose_name_plural = "Emails"
-
+    
+    def __str__(self):
+        return self.email_address
 # ------------------------------------------------------------- #
 
 class Wireless_Number(models.Model):
@@ -71,7 +73,7 @@ class Wireless_Number(models.Model):
         verbose_name_plural = 'Wireless Numbers'
     
     def __str__(self):
-        return self.email_address
+        return self.w_number
 
 # ------------------------------------------------------------- #
 
@@ -83,6 +85,8 @@ class Landline_Number(models.Model):
     class Meta:
         verbose_name = 'Landline Number'
         verbose_name_plural = 'Landline Numbers'
+    def __str__(self):
+        return self.l_number
 
 # ------------------------------------------------------------- #
 
@@ -110,6 +114,7 @@ class Contact(OperationStat):
     landline = models.ManyToManyField(Landline_Number, related_name='contact_as_landline', blank=True, verbose_name='Landline Numbers')
     emails = models.ManyToManyField(Email, related_name='contact_as_email', blank=True, verbose_name='Email Addresses')
     related_contacts = models.ManyToManyField('self', blank=True, symmetrical=True)
+    skp_assignedto = models.ManyToManyField(User, related_name='assign_skp', blank=True, null=True)
     skiptraced = models.BooleanField(default=False)
     
     def __str__(self):
