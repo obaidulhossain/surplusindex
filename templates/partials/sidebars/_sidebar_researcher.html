@@ -27,7 +27,13 @@
     <li class="sidebar-item">
         <a href="{% url 'active_tasks' %}" class="sidebar-link">
             <i class="lni lni-pen-to-square"></i>
-            <span>Active Tasks</span>
+            <span>Active Case Search</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
+        <a href="{% url 'skiptracing_checklist' %}" class="sidebar-link">
+            <i class="lni lni-target-user"></i>
+            <span>Active Skiptracing</span>
         </a>
     </li>
     <li class="sidebar-item">
@@ -36,6 +42,11 @@
             <span>Foreclosure Manager</span>
         </a>
     </li>
+    <li class="sidebar-item">
+        <a href="{% url 'skiptrace' %}" class="sidebar-link">
+            <i class="lni lni-refresh-user-1"></i>
+            <span>Contact Manager</span>
+        <
     <li class="sidebar-item">
         <a href="{% url 'deliveredtasks' %}" class="sidebar-link">
             <i class="lni lni-check-square-2"></i>
