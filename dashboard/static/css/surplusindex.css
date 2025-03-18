@@ -65,25 +65,29 @@ label {
 
 .full {
     min-width: 99%;
+    max-width: 99%;
 }
 
 .onehalf {
-    max-width: 48%;
+    width: 48%;
+    display: inline-block;
+    vertical-align: top;
 }
 
 .onethird {
-    max-width: 33%;
+    width: 33%;
     display: inline-block;
     vertical-align: top;
 }
 
 .onefourth {
     width: 24%;
+    display: inline-block;
+    vertical-align: top;
 }
 
 .onefifth {
-    min-width: 19%;
-    max-width: 19%;
+    width: 19%;
     display: inline-block;
     vertical-align: top;
 }
