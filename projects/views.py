@@ -1,19 +1,13 @@
-from django.template import loader
-from django.shortcuts import redirect, render, get_object_or_404, HttpResponseRedirect, HttpResponse
+from django.shortcuts import redirect, render, get_object_or_404, HttpResponseRedirect
 
 from django.utils.timezone import now
 from django.core.paginator import Paginator
 from django.http import JsonResponse
 
-from django.views.decorators.csrf import csrf_exempt
-from django.urls import reverse
-
-
 from django.contrib import messages
 from datetime import timedelta
 
 # -----------Forms------------------
-from django.forms import modelformset_factory
 from .forms import *
 from propertydata.forms import *
 # -----------Models------------------
@@ -34,7 +28,6 @@ def EventsCalendar(request):
     filter_option = request.GET.get('filter', 'all')
     state_selected = request.GET.get('states', 'All')
     selected_sale_types = request.GET.getlist('sale_type')
-
 
     option1 = ""
     option2 = ""
@@ -119,17 +112,11 @@ def EventsCalendar(request):
                 events_queryset = foreclosure_Events.objects.filter(state=state_selected, assigned_to=current_user)
                 option1="selected"
                 option4=state_selected
-
-
-
-
     
     # Paginate the results
     p = Paginator(events_queryset, 15)
     page = request.GET.get('page')
     events = p.get_page(page)
-
-
     current_page = int(events.number)
     second_previous = current_page + 2
 
@@ -137,7 +124,7 @@ def EventsCalendar(request):
         'events':events,
         'all_states':all_states,
         'second_previous':second_previous,
-        'filter_option':filter_option, # Pass the current filter option to the template
+        'filter_option':filter_option,
         'option1':option1,
         'option2':option2,
         'option3':option3,
@@ -146,7 +133,7 @@ def EventsCalendar(request):
         'saletypetax':saletypetax,
         'saletypemtg':saletypemtg,
         'saletypeoth':saletypeoth,
-        'current_user':current_user
+        'current_user':current_user,
     }
     return render(request, 'da/events_calendar.html', context)
 
@@ -160,7 +147,6 @@ def ActiveTasks(request):
     checklist = p.get_page(page)
     current_page = int(checklist.number)
     second_previous = current_page + 2
-    
 
     context = {
         'current_user':current_user,
@@ -193,7 +179,6 @@ def skiptrace(request):
         all_wireless = None
         all_landline = None
 
-    
     context = {
         'all_contact':all_contact,
         'contact_selected':contact_selected,
@@ -351,12 +336,6 @@ def fetch_mailing_address(request):
     messages.info(request, 'Successfully Fetched All Mailing Addresses')
     return HttpResponseRedirect(f"/skiptrace/?con_id={contact_instance.pk}#mailing_address")
 
-    
-    
-    
-    
-    pass
-
 def addMailing(request):
     if request.method == 'POST':
         update = request.POST.get('con_id')
@@ -366,12 +345,10 @@ def addMailing(request):
         coninstance.mailing_address.add(propinstance)
         messages.success(request,'Mailing Address successfully added to current contact')
 
-    #return HttpResponseRedirect(f"/foreclosures/?g_caseid={selected}")
     return HttpResponseRedirect(f"/skiptrace/?con_id={update}")
 #Mailing Address Section -----------------------------------------------------------------------End
 
 def CreateUpdateContact(request):
-    current_user = request.user        #.groups.filter(name="researcher").exists()
     contact_selected = request.POST.get('con_id','')
     prefix = request.POST.get('prefix','')
     f_name = request.POST.get('f_name','')
@@ -408,7 +385,6 @@ def CreateUpdateContact(request):
         messages.success(request, 'New Contact Instance Created!!')
     contact_selected = contact_instance.pk
 
-    # return redirect('add_edit_fcl')
     return HttpResponseRedirect(f"/skiptrace/?con_id={contact_selected}")
 
 def filter_contact(request):
@@ -419,8 +395,6 @@ def filter_contact(request):
         suffix = request.GET.get('suffix','')
         business = request.GET.get('business','')
         
-#stop here if needed 
-        # Query the database using Q objects
         contact = Contact.objects.all()
         if prefix:
             contact = contact.filter(name_prefix__icontains=prefix)
@@ -449,8 +423,7 @@ def filter_contact(request):
                 'business_name': con.business_name,
                 'mailing_addresses': mailing_addresses,
             })
-        # Return results as JSON
-        #results = list(contact.values('id', 'name_prefix', 'first_name', 'middle_name', 'last_name', 'name_suffix', 'business_name'))
+        
         return JsonResponse({'contact': results})
 
 def update_contact(request):
@@ -486,7 +459,7 @@ def update_contact(request):
 
     return HttpResponseRedirect(f"/skiptrace/?con_id={contact}")
 
-def assign_skp(request):
+def skiptracing_checklist(request):
     current_user=request.user
     p=Paginator(Contact.objects.filter(skp_assignedto=current_user, skiptraced=False), 20)
     states=Foreclosure.objects.values_list("state", flat=True).distinct()
@@ -496,7 +469,6 @@ def assign_skp(request):
     checklist = p.get_page(page)
     current_page = int(checklist.number)
     second_previous = current_page + 2
-    
 
     context = {
         'current_user':current_user,
@@ -511,9 +483,7 @@ def assign_skp(request):
 def deliveredtasks(request):
     current_user=request.user
     p=Paginator(Foreclosure.objects.filter(case_search_assigned_to=current_user, case_search_status = "Completed"), 20)
-    # states=Foreclosure.objects.values_list("state", flat=True).distinct()
-    # counties=Foreclosure.objects.values_list("county", flat=True).distinct()
-    # saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
+
     page = request.GET.get('page')
     deliveredlist = p.get_page(page)
     current_page = int(deliveredlist.number)
@@ -522,7 +492,6 @@ def deliveredtasks(request):
         'deliveredlist':deliveredlist,
         'current_page':current_page,
         'second_previous':second_previous,
-
 
     }
     return render(request,'da/delivered_tasks.html',context)
@@ -548,7 +517,6 @@ def fclview(request):
         all_plt = None
         all_def = None    
 
-    
     context = {
         'all_foreclosure':all_foreclosure,
         'selected_foreclosure':selected_foreclosure,
@@ -566,9 +534,7 @@ def filter_foreclosure(request):
     case_num = request.GET.get('case_num','')
     sale_type = request.GET.get('sale_type','')
     sale_status = request.GET.get('sale_status','')
-    
 
-    # Query the database using Q objects
     foreclosure = Foreclosure.objects.all()
     if state:
         foreclosure = foreclosure.filter(state__icontains=state)
@@ -581,12 +547,11 @@ def filter_foreclosure(request):
     if sale_status:
         foreclosure = foreclosure.filter(sale_status__icontains=sale_status)
 
-    # Return results as JSON
     results = list(foreclosure.values('id', 'state', 'county', 'case_number', 'sale_date', 'sale_type', 'sale_status'))
     return JsonResponse({'foreclosure': results})
 
 def update_foreclosure(request):
-    current_user = request.user        #.groups.filter(name="researcher").exists()
+    current_user = request.user
     sel_fcl = request.POST.get('caseid','')
     
     case = request.POST.get('case_num','')
@@ -607,7 +572,6 @@ def update_foreclosure(request):
     case_type = request.POST.get('case_type','')
     case_status = request.POST.get('case_status','')
     case_search_status = request.POST.get('case_search_status','')
-    
     
     if sel_fcl:
         fcl_instance = Foreclosure.objects.get(pk=sel_fcl)
@@ -638,6 +602,7 @@ def update_foreclosure(request):
             fcl_instance.case_search_status = "Completed"
         else:
             fcl_instance.case_search_status = case_search_status
+        fcl_instance.update_possible_surplus()
     
     else:
         fcl_instance = Foreclosure(
@@ -647,17 +612,6 @@ def update_foreclosure(request):
             sale_type=sale_type,
             sale_status=sale_status,
             case_search_status="Pending"
-            # case_number_ext=case_ext,
-            # court_name=court_name,
-            # case_type=case_type,
-            # case_status=case_status,
-            # sale_date=sale_date,
-
-            # fcl_final_judgment=judgment,
-            # sale_price=saleprice,
-            # possible_surplus=possible_sf,
-            # verified_surplus=verified_sf,
-            # surplus_status=surplus_status,
             )
         
     fcl_instance.save()
@@ -667,7 +621,6 @@ def update_foreclosure(request):
         messages.success(request, 'New Foreclosure Instance Created!!')
     sel_fcl = fcl_instance.pk
 
-    # return redirect('add_edit_fcl')
     return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={sel_fcl}")
 
 #---------------foreclosureview-----------------end
@@ -693,8 +646,6 @@ def defendant_search(request):
     business = request.GET.get('business', '')
     designation = request.GET.get('designation', '')
     
-    
-    # Query the database using Q objects
     defendant = Contact.objects.all()
     if prefix:
         defendant = defendant.filter(name_prefix__icontains=prefix)
@@ -710,8 +661,7 @@ def defendant_search(request):
         defendant = defendant.filter(business_name__icontains=business)
     if designation:
         defendant = defendant.filter(designation__icontains=designation)
-    
-    # Return results as JSON
+
     defresults = list(defendant.values('id', 'name_prefix', 'first_name', 'middle_name', 'last_name', 'name_suffix', 'business_name', 'designation'))
     return JsonResponse({'defendant': defresults})
 
@@ -748,9 +698,6 @@ def update_defendant(request):
         business = request.POST.get('u_business_name')
         designation = request.POST.get('u_designation')
 
-
-
-
         def_instance = get_object_or_404(Contact,pk=defendant)
         def_instance.name_prefix = prefix
         def_instance.first_name = first
@@ -785,7 +732,6 @@ def create_update_plaintiff(request):
 def update_plaintiff(request):
     if request.method == 'POST':
         foreclosure = request.POST.get('caseid')
-        # property = request.POST.get('propertyid')
         plaintiff = request.POST.get('plt-id')
         contact_nm = request.POST.get('u_contact')
         business_nm = request.POST.get('u_business')
@@ -800,7 +746,6 @@ def update_plaintiff(request):
 def add_plaintiff(request):
     if request.method == 'POST':
         foreclosure = request.POST.get('caseid')
-        # property = request.POST.get('propertyid')
         plaintiff = request.POST.get('pltid')
         plt_instance = get_object_or_404(ForeclosingEntity, pk=plaintiff)
         fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
@@ -813,7 +758,6 @@ def plaintiff_search(request):
     dba = request.GET.get('dba', '')
     contact = request.GET.get('contact_name', '')
     
-    # Query the database using Q objects
     plaintiff = ForeclosingEntity.objects.all()
     if business:
         plaintiff = plaintiff.filter(business_name__icontains=business)
@@ -822,7 +766,6 @@ def plaintiff_search(request):
     if contact:
         plaintiff = plaintiff.filter(individual_name__icontains=contact)
     
-    # Return results as JSON
     pltresults = list(plaintiff.values('id','business_name', 'dba','individual_name'))
     return JsonResponse({'plaintiff': pltresults})
 #--------------Plaintiff Section----------------End
@@ -891,7 +834,7 @@ def update_property(request):
     return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#prop")
 
 def address_search(request):
-# Fetch search parameters from GET request
+
     parcel = request.GET.get('parcel', '')
     state = request.GET.get('state', '')
     county = request.GET.get('county', '')
@@ -899,7 +842,6 @@ def address_search(request):
     street = request.GET.get('street', '')
     sttype = request.GET.get('sttype', '')
 
-    # Query the database using Q objects
     address = Property.objects.all()
     if parcel:
         address = address.filter(parcel__icontains=parcel)
@@ -914,7 +856,6 @@ def address_search(request):
     if sttype:
         address = address.filter(road_type__icontains=sttype)
 
-    # Return results as JSON
     results = list(address.values('id', 'state','county','parcel', 'house_number', 'road_name', 'road_type','direction','apt_unit','extention','city','zip_code'))
     return JsonResponse({'address': results})
 
@@ -927,6 +868,5 @@ def fcl_add_property(request):
         fclinstance.property.add(propinstance)
         messages.success(request,'Property successfully added to current foreclosure')
 
-    #return HttpResponseRedirect(f"/foreclosures/?g_caseid={selected}")
     return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={update}#prop")
 #------------------property-------------End

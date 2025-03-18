@@ -221,7 +221,17 @@ class Foreclosure(OperationStat):
     case_search_assigned_to = models.ForeignKey(User,related_name='case_assigned_to',blank=True, null=True, on_delete=models.CASCADE)
     case_search_status = models.CharField(max_length=100, choices=CASE_SEARCH_STATUS, blank=True)
     published = models.BooleanField(default=False)
-    
+    def update_possible_surplus(self):
+        try:
+            sale_price = float(self.sale_price)
+            fcl_final_judgment = float(self.fcl_final_judgment)
+            self.possible_surplus = sale_price - fcl_final_judgment
+        except (ValueError, TypeError) as e:
+            # Handle the error, log it, or set a default value
+            self.possible_surplus = None
+            print(f"Error calculating possible_surplus: {e}")
+            self.save()
+
     class Meta:
         verbose_name = 'Foreclosure'
         verbose_name_plural = 'Foreclosures'

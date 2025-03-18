@@ -5,7 +5,7 @@ from . import views
 urlpatterns = [
 path('events_calendar', views.EventsCalendar, name="events_calendar"),
 path('active_tasks', views.ActiveTasks, name="active_tasks"),
-path('skiptracing_checklist', views.assign_skp, name="skiptracing_checklist"),
+path('skiptracing_checklist', views.skiptracing_checklist, name="skiptracing_checklist"),
 path('deliveredtasks', views.deliveredtasks, name="deliveredtasks"),
 
 # Urls for Skipptracing Section
