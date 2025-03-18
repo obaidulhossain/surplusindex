@@ -30,21 +30,17 @@ Skiptracing
     <div class="section-body-full">
         <form method="post" action="{% url 'create_update_contact' %}">
             {% csrf_token %}
-            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-            
-                <label>Contact Name</label><br>
-                <input type="text" name="prefix" id="prefix" placeholder="Prefix" value="{{current_con_instance.name_prefix}}">
-                <input type="text" name="f_name" id="f_name" placeholder="First Name" value="{{current_con_instance.first_name}}">
-                <input type="text" name="m_name" id="m_name" placeholder="Middle Name" value="{{current_con_instance.middle_name}}">
-                <input type="text" name="l_name" id="l_name" placeholder="Last Name" value="{{current_con_instance.last_name}}">
-                <input type="text" name="suffix" id="suffix" placeholder="Suffix" value="{{current_con_instance.suffix}}"></br>
-                <label>Business Name</label><br>
-                <input type="text" name="b_name" id="b_name" placeholder="Business Name" value="{{current_con_instance.business_name}}">
-                <input type="text" name="designation" id="designation" placeholder="Designation" value="{{current_con_instance.designation}}">              
-                <input type="submit" value="{% if contact_selected == "" %}Create Contact Instance{% else %}Update Contact{% endif %}">
-            <div class="input-item">
-            </div>
-            
+            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">       
+            <label>Contact Name</label><br>
+            <input type="text" name="prefix" id="prefix" placeholder="Prefix" value="{{current_con_instance.name_prefix}}">
+            <input type="text" name="f_name" id="f_name" placeholder="First Name" value="{{current_con_instance.first_name}}">
+            <input type="text" name="m_name" id="m_name" placeholder="Middle Name" value="{{current_con_instance.middle_name}}">
+            <input type="text" name="l_name" id="l_name" placeholder="Last Name" value="{{current_con_instance.last_name}}">
+            <input type="text" name="suffix" id="suffix" placeholder="Suffix" value="{{current_con_instance.suffix}}"></br>
+            <label>Business Name</label><br>
+            <input type="text" style="width:600px;" name="b_name" id="b_name" placeholder="Business Name" value="{{current_con_instance.business_name}}">
+            <input type="text" name="designation" id="designation" placeholder="Designation" value="{{current_con_instance.designation}}">              
+            <input type="submit" style="margin-top:20px;" value="{% if contact_selected == "" %}Create Contact Instance{% else %}Update Contact{% endif %}">
         </form>
     </div>
     <div class="section-body-full">

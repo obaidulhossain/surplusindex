@@ -46,7 +46,9 @@ input[type=submit] {
     font-weight: bold;
     padding: 0px 20px;
     width: -webkit-fill-available;
+
 }
+
 
 input[type=submit]:hover {
     background-color: #10be73;
@@ -80,17 +82,26 @@ label {
 }
 
 .onefifth {
-    min-width: 18%;
+    min-width: 19%;
+    max-width: 19%;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.onesixth input,
+.onesixth select,
+.onefifth input,
+.onefifth select {
+    width: -webkit-fill-available;
 }
 
 .onesixth {
     min-width: 15%;
+    max-width: 15%;
+    display: inline-block;
+    vertical-align: top;
 }
 
-
-.body-section {
-    position: relative;
-}
 
 table.table tr th {
     border: 1px solid #d3d3d3;
@@ -104,6 +115,11 @@ table.table tr td {
     padding: 0px 2px;
     vertical-align: middle;
     text-wrap-mode: nowrap;
+}
+
+.body-section {
+    text-align-last: center;
+    position: relative;
 }
 
 .section-header {
@@ -150,6 +166,7 @@ table.table tr td {
     padding: 10px;
     overflow-x: auto;
     width: 100%;
+    text-align: center;
 }
 
 .subsection-header {
@@ -162,6 +179,7 @@ table.table tr td {
 .subsection-body {
     background-color: #e0e0e0;
     border: 2px solid #6f6f6f;
+    padding: 20px 5px;
 }
 
 .button {
