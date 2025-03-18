@@ -14,6 +14,7 @@ path('create_update_contact', views.CreateUpdateContact, name="create_update_con
 path('filter-con', views.filter_contact, name="filter-con"),
 path('update_contact', views.update_contact, name="update_contact"),
 path('add_mailing', views.addMailing, name="add_mailing"),
+path('fetch_mailing_address', views.fetch_mailing_address, name="fetch_mailing_address"),
 
 path('update_email', views.update_email, name="update_email"),
 path('search_create_email', views.search_create_email, name="search_create_email"),

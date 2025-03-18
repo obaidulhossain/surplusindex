@@ -122,8 +122,12 @@ Skiptracing
 
 <!--Mailing Address Section               Start -->
 <div style="margin-top: 20px;" class="body-section">
-    <div class="section-header">
+    <div id="mailing_address" class="section-header">
         <h4>Mailing Addresses</h4>
+        <form method="post" action="{% url 'fetch_mailing_address' %}">
+        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+        <td><input type="submit" value="Fetch Mailing Address"></td>
+        <form>
     </div>
 
     <div class="section-body-full">
@@ -265,7 +269,7 @@ Skiptracing
 <!--Email section-start-->
 
     <div style="margin-top:20px;" class="body-section onethird">
-        <div class="section-header">
+        <div id="em" class="section-header">
             <h4>Emails</h4>
         </div>
         <div class="section-body-full">
@@ -355,7 +359,7 @@ Skiptracing
     <!--Wireless section-start-->
 
     <div style="margin-top:20px;" class="body-section onethird">
-        <div class="section-header">
+        <div id="wn" class="section-header">
             <h4>Wireless Numbers</h4>   
         </div>
         <div class="section-body-full">
@@ -447,7 +451,7 @@ Skiptracing
 
     <!--Landline section-start-->
     <div style="margin-top:20px;" class="body-section onethird">
-        <div class="section-header">
+        <div id="ln" class="section-header">
             <h4>Landline Numbers</h4>   
         </div>
         <div class="section-body-full">

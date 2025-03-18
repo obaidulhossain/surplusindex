@@ -14,7 +14,7 @@ Checklists
 
 <!--Foreclosure Section               End -->
 <div style="margin-top: 20px;" class="body-section">
-    <div class="section-header">
+    <div id="fcl" class="section-header">
         {% if selected_foreclosure == "" %}
         <h4 name="updatefcl">Create Foreclosure</h4>
         {% else %}
@@ -224,7 +224,7 @@ Checklists
 
 <!--Property Section               Start -->
 <div style="margin-top: 20px;" class="body-section">
-    <div class="section-header">
+    <div id="prop" class="section-header">
         <h4>Properties</h4>
     </div>
 
@@ -272,7 +272,7 @@ Checklists
                     <form id="search-form" method="post" action="{% url 'search_create_property' %}">
                         {% csrf_token %}
                         <input type="hidden" name="caseid" value="{{ current_fcl_instance.pk }}">
-                        <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="icounty" placeholder="County" name="county"></td>
+                        <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="icounty" placeholder="County" name="county" value="{% if current_fcl_instance %}{{current_fcl_instance.county}}{% endif %}"></td>
                         <td><input style="width: 170px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="iparcel" placeholder="Parcel" name="parcel"></td>
                         <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="ihouse" placeholder="House" name="house"></td>
                         <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="istreet" placeholder="Street" name="road"></td>
@@ -281,7 +281,7 @@ Checklists
                         <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="iapt" placeholder="A/B/U" name="apt"></td>
                         <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="iext" placeholder="Ext" name="ext"></td>
                         <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="icity" placeholder="City" name="city"></td>
-                        <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="istate" placeholder="State" name="state"></td>                      
+                        <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="istate" placeholder="State" name="state" value="{% if current_fcl_instance %}{{current_fcl_instance.state}}{% endif %}"></td>                      
                         <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="izip" placeholder="Zip" name="zip"></td>
                         <td><input type="submit" style="border: 2px solid #08c88e;" Value="Create"></td>
                     </form>
@@ -367,7 +367,7 @@ Checklists
 <!--plaintiff section-start-->
 
 <div style="margin-top: 20px;" class="body-section">
-    <div class="section-header">
+    <div id="plt" class="section-header">
         <h4>Plaintiffs</h4>   
     </div>
     <div class="section-body-full">
@@ -474,7 +474,7 @@ Checklists
 <!--defendants section-start-->
 
 <div style="margin-top: 20px;" class="body-section">
-    <div class="section-header">
+    <div id="def" class="section-header">
         <h4>Defendants</h4>   
     </div>
     <div class="section-body-full">

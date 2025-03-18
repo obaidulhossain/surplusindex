@@ -6,14 +6,12 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 
 from django.views.decorators.csrf import csrf_exempt
-import json
-from django.http import HttpResponse
 from django.urls import reverse
-from tablib import Dataset
-import pandas as pd
+
+
 from django.contrib import messages
 from datetime import timedelta
-from itertools import chain
+
 # -----------Forms------------------
 from django.forms import modelformset_factory
 from .forms import *
@@ -24,7 +22,7 @@ from realestate_directory.models import *
 from propertydata.models import *
 # -----------Resources---------------
 from .resources import *
-from django.db.models import Q
+
 imported_data_cache = None
 
 # Create your views here.
@@ -152,8 +150,6 @@ def EventsCalendar(request):
     }
     return render(request, 'da/events_calendar.html', context)
 
-
-
 def ActiveTasks(request):
     current_user=request.user
     p=Paginator(Foreclosure.objects.filter(case_search_assigned_to=current_user, changed_at__lt=now().date() - timedelta(days=7)) | Foreclosure.objects.filter(case_search_assigned_to=current_user, case_search_status="Pending"), 20)
@@ -210,6 +206,7 @@ def skiptrace(request):
     }
     return render(request,'projects/skiptrace.html', context)
 
+#Email Section -----------------------------------------------------------------------Start
 def update_email(request):
     if request.method == 'POST':
         contact = request.POST.get('con_id','')
@@ -219,7 +216,7 @@ def update_email(request):
             emailinstance.email_address = request.POST.get('email')
             emailinstance.save()
             messages.info(request, "Email Saved!")
-    return HttpResponseRedirect(f"/skiptrace/?con_id={contact}")
+    return HttpResponseRedirect(f"/skiptrace/?con_id={contact}#em")
 
 def search_create_email(request):
     if request.method == 'POST':
@@ -232,7 +229,7 @@ def search_create_email(request):
             contactinstance = Contact.objects.get(pk=selected_contact)
             contactinstance.emails.add(createEmail)
             messages.info(request, 'Email added to current contact instance')
-    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}")
+    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}#em")
 
 def filterEmail(request):
     emailaddress = request.GET.get('email')
@@ -241,6 +238,7 @@ def filterEmail(request):
         emails = emails.filter(email_address__icontains=emailaddress)
     results = list(emails.values('id', 'email_address'))
     return JsonResponse({'emails':results})
+
 def add_email(request):
     selected_contact = request.POST.get('con_id')
     emailid = request.POST.get('email_id')
@@ -249,10 +247,10 @@ def add_email(request):
         emailinstance = Email.objects.get(pk=emailid)
         contactinstance.emails.add(emailinstance)
         messages.info(request,'Email added to contact')
-    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}")
+    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}#em")
 #Email Section -----------------------------------------------------------------------End
-#Wireless Section -----------------------------------------------------------------------Start
 
+#Wireless Section -----------------------------------------------------------------------Start
 def update_wireless(request):
     if request.method == 'POST':
         contact = request.POST.get('con_id','')
@@ -262,7 +260,8 @@ def update_wireless(request):
             w_instance.w_number = request.POST.get('wireless')
             w_instance.save()
             messages.info(request, "Number Updated!")
-    return HttpResponseRedirect(f"/skiptrace/?con_id={contact}")
+    return HttpResponseRedirect(f"/skiptrace/?con_id={contact}#wn")
+
 def create_wireless(request):
     if request.method == 'POST':
         selected_contact = request.POST.get('con_id')
@@ -274,7 +273,7 @@ def create_wireless(request):
             contactinstance = Contact.objects.get(pk=selected_contact)
             contactinstance.wireless.add(createwireless)
             messages.info(request, 'Wireless Number added to current contact instance')
-    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}")
+    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}#wn")
 
 def filterWireless(request):
     w_number = request.GET.get('wireless')
@@ -292,10 +291,10 @@ def add_wireless(request):
         w_instance = Wireless_Number.objects.get(pk=w_id)
         contactinstance.wireless.add(w_instance)
         messages.info(request,'Wireless number added to contact')
-    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}")
+    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}#wn")
 #Wireless Section -----------------------------------------------------------------------End
-#landline Section -----------------------------------------------------------------------Start
 
+#landline Section -----------------------------------------------------------------------Start
 def updateLandline(request):
     if request.method == 'POST':
         contact = request.POST.get('con_id','')
@@ -305,7 +304,8 @@ def updateLandline(request):
             l_instance.l_number = request.POST.get('landline')
             l_instance.save()
             messages.info(request, "Landline Number Updated!")
-    return HttpResponseRedirect(f"/skiptrace/?con_id={contact}")
+    return HttpResponseRedirect(f"/skiptrace/?con_id={contact}#ln")
+
 def createLandline(request):
     if request.method == 'POST':
         selected_contact = request.POST.get('con_id')
@@ -317,7 +317,8 @@ def createLandline(request):
             contactinstance = Contact.objects.get(pk=selected_contact)
             contactinstance.landline.add(createlandline)
             messages.info(request, 'Landline Number added to current contact instance')
-    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}")
+    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}#ln")
+
 def filterLandline(request):
     l_number = request.GET.get('landline')
     landline = Landline_Number.objects.all()
@@ -325,6 +326,7 @@ def filterLandline(request):
         landline = landline.filter(l_number__icontains=l_number)
     results = list(landline.values('id', 'l_number'))
     return JsonResponse({'landline':results})
+
 def addLandline(request):
     selected_contact = request.POST.get('con_id')
     l_id = request.POST.get('landline-id')
@@ -333,9 +335,27 @@ def addLandline(request):
         l_instance = Landline_Number.objects.get(pk=l_id)
         contactinstance.landline.add(l_instance)
         messages.info(request,'Landline number added to contact')
-    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}")
-
+    return HttpResponseRedirect(f"/skiptrace/?con_id={contactinstance.pk}#ln")
 #landline Section -----------------------------------------------------------------------End
+
+#Mailing Address Section -----------------------------------------------------------------------Start
+def fetch_mailing_address(request):
+    selected_contact = request.POST.get('con_id')
+    contact_instance = Contact.objects.get(pk=selected_contact)
+    foreclosures = Foreclosure.objects.filter(defendant=contact_instance)
+    for fcl in foreclosures:
+        properties = fcl.property.all()
+        for prop in properties:
+            property_instance = Property.objects.get(pk=prop.pk)
+            contact_instance.mailing_address.add(property_instance)
+    messages.info(request, 'Successfully Fetched All Mailing Addresses')
+    return HttpResponseRedirect(f"/skiptrace/?con_id={contact_instance.pk}#mailing_address")
+
+    
+    
+    
+    
+    pass
 
 def addMailing(request):
     if request.method == 'POST':
@@ -348,6 +368,7 @@ def addMailing(request):
 
     #return HttpResponseRedirect(f"/foreclosures/?g_caseid={selected}")
     return HttpResponseRedirect(f"/skiptrace/?con_id={update}")
+#Mailing Address Section -----------------------------------------------------------------------End
 
 def CreateUpdateContact(request):
     current_user = request.user        #.groups.filter(name="researcher").exists()
@@ -390,7 +411,6 @@ def CreateUpdateContact(request):
     # return redirect('add_edit_fcl')
     return HttpResponseRedirect(f"/skiptrace/?con_id={contact_selected}")
 
-from django.db.models import Prefetch
 def filter_contact(request):
         prefix = request.GET.get('prefix','')
         firstname = request.GET.get('f_name','')
@@ -432,6 +452,7 @@ def filter_contact(request):
         # Return results as JSON
         #results = list(contact.values('id', 'name_prefix', 'first_name', 'middle_name', 'last_name', 'name_suffix', 'business_name'))
         return JsonResponse({'contact': results})
+
 def update_contact(request):
     if request.method == 'POST':
         contact = request.POST.get('con_id')
@@ -486,7 +507,6 @@ def assign_skp(request):
         'second_previous':second_previous
         }
     return render(request,'da/active_skp.html',context)
-
 
 def deliveredtasks(request):
     current_user=request.user
@@ -564,10 +584,6 @@ def filter_foreclosure(request):
     # Return results as JSON
     results = list(foreclosure.values('id', 'state', 'county', 'case_number', 'sale_date', 'sale_type', 'sale_status'))
     return JsonResponse({'foreclosure': results})
-
-
-    
-
 
 def update_foreclosure(request):
     current_user = request.user        #.groups.filter(name="researcher").exists()
@@ -654,11 +670,9 @@ def update_foreclosure(request):
     # return redirect('add_edit_fcl')
     return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={sel_fcl}")
 
-#---------------foreclosureview---------end---------------
+#---------------foreclosureview-----------------end
 
-
-#--------------defendant Section----------------Start----------
-
+#--------------defendant Section----------------Start
 def add_defendant(request):
    if request.method == 'POST':
         foreclosure = request.POST.get('caseid')
@@ -667,8 +681,7 @@ def add_defendant(request):
         fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
         fcl_instance.defendant.add(def_instance)
         messages.success(request, "Defendant Added to Foreclosure Instance!")
-        return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
-
+        return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#def")
 
 def defendant_search(request):
 
@@ -702,7 +715,6 @@ def defendant_search(request):
     defresults = list(defendant.values('id', 'name_prefix', 'first_name', 'middle_name', 'last_name', 'name_suffix', 'business_name', 'designation'))
     return JsonResponse({'defendant': defresults})
 
-
 def search_create_defendant(request):
     if request.method == 'POST':
 
@@ -722,7 +734,7 @@ def search_create_defendant(request):
             fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
             fcl_instance.defendant.add(add_defendant)
             messages.info(request, 'Defendant Added to Current Foreclosure Instance')
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#def")
 
 def update_defendant(request):
     if request.method == 'POST':
@@ -749,12 +761,10 @@ def update_defendant(request):
         def_instance.designation = designation
         def_instance.save()
         messages.success(request, "Defendant Updated Successfully!")
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#def")
+#--------------defendant Section----------------end
 
-#--------------defendant Section----------------end----------
-#--------------Plaintiff Section----------------Start----------
-
-
+#--------------Plaintiff Section----------------Start
 def create_update_plaintiff(request):
     if request.method == 'POST':
 
@@ -770,8 +780,7 @@ def create_update_plaintiff(request):
             fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
             fcl_instance.plaintiff.add(add_plaintiff)
             messages.info(request, 'Foreclosing Entity Added to Current Foreclosure Instance')
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
-
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#plt")
 
 def update_plaintiff(request):
     if request.method == 'POST':
@@ -786,7 +795,7 @@ def update_plaintiff(request):
         plt_instance.business_name = business_nm
         plt_instance.dba = dba
         plt_instance.save()
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#plt")
 
 def add_plaintiff(request):
     if request.method == 'POST':
@@ -797,7 +806,7 @@ def add_plaintiff(request):
         fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
         fcl_instance.plaintiff.add(plt_instance)
         messages.success(request, "Plaintiff Added to Foreclosure Instance")
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#plt")
 
 def plaintiff_search(request):
     business = request.GET.get('business_name', '')
@@ -816,13 +825,9 @@ def plaintiff_search(request):
     # Return results as JSON
     pltresults = list(plaintiff.values('id','business_name', 'dba','individual_name'))
     return JsonResponse({'plaintiff': pltresults})
+#--------------Plaintiff Section----------------End
 
-
-#--------------Plaintiff Section----------------End----------
-
-       
-
-#------------------property-------------start
+#------------------property-------------Start
 def search_create_property(request):
     if request.method == 'POST':
         foreclosure = request.POST.get('caseid')
@@ -845,13 +850,12 @@ def search_create_property(request):
         foreclosure = Foreclosure.objects.get(pk=foreclosure)
         foreclosure.property.add(add_property)
         messages.info(request, 'Property Added to Current Foreclosure Instance')
-        return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure.pk}")
+        return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure.pk}#prop")
     elif contact:
         contact = Contact.objects.get(pk=contact)
         contact.mailing_address.add(add_property)
         messages.info(request, 'Contact Added to Current Foreclosure Instance')
         return HttpResponseRedirect(f"/skiptrace/?con_id={contact.pk}")
-
 
 def update_property(request):
     if request.method == 'POST':
@@ -884,7 +888,7 @@ def update_property(request):
             property_instance.save()
             messages.success(request, 'Property Record Saved')
 
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}")
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#prop")
 
 def address_search(request):
 # Fetch search parameters from GET request
@@ -924,7 +928,5 @@ def fcl_add_property(request):
         messages.success(request,'Property successfully added to current foreclosure')
 
     #return HttpResponseRedirect(f"/foreclosures/?g_caseid={selected}")
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={update}")
-
-
-#------------------property-------------start
+    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={update}#prop")
+#------------------property-------------End
