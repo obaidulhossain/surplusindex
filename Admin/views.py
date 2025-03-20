@@ -83,3 +83,29 @@ def update_publish_status(request):
 
     return redirect('new_leads')
 #----------------Data--------------------end
+
+
+
+def assign_skiptracing(request):
+     
+    assign_to = request.POST.get('skp_assign_to')
+    state = request.POST.get('sel_state')
+    user = User.objects.get(username=assign_to)
+    if state:
+        foreclosures = Foreclosure.objects.filter(state=state)
+        if assign_to:
+            for foreclosure in foreclosures:
+                print(foreclosure.case_number)
+                contacts_to_update = foreclosure.defendant.all()
+                for contact in contacts_to_update:
+                     if contact.skiptraced == False:
+                          contact.skp_assignedto.add(user)
+                          contact.save()
+        else:
+            messages.info(request, 'Please select a User to assign Skiptracing')
+    else:
+            messages.info(request, 'Please select a State to assign Skiptracing')
+
+    return redirect('new_leads')
+
+

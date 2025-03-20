@@ -31,17 +31,31 @@ New Leads
 
     <div class="filter-body">
         <div class="onefourth" style="padding:10px; display:inline-block;">
-        <form method="post", action="{% url 'update_assignment' %}">      
+        <form method="post", action="{% url 'update_case_assignment' %}">      
         {% csrf_token %}
             <input type="hidden" name="sel_state" value="{{sel_state}}">
             
             <select style="width:100%;" name="assign_to" id="assign_to">
-                <option value="">-- Select Researcher --</option>
+                <option value="">-- Assign Case Search --</option>
                 {% for user in DA %}
-                <option value="{{ user.username }}" {% if user.username == request.POST.assign_to %}selected{% endif %}>{{ user.username }}</option>
+                <option value="{{ user.username }}" {% if user.username == request.POST.assign_to %}selected{% endif %}>{{ user.username|upper }}</option>
                 {% endfor %}
             </select>
             <input type="submit" id="submitBtn" value="Assign" disabled>
+        </form>
+        </div>
+        <div class="onefourth" style="padding:10px; display:inline-block;">
+        <form method="post", action="{% url 'update_skp_assignment' %}">
+        {% csrf_token %}
+            <input type="hidden" name="sel_state" value="{{sel_state}}">
+            
+            <select style="width:100%;" name="skp_assign_to" id="skp_assign_to">
+                <option value="">-- Assign Skiptracing --</option>
+                {% for user in DA %}
+                <option value="{{ user.username }}" {% if user.username == request.POST.assign_to %}selected{% endif %}>{{ user.username|upper }}</option>
+                {% endfor %}
+            </select>
+            <input type="submit" id="submitBtnSkp" value="Assign" disabled>
         </form>
         </div>
         <div class="onefourth" style="padding:10px; display:inline-block;">
@@ -75,7 +89,7 @@ New Leads
     <div class="section-body-full">
         <table class="table table-striped table-hover">
             <thead>
-                <tr>                   
+                <tr>
                     <th>State</th>
                     <th>County</th>
                     <th>Date Added</th>
@@ -131,27 +145,14 @@ New Leads
 <script>
         const selectElement = document.getElementById('assign_to');
         const submitButton = document.getElementById('submitBtn');
+
+        const selectSkip = document.getElementById('skp_assign_to');
+        const skipButton = document.getElementById('submitBtnSkp');
+
         const selectStatus = document.getElementById('status');
         const statusButton = document.getElementById('updatestatus');
         const selectPublish = document.getElementById('publish');
         const publishButton = document.getElementById('updatepublish');
-
-        selectPublish.addEventListener('change', function(){
-            if (selectPublish.value === "") {
-                publishButton.disabled = true;
-            } else {
-                publishButton.disabled = false;
-            }
-        })
-
-        selectStatus.addEventListener('change', function(){
-            if (selectStatus.value === "") {
-                statusButton.disabled = true;
-            } else {
-                statusButton.disabled = false;
-            }
-        })
-
 
         selectElement.addEventListener('change', function() {
             if (selectElement.value === "") {
@@ -161,17 +162,42 @@ New Leads
             }
         });
 
+        selectSkip.addEventListener('change', function() {
+            if (selectSkip.value === "") {
+                submitBtnSkp.disabled = true;
+            } else {
+                submitBtnSkp.disabled = false;
+            }
+        });
 
-        // Check on page load in case of form resubmission with an empty value
+        selectStatus.addEventListener('change', function(){
+            if (selectStatus.value === "") {
+                statusButton.disabled = true;
+            } else {
+                statusButton.disabled = false;
+            }
+        })
+
+        selectPublish.addEventListener('change', function(){
+            if (selectPublish.value === "") {
+                publishButton.disabled = true;
+            } else {
+                publishButton.disabled = false;
+            }
+        })         
+
+// Check on page load in case of form resubmission with an empty value
         if (selectElement.value === "") {
             submitButton.disabled = true;
         }
-        
+
+        if (selectSkip.value === "") {
+            submitBtnSkp.disabled = true;
+        }
         
         if (selectStatus.value === "") {
             statusButton.disabled = true;
         }
-        
         
         if (selectPublish.value === "") {
             publishButton.disabled = true;
