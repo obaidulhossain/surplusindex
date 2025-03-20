@@ -24,13 +24,14 @@ Skiptracing
         {% if researcher %}
         <a class="headerbutton" href="{% url 'skiptracing_checklist' %}">Skiptracing Checklist</a>
         {% endif %}
-        <a class="headerbutton" href="{% url 'skiptrace' %}">Create New Contact</a>
+        <a class="headerbutton" href="{% url 'skiptrace' %}">Create New Contact</a>      
         </div>
     </div>
     <div class="section-body-full">
         <form method="post" action="{% url 'create_update_contact' %}">
             {% csrf_token %}
-            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">       
+            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">   
+            <input type="hidden" name="related_contact" value="{{related_contact}}">
             <label>Contact Name</label><br>
             <input type="text" name="prefix" id="prefix" placeholder="Prefix" value="{{current_con_instance.name_prefix}}">
             <input type="text" name="f_name" id="f_name" placeholder="First Name" value="{{current_con_instance.first_name}}">
@@ -100,6 +101,7 @@ Skiptracing
                                 <td>
                                     <form method="get" action="{% url 'skiptrace' %}">
                                         <input type="hidden" name="con_id" value="${contact.id}">
+                                        <input type="hidden" name="related_contact" value="{{ related_contact }}">
                                         <input type="submit" value="Edit">
                                     </form>
                                 </td>
@@ -125,9 +127,11 @@ Skiptracing
     <div id="mailing_address" class="section-header">
         <h4>Mailing Addresses</h4>
         <form method="post" action="{% url 'fetch_mailing_address' %}">
-        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-        <td><input type="submit" value="Fetch Mailing Address"></td>
-        <form>
+            {% csrf_token %}
+            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+            <input type="hidden" name="related_contact" value="{{ related_contact }}">
+            <td><input type="submit" value="Fetch Mailing Address"></td>
+        </form>
     </div>
 
     <div class="section-body-full">
@@ -154,6 +158,7 @@ Skiptracing
                     <form id="search-form" method="post" action="{% url 'update_contact' %}">
                         {% csrf_token %}
                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                        <input type="hidden" name="related_contact" value="{{ related_contact }}">
                         <input type="hidden" name="propid" value="{{ prop.pk }}">
                         <td><input style="width: 120px; " type="text" id="county" placeholder="County" value="{{prop.county}}" name="county"></td>
                         <td><input style="width: 170px;" type="text" id="parcel" placeholder="Parcel" value="{{prop.parcel}}" name="parcel"></td>
@@ -174,6 +179,7 @@ Skiptracing
                     <form id="search-form" method="post" action="{% url 'search_create_property' %}">
                         {% csrf_token %}
                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                        <input type="hidden" name="related_contact" value="{{ related_contact }}">
                         <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="icounty" placeholder="County" name="county"></td>
                         <td><input style="width: 170px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="iparcel" placeholder="Parcel" name="parcel"></td>
                         <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="ihouse" placeholder="House" name="house"></td>
@@ -243,6 +249,7 @@ Skiptracing
                                     <form method="post" action="{% url 'add_mailing'%}">
                                     {% csrf_token %}
                                     <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                                    <input type="hidden" name="related_contact" value="{{ related_contact }}">
                                     <input type="hidden" name="property_id" value="${address.id}">
                                     <input type="submit" value="Add" onclick="this.form.submit()">
                                     </form>
@@ -286,6 +293,7 @@ Skiptracing
                         <form method="post" action="{% url 'update_email' %}">
                             {%csrf_token%}
                             <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                            <input type="hidden" name="related_contact" value="{{related_contact}}">
                             <input type="hidden" name="email_id" value="{{ email.pk }}">
                             <td><input style="width: 290px;" type="text" placeholder="Email" name="email" value="{{email.email_address}}"></td>
                             <td><input type="submit" value="Update"></td>
@@ -296,6 +304,7 @@ Skiptracing
                         <form id="search-form" method="post" action="{% url 'search_create_email' %}">
                             {% csrf_token %}
                             <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                            <input type="hidden" name="related_contact" value="{{related_contact}}">
                             <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="email" placeholder="Email Address" name="email"></td>
                             <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
                         </form>
@@ -334,6 +343,7 @@ Skiptracing
                                         <form method="post" action="{% url 'add_email' %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                                        <input type="hidden" name="related_contact" value="{{related_contact}}">
                                         <input type="hidden" name="email_id" value="${emails.id}">
                                         <input type="submit" value="Add" onclick="this.form.submit()">
                                         </form>
@@ -376,6 +386,7 @@ Skiptracing
                         <form method="post" action="{% url 'update_wireless' %}">
                             {%csrf_token%}
                             <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                            <input type="hidden" name="related_contact" value="{{related_contact}}">
                             <input type="hidden" name = "wireless-id" value="{{wireless.id}}">
                             <td><input style="width: 290px;" type="text" placeholder="Wireless" name="wireless" value="{{wireless.w_number}}"></td>
                             <td><input type="submit" value="Update"></td>
@@ -386,6 +397,7 @@ Skiptracing
                         <form id="search-form" method="post" action="{% url 'create_wireless' %}">
                             {% csrf_token %}
                             <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                            <input type="hidden" name="related_contact" value="{{related_contact}}">
                             <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="wireless" placeholder="Wireless Number" name="wireless"></td>
                             <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
                         </form>
@@ -426,6 +438,7 @@ Skiptracing
                                         <form method="post" action="{% url 'add_wireless'%}">
                                         {% csrf_token %}
                                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                                        <input type="hidden" name="related_contact" value="{{related_contact}}">
                                         <input type="hidden" name="wireless-id" value="${wireless.id}">
                                         <input type="submit" value="Add" onclick="this.form.submit()">
                                         </form>
@@ -468,6 +481,7 @@ Skiptracing
                         <form method="post" action="{% url 'update_landline' %}">
                             {%csrf_token%}
                             <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                            <input type="hidden" name="related_contact" value="{{related_contact}}">
                             <input type="hidden" name = "landline-id" value="{{landline.id}}">
                             <td><input style="width: 290px;" type="text" placeholder="Landline Number" name="landline" value="{{landline.l_number}}"></td>
                             <td><input type="submit" value="Update"></td>
@@ -478,6 +492,7 @@ Skiptracing
                         <form id="search-form" method="post" action="{% url 'create_landline' %}">
                             {% csrf_token %}
                             <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                            <input type="hidden" name="related_contact" value="{{related_contact}}">
                             <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="landline" placeholder="Landline Number" name="landline"></td>
                             <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
                         </form>
@@ -518,6 +533,7 @@ Skiptracing
                                         <form method="post" action="{% url 'add_landline' %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                                        <input type="hidden" name="related_contact" value="{{related_contact}}">
                                         <input type="hidden" name="landline-id" value="${landline.id}">
                                         <input type="submit" value="Add" onclick="this.form.submit()">
                                         </form>
@@ -539,5 +555,145 @@ Skiptracing
     </script>
     <!--Landline section-start-->
 
+
+
+
+
+
+
+
+
+
+
+
+<div style="margin-top: 20px;" class="body-section">
+    <div id="rc" class="section-header">
+        <h4>Related Contacts</h4>
+    </div>
+    <div class="section-body-full">
+        <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Prefix</th>
+                <th>First Name</th>
+                <th>Middle Name</th>
+                <th>Last Name</th>
+                <th>Suffix</th>
+                <th>Mailing Addresses</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for related_contact in all_related_contact %}
+            <tr>
+                <form method="post" action="{% url 'skiptrace_related_contact' %}">
+                    {%csrf_token%}
+                    <input type="hidden" name="con_id" value="{{ related_contact.id }}">
+                    <input type="hidden" name="related_contact" value="{{ current_con_instance.pk }}">
+                    <td>{{related_contact.name_prefix}}</td>
+                    <td>{{related_contact.first_name}}</td>
+                    <td>{{related_contact.middle_name}}</td>
+                    <td>{{related_contact.last_name}}</td>
+                    <td>{{related_contact.name_suffix}}</td>                   
+                    <td>
+                        {% for property in related_contact.mailing_address.all %}
+                        {{ property }}<br>
+                        {% endfor %}
+                    </td>
+                    <td><input type="submit" {% if related_contact.skiptraced == False %}style="background-color: #fe8420;" value="Skiptrace"{% endif %} value="Edit"></td>
+                </form>
+            </tr>
+            {% endfor %}
+            <tr style="background-color: #fff;">
+                <form id="search-form" method="post" action="{% url 'create_related_contact' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                    <input type="hidden" name="related_contact" value="{{ related_contact }}">
+                    <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_prefix" placeholder="Prefix" name="rc_prefix"></td>
+                    <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_first" placeholder="First Name" name="rc_first"></td>
+                    <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_middle" placeholder="Middle Name" name="rc_middle"></td>
+                    <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_last" placeholder="Last Name" name="rc_last"></td>
+                    <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_suffix" placeholder="Suffix" name="rc_suffix"></td>                  
+                    <td><input style="width: 500px; border: 2px solid #08c88e; background-color: #54ff001f"type="text" id="search_query" placeholder="Search by name, business, or other details"></td>
+                    <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
+                </form>
+            </tr>
+        </tbody>
+        <tbody id="rc-results">
+        </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        // Function to fetch and update search results
+        function rcresults() {
+            const rc_prefix = $('#rc_prefix').val();
+            const rc_first = $('#rc_first').val();
+            const rc_middle = $('#rc_middle').val();
+            const rc_last = $('#rc_last').val();
+            const rc_suffix = $('#rc_suffix').val();
+            
+
+            $.ajax({
+                url: "{% url 'filter_related_contact' %}",
+                data: {
+                    rc_prefix: rc_prefix,
+                    rc_first: rc_first,
+                    rc_middle: rc_middle,
+                    rc_last: rc_last,
+                    rc_suffix: rc_suffix,
+                    
+                },
+                success: function (data) {
+                    const contact = data.rc_contact;
+                    const conresultcontainer = $('#rc-results');
+                    conresultcontainer.empty();
+
+                    if (contact.length > 0) {
+                        contact.forEach(contact => {
+                            let mailingAddressesHtml = '';
+                            if (contact.mailing_addresses.length > 0) {
+                                mailingAddressesHtml = contact.mailing_addresses.join('<br>'); // Join addresses with <br> for display
+                            } else {
+                                mailingAddressesHtml = 'No Mailing Address';
+                            }
+                            conresultcontainer.append(`
+                            <tr>
+                                <td colspan="5">${contact.name_prefix} ${contact.first_name} ${contact.middle_name} ${contact.last_name} ${contact.name_suffix}<br><small>${contact.business_name}</small></td>
+                                <td>${mailingAddressesHtml}</td>
+                                <td>
+                                    <form method="post" action="{% url 'add_related_contact' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                                        <input type="hidden" name="related_contact" value="{{ related_contact }}">
+                                        <input type="hidden" name="add_rc_id" value="${contact.id}">
+                                        <input type="submit" value="Add">
+                                    </form>
+                                </td>
+                            </tr>
+
+                            `);
+                        });
+                    } else {
+                        conresultcontainer.append('<tr><th colspan="4"><center>No Contact Record found</center></th></tr>');
+                    }
+                }
+            });
+        }
+        // Trigger AJAX call on input change
+        $('#rc_prefix, #rc_first, #rc_middle, #rc_last, #rc_suffix').on('input', rcresults);
+    });
+</script>
+
+<div style="margin-top: 20px; float:right;" class="body-section">
+    <form  method="post" action="{% url 'mark_as_skiptraced' %}">
+        {% csrf_token %}
+        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+        <input type="hidden" name="related_contact" value="{{ related_contact }}">
+        <input type="submit" {% if related_contact.skiptraced == False %}style="background-color: #fe8420;" value="Skiptrace"{% endif %} value="Mark as Skiptraced">
+
+    </form>
+</div>
 
 {% endblock content %}
