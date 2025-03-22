@@ -194,7 +194,10 @@ class Foreclosure(OperationStat):
         (SOLD, 'Sold'),
         (CANCELLED, 'Cancelled'),
     )
-    
+
+    TAX = 'tax'
+    MORTGAGE = 'mortgage'
+    SALE_TYPE = ((TAX, 'Tax'), (MORTGAGE, 'Mortgage'))
 
     state = models.CharField(max_length=225)
     county = models.CharField(max_length=225)
@@ -207,7 +210,7 @@ class Foreclosure(OperationStat):
     plaintiff = models.ManyToManyField(ForeclosingEntity, blank=True, related_name='plaintiff_for_foreclosure', default="", verbose_name='Plaintiff')
     defendant = models.ManyToManyField(Contact, blank=True, related_name='defendant_for_foreclosure', default="", verbose_name='Defendant')
     sale_date = models.DateField(blank=True, null=True)
-    sale_type = models.CharField(max_length=225, null=True, blank=True)
+    sale_type = models.CharField(max_length=225, choices=SALE_TYPE, null=True, blank=True)
     sale_status = models.CharField(max_length=225, choices=SALE_STATUS, null=True, blank=True)
     fcl_final_judgment = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
     sale_price = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)

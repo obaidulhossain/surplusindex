@@ -202,6 +202,34 @@ table.table tr td {
 
 }
 
+.action-section {
+    padding: 12px;
+    display: block;
+    height: 60px;
+    background: #a6cbde;
+
+}
+
+.action-item {
+    float: right;
+    margin: 0px 10px;
+}
+
+.action-item button {
+    padding: 6px 20px;
+    background-color: #0b9056;
+    text-decoration: none;
+    color: #ffffff;
+    border-radius: 5px;
+    border: 1px solid #566787;
+    margin-bottom: 20px;
+    transition: 500ms;
+}
+
+.action-item button:hover {
+    background-color: #10be73;
+    transition: 500ms;
+}
 
 /* new css properties */
 
@@ -314,26 +342,6 @@ h6 {
 }
 
 
-.action-section {
-    float: right;
-    margin: 0px 10px;
-}
-
-.action-section button {
-    padding: 6px 20px;
-    background-color: #0b9056;
-    text-decoration: none;
-    color: #ffffff;
-    border-radius: 5px;
-    border: 1px solid #566787;
-    margin-bottom: 20px;
-    transition: 500ms;
-}
-
-.action-section button:hover {
-    background-color: #10be73;
-    transition: 500ms;
-}
 
 button:disabled,
 button[disabled] {
