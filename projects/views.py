@@ -354,24 +354,29 @@ def update_defendant(request):
     if request.method == 'POST':
         foreclosure = request.POST.get('caseid')
         defendant = request.POST.get('def-id')
-        prefix = request.POST.get('u_prefix')
-        first = request.POST.get('u_first')
-        middle = request.POST.get('u_middle')
-        last = request.POST.get('u_last')
-        suffix = request.POST.get('u_suffix')
-        business = request.POST.get('u_business_name')
-        designation = request.POST.get('u_designation')
-
         def_instance = get_object_or_404(Contact,pk=defendant)
-        def_instance.name_prefix = prefix
-        def_instance.first_name = first
-        def_instance.middle_name = middle
-        def_instance.last_name = last
-        def_instance.name_suffix = suffix
-        def_instance.business_name = business
-        def_instance.designation = designation
-        def_instance.save()
-        messages.success(request, "Defendant Updated Successfully!")
+        if request.POST.get('delete') == "Delete":
+            foreclosure_instance = Foreclosure.objects.get(pk=foreclosure)
+            foreclosure_instance.defendant.remove(def_instance)
+            messages.success(request, "Defendant Removed")
+        elif request.POST.get('update') == "Update":
+            prefix = request.POST.get('u_prefix')
+            first = request.POST.get('u_first')
+            middle = request.POST.get('u_middle')
+            last = request.POST.get('u_last')
+            suffix = request.POST.get('u_suffix')
+            business = request.POST.get('u_business_name')
+            designation = request.POST.get('u_designation')
+        
+            def_instance.name_prefix = prefix
+            def_instance.first_name = first
+            def_instance.middle_name = middle
+            def_instance.last_name = last
+            def_instance.name_suffix = suffix
+            def_instance.business_name = business
+            def_instance.designation = designation
+            def_instance.save()
+            messages.success(request, "Defendant Updated Successfully!")
     return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#def")
 
 ##-------------------------------------Plaintiff Section
@@ -396,14 +401,20 @@ def update_plaintiff(request):
     if request.method == 'POST':
         foreclosure = request.POST.get('caseid')
         plaintiff = request.POST.get('plt-id')
+        plt_instance = get_object_or_404(ForeclosingEntity,pk=plaintiff)
         contact_nm = request.POST.get('u_contact')
         business_nm = request.POST.get('u_business')
         dba = request.POST.get('u_dba')
-        plt_instance = get_object_or_404(ForeclosingEntity,pk=plaintiff)
-        plt_instance.individual_name = contact_nm
-        plt_instance.business_name = business_nm
-        plt_instance.dba = dba
-        plt_instance.save()
+        if request.POST.get('delete') == "Delete":
+            foreclosure_instance = Foreclosure.objects.get(pk=foreclosure)
+            foreclosure_instance.plaintiff.remove(plt_instance)
+            messages.info(request, "Plaintiff Removed")
+        elif request.POST.get('update') == "Update":
+            plt_instance.individual_name = contact_nm
+            plt_instance.business_name = business_nm
+            plt_instance.dba = dba
+            plt_instance.save()
+            messages.info(request, "Plaintiff Updated")
     return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#plt")
 
 def add_plaintiff(request):
@@ -484,19 +495,25 @@ def update_property(request):
         zip = request.POST.get('zip')
         if property:
             property_instance = get_object_or_404(Property, pk=property)
-            property_instance.parcel = parcel
-            property_instance.state = state
-            property_instance.county = county
-            property_instance.house_number = house
-            property_instance.road_name = road
-            property_instance.road_type = roadtype
-            property_instance.direction = dir
-            property_instance.apt_unit = apt
-            property_instance.extention = ext
-            property_instance.city = city
-            property_instance.zip_code = zip
-            property_instance.save()
-            messages.success(request, 'Property Record Saved')
+            if request.POST.get('delete') == "Delete":
+                foreclosure_instance = Foreclosure.objects.get(pk=foreclosure)
+                foreclosure_instance.property.remove(property_instance)
+                messages.info(request, 'Property Record Removed')
+            elif request.POST.get('update') == "Update":
+                property_instance.parcel = parcel
+                property_instance.state = state
+                property_instance.county = county
+                property_instance.house_number = house
+                property_instance.road_name = road
+                property_instance.road_type = roadtype
+                property_instance.direction = dir
+                property_instance.apt_unit = apt
+                property_instance.extention = ext
+                property_instance.city = city
+                property_instance.zip_code = zip
+
+                property_instance.save()
+                messages.info(request, 'Property Record Saved')
 
     return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#prop")
 
@@ -719,6 +736,7 @@ def fetch_mailing_address(request):
 
 def update_contact(request):
     if request.method == 'POST':
+    
         contact = request.POST.get('con_id')
         related_contact = request.POST.get('related_contact')
         property = request.POST.get('propid')
@@ -746,8 +764,13 @@ def update_contact(request):
             property_instance.extention = ext
             property_instance.city = city
             property_instance.zip_code = zip
-            property_instance.save()
-            messages.success(request, 'Property Record Saved')
+            if request.POST.get("update") == "Update":
+                property_instance.save()
+                messages.success(request, 'Property Record Saved')
+            elif request.POST.get("delete") == "Delete":
+                contact_instance = Contact.objects.get(pk=contact)
+                contact_instance.mailing_address.remove(property_instance)
+                messages.success(request, 'Property Record Removed')
         if related_contact:
             url = f"/skiptrace/?con_id={contact}&related_contact={related_contact}"
         else:
@@ -777,13 +800,19 @@ def addMailing(request):
 def update_email(request):
     if request.method == 'POST':
         contact = request.POST.get('con_id','')
+        
         related_contact = request.POST.get('related_contact')
         email = request.POST.get('email_id')
         if email:
             emailinstance = Email.objects.get(pk=email)
-            emailinstance.email_address = request.POST.get('email')
-            emailinstance.save()
-            messages.info(request, "Email Saved!")
+            contact_instance = Contact.objects.get(pk=contact)
+            if request.POST.get('delete') == "Delete":
+                contact_instance.emails.remove(emailinstance)
+                messages.info(request, "Email Removed!")
+            elif request.POST.get('update') == "Update":
+                emailinstance.email_address = request.POST.get('email')
+                emailinstance.save()
+                messages.info(request, "Email Saved!")
         if related_contact:
             url = f"/skiptrace/?con_id={contact}&related_contact={related_contact}#em"
         else:
@@ -839,9 +868,14 @@ def update_wireless(request):
         wireless = request.POST.get('wireless-id')
         if wireless:
             w_instance = Wireless_Number.objects.get(pk=wireless)
-            w_instance.w_number = request.POST.get('wireless')
-            w_instance.save()
-            messages.info(request, "Number Updated!")
+            contact_instance = Contact.objects.get(pk=contact)
+            if request.POST.get('delete') == "Delete":
+                contact_instance.wireless.remove(w_instance)
+                messages.info(request, "Number Removed!")
+            elif request.POST.get('update') == "Update":
+                w_instance.w_number = request.POST.get('wireless')
+                w_instance.save()
+                messages.info(request, "Number Updated!")
         if related_contact:
             url = f"/skiptrace/?con_id={contact}&related_contact={related_contact}#wn"
         else:
@@ -897,9 +931,14 @@ def updateLandline(request):
         landline = request.POST.get('landline-id')
         if landline:
             l_instance = Landline_Number.objects.get(pk=landline)
-            l_instance.l_number = request.POST.get('landline')
-            l_instance.save()
-            messages.info(request, "Landline Number Updated!")
+            contact_instance = Contact.objects.get(pk=contact)
+            if request.POST.get('delete') == "Delete":
+                contact_instance.landline.remove(l_instance)
+                messages.info(request, "Number Removed!")
+            elif request.POST.get('update') == "Update":
+                l_instance.l_number = request.POST.get('landline')
+                l_instance.save()
+                messages.info(request, "Landline Number Updated!")
         if related_contact:
             url = f"/skiptrace/?con_id={contact}&related_contact={related_contact}#ln"
         else:
@@ -1023,16 +1062,23 @@ def add_related_contact(request):
         add_rc_instance = Contact.objects.get(pk=rc_id)
         contactinstance.related_contacts.add(add_rc_instance)
         messages.info(request,'Related Contact Added')
-        if related_contact:
-            url = f"/skiptrace/?con_id={selected_contact}&related_contact={related_contact}#rc"
-        else:
-            url = f"/skiptrace/?con_id={selected_contact}#rc"
+    if related_contact:
+        url = f"/skiptrace/?con_id={selected_contact}&related_contact={related_contact}#rc"
+    else:
+        url = f"/skiptrace/?con_id={selected_contact}#rc"
     return HttpResponseRedirect(url)
 
 def skiptrace_related_contact(request):
     selected_contact = request.POST.get('con_id')
     related_contact = request.POST.get('related_contact')
-    url = f"/skiptrace/?con_id={selected_contact}&related_contact={related_contact}"
+    if request.POST.get('delete') == "Delete":
+        contact_instance = Contact.objects.get(pk=related_contact)
+        related_instance = Contact.objects.get(pk=selected_contact)
+        contact_instance.related_contacts.remove(related_instance)
+        messages.info(request, "Related Contact Instance Removed!")
+        url = f"/skiptrace/?con_id={related_contact}"
+    elif request.POST.get('skiptrace') == "Edit" or "Skiptrace":
+        url = f"/skiptrace/?con_id={selected_contact}&related_contact={related_contact}"
     return redirect(url)
 
 # --------------------------------------------------------------------------------

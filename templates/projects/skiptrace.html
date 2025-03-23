@@ -137,7 +137,8 @@ Skiptracing
     <div class="section-body-full">
         <table class="table table-striped table-hover">
             <thead>
-                <tr>                   
+                <tr>
+                    <th>Copy</th>
                     <th>County</th>
                     <th>Parcel ID</th>
                     <th>House</th>
@@ -149,7 +150,8 @@ Skiptracing
                     <th>City</th>
                     <th>State</th>
                     <th>Zip</th>
-                    <th>Action</th>
+                    <th>Update</th>
+                    <th>Delete</th>
                 </tr>
             <thead>    
             <tbody>
@@ -160,6 +162,7 @@ Skiptracing
                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
                         <input type="hidden" name="related_contact" value="{{ related_contact }}">
                         <input type="hidden" name="propid" value="{{ prop.pk }}">
+                        <td><input type="button" class="copyButton" value="Copy" data="{{prop.house_number}} {{prop.road_name}} {{prop.road_type}} {{prop.direction}} {{prop.apt_unit}}{{prop.extention}}, {{prop.city}} {{prop.zip_code}}"onclick="copyToClipboard(this);"></td>
                         <td><input style="width: 120px; " type="text" id="county" placeholder="County" value="{{prop.county}}" name="county"></td>
                         <td><input style="width: 170px;" type="text" id="parcel" placeholder="Parcel" value="{{prop.parcel}}" name="parcel"></td>
                         <td><input style="width: 80px;" type="text" id="house" placeholder="House" value="{{prop.house_number}}" name="house"></td>
@@ -171,7 +174,8 @@ Skiptracing
                         <td><input style="width: 120px;" type="text" id="city" placeholder="City" value="{{prop.city}}" name="city"></td>
                         <td><input style="width: 120px;" type="text" id="state" placeholder="State" value="{{prop.state}}" name="state"></td>                      
                         <td><input style="width: 70px;" type="text" id="zip" placeholder="Zip" value="{{prop.zip_code}}" name="zip"></td>
-                        <td><input type="submit" value="Update" ></td>
+                        <td><input type="submit" name="update" value="Update" ></td>
+                        <td><input type="submit" name="delete" value="Delete" ></td>
                     </form>
                 </tr>
                 {% endfor %}
@@ -180,6 +184,7 @@ Skiptracing
                         {% csrf_token %}
                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
                         <input type="hidden" name="related_contact" value="{{ related_contact }}">
+                        <td></td>
                         <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="icounty" placeholder="County" name="county"></td>
                         <td><input style="width: 170px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="iparcel" placeholder="Parcel" name="parcel"></td>
                         <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="ihouse" placeholder="House" name="house"></td>
@@ -192,6 +197,7 @@ Skiptracing
                         <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="istate" placeholder="State" name="state"></td>                      
                         <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="izip" placeholder="Zip" name="zip"></td>
                         <td><input type="submit" style="border: 2px solid #08c88e;" Value="Create"></td>
+                        <td></td>
                     </form>
                 </tr>
             </tbody>
@@ -234,6 +240,7 @@ Skiptracing
                             resultsContainer.append(`
 
                             <tr>
+                                <td></td>
                                 <td>${address.county}</td>
                                 <td>${address.parcel}</td>
                                 <td>${address.house_number}</td>
@@ -254,6 +261,7 @@ Skiptracing
                                     <input type="submit" value="Add" onclick="this.form.submit()">
                                     </form>
                                 </td>
+                                <td></td>
                             </tr>
                             
                                 `);
@@ -284,7 +292,8 @@ Skiptracing
                 <thead>
                     <tr>                   
                         <th>Email Address</th>
-                        <th>Action</th>
+                        <th>Update</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -296,7 +305,8 @@ Skiptracing
                             <input type="hidden" name="related_contact" value="{{related_contact}}">
                             <input type="hidden" name="email_id" value="{{ email.pk }}">
                             <td><input style="width: 290px;" type="text" placeholder="Email" name="email" value="{{email.email_address}}"></td>
-                            <td><input type="submit" value="Update"></td>
+                            <td><input type="submit" name="update" value="Update"></td>
+                            <td><input type="submit" name="delete" value="Delete"></td>
                         </form>
                     </tr>
                     {% endfor %}
@@ -307,6 +317,7 @@ Skiptracing
                             <input type="hidden" name="related_contact" value="{{related_contact}}">
                             <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="email" placeholder="Email Address" name="email"></td>
                             <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
+                            <td></td>
                         </form>
                     </tr>
                 </tbody>
@@ -348,6 +359,7 @@ Skiptracing
                                         <input type="submit" value="Add" onclick="this.form.submit()">
                                         </form>
                                     </td>
+                                    <td></td>
                                 </tr>
                                     `);
                             });
@@ -377,7 +389,8 @@ Skiptracing
                 <thead>
                     <tr>
                         <th>Wireless Numbers</th>
-                        <th>Action</th>
+                        <th>Update</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -389,7 +402,8 @@ Skiptracing
                             <input type="hidden" name="related_contact" value="{{related_contact}}">
                             <input type="hidden" name = "wireless-id" value="{{wireless.id}}">
                             <td><input style="width: 290px;" type="text" placeholder="Wireless" name="wireless" value="{{wireless.w_number}}"></td>
-                            <td><input type="submit" value="Update"></td>
+                            <td><input type="submit" name="update" value="Update" ></td>
+                            <td><input type="submit" name="delete" value="Delete" ></td>
                         </form>
                     </tr>
                     {% endfor %}
@@ -472,7 +486,8 @@ Skiptracing
                 <thead>
                     <tr>
                         <th>Landline Numbers</th>
-                        <th>Action</th>
+                        <th>Update</th>
+                        <th>Delete</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -484,7 +499,8 @@ Skiptracing
                             <input type="hidden" name="related_contact" value="{{related_contact}}">
                             <input type="hidden" name = "landline-id" value="{{landline.id}}">
                             <td><input style="width: 290px;" type="text" placeholder="Landline Number" name="landline" value="{{landline.l_number}}"></td>
-                            <td><input type="submit" value="Update"></td>
+                            <td><input type="submit" name="update" value="Update" ></td>
+                            <td><input type="submit" name="delete" value="Delete" ></td>
                         </form>
                     </tr>
                     {% endfor %}
@@ -565,7 +581,7 @@ Skiptracing
 
 
 
-
+{% if not related_contact %}
 <div style="margin-top: 20px;" class="body-section">
     <div id="rc" class="section-header">
         <h4>Related Contacts</h4>
@@ -574,6 +590,7 @@ Skiptracing
         <table class="table table-striped table-hover">
         <thead>
             <tr>
+                <th>SN</th>
                 <th>Prefix</th>
                 <th>First Name</th>
                 <th>Middle Name</th>
@@ -590,6 +607,7 @@ Skiptracing
                     {%csrf_token%}
                     <input type="hidden" name="con_id" value="{{ related_contact.id }}">
                     <input type="hidden" name="related_contact" value="{{ current_con_instance.pk }}">
+                    <td>{{ forloop.counter }}</td>
                     <td>{{related_contact.name_prefix}}</td>
                     <td>{{related_contact.first_name}}</td>
                     <td>{{related_contact.middle_name}}</td>
@@ -600,7 +618,8 @@ Skiptracing
                         {{ property }}<br>
                         {% endfor %}
                     </td>
-                    <td><input type="submit" {% if related_contact.skiptraced == False %}style="background-color: #fe8420;" value="Skiptrace"{% endif %} value="Edit"></td>
+                    <td><input type="submit" name="skiptrace" {% if related_contact.skiptraced == False %}style="background-color: #fe8420;" value="Skiptrace"{% endif %} value="Edit"></td>
+                    <td><input type="submit" name="delete" value="Delete" ></td>
                 </form>
             </tr>
             {% endfor %}
@@ -609,6 +628,7 @@ Skiptracing
                     {% csrf_token %}
                     <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
                     <input type="hidden" name="related_contact" value="{{ related_contact }}">
+                    <td></td>
                     <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_prefix" placeholder="Prefix" name="rc_prefix"></td>
                     <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_first" placeholder="First Name" name="rc_first"></td>
                     <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_middle" placeholder="Middle Name" name="rc_middle"></td>
@@ -660,8 +680,8 @@ Skiptracing
                             }
                             conresultcontainer.append(`
                             <tr>
-                                <td colspan="5">${contact.name_prefix} ${contact.first_name} ${contact.middle_name} ${contact.last_name} ${contact.name_suffix}<br><small>${contact.business_name}</small></td>
-                                <td>${mailingAddressesHtml}</td>
+                                <td colspan="4">${contact.name_prefix} ${contact.first_name} ${contact.middle_name} ${contact.last_name} ${contact.name_suffix}<br><small>${contact.business_name}</small></td>
+                                <td colspan="3">${mailingAddressesHtml}</td>
                                 <td>
                                     <form method="post" action="{% url 'add_related_contact' %}">
                                         {% csrf_token %}
@@ -685,7 +705,7 @@ Skiptracing
         $('#rc_prefix, #rc_first, #rc_middle, #rc_last, #rc_suffix').on('input', rcresults);
     });
 </script>
-
+{% endif %}
 <div style="margin-top: 20px; float:right;" class="body-section">
     <form  method="post" action="{% url 'mark_as_skiptraced' %}">
         {% csrf_token %}
@@ -695,5 +715,5 @@ Skiptracing
 
     </form>
 </div>
-
+<script src="{% static 'js/Surplusindex.js' %}"></script>
 {% endblock content %}

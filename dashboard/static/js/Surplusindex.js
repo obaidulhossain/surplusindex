@@ -16,3 +16,24 @@ function toggleFilters(togglebtn, hide_id) {
 
 
 // -------------------------toggle filters button-----(end)-----------------------------
+
+function copyToClipboard(button) {
+    const url = button.getAttribute('data'); // Get the URL from the data attribute
+    navigator.clipboard.writeText(url).then(() => {
+        // Change text and color with transition
+        button.value = "Copied!";
+        button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+        button.style.backgroundColor = "#4CAF50"; // Change to green
+        button.style.color = "#fff"; // Change text color to white
+
+        // Reset after 5 seconds with transition
+        setTimeout(() => {
+            button.value = "Copy";
+            button.style.transition = "background-color 0.3s ease, color 0.3s ease"; // Ensure transition when resetting
+            button.style.backgroundColor = ""; // Reset to original color
+            button.style.color = ""; // Reset to original color
+        }, 1500); // 5000 milliseconds = 5 seconds
+    }).catch(err => {
+        alert("Failed to copy URL: " + err);
+    });
+}
