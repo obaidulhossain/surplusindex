@@ -22,6 +22,7 @@ def availableLeads(request):
         psmin = request.POST.get('ps_min','')
         vsmin = request.POST.get('vs_min','')
         showHidden = request.POST.get('show_hidden','')
+        showUpcoming = request.POST.get('show_upcoming','')
     else:
         selectedState = request.GET.get('stateFilter','')
         selectedCounty = request.GET.get('countyFilter','')
@@ -29,10 +30,10 @@ def availableLeads(request):
         psmin = request.GET.get('ps_min','')
         vsmin = request.GET.get('vs_min','')
         showHidden = request.GET.get('show_hidden','')
-
+        
 
     states=Foreclosure.objects.values_list("state", flat=True).distinct()
-    leads_queryset = Foreclosure.objects.exclude(purchased_by=user)
+    leads_queryset = Foreclosure.objects.exclude(purchased_by=user).exclude(sale_status="CANCELLED" or "ACTIVE")
     
     if not selectedState:
         counties=Foreclosure.objects.values_list("county", flat=True).distinct()
@@ -57,10 +58,10 @@ def availableLeads(request):
 
     if showHidden != "show":
         leads_queryset = leads_queryset.exclude(hidden_for=user)
-            
+    
     
     total_leads = leads_queryset.count()
-    p = Paginator(leads_queryset, 5)
+    p = Paginator(leads_queryset, 25)
     page = request.GET.get('page')
     leads = p.get_page(page)
     current_page = int(leads.number)
