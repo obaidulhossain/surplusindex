@@ -6,21 +6,43 @@ $(document).ready(function () {
     //----------------------------------------------------------------------------------------------------
     // -------------------------Select Deselect and Select All Checkboxes---------------------------------
     // -------------------------Select Deselect and Select All Checkboxes---------------------------------
+    // var checkbox = $('table tbody tr:visible input[type="checkbox"]');
+    // $("#selectAll").click(function () {
+    //     if (this.checked) {
+    //         checkbox.each(function () {
+    //             this.checked = true;
+    //         });
+    //     } else {
+    //         checkbox.each(function () {
+    //             this.checked = false;
+    //         });
+    //     }
+    // });
+    // checkbox.click(function () {
+    //     if (!this.checked) {
+    //         $("#selectAll").prop("checked", false);
+    //     }
+    // });
 
 
-    var checkbox = $('table tbody input[type="checkbox"]');
+
+
+
+
+    var visibleCheckboxes = $('table tbody tr:visible input[type="checkbox"]');
     $("#selectAll").click(function () {
+
         if (this.checked) {
-            checkbox.each(function () {
+            visibleCheckboxes.each(function () {
                 this.checked = true;
             });
         } else {
-            checkbox.each(function () {
+            visibleCheckboxes.each(function () {
                 this.checked = false;
             });
         }
     });
-    checkbox.click(function () {
+    visibleCheckboxes.click(function () {
         if (!this.checked) {
             $("#selectAll").prop("checked", false);
         }
@@ -252,11 +274,14 @@ document.addEventListener("DOMContentLoaded", function () {
 // -------------------------Update filters and table-----(end)-----------------------------
 
 // -------------------------toggle filters button-----(start)-----------------------------
+
+
+// Reuseable function (copied to surplusindex.js)
 // -------------------------toggle filters button-----(start)-----------------------------
 
-function toggleFilters() {
-    const x = document.getElementById("filter-section");
-    const y = document.getElementById("toggle-filters");
+function toggleFilters(togglebtn, hide_id) {
+    const x = document.getElementById(hide_id); // hide_id = section id to be hidden
+    const y = document.getElementById(togglebtn); // togglebtn = button id that will perform the action
 
     if (x.style.display === "flex") {
         x.style.display = "none";
@@ -270,3 +295,74 @@ function toggleFilters() {
 
 // -------------------------toggle filters button-----(end)-----------------------------
 // -------------------------toggle filters button-----(end)-----------------------------
+
+function confirmHideLeads() {
+    // Get the count of selected checkboxes
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to hide ${selectedLeads} selected leads?`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+function confirmAddToMyLeads() {
+    // Get the count of selected checkboxes
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to ' + action + '.');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to move ${selectedLeads} selected leads to My Leads Section for ${selectedLeads} credits?`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+
+function confirmUnhideLeads() {
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to unhide ${selectedLeads} selected leads?`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+function confirmArchive() {
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to Archive ${selectedLeads} selected leads? These leads can be found and unarchived from Archived Leads Section.`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+function confirmUnarchive() {
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to Unarchive ${selectedLeads} selected leads? These leads can be found in My Leads Section.`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}

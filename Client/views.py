@@ -1,15 +1,19 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from authentication.decorators import allowed_users
 from django.core.paginator import Paginator
+from django.contrib import messages
 
 from .models import *
 from propertydata.models import *
 from .forms import *
 from .resources import *
+from si_user.models import *
 # Create your views here.
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 
 
@@ -30,7 +34,7 @@ def availableLeads(request):
         psmin = request.GET.get('ps_min','')
         vsmin = request.GET.get('vs_min','')
         showHidden = request.GET.get('show_hidden','')
-        
+    
 
     states=Foreclosure.objects.values_list("state", flat=True).distinct()
     leads_queryset = Foreclosure.objects.exclude(purchased_by=user).exclude(sale_status="CANCELLED" or "ACTIVE")
@@ -38,28 +42,31 @@ def availableLeads(request):
     if not selectedState:
         counties=Foreclosure.objects.values_list("county", flat=True).distinct()
         saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
-        
+
     else:
         counties=Foreclosure.objects.filter(state=selectedState).values_list("county", flat=True).distinct()
         saletypes=Foreclosure.objects.filter(state=selectedState).values_list("sale_type", flat=True).distinct()
         leads_queryset = leads_queryset.filter(state__iexact=selectedState)
-    
+
     if selectedCounty:
         leads_queryset = leads_queryset.filter(county__iexact=selectedCounty)
 
     if selectedSaletype:
         leads_queryset = leads_queryset.filter(sale_type__iexact=selectedSaletype)
-    
+
     if psmin:
         leads_queryset = leads_queryset.filter(possible_surplus__gte=psmin)
 
     if vsmin:
         leads_queryset = leads_queryset.filter(verified_surplus__gte=vsmin)
 
-    if showHidden != "show":
+    if not showHidden == "show":
         leads_queryset = leads_queryset.exclude(hidden_for=user)
-    
-    
+    else:
+        leads_queryset = leads_queryset.filter(hidden_for=user)
+
+
+
     total_leads = leads_queryset.count()
     p = Paginator(leads_queryset, 25)
     page = request.GET.get('page')
@@ -68,6 +75,7 @@ def availableLeads(request):
     second_previous = current_page + 2
 
     context = {
+        'current_user':user,
         'leads':leads,
         'total_leads':total_leads,
         'states':states,
@@ -81,9 +89,103 @@ def availableLeads(request):
         'showHidden':showHidden,
 
         'second_previous':second_previous
-
     }
     return render(request, 'Client/available_leads.html', context)
+
+def purchaseLeads(request):
+    if request.method == "POST":
+        selected_leads_ids = request.POST.getlist('selected_items')
+        lead_count = len(selected_leads_ids)
+        
+        # Get user credit details
+        user_details = UserDetail.objects.get(user=request.user)
+        free_credit = user_details.free_credit_balance
+        purchased_credit = user_details.purchased_credit_balance
+
+        # Check if user has enough credits
+        total_credit = free_credit + purchased_credit
+        if lead_count > total_credit:
+            messages.error(request, "Insufficient credits to add the selected leads.")
+            return redirect('available_leads')  # Redirect back to the leads page
+        else:
+            # Deduct credits
+            remaining_leads = lead_count
+
+            # Deduct from free credits first
+            if free_credit >= remaining_leads:
+                user_details.free_credit_balance -= remaining_leads
+                remaining_leads = 0
+                messages.info(request, str(lead_count) + ' Credits have been deducted from free credits')
+                messages.success(request,str(lead_count) + ' successfully added to My Leads. Visit My Leads Tab to explore lead details.')
+
+            else:
+                if free_credit >= 1:
+
+                    remaining_leads -= free_credit
+                    user_details.free_credit_balance = 0
+                    # Deduct the rest from purchased credits
+                    user_details.purchased_credit_balance -= remaining_leads
+                    messages.info(request, str(free_credit) + ' free credit and '+str(remaining_leads)+' purchased credit have beed deducted.') 
+                    messages.success(request,str(lead_count) + ' successfully added to My Leads. Visit My Leads Tab to explore lead details.')
+                else:
+                    user_details.purchased_credit_balance -= remaining_leads
+                    messages.info(request, str(remaining_leads)+' credits deducted from purchased credit balance.') 
+                    messages.success(request,str(lead_count) + ' successfully added to My Leads. Visit My Leads Tab to explore lead details.')
+            # Save updated credit balances
+            user_details.save()
+            user_details.update_total_credits()
+
+
+            for lead_id in selected_leads_ids:
+                Status.objects.create(lead_id=lead_id, client=request.user)
+                fcl = Foreclosure.objects.get(pk=lead_id)
+                fcl.purchased_by.add(request.user)
+            return redirect('available_leads')
+    else:
+        return HttpResponse("Invalid Request", status=400)
+
+def hidefromallLeads(request):
+    selectedState = request.POST.get('stateFilter','')
+    selectedCounty = request.POST.get('countyFilter','')
+    selectedSaletype = request.POST.get('saletypeFilter','')
+    psmin = request.POST.get('ps_min','')
+    vsmin = request.POST.get('vs_min','')
+    unhide = request.POST.get('unhide')
+    if request.method == "POST":
+        selected_leads_ids = request.POST.getlist('selected_items')
+        if unhide == "show":
+            for lead_id in selected_leads_ids:
+                unhideLeads = Foreclosure.objects.get(pk=lead_id)
+                unhideLeads.hidden_for.remove(request.user)
+            messages.success(request, str(len(selected_leads_ids)) + ' Leads successfully unhidden from All Leads! ')
+        
+        else:
+            for lead_id in selected_leads_ids:
+                hideLeads = Foreclosure.objects.get(pk=lead_id)
+                hideLeads.hidden_for.add(request.user)
+            messages.success(request, str(len(selected_leads_ids)) + ' Leads successfully hidden from All Leads! ')
+        return redirect('available_leads')
+
+    else:
+        return HttpResponse("Invalid Request", status=400)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -202,6 +202,8 @@ table.table tr td {
 
 }
 
+
+
 .action-section {
     padding: 12px;
     display: block;
@@ -384,6 +386,11 @@ table.table tr th:last-child {
 
 table.table-striped tbody tr:nth-of-type(odd) {
     background-color: #fcfcfc;
+}
+
+.highlight-row {
+    background-color: #feffdf !important;
+
 }
 
 table.table-striped.table-hover tbody tr:hover {

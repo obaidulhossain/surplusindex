@@ -8,7 +8,6 @@ Available Leads
 {% load static %}
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
 <div class="body-section">
-    
     <div class="section-header">
         <h2>Available Leads</h2>
         <button id="toggle-filters" class="button" onclick="toggleFilters(this.id, 'filters')">Hide</button>
@@ -57,19 +56,26 @@ Available Leads
         </form>
     </div>    
     <div class="section-body-full">
-        <form id="add-to-myleads" method="POST" action="{% url 'buy-leads' %}">
+        <form id="add-to-myleads" method="POST" action="{% url 'purchaseLeads' %}">
             {% csrf_token %}
             <div class="action-section">
+                <input type="hidden" name="unhide" value={{showHidden}}>
+                <input type="hidden" name="stateFilter" value={{selectedState}}>
+                <input type="hidden" name="countyFilter" value={{selectedCounty}}>
+                <input type="hidden" name="saletypeFilter" value={{selectedSaletype}}>
+                <input type="hidden" name="ps_min" value={{psmin}}>
+                <input type="hidden" name="vs_min" value={{vsmin}}>
                 <div class="action-item">
                     <button class="button" id="add-button" disabled="disabled" type="submit"
                         onclick="return confirmAddToMyLeads()">
                         Add <span id="selected-count">0</span> to My Leads</button>
                 </div>
                 <div class="action-item">
-                    <button class="button" id="hide-button" disabled="disabled" type="submit"
-                        formaction="{% url 'hide-leads' %}" onclick="return confirmHideLeads()">
-                        Hide <span id="selected-count-hide">0</span> Selected</button>
+
+                    
+                    <button class="button" id="hide-button" disabled="disabled" type="submit" formaction="{% url 'hide-leads' %}" onclick="return confirmHideLeads()">{% if showHidden == "show" %}Unhide{% else %}Hide{% endif %} <span id="selected-count-hide">0</span> Selected</button>
                 </div>
+
             </div>
             <div class="table-wrapper">
                 <table id="leads-table" class="table table-striped table-hover">
@@ -77,7 +83,7 @@ Available Leads
                         <tr>
                             <th>
                                 <span class="custom-checkbox">
-                                    <input type="checkbox" id="selectAll" disabled>
+                                    <input type="hidden" id="selectAll">
                                     
                                 </span>
                             </th>
@@ -100,20 +106,20 @@ Available Leads
                         {% for i in leads %}
 
                         <tr>
-                            <td>
+                            <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">
                                 <span class="custom-checkbox">
-                                    <input type="checkbox" id="checkbox1" name="selected_items" value="{{ i.id }}">
-                                    <label for="checkbox1"></label>
+                                    <input type="checkbox" id="checkbox" class="checkbox" name="selected_items" value="{{ i.id }}">
+                                    <label for="checkbox"></label>
                                 </span>
                             </td>
-                            <td class="state">{{i.state}}</td>
-                            <td class="county">{{i.county}}</td>
-                            <td>{{i.sale_date}}</td>
-                            <td class="saletype">{{i.sale_type}}</td>
-                            <td>{{i.sale_status}}</td>
-                            <td class="amount">{{i.sale_price}}</td>
-                            <td class="possible-surplus">{{i.possible_surplus}}</td>
-                            <td class="verified-surplus">{{i.verified_surplus}}</td>
+                            <td class="state {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.state}}</td>
+                            <td class="county {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.county}}</td>
+                            <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.sale_date}}</td>
+                            <td class="saletype {% if current_user in i.hidden_for.all %}highlight-row{% endif %}" >{{i.sale_type}}</td>
+                            <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.sale_status}}</td>
+                            <td class="amount {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.sale_price}}</td>
+                            <td class="possible-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.possible_surplus}}</td>
+                            <td class="verified-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.verified_surplus}}</td>
                         </tr>
                         {% endfor %}
                     {% endif %}
@@ -150,6 +156,9 @@ Available Leads
 
 
     </div>
+    <script src="{% static 'js/nouislider.min.js' %}"></script>
+    <script src="{% static 'js/Client.js' %}"></script>
+    <script src="{% static 'js/Surplusindex.js' %}"></script>
 </div>
 
 
@@ -164,8 +173,6 @@ Available Leads
 
 
     
-    <script src="{% static 'js/nouislider.min.js' %}"></script>
-    <script src="{% static 'js/Client.js' %}"></script>
-    <script src="{% static 'js/Surplusindex.js' %}"></script>
+
 
 {% endblock content%}
