@@ -51,9 +51,10 @@ Checklists
         <label for="casestatusFilter">Checklist</label>
         <select id="casestatusFilter" name="casestatusFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
             <option value="">All</option>
+            <option value="Verified" {% if status == "Verified" %}selected{% endif %}>Active Checklist</option>
             <option value="Pending" {% if status == "Pending" %}selected{% endif %}>New Cases</option>
             <option value="Completed" {% if status == "Completed" %}selected{% endif %}>Completed</option>
-            <option value="Verified" {% if status == "Verified" %}selected{% endif %}>Active Checklist</option>
+            
         </select>
         </div>
         </form>
@@ -83,12 +84,7 @@ Checklists
                         {% for i in leads %}
 
                         <tr>
-                            <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">
-                                <span class="custom-checkbox">
-                                    <input type="checkbox" id="checkbox" class="checkbox" name="selected_items" value="{{ i.id }}">
-                                    <label for="checkbox"></label>
-                                </span>
-                            </td>
+                            <td><a href="/add_edit_foreclosure/?fcl_id={{ i.id }}">Edit</a></td>
                             <td class="state {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.state}}</td>
                             <td class="county {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.county}}</td>
                             <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.sale_date}}</td>
