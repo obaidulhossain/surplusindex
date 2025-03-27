@@ -283,293 +283,293 @@ Skiptracing
 
 <!--Email section-start-->
 
-    <div style="margin-top:20px;" class="body-section onethird">
-        <div id="em" class="section-header">
-            <h4>Emails</h4>
-        </div>
-        <div class="section-body-full">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>                   
-                        <th>Email Address</th>
-                        <th>Update</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for email in all_email %}
-                    <tr>
-                        <form method="post" action="{% url 'update_email' %}">
-                            {%csrf_token%}
-                            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                            <input type="hidden" name="related_contact" value="{{related_contact}}">
-                            <input type="hidden" name="email_id" value="{{ email.pk }}">
-                            <td><input style="width: 290px;" type="text" placeholder="Email" name="email" value="{{email.email_address}}"></td>
-                            <td><input type="submit" name="update" value="Update"></td>
-                            <td><input type="submit" name="delete" value="Delete"></td>
-                        </form>
-                    </tr>
-                    {% endfor %}
-                    <tr style="background-color: #fff;">
-                        <form id="search-form" method="post" action="{% url 'search_create_email' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                            <input type="hidden" name="related_contact" value="{{related_contact}}">
-                            <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="email" placeholder="Email Address" name="email"></td>
-                            <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
-                            <td></td>
-                        </form>
-                    </tr>
-                </tbody>
-                <tbody id="email-results">
-                </tbody>
-            </table>
-        </div>
+<div style="margin-top:20px;" class="body-section onethird">
+    <div id="em" class="section-header">
+        <h4>Emails</h4>
     </div>
-
-    <script>
-        $(document).ready(function () {
-            // Function to fetch and update search results
-            function fetchemail() {
-                const email = $('#email').val();
-                
-                $.ajax({
-                    url: "{% url 'filteremail' %}",
-                    data: {
-                        email: email,
-                    },
-                    success: function (data) {
-                        const emails = data.emails;
-                        const emailresultsContainer = $('#email-results');
-
-                        emailresultsContainer.empty();
-
-                        if (emails.length > 0) {
-                            emails.forEach(emails => {
-                                emailresultsContainer.append(`
-
-                                <tr>
-                                    <td>${emails.email_address}</td>
-                                    <td>
-                                        <form method="post" action="{% url 'add_email' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                                        <input type="hidden" name="related_contact" value="{{related_contact}}">
-                                        <input type="hidden" name="email_id" value="${emails.id}">
-                                        <input type="submit" value="Add" onclick="this.form.submit()">
-                                        </form>
-                                    </td>
-                                    <td></td>
-                                </tr>
-                                    `);
-                            });
-                        } else {
-                            emailresultsContainer.append('<tr><th colspan="2"><center>Email Not Found!</center></th></tr>');
-                        }
-                    }
-                });
-            }
-
-            // Trigger AJAX call on input change
-            $('#email').on('input', fetchemail);
-        });
-    </script>
-
-
-    <!--Email section-end-->
-
-    <!--Wireless section-start-->
-
-    <div style="margin-top:20px;" class="body-section onethird">
-        <div id="wn" class="section-header">
-            <h4>Wireless Numbers</h4>   
-        </div>
-        <div class="section-body-full">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Wireless Numbers</th>
-                        <th>Update</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for wireless in all_wireless %}
-                    <tr>
-                        <form method="post" action="{% url 'update_wireless' %}">
-                            {%csrf_token%}
-                            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                            <input type="hidden" name="related_contact" value="{{related_contact}}">
-                            <input type="hidden" name = "wireless-id" value="{{wireless.id}}">
-                            <td><input style="width: 290px;" type="text" placeholder="Wireless" name="wireless" value="{{wireless.w_number}}"></td>
-                            <td><input type="submit" name="update" value="Update" ></td>
-                            <td><input type="submit" name="delete" value="Delete" ></td>
-                        </form>
-                    </tr>
-                    {% endfor %}
-                    <tr style="background-color: #fff;">
-                        <form id="search-form" method="post" action="{% url 'create_wireless' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                            <input type="hidden" name="related_contact" value="{{related_contact}}">
-                            <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="wireless" placeholder="Wireless Number" name="wireless"></td>
-                            <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
-                        </form>
-                    </tr>
-                </tbody>
-                <tbody id="wireless-results">
-                </tbody>
-            </table>
-        </div>
+    <div class="section-body-full">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>                   
+                    <th>Email Address</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for email in all_email %}
+                <tr>
+                    <form method="post" action="{% url 'update_email' %}">
+                        {%csrf_token%}
+                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                        <input type="hidden" name="related_contact" value="{{related_contact}}">
+                        <input type="hidden" name="email_id" value="{{ email.pk }}">
+                        <td><input style="width: 290px;" type="text" placeholder="Email" name="email" value="{{email.email_address}}"></td>
+                        <td><input type="submit" name="update" value="Update"></td>
+                        <td><input type="submit" name="delete" value="Delete"></td>
+                    </form>
+                </tr>
+                {% endfor %}
+                <tr style="background-color: #fff;">
+                    <form id="search-form" method="post" action="{% url 'search_create_email' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                        <input type="hidden" name="related_contact" value="{{related_contact}}">
+                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="email" placeholder="Email Address" name="email"></td>
+                        <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
+                        <td></td>
+                    </form>
+                </tr>
+            </tbody>
+            <tbody id="email-results">
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <script>
-        $(document).ready(function () {
-            // Function to fetch and update search results
-            function fetchwireless() {
-                const wireless = $('#wireless').val();
-                
+<script>
+    $(document).ready(function () {
+        // Function to fetch and update search results
+        function fetchemail() {
+            const email = $('#email').val();
+            
+            $.ajax({
+                url: "{% url 'filteremail' %}",
+                data: {
+                    email: email,
+                },
+                success: function (data) {
+                    const emails = data.emails;
+                    const emailresultsContainer = $('#email-results');
 
-                $.ajax({
-                    url: "{% url 'filterwireless' %}",
-                    data: {
-                        wireless: wireless,
+                    emailresultsContainer.empty();
 
-                    },
-                    success: function (data) {
-                        const wireless = data.wireless;
-                        const wirelessresultsContainer = $('#wireless-results');
+                    if (emails.length > 0) {
+                        emails.forEach(emails => {
+                            emailresultsContainer.append(`
 
-                        wirelessresultsContainer.empty();
-
-                        if (wireless.length > 0) {
-                            wireless.forEach(wireless => {
-                                wirelessresultsContainer.append(`
-
-                                <tr>
-                                    <td>${wireless.w_number}</td>
-                                    <td>
-                                        <form method="post" action="{% url 'add_wireless'%}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                                        <input type="hidden" name="related_contact" value="{{related_contact}}">
-                                        <input type="hidden" name="wireless-id" value="${wireless.id}">
-                                        <input type="submit" value="Add" onclick="this.form.submit()">
-                                        </form>
-                                    </td>
-                                </tr>
-                                
-                                    `);
-                            });
-                        } else {
-                            wirelessresultsContainer.append('<tr><th colspan="2"><center>No Wireless Number Found!</center></th></tr>');
-                        }
+                            <tr>
+                                <td>${emails.email_address}</td>
+                                <td>
+                                    <form method="post" action="{% url 'add_email' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                                    <input type="hidden" name="related_contact" value="{{related_contact}}">
+                                    <input type="hidden" name="email_id" value="${emails.id}">
+                                    <input type="submit" value="Add" onclick="this.form.submit()">
+                                    </form>
+                                </td>
+                                <td></td>
+                            </tr>
+                                `);
+                        });
+                    } else {
+                        emailresultsContainer.append('<tr><th colspan="2"><center>Email Not Found!</center></th></tr>');
                     }
-                });
-            }
+                }
+            });
+        }
 
-            // Trigger AJAX call on input change
-            $('#wireless').on('input', fetchwireless);
-        });
-    </script>
-    <!--Wireless section-end-->
+        // Trigger AJAX call on input change
+        $('#email').on('input', fetchemail);
+    });
+</script>
 
 
+<!--Email section-end-->
 
-    <!--Landline section-start-->
-    <div style="margin-top:20px;" class="body-section onethird">
-        <div id="ln" class="section-header">
-            <h4>Landline Numbers</h4>   
-        </div>
-        <div class="section-body-full">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Landline Numbers</th>
-                        <th>Update</th>
-                        <th>Delete</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for landline in all_landline %}
-                    <tr>
-                        <form method="post" action="{% url 'update_landline' %}">
-                            {%csrf_token%}
-                            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                            <input type="hidden" name="related_contact" value="{{related_contact}}">
-                            <input type="hidden" name = "landline-id" value="{{landline.id}}">
-                            <td><input style="width: 290px;" type="text" placeholder="Landline Number" name="landline" value="{{landline.l_number}}"></td>
-                            <td><input type="submit" name="update" value="Update" ></td>
-                            <td><input type="submit" name="delete" value="Delete" ></td>
-                        </form>
-                    </tr>
-                    {% endfor %}
-                    <tr style="background-color: #fff;">
-                        <form id="search-form" method="post" action="{% url 'create_landline' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                            <input type="hidden" name="related_contact" value="{{related_contact}}">
-                            <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="landline" placeholder="Landline Number" name="landline"></td>
-                            <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
-                        </form>
-                    </tr>
-                </tbody>
-                <tbody id="landline-results">
-                </tbody>
-            </table>
-        </div>
+<!--Wireless section-start-->
+
+<div style="margin-top:20px;" class="body-section onethird">
+    <div id="wn" class="section-header">
+        <h4>Wireless Numbers</h4>   
     </div>
+    <div class="section-body-full">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Wireless Numbers</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for wireless in all_wireless %}
+                <tr>
+                    <form method="post" action="{% url 'update_wireless' %}">
+                        {%csrf_token%}
+                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                        <input type="hidden" name="related_contact" value="{{related_contact}}">
+                        <input type="hidden" name = "wireless-id" value="{{wireless.id}}">
+                        <td><input style="width: 290px;" type="text" placeholder="Wireless" name="wireless" value="{{wireless.w_number}}"></td>
+                        <td><input type="submit" name="update" value="Update" ></td>
+                        <td><input type="submit" name="delete" value="Delete" ></td>
+                    </form>
+                </tr>
+                {% endfor %}
+                <tr style="background-color: #fff;">
+                    <form id="search-form" method="post" action="{% url 'create_wireless' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                        <input type="hidden" name="related_contact" value="{{related_contact}}">
+                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="wireless" placeholder="Wireless Number" name="wireless"></td>
+                        <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
+                    </form>
+                </tr>
+            </tbody>
+            <tbody id="wireless-results">
+            </tbody>
+        </table>
+    </div>
+</div>
 
-    <script>
-        $(document).ready(function () {
-            // Function to fetch and update search results
-            function fetchlandline() {
-                const landline = $('#landline').val();
-                
+<script>
+    $(document).ready(function () {
+        // Function to fetch and update search results
+        function fetchwireless() {
+            const wireless = $('#wireless').val();
+            
 
-                $.ajax({
-                    url: "{% url 'filter_landline' %}",
-                    data: {
-                        landline: landline,
+            $.ajax({
+                url: "{% url 'filterwireless' %}",
+                data: {
+                    wireless: wireless,
 
-                    },
-                    success: function (data) {
-                        const landline = data.landline;
-                        const landlineresultsContainer = $('#landline-results');
+                },
+                success: function (data) {
+                    const wireless = data.wireless;
+                    const wirelessresultsContainer = $('#wireless-results');
 
-                        landlineresultsContainer.empty();
+                    wirelessresultsContainer.empty();
 
-                        if (landline.length > 0) {
-                            landline.forEach(landline => {
-                                landlineresultsContainer.append(`
+                    if (wireless.length > 0) {
+                        wireless.forEach(wireless => {
+                            wirelessresultsContainer.append(`
 
-                                <tr>
-                                    <td>${landline.l_number}</td>
-                                    <td>
-                                        <form method="post" action="{% url 'add_landline' %}">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                                        <input type="hidden" name="related_contact" value="{{related_contact}}">
-                                        <input type="hidden" name="landline-id" value="${landline.id}">
-                                        <input type="submit" value="Add" onclick="this.form.submit()">
-                                        </form>
-                                    </td>
-                                </tr>
-                                
-                                    `);
-                            });
-                        } else {
-                            landlineresultsContainer.append('<tr><th colspan="2"><center>No Landline Number Found!</center></th></tr>');
-                        }
+                            <tr>
+                                <td>${wireless.w_number}</td>
+                                <td>
+                                    <form method="post" action="{% url 'add_wireless'%}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                                    <input type="hidden" name="related_contact" value="{{related_contact}}">
+                                    <input type="hidden" name="wireless-id" value="${wireless.id}">
+                                    <input type="submit" value="Add" onclick="this.form.submit()">
+                                    </form>
+                                </td>
+                            </tr>
+                            
+                                `);
+                        });
+                    } else {
+                        wirelessresultsContainer.append('<tr><th colspan="2"><center>No Wireless Number Found!</center></th></tr>');
                     }
-                });
-            }
+                }
+            });
+        }
 
-            // Trigger AJAX call on input change
-            $('#landline').on('input', fetchlandline);
-        });
-    </script>
-    <!--Landline section-start-->
+        // Trigger AJAX call on input change
+        $('#wireless').on('input', fetchwireless);
+    });
+</script>
+<!--Wireless section-end-->
+
+
+
+<!--Landline section-start-->
+<div style="margin-top:20px;" class="body-section onethird">
+    <div id="ln" class="section-header">
+        <h4>Landline Numbers</h4>   
+    </div>
+    <div class="section-body-full">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Landline Numbers</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for landline in all_landline %}
+                <tr>
+                    <form method="post" action="{% url 'update_landline' %}">
+                        {%csrf_token%}
+                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                        <input type="hidden" name="related_contact" value="{{related_contact}}">
+                        <input type="hidden" name = "landline-id" value="{{landline.id}}">
+                        <td><input style="width: 290px;" type="text" placeholder="Landline Number" name="landline" value="{{landline.l_number}}"></td>
+                        <td><input type="submit" name="update" value="Update" ></td>
+                        <td><input type="submit" name="delete" value="Delete" ></td>
+                    </form>
+                </tr>
+                {% endfor %}
+                <tr style="background-color: #fff;">
+                    <form id="search-form" method="post" action="{% url 'create_landline' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                        <input type="hidden" name="related_contact" value="{{related_contact}}">
+                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="landline" placeholder="Landline Number" name="landline"></td>
+                        <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
+                    </form>
+                </tr>
+            </tbody>
+            <tbody id="landline-results">
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        // Function to fetch and update search results
+        function fetchlandline() {
+            const landline = $('#landline').val();
+            
+
+            $.ajax({
+                url: "{% url 'filter_landline' %}",
+                data: {
+                    landline: landline,
+
+                },
+                success: function (data) {
+                    const landline = data.landline;
+                    const landlineresultsContainer = $('#landline-results');
+
+                    landlineresultsContainer.empty();
+
+                    if (landline.length > 0) {
+                        landline.forEach(landline => {
+                            landlineresultsContainer.append(`
+
+                            <tr>
+                                <td>${landline.l_number}</td>
+                                <td>
+                                    <form method="post" action="{% url 'add_landline' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+                                    <input type="hidden" name="related_contact" value="{{related_contact}}">
+                                    <input type="hidden" name="landline-id" value="${landline.id}">
+                                    <input type="submit" value="Add" onclick="this.form.submit()">
+                                    </form>
+                                </td>
+                            </tr>
+                            
+                                `);
+                        });
+                    } else {
+                        landlineresultsContainer.append('<tr><th colspan="2"><center>No Landline Number Found!</center></th></tr>');
+                    }
+                }
+            });
+        }
+
+        // Trigger AJAX call on input change
+        $('#landline').on('input', fetchlandline);
+    });
+</script>
+<!--Landline section-start-->
 
 
 

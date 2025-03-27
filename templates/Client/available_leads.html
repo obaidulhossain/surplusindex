@@ -66,14 +66,10 @@ Available Leads
                 <input type="hidden" name="ps_min" value={{psmin}}>
                 <input type="hidden" name="vs_min" value={{vsmin}}>
                 <div class="action-item">
-                    <button class="button" id="add-button" disabled="disabled" type="submit"
-                        onclick="return confirmAddToMyLeads()">
-                        Add <span id="selected-count">0</span> to My Leads</button>
+                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmAddToMyLeads()">Add <span data-selected-count>0</span> to My Leads</button>
                 </div>
                 <div class="action-item">
-
-                    
-                    <button class="button" id="hide-button" disabled="disabled" type="submit" formaction="{% url 'hide-leads' %}" onclick="return confirmHideLeads()">{% if showHidden == "show" %}Unhide{% else %}Hide{% endif %} <span id="selected-count-hide">0</span> Selected</button>
+                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmHideLeads()" formaction="{% url 'hide-leads' %}">{% if showHidden == "show" %}Unhide{% else %}Hide{% endif %} <span data-selected-count>0</span> Selected</button>
                 </div>
 
             </div>

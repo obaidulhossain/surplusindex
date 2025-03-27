@@ -37,3 +37,61 @@ function copyToClipboard(button) {
         alert("Failed to copy URL: " + err);
     });
 }
+
+
+// Reuseable function
+// -------------------------count checkbox checked-----(start)-----------------------------
+//Example Usage: <button class="button" id="archive-button" data-requires-selection disabled="disabled" type="submit" onclick="return confirmArchiveLeads()">Archive <span data-selected-count>0</span> Selected</button>
+
+function updateButtonStates() {
+    // Get all checkboxes with the class 'checkbox'
+    const checkboxes = document.querySelectorAll('.checkbox');
+    const selectedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+
+    // Count the selected checkboxes
+    const selectedCount = selectedCheckboxes.length;
+
+    // Update all elements with the 'data-selected-count' attribute
+    document.querySelectorAll('[data-selected-count]').forEach(element => {
+        element.textContent = selectedCount;
+    });
+
+    // Enable or disable buttons based on selection
+    document.querySelectorAll('[data-requires-selection]').forEach(button => {
+        button.disabled = selectedCount === 0;
+    });
+}
+
+// Attach event listeners and initialize states
+document.addEventListener('DOMContentLoaded', () => {
+    const checkboxes = document.querySelectorAll('.checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateButtonStates);
+    });
+
+    // Initialize button states on page load
+    updateButtonStates();
+});
+
+// -------------------------count checkbox checked-----(end)-----------------------------
+
+
+//<input type="text" id="phone" maxlength="14" placeholder="(123) 456-7890">
+const phoneInput = document.getElementById('phone');
+
+phoneInput.addEventListener('input', (e) => {
+    let input = e.target.value.replace(/\D/g, ''); // Remove all non-digit characters
+    let formatted = '';
+
+    if (input.length > 0) {
+        formatted = '(' + input.substring(0, 3);
+    }
+    if (input.length > 3) {
+        formatted += ') ' + input.substring(3, 6);
+    }
+    if (input.length > 6) {
+        formatted += '-' + input.substring(6, 10);
+    }
+
+    e.target.value = formatted;
+});

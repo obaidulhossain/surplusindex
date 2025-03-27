@@ -259,7 +259,7 @@ class Status(models.Model):
     CLAIM_SUBMITTED = 'claim submitted'
     WAITING_FOR_COURTS_DECISION = 'waiting for courts decision'
     FUND_DISBURSED = 'fund disbursed'
-    CLAIM_SATUS = (
+    CLAIM_STATUS = (
         (NOT_SIGNED, 'Not Signed'),
         (PREPARING_DOCUMENTS, 'Preparing Documents'),
         (CLAIM_SUBMITTED, 'Claim Submitted'),
@@ -268,12 +268,31 @@ class Status(models.Model):
         )
     client = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name='user_as_client', default=1)
     lead = models.ForeignKey(Foreclosure, blank=True, related_name='foreclosure_as_lead', on_delete=models.CASCADE, default=1)
+    number_in_use = models.CharField(max_length=14, null=True, blank=True)
     call_status = models.CharField(max_length=255, blank=True, default='Need to Call')
     call_comment = models.TextField(max_length=500, blank=True)
     agreement_status = models.CharField(max_length=255, blank=True, choices=AG_STATUS, default='Not Signed')
     agreement_comment = models.TextField(max_length=500, blank=True)
-    claim_status = models.CharField(max_length=255, blank=True, choices=CLAIM_SATUS, default='Not Signed')
+    claim_status = models.CharField(max_length=255, blank=True, choices=CLAIM_STATUS, default='Not Signed')
     claim_comment = models.TextField(max_length=500, blank=True)
     archived = models.BooleanField(default=False)
+    find_contact_status = models.CharField(max_length=255, blank=True)
+    find_contact_comment = models.TextField(max_length=500, blank=True)
+    call_negotiate_status = models.CharField(max_length=255, blank=True)
+    call_negotiate_comment = models.TextField(max_length=500, blank=True)
+    follow_up_status = models.CharField(max_length=255, blank=True)
+    follow_up_comment = models.TextField(max_length=500, blank=True)
+    paperwork_status = models.CharField(max_length=255, blank=True)
+    paperwork_comment = models.TextField(max_length=500, blank=True)
+    fund_confirm_status = models.CharField(max_length=255, blank=True)
+    fund_confirm_comment = models.TextField(max_length=500, blank=True)
+    submit_paperwork_status = models.CharField(max_length=255, blank=True)
+    submit_paperwork_comment = models.TextField(max_length=500, blank=True)
+    waiting_status = models.CharField(max_length=255, blank=True)
+    waiting_comment = models.TextField(max_length=500, blank=True)
+    fund_collection_status = models.CharField(max_length=255, blank=True)
+    fund_collection_comment = models.TextField(max_length=500, blank=True)
+    
+
 
 

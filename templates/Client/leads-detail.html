@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% block title %}
+Leads Detail
+{% endblock title %}
+
+
+{% block content%}
+
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/accordion.css' %}" rel="stylesheet">
+<link href="{% static 'css/nouislider.min.css' %}" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+<div style="margin-top: 20px;" class="body-section">
+<div class="section-header">
+<h2>Foreclosure Detail</h2>
+</div>
+<div class="section-body-full">
+    <div class="table-wrapper">
+        <table class="infotable">
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Sale Type</th>
+                    <th>Sale Status</th>
+                </tr>
+            <thead>
+            <tbody>
+                <tr>
+                    <td>{{status_instance.lead.state|title}}</td>
+                    <td>{{status_instance.lead.county|title}}</td>
+                    <td>{{status_instance.lead.case_number|upper}}</td>
+                    <td>{{status_instance.lead.sale_date|date:"m/d/Y"}}</td>
+                    <td>{{status_instance.lead.sale_type|title}}</td>
+                    <td>{{status_instance.lead.sale_status|title}}</td>
+                </tr>
+            <tbody>
+        </table>
+    </div>
+        <div class="table-wrapper" style="margin-top:15px; text-align-last: left;">
+        <table class="infotable">
+            <thead>
+                <tr>
+                    <th>Defendants</th>
+                    <th></th>
+                    <th>Plaintiffs</th>
+                    <th></th>
+                    <th>Property Address</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td colspan=2>{% for def in alldef %}{{def.business_name|upper}}<br>{% if not def.first_name == "" and def.business_name != "" %} {{def.designation|upper}}: {% endif %}{{def.name_prefix|title}} {{def.first_name|title}} {{def.middle_name|title}} {{def.last_name|title}} {{def.name_suffix|title}}<br><br>{% endfor %}</td>
+                <td colspan=2>{% for plt in allplt %}{{plt}}<br>{% endfor %}</td>
+                <td colspan=2>{% for address in alladdress %}{{address.house_number}} {{address.road_name}} {{address.road_type}}{% if not address.direction == "" %} {{address.direction}}{% endif %}{% if not address.apt_unit == "" %} {{address.apt_unit}}{% endif %}{% if not address.extention == "" %} {{address.extention}}{% endif %}, {{address.city}}, {{address.state}} {{address.zip_code}}<br>{% endfor %}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div style="margin-top: 20px;" class="body-section">
+<div class="section-header">
+<h2>Financial Information</h2>
+</div>
+<div class="section-body-full">
+    <div class="table-wrapper">
+        <table class="infotable">
+            <thead>
+                <tr>
+                    <th>Final Judgment</th>
+                    <th>Sale Price</th>
+                    <th>Possible Surplus</th>
+                    <th>Verified Surplus</th>
+                    <th>Surplus Status</th>
+                </tr>
+            <thead>
+            <tbody>
+                <tr>
+                    <td>{{status_instance.lead.fcl_final_judgment|currency}}</td>
+                    <td>{{status_instance.lead.sale_price|currency}}</td>
+                    <td>{{status_instance.lead.possible_surplus|currency}}</td>
+                    <td>{{status_instance.lead.verified_surplus|currency}}</td>
+                    <td>{{status_instance.lead.surplus_status|upper}}</td>
+                    
+                </tr>
+            <tbody>
+        </table>
+    </div>
+</div>
+<div style="margin-top: 20px;" class="body-section">
+    <div class="section-header">
+        <h2>Prospecting Timeline</h2>
+    </div>
+    <div class="section-body-full">
+        <div class="wrap">
+        <div style="height:580px;">
+            <div class="tab">
+                <button class="tablinks" onclick="openCity(event, 'Skiptrace')" id="defaultOpen">Find The Right Contact</button>
+                <button class="tablinks" onclick="openCity(event, 'Negotiate')">Call and Negotiate</button>
+                <button class="tablinks" onclick="openCity(event, 'Followup')">Follow Up</button>
+                <button class="tablinks" onclick="openCity(event, 'Agreement')">Do the Paperword</button>
+                <button class="tablinks" onclick="openCity(event, 'Confirm')">Confirm Fund</button>
+                <button class="tablinks" onclick="openCity(event, 'Submit')">Submit Paperwork</button>
+                <button class="tablinks" onclick="openCity(event, 'Wait')">Waiting for Approval</button>
+                <button class="tablinks" onclick="openCity(event, 'Collect')">Collect Percentage</button>
+            </div>
+            <form method="post" action="{% url 'leads-detail' %}">
+                {% csrf_token %}
+                <input type="hidden" name="status_id" value="{{status_instance.pk}}">
+                <div id="Skiptrace" class="tabcontent">
+                    <h3>Find The Right Contact</h3>
+                    <div class="instruction">
+                    <p>Instructions to Follow: Firstly You can call the numbers from available contacts section. If you can find the right contact, note it down and proceed with the next step</p>
+                    </div>
+                    <label for="phone">Number in use</label>
+                    <input type="text" id="phone" name="numberinuse" maxlength="14" {% if not status_instance.number_in_use == "" or None %}value="{{status_instance.number_in_use}}"{% else %}placeholder="(123) 456-7890"{% endif %}>
+                    <button class="button" type="submit">Save</button>
+                    <a href="callto:{{status_instance.number_in_use}}" class="button">Make Call</a>
+
+                </div>
+
+                <div id="Negotiate" class="tabcontent">
+                    <h3>Make Call and Negotiate</h3>
+                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+                </div>
+
+                <div id="Followup" class="tabcontent">
+                    <h3>Follow Up</h3>
+                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+                </div>
+                <div id="Agreement" class="tabcontent">
+                    <h3>Do the Paperword</h3>
+                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+                </div>
+                <div id="Confirm" class="tabcontent">
+                    <h3>Confirm Fund</h3>
+                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+                </div>
+                <div id="Submit" class="tabcontent">
+                    <h3>Submit Paperwork</h3>
+                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+                </div>
+                <div id="Wait" class="tabcontent">
+                    <h3>Waiting for Approval</h3>
+                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+                </div>
+                <div id="Collect" class="tabcontent">
+                    <h3>Collect Percentage</h3>
+                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+                </div>
+            </form>    
+        </div>
+    </div>   
+    </div>
+</div>
+
+
+
+</br>
+</br>
+<h1>Available Contacts</h1>
+{% for def in alldef %}
+
+<div style="margin-top: 20px;" class="body-section">
+    <div class="section-header">
+    <h2>{{forloop.counter}} {{def.name_prefix|title}} {{def.first_name|title}} {{def.middle_name|title}} {{def.last_name|title}} {{def.name_suffix|title}}</h2>
+    </div>
+    <div class="section-body-full">
+        <div class="table-wrapper">
+            <table class="infotable">
+                <thead>
+                    <tr>
+                        <th><h6>Email</h6></th>
+                        <th><h6>Wirelesses</h6></th>
+                        <th><h6>Landlines</h6></th>
+                        <th><h6>Mailing Addresses</h6></th>
+                    </tr>
+                <thead>
+                <tbody>
+                    <tr>
+                        <td style="width:300px;">
+                        {% for email in def.emails.all %}
+                        <a class="contact-button" href="mailto:{{email.email_address}}">{{email.email_address}}</a>
+                        {% endfor %}
+                        </td>
+                        <td style="width:200px;">
+                        {% for wireless in def.wireless.all %}
+                        <a class="contact-button" href="callto:{{ wireless.w_number }}">{{ wireless.w_number }}</a>
+                        {% endfor %}
+                        </td>
+                        <td style="width:200px;">
+                        {% for landline in def.landline.all %}
+                        <a class="contact-button" href="callto:{{ landline.l_number }}">{{ landline.l_number }}</a>
+                        {% endfor %}
+                        </td>
+                        <td style="width:600px;">
+                        {% for mailing in def.mailing_address.all %}
+                        <div style="width:100%;">{{ mailing }}</div>
+                        {% endfor %}
+                        </td>
+                    </tr>
+                <tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+{% for related in def.related_contacts.all %}
+<div style="margin-top: 20px;" class="body-section">
+    <div style="background-color:#3e9b72; padding:0px 30px;" class="section-header">
+    <h2>{{forloop.parentloop.counter}}.{{forloop.counter}} {{related.name_prefix|title}} {{related.first_name|title}} {{related.middle_name|title}} {{related.last_name|title}} {{related.name_suffix|title}}</h2>
+    <h5>Associated with: {{def.name_prefix|title}} {{def.first_name|title}} {{def.middle_name|title}} {{def.last_name|title}} {{def.name_suffix|title}}</h5>
+    </div>
+    <div class="section-body-full">
+        <div class="table-wrapper">
+            <table class="infotable">
+                <thead>
+                    <tr>
+                        <th><h6>Email</h6></th>
+                        <th><h6>Wirelesses</h6></th>
+                        <th><h6>Landlines</h6></th>
+                        <th><h6>Mailing Addresses</h6></th>                       
+                    </tr>
+                <thead>
+                <tbody>
+                    <tr>
+                        <td style="width:300px;">
+                        {% for email in related.emails.all %}
+                        <a class="contact-button" href="mailto:{{email.email_address}}">{{email.email_address}}</a>
+                        {% endfor %}
+                        </td>
+                        <td style="width:200px;">
+                        {% for wireless in related.wireless.all %}
+                        <a class="contact-button" href="callto:{{ wireless.w_number }}">{{ wireless.w_number }}</a>
+                        {% endfor %}
+                        </td>
+                        <td style="width:200px;">
+                        {% for landline in related.landline.all %}
+                        <a class="contact-button" href="callto:{{ landline.l_number }}">{{ landline.l_number }}</a>
+                        {% endfor %}
+                        </td>
+                        <td style="width:600px;">
+                        {% for mailing in related.mailing_address.all %}
+                        <div style="width:100%;">{{ mailing }}</div>
+                        {% endfor %}
+                        </td>
+                    </tr>
+                <tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endfor %}
+
+{{status_instance.id}}
+{{status_instance.lead.id}}
+
+
+
+
+<script src="{% static 'js/accordion.js' %}"></script>
+<script src="{% static 'js/nouislider.min.js' %}"></script>
+<script src="{% static 'js/Client.js' %}"></script>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+
+{% endblock content%}

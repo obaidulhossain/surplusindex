@@ -106,7 +106,7 @@ def purchaseLeads(request):
         total_credit = free_credit + purchased_credit
         if lead_count > total_credit:
             messages.error(request, "Insufficient credits to add the selected leads.")
-            return redirect('available_leads')  # Redirect back to the leads page
+            return redirect('leads')  # Redirect back to the leads page
         else:
             # Deduct credits
             remaining_leads = lead_count
@@ -140,7 +140,7 @@ def purchaseLeads(request):
                 Status.objects.create(lead_id=lead_id, client=request.user)
                 fcl = Foreclosure.objects.get(pk=lead_id)
                 fcl.purchased_by.add(request.user)
-            return redirect('available_leads')
+            return redirect('leads')
     else:
         return HttpResponse("Invalid Request", status=400)
 
@@ -164,16 +164,151 @@ def hidefromallLeads(request):
                 hideLeads = Foreclosure.objects.get(pk=lead_id)
                 hideLeads.hidden_for.add(request.user)
             messages.success(request, str(len(selected_leads_ids)) + ' Leads successfully hidden from All Leads! ')
-        return redirect('available_leads')
+        return redirect('leads')
 
+    else:
+        return HttpResponse("Invalid Request", status=400)
+
+def myLeads(request):
+    user = request.user
+    if request.method == 'POST':
+        selectedState = request.POST.get('stateFilter','')
+        selectedCounty = request.POST.get('countyFilter','')
+        selectedSaletype = request.POST.get('saletypeFilter','')
+        psmin = request.POST.get('ps_min','')
+        vsmin = request.POST.get('vs_min','')
+        showArchived = request.POST.get('show_archived','')
+    else:
+        selectedState = request.GET.get('stateFilter','')
+        selectedCounty = request.GET.get('countyFilter','')
+        selectedSaletype = request.GET.get('saletypeFilter','')
+        psmin = request.GET.get('ps_min','')
+        vsmin = request.GET.get('vs_min','')
+        showArchived = request.GET.get('show_Archived','')
+    
+
+    statusinstances = Status.objects.filter(client=user)
+    leads_queryset = Foreclosure.objects.filter(foreclosure_as_lead__in=statusinstances).prefetch_related('foreclosure_as_lead')
+    states=leads_queryset.values_list("state", flat=True).distinct()
+    if not selectedState:
+        counties=Foreclosure.objects.values_list("county", flat=True).distinct()
+        saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
+
+    else:
+        counties=Foreclosure.objects.filter(state=selectedState).values_list("county", flat=True).distinct()
+        saletypes=Foreclosure.objects.filter(state=selectedState).values_list("sale_type", flat=True).distinct()
+        leads_queryset = leads_queryset.filter(state__iexact=selectedState)
+    
+    if not showArchived == "show":
+        leads_queryset = leads_queryset.exclude(archived_by=user)
+    else:
+        leads_queryset = leads_queryset.filter(archived_by=user)
+
+    if selectedCounty:
+        leads_queryset = leads_queryset.filter(county__iexact=selectedCounty)
+
+    if selectedSaletype:
+        leads_queryset = leads_queryset.filter(sale_type__iexact=selectedSaletype)
+
+    if psmin:
+        leads_queryset = leads_queryset.filter(possible_surplus__gte=psmin)
+
+    if vsmin:
+        leads_queryset = leads_queryset.filter(verified_surplus__gte=vsmin)
+
+    
+
+
+
+    total_leads = leads_queryset.count()
+    p = Paginator(leads_queryset, 25)
+    page = request.GET.get('page')
+    leads = p.get_page(page)
+    current_page = int(leads.number)
+    second_previous = current_page + 2
+
+    context = {
+        'current_user':user,
+        'leads':leads,
+        'total_leads':total_leads,
+        'states':states,
+        'counties':counties,
+        'saletypes':saletypes,
+        'selectedState':selectedState,
+        'selectedCounty':selectedCounty,
+        'selectedSaletype':selectedSaletype,
+        'psmin':psmin,
+        'vsmin':vsmin,
+        'showArchived':showArchived,
+
+        'second_previous':second_previous
+    }
+    return render(request, 'Client/my_leads.html', context)
+
+
+
+def archivefromMyLeads(request):
+    showArchived = request.POST.get('show_archived','')
+    if request.method == "POST":
+        selected_leads_ids = request.POST.getlist('selected_items')
+        
+        for lead_id in selected_leads_ids:
+            fclinstance = Foreclosure.objects.get(pk=lead_id)
+            if not request.user in fclinstance.archived_by.all():
+                fclinstance.archived_by.add(request.user)
+
+            else:
+                fclinstance.archived_by.remove(request.user)
+        if showArchived == 'show':
+            messages.success(request, str(len(selected_leads_ids)) + ' Leads unarchived!')
+        else:
+            messages.success(request, str(len(selected_leads_ids)) + ' Leads archived!')
+        return redirect('myleads')
     else:
         return HttpResponse("Invalid Request", status=400)
 
 
 
+def leadsDetail(request):
+    if request.method == "POST":
+        selected_status = request.POST.get('status_id')
+        status_instance = Status.objects.get(pk=selected_status)
+        numberinuse = request.POST.get('numberinuse','')
+
+        status_instance.number_in_use = numberinuse
+        status_instance.save()
+        messages.info(request, 'Status Updated')
+    else:
+        selected_status = request.GET.get('status_id')
+    
+    status_instance = Status.objects.get(pk=selected_status)
+    alldef = status_instance.lead.defendant.all()
+    allplt = status_instance.lead.plaintiff.all()
+    alladdress = status_instance.lead.property.all()
+    
+    context = {
+        
+        'status_instance':status_instance,
+        'alldef':alldef,
+        'allplt':allplt,
+        'alladdress':alladdress,
+
+        # 'fcl_instance':fcl_instance,
+    }
+    return render(request, 'Client/leads-detail.html', context)
+    
 
 
 
+def updateStatus(request):
+    selected_status = request.POST.get('status_id')
+    status_instance = Status.objects.get(pk=selected_status)
+    numberinuse = request.POST.get('numberinuse','')
+
+    status_instance.number_in_use = numberinuse
+    status_instance.save()
+
+    return redirect('leads-detail')
 
 
 

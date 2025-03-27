@@ -1,3 +1,5 @@
+
+
 // $(document).ready(function () {
 //     var checkbox = $('table tbody tr input[type="checkbox"]');
 //     $("#selectAll").click(function () {
@@ -58,31 +60,39 @@
 
 
 
-function updateButtonStates() {
-    // Get all checkboxes within the table
-    const checkboxes = document.querySelectorAll('.checkbox');
-    const selectedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+// function updateButtonStates() {
+//     // Get all checkboxes within the table
+//     const checkboxes = document.querySelectorAll('.checkbox');
+//     const selectedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
 
-    // Update the count of selected checkboxes
-    const selectedCount = selectedCheckboxes.length;
-    document.getElementById('selected-count').textContent = selectedCount;
-    document.getElementById('selected-count-hide').textContent = selectedCount;
+//     // Update the count of selected checkboxes
+//     const selectedCount = selectedCheckboxes.length;
+//     document.getElementById('selected-count').textContent = selectedCount;
+//     document.getElementById('selected-count-hide').textContent = selectedCount;
+//     // document.getElementById('selected-count-archive').textContent = selectedCount;
 
-    // Enable or disable buttons based on selection
-    document.getElementById('add-button').disabled = selectedCount === 0;
-    document.getElementById('hide-button').disabled = selectedCount === 0;
-}
+//     // Enable or disable buttons based on selection
+//     document.getElementById('add-button').disabled = selectedCount === 0;
+//     document.getElementById('hide-button').disabled = selectedCount === 0;
+//     // document.getElementById('archive-button').disabled = selectedCount === 0;
+// }
 
-// Attach event listeners to checkboxes
-document.addEventListener('DOMContentLoaded', () => {
-    const checkboxes = document.querySelectorAll('.checkbox');
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateButtonStates);
-    });
+// // Attach event listeners to checkboxes
+// document.addEventListener('DOMContentLoaded', () => {
+//     const checkboxes = document.querySelectorAll('.checkbox');
+//     checkboxes.forEach(checkbox => {
+//         checkbox.addEventListener('change', updateButtonStates);
+//     });
 
-    // Also initialize button states on page load
-    updateButtonStates();
-});
+//     // Also initialize button states on page load
+//     updateButtonStates();
+// });
+
+
+
+
+
+
 
 function confirmAddToMyLeads() {
     // Get the count of selected checkboxes
@@ -99,3 +109,57 @@ function confirmAddToMyLeads() {
     return confirm(message); // Returns true if OK is clicked, false otherwise
 }
 
+function confirmHideLeads() {
+    // Get the count of selected checkboxes
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to hide ${selectedLeads} selected leads?`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+function confirmUnhideLeads() {
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to unhide ${selectedLeads} selected leads?`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+function confirmArchive() {
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to Archive ${selectedLeads} selected leads? These leads can be found and unarchived from Archived Leads Section.`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+function confirmUnarchive() {
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to hide');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to Unarchive ${selectedLeads} selected leads? These leads can be found in My Leads Section.`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
