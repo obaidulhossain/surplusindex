@@ -32,8 +32,21 @@ def caseChecklist(request):
         status = request.GET.get('casestatusFilter','')
     
 
-    states=Foreclosure.objects.values_list("state", flat=True).distinct()
+    # states=Foreclosure.objects.values_list("state", flat=True).distinct()
+
     leads_queryset = Foreclosure.objects.filter(case_search_assigned_to=user)
+    if status == "Pending":
+        leads_queryset = leads_queryset.filter(case_search_status="Pending")
+    elif status == "Completed":
+        leads_queryset = leads_queryset.filter(case_search_status="Completed")
+    elif status == "Verified":
+        leads_queryset = leads_queryset.filter(case_search_status="Verified", changed_at__lt=now().date() - timedelta(days=7)).exclude(surplus_status='Fund Claimed').exclude(surplus_status='No Surplus').exclude(sale_status='Cancelled')
+    
+    states = leads_queryset.values_list("state", flat=True).distinct()
+
+
+
+
 
     if not selectedState:
         counties=Foreclosure.objects.values_list("county", flat=True).distinct()
@@ -50,13 +63,6 @@ def caseChecklist(request):
     if selectedSaletype:
         leads_queryset = leads_queryset.filter(sale_type__iexact=selectedSaletype)
 
-    if status == "Pending":
-        leads_queryset = leads_queryset.filter(case_search_status="Pending")
-    elif status == "Completed":
-        leads_queryset = leads_queryset.filter(case_search_status="Completed")
-    elif status == "Verified":
-        leads_queryset = leads_queryset.filter(case_search_status="Verified", changed_at__lt=now().date() - timedelta(days=7)).exclude(surplus_status='Fund Claimed').exclude(surplus_status='No Surplus').exclude(sale_status='Cancelled')
-    
 
 
 

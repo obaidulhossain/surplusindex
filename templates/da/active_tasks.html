@@ -21,8 +21,18 @@ Checklists
     <form method="post">
         {% csrf_token %}
         <div class="onefifth">
+            <label for="casestatusFilter">Checklist</label>
+            <select id="casestatusFilter" name="casestatusFilter" onchange="this.form.submit()">
+                <option value="">--- Select Checklist ---</option>
+                <option value="Verified" {% if status == "Verified" %}selected{% endif %}>Active Checklist</option>
+                <option value="Pending" {% if status == "Pending" %}selected{% endif %}>New Cases</option>
+                <option value="Completed" {% if status == "Completed" %}selected{% endif %}>Completed</option>
+                
+            </select>
+        </div>
+        <div class="onefifth">
             <label for="stateFilter">Select State</label><br>
-            <select id="stateFilter" name="stateFilter" onchange="this.form.submit()">
+            <select id="stateFilter" name="stateFilter" onchange="this.form.submit()"{% if status == "" %}disabled{% endif %}>
                 <option value="" {% if selectedState == "" %}selected{% endif %}>--- Select State ---</option>
                 {% for state in states %}
                 <option value="{{state}}" {% if state == selectedState %}selected{% endif %}>{{state|upper}}</option>
@@ -47,16 +57,6 @@ Checklists
             {% endfor %}
         </select>
         </div>
-        <div class="onefifth">
-        <label for="casestatusFilter">Checklist</label>
-        <select id="casestatusFilter" name="casestatusFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
-            <option value="">All</option>
-            <option value="Verified" {% if status == "Verified" %}selected{% endif %}>Active Checklist</option>
-            <option value="Pending" {% if status == "Pending" %}selected{% endif %}>New Cases</option>
-            <option value="Completed" {% if status == "Completed" %}selected{% endif %}>Completed</option>
-            
-        </select>
-        </div>
         </form>
     </div>
     <div class="section-body-full">
@@ -76,9 +76,9 @@ Checklists
                     </tr>
                     </thead>
                     <tbody>
-                    {% if selectedState == "" %}
+                    {% if status == "" %}
                         <tr>
-                            <td colspan=9>Please select a State to load data</td>
+                            <td colspan=9>Please select a Checklist to load data</td>
                         <tr>
                     {% else %}
                         {% for i in leads %}
