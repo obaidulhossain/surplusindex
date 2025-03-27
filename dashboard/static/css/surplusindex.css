@@ -156,7 +156,7 @@ table.table tr td {
 .section-filter-full {
     background-color: #eeeeee;
     border: 1px solid #ababab;
-    display: flex;
+    display: block;
     padding: 10px 20px;
     overflow-x: auto;
     width: 100%;

@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'import_export',
     'Admin',
     'Client',
+    'DA',
 ]
 
 MIDDLEWARE = [

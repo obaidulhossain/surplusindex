@@ -22,10 +22,12 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('Admin.urls')),
     path('', include('Client.urls')),
+    path('', include('DA.urls')),
     path('', include('propertydata.urls')),
     path('', include('authentication.urls')),
     path('', include('si_user.urls')),
     path('', include('realestate_directory.urls')),
     path('', include('projects.urls')),
+    
 
     ]
