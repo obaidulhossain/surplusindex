@@ -24,12 +24,14 @@ function saveRow(button) {
     const row = button.closest('tr');
     const rowId = row.getAttribute('data-id');
     const eventNext = row.querySelector('.event_next').value;
+    const eventUpdatedFrom = row.querySelector('.event_updated_from').value;
     const eventUpdatedTo = row.querySelector('.event_updated_to').value;
 
     // Prepare data for updating
     const updatedData = {
         id: rowId,
         event_next: eventNext,
+        event_updated_from: eventUpdatedFrom,
         event_updated_to: eventUpdatedTo
     };
 

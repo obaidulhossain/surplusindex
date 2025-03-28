@@ -3,14 +3,15 @@
 Checklists
 {% endblock title %}
 
-
-{% block content%}
+{% block content %}
 {% load static %}
+
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
 <link href="{% static 'css/propertydata.css' %}" rel="stylesheet">
 <link href="{% static 'css/nouislider.min.css' %}" rel="stylesheet">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
 <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css"> -->
 <div class="body-section">
     <div class="section-header">
@@ -27,7 +28,6 @@ Checklists
                 <option value="Verified" {% if status == "Verified" %}selected{% endif %}>Active Checklist</option>
                 <option value="Pending" {% if status == "Pending" %}selected{% endif %}>New Cases</option>
                 <option value="Completed" {% if status == "Completed" %}selected{% endif %}>Completed</option>
-                
             </select>
         </div>
         <div class="onefifth">

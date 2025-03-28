@@ -3,8 +3,6 @@ from . import views
 
 
 urlpatterns = [
-# Urls for Events Calendar Section
-path('events_calendar', views.EventsCalendar, name="events_calendar"),
 
 # Urls for Active Case Search Section
 path('active_tasks', views.ActiveTasks, name="active_tasks"),

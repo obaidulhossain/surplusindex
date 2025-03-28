@@ -4,7 +4,7 @@ from . models import *
 from django.utils.timezone import now
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-
+from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 import json
 
@@ -17,105 +17,58 @@ from .resources import ForeclosureEventsResource, ForeclosureEventsExportResourc
 # Create your views here.
 
 def auctionCalendar(request):
-
     user = request.user
-    all_states = foreclosure_Events.objects.values_list('state', flat=True).distinct()
-    # Get the filter option from the query parameters
-    filter_option = request.GET.get('filter', 'all')
-    state_selected = request.GET.get('states', 'All')
-    selected_sale_types = request.GET.getlist('sale_type')
-
-
-    option1 = ""
-    option2 = ""
-    option3 = ""
-    option4 = ""
-    saletypetax = False
-    saletypemtg = False
-    saletypeoth = False
-
-    if 'Tax' in selected_sale_types:
-        saletypetax = True
+    userList = User.objects.filter(groups__name='researcher')
+    if request.method == 'POST':
+        selectedUser = request.POST.get('selectedUser','')
+        stateFilter = request.POST.get('stateFilter','')
+        countyFilter = request.POST.get('countyFilter','')
+        saletypeFilter = request.POST.get('saletypeFilter','')
+        saledateFilter = request.POST.get('saledateFilter','')
+    else:
+        selectedUser = request.GET.get('selectedUser','')
+        stateFilter = request.GET.get('stateFilter','')
+        countyFilter = request.GET.get('countyFilter','')
+        saletypeFilter = request.GET.get('saletypeFilter','')
+        saledateFilter = request.GET.get('saledateFilter','')
     
-    if 'Mtg' in selected_sale_types:
-        saletypemtg = True
-
-    if 'Oth' in selected_sale_types:
-        saletypeoth = True
+    event_queryset = foreclosure_Events.objects.all()
+    states = event_queryset.values_list('state', flat=True).distinct()
+    counties = event_queryset.values_list('county', flat=True).distinct()
+    saletypes = event_queryset.values_list('sale_type', flat=True).distinct()
     
-    saletype_selected = []
-    if saletypetax:
-        saletype_selected.append('Tax')
-    if saletypemtg:
-        saletype_selected.append('Mortgage')
-    if saletypeoth:
-        saletype_selected.append('Others')
-    # Determine the queryset based on the filter option
+    if selectedUser:
+        selectedUserinstance = User.objects.get(username=selectedUser)
+        event_queryset = event_queryset.filter(assigned_to=selectedUserinstance)
+        states = event_queryset.values_list('state', flat=True).distinct()
+        counties = event_queryset.values_list('county', flat=True).distinct()
+        saletypes = event_queryset.values_list('sale_type', flat=True).distinct()
+    # else:
+    #     event_queryset.filter(assigned_to=user)
+    #     states = event_queryset.values_list('state', flat=True).distinct()
+    #     counties = event_queryset.values_list('county', flat=True).distinct()
+
+    if not stateFilter == "":
+        event_queryset = event_queryset.filter(state=stateFilter)
+        counties = event_queryset.values_list('county', flat=True).distinct()
+        saletypes = event_queryset.values_list('sale_type', flat=True).distinct()
     
-    if filter_option == 'past':
-        if state_selected == 'All' or state_selected == '':
-            if saletype_selected:
-                events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), sale_type__in=saletype_selected)
-                option2="selected"
-                option4 = 'All'
-            else:
-                events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date())
-                option2="selected"
-                option4 = 'All'
-        else:
-            if saletype_selected:
-                events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), state=state_selected, sale_type__in=saletype_selected)
-                option2="selected"
-                option4=state_selected
-            else:
-                events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), state=state_selected)
-                option2="selected"
-                option4=state_selected
-    elif filter_option == 'upcoming':
-        if state_selected == 'All' or state_selected == '':
-            if saletype_selected:
-                events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), sale_type__in=saletype_selected)
-                option3="selected"
-                option4='All'
-            else:    
-                events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date())
-                option3="selected"
-                option4='All'
-        else:
-            if saletype_selected:
-                events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), state=state_selected, sale_type__in=saletype_selected)
-                option3="selected"
-                option4=state_selected
-            else:    
-                events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), state=state_selected)
-                option3="selected"
-                option4=state_selected
-    else:  # Default to 'all'
-        if state_selected == 'All' or state_selected == '':
-            if saletype_selected:
-                events_queryset = foreclosure_Events.objects.filter(sale_type__in=saletype_selected)
-                option1="selected"
-                option4='All'                
-            else:
-                events_queryset = foreclosure_Events.objects.all()
-                option1="selected"
-                option4='All'
-        else:
-            if saletype_selected:
-                events_queryset = foreclosure_Events.objects.filter(state=state_selected, sale_type__in=saletype_selected)
-                option1="selected"
-                option4=state_selected    
-            else:
-                events_queryset = foreclosure_Events.objects.filter(state=state_selected)
-                option1="selected"
-                option4=state_selected
-
-
-
+    if not countyFilter =="":
+        event_queryset = event_queryset.filter(county=countyFilter)
+        saletypes = event_queryset.values_list('sale_type', flat=True).distinct()
+    
+    if saletypeFilter:
+        event_queryset = event_queryset.filter(sale_type=saletypeFilter)
+    
+    if saledateFilter == "past":
+        event_queryset = event_queryset.filter(event_next__lt=now().date())
+    elif saledateFilter == "upcoming":
+        event_queryset = event_queryset.filter(event_next__gte=now().date())
 
     
     # Paginate the results
-    p = Paginator(events_queryset, 20)
+    total_events = event_queryset.count()
+    p = Paginator(event_queryset, 20)
     page = request.GET.get('page')
     events = p.get_page(page)
 
@@ -124,22 +77,127 @@ def auctionCalendar(request):
     second_previous = current_page + 2
 
     context = {
+        'userList':userList,
+        'selectedUser':selectedUser,
+        'stateFilter':stateFilter,
+        'countyFilter':countyFilter,
+        'saletypeFilter':saletypeFilter,
+        'saledateFilter':saledateFilter,
         'events':events,
-        'all_states':all_states,
+        'total_events':total_events,
+        'states':states,
+        'counties':counties,
+        'saletypes':saletypes,
         'second_previous':second_previous,
-        'filter_option':filter_option, # Pass the current filter option to the template
-        'option1':option1,
-        'option2':option2,
-        'option3':option3,
-        'option4':option4,
-        'selected_sale_types':selected_sale_types,
-        'saletypetax':saletypetax,
-        'saletypemtg':saletypemtg,
-        'saletypeoth':saletypeoth,
-
         }
 
     return render(request, 'auction_calendar/auction_calendar.html', context)
+
+
+#old codes-------------------------------------
+        # 'filter_option':filter_option, # Pass the current filter option to the template
+        # 'option1':option1,
+        # 'option2':option2,
+        # 'option3':option3,
+        # 'option4':option4,
+        # 'selected_sale_types':selected_sale_types,
+        # 'saletypetax':saletypetax,
+        # 'saletypemtg':saletypemtg,
+        # 'saletypeoth':saletypeoth,
+
+    # all_states = foreclosure_Events.objects.values_list('state', flat=True).distinct()
+    # # Get the filter option from the query parameters
+    # filter_option = request.GET.get('filter', 'all')
+    # state_selected = request.GET.get('states', 'All')
+    # selected_sale_types = request.GET.getlist('sale_type')
+
+
+    # option1 = ""
+    # option2 = ""
+    # option3 = ""
+    # option4 = ""
+    # saletypetax = False
+    # saletypemtg = False
+    # saletypeoth = False
+
+    # if 'Tax' in selected_sale_types:
+    #     saletypetax = True
+    
+    # if 'Mtg' in selected_sale_types:
+    #     saletypemtg = True
+
+    # if 'Oth' in selected_sale_types:
+    #     saletypeoth = True
+    
+    # saletype_selected = []
+    # if saletypetax:
+    #     saletype_selected.append('Tax')
+    # if saletypemtg:
+    #     saletype_selected.append('Mortgage')
+    # if saletypeoth:
+    #     saletype_selected.append('Others')
+    # # Determine the queryset based on the filter option
+    
+    # if filter_option == 'past':
+    #     if state_selected == 'All' or state_selected == '':
+    #         if saletype_selected:
+    #             events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), sale_type__in=saletype_selected)
+    #             option2="selected"
+    #             option4 = 'All'
+    #         else:
+    #             events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date())
+    #             option2="selected"
+    #             option4 = 'All'
+    #     else:
+    #         if saletype_selected:
+    #             events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), state=state_selected, sale_type__in=saletype_selected)
+    #             option2="selected"
+    #             option4=state_selected
+    #         else:
+    #             events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), state=state_selected)
+    #             option2="selected"
+    #             option4=state_selected
+    # elif filter_option == 'upcoming':
+    #     if state_selected == 'All' or state_selected == '':
+    #         if saletype_selected:
+    #             events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), sale_type__in=saletype_selected)
+    #             option3="selected"
+    #             option4='All'
+    #         else:    
+    #             events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date())
+    #             option3="selected"
+    #             option4='All'
+    #     else:
+    #         if saletype_selected:
+    #             events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), state=state_selected, sale_type__in=saletype_selected)
+    #             option3="selected"
+    #             option4=state_selected
+    #         else:    
+    #             events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), state=state_selected)
+    #             option3="selected"
+    #             option4=state_selected
+    # else:  # Default to 'all'
+    #     if state_selected == 'All' or state_selected == '':
+    #         if saletype_selected:
+    #             events_queryset = foreclosure_Events.objects.filter(sale_type__in=saletype_selected)
+    #             option1="selected"
+    #             option4='All'                
+    #         else:
+    #             events_queryset = foreclosure_Events.objects.all()
+    #             option1="selected"
+    #             option4='All'
+    #     else:
+    #         if saletype_selected:
+    #             events_queryset = foreclosure_Events.objects.filter(state=state_selected, sale_type__in=saletype_selected)
+    #             option1="selected"
+    #             option4=state_selected    
+    #         else:
+    #             events_queryset = foreclosure_Events.objects.filter(state=state_selected)
+    #             option1="selected"
+    #             option4=state_selected
+
+
+
 
 
 
@@ -156,6 +214,7 @@ def update_row(request):
             event_id = data.get('id')
             event_next = data.get('event_next')
             event_updated_to = data.get('event_updated_to')
+            event_updated_from = data.get('event_updated_from')
 
             # Fetch the corresponding event object from the database
             event = foreclosure_Events.objects.get(id=event_id)
@@ -165,6 +224,8 @@ def update_row(request):
                 event.event_next = event_next
             if event_updated_to:
                 event.event_updated_to = event_updated_to
+            if event_updated_from:
+                event.event_updated_from = event_updated_from
             # Save the updated object
             event.save()
 
