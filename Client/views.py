@@ -246,7 +246,6 @@ def myLeads(request):
     return render(request, 'Client/my_leads.html', context)
 
 
-
 def archivefromMyLeads(request):
     showArchived = request.POST.get('show_archived','')
     if request.method == "POST":
@@ -266,7 +265,6 @@ def archivefromMyLeads(request):
         return redirect('myleads')
     else:
         return HttpResponse("Invalid Request", status=400)
-
 
 
 def leadsDetail(request):
@@ -298,8 +296,6 @@ def leadsDetail(request):
     return render(request, 'Client/leads-detail.html', context)
     
 
-
-
 def updateStatus(request):
     selected_status = request.POST.get('status_id')
     status_instance = Status.objects.get(pk=selected_status)
@@ -309,18 +305,6 @@ def updateStatus(request):
     status_instance.save()
 
     return redirect('leads-detail')
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
