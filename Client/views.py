@@ -37,7 +37,7 @@ def availableLeads(request):
     
 
     states=Foreclosure.objects.values_list("state", flat=True).distinct()
-    leads_queryset = Foreclosure.objects.exclude(purchased_by=user).exclude(sale_status="CANCELLED" or "ACTIVE").exclude(surplus_status="NO_SURPLUS").exclude(surplus_status=None)
+    leads_queryset = Foreclosure.objects.exclude(purchased_by=user).exclude(sale_status="CANCELLED" or "ACTIVE").exclude(surplus_status="No Surplus").exclude(surplus_status=None)
     
     if not selectedState:
         counties=Foreclosure.objects.values_list("county", flat=True).distinct()
