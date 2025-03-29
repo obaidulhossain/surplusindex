@@ -88,6 +88,7 @@ def auctionCalendar(request):
         'states':states,
         'counties':counties,
         'saletypes':saletypes,
+        'current_user':user,
         'second_previous':second_previous,
         }
 

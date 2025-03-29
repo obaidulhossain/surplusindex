@@ -20,29 +20,6 @@ from .resources import *
 imported_data_cache = None
 
 
-# Views for Section (Active Tasks)--------------------Start
-def ActiveTasks(request):
-    current_user=request.user
-    leads_queryset = Foreclosure.objects.filter(case_search_assigned_to=current_user) | Foreclosure.objects.filter(case_search_status="Pending")
-    p=Paginator(Foreclosure.objects.filter(case_search_assigned_to=current_user, changed_at__lt=now().date() - timedelta(days=7)) | Foreclosure.objects.filter(case_search_assigned_to=current_user, case_search_status="Pending"), 20)
-    states=Foreclosure.objects.values_list("state", flat=True).distinct()
-    counties=Foreclosure.objects.values_list("county", flat=True).distinct()
-    saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
-    page = request.GET.get('page')
-    checklist = p.get_page(page)
-    current_page = int(checklist.number)
-    second_previous = current_page + 2
-
-    context = {
-        'current_user':current_user,
-        'checklist':checklist,
-        'states':states,
-        'counties':counties,
-        'saletypes':saletypes,
-        'second_previous':second_previous
-        }
-    return render(request,'da/active_tasks.html',context)
-
 # --------------------------------------------------------------------------------
 
 # Views for Section (Foreclosure)--------------------Start

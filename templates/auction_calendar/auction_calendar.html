@@ -15,7 +15,7 @@ Auction Calendar
 
 <div class="body-section">
     <div class="section-header">
-        <h2>Auction Calendar Checklist {{current_user|upper}}</h2>
+        <h2>Events Filters</h2>
         <button id="toggle-filters" class="button" onclick="toggleFilters(this.id, 'filters')">Hide</button>
     </div>
     <div class="section-filter-full" id="filters">
@@ -66,6 +66,10 @@ Auction Calendar
         </select>
         </div>
         </form>
+    </div>
+    <div class="section-header" style="margin-top:20px;">
+        <h2>Events Calendar</h2>
+        <h4>{{current_user|upper}}</h4>
     </div>
     <div class="section-body-full">
         <div class="table-wrapper">

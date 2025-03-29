@@ -22,7 +22,7 @@ Checklists
         {% endif %}
         <div>
         {% if researcher %}
-        <a class="headerbutton" href="{% url 'active_tasks' %}">Go to Active Tasks</a>
+        <a class="headerbutton" href="{% url 'case_checklist' %}">Go to Active Tasks</a>
         {% endif %}
         <a class="headerbutton" href="{% url 'add_edit_fcl' %}">Start New Entry</a>
         </div>
@@ -101,6 +101,7 @@ Checklists
                             <option value="">Select Status</option>
                             <option value="Not Determined" {% if current_fcl_instance.surplus_status == "Not Determined" %}selected{% endif %}>Not Determined</option>
                             <option value="Possible Surplus" {% if current_fcl_instance.surplus_status == "Possible Surplus" %}selected{% endif %}>Possible Surplus</option>
+                            <option value="No Possible Surplus" {% if current_fcl_instance.surplus_status == "No Possible Surplus" %}selected{% endif %}>No Possible Surplus</option>
                             <option value="No Surplus" {% if current_fcl_instance.surplus_status == "No Surplus" %}selected{% endif %}>No Surplus</option>
                             <option value="Fund Available" {% if current_fcl_instance.surplus_status == "Fund Available" %}selected{% endif %}>Fund Available</option>
                             <option value="Motion Filed" {% if current_fcl_instance.surplus_status == "Motion Filed" %}selected{% endif %}>Motion Filed</option>

@@ -164,6 +164,7 @@ class Transaction(OperationStat):
 class Foreclosure(OperationStat):
     NOT_DETERMINED = 'not determined'
     POSSIBLE_SURPLUS = 'possible surplus'
+    NO_POSSIBLE_SURPLUS = 'no possible surplus'
     FUND_AVAILABLE = 'fund available'
     MOTION_FILED = 'motion filed'
     FUND_CLAIMED = 'fund claimed'
@@ -171,6 +172,7 @@ class Foreclosure(OperationStat):
     SURPLUS_STATUS = (
         (NOT_DETERMINED, 'Not Determined'),
         (POSSIBLE_SURPLUS, 'Possible Surplus'),
+        (NO_POSSIBLE_SURPLUS, 'No Possible Surplus'),
         (FUND_AVAILABLE, 'Fund Available'),
         (MOTION_FILED, 'Motion Filed'),
         (FUND_CLAIMED, 'Fund Claimed'),

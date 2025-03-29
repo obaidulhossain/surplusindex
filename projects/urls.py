@@ -5,7 +5,6 @@ from . import views
 urlpatterns = [
 
 # Urls for Active Case Search Section
-path('active_tasks', views.ActiveTasks, name="active_tasks"),
 
 # Urls for Active Skiptracing Section
 path('skiptracing_checklist', views.skiptracing_checklist, name="skiptracing_checklist"),
