@@ -87,10 +87,11 @@ Available Leads
                             <th>County</th>
                             <th>Sale Date</th>
                             <th>Sale Type</th>
-                            <th>Status</th>
+                            <th>Sale Status</th>
                             <th>Sale Price</th>
                             <th>Possible Surplus</th>
                             <th>Verified Surplus</th>
+                            <th>Surplus Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -116,6 +117,7 @@ Available Leads
                             <td class="amount {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.sale_price}}</td>
                             <td class="possible-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.possible_surplus}}</td>
                             <td class="verified-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.verified_surplus}}</td>
+                            <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.surplus_status}}</td>
                         </tr>
                         {% endfor %}
                     {% endif %}
