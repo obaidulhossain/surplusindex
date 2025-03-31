@@ -25,6 +25,8 @@ def All_Data(request):
         stateFilter = request.POST.get('stateFilter','')
         countyFilter = request.POST.get('countyFilter','')
         saletypeFilter = request.POST.get('saletypeFilter','')
+
+        assignCaseSearch = request.POST.get('')
         
         
         
