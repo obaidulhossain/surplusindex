@@ -4,7 +4,7 @@ from . import views
 
 
 urlpatterns = [
-    path('new_leads/',views.newly_added_leads, name='new_leads'),
+    path('all_data/',views.All_Data, name='all_data'),
     path('update_case_assignment', views.assign_leads, name='update_case_assignment'),
     path('update_skp_assignment', views.assign_skiptracing, name='update_skp_assignment'),
 

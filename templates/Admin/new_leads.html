@@ -15,29 +15,103 @@ New Leads
 
 <div style="margin-top: 20px;" class="body-section">
     <div class="section-header">
-        <h4>Newly Added Leads</h4>
-        <div>
-            <form method="post" action="{% url 'new_leads' %}">
-            {% csrf_token %}
-            <select name="sel_state" id="sel_state" onchange="this.form.submit()">
-                <option value="">-- Select State --</option>
-                {% for state in States %}
-                <option value="{{ state.state }}" {% if state.state == request.POST.sel_state %}selected{% endif %}>{{ state.state }}</option>
-                {% endfor %}
-            </select>
-            </form>
+        <h4>Filters</h4>
+        <a href="{% url 'all_data' %}" class="button">Clear Filter</a>
+    </div>
+
+    <form method="post" action="{% url 'all_data' %}">
+        {% csrf_token %}
+        <div class="section-filter-full" id="filters">
+            <div class="onefourth">
+                <label for="salestatusFilter">Sale Status</label><br>
+                <select style="width:85%;" id="salestatusFilter" name="salestatusFilter" onchange="this.form.submit()">
+                    <option value="" {% if salestatusFilter == "" %}selected{% endif %}>--- Select Sale Status ---</option>
+                    {% for salestatus in salestatuses %}
+                    <option value="{{salestatus}}" {% if salestatus == salestatusFilter %}selected{% endif %}>{{salestatus|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="surplusstatusFilter">Surplus Status</label><br>
+                <select style="width:85%;" id="surplusstatusFilter" name="surplusstatusFilter" onchange="this.form.submit()">
+                    <option value="" {% if surplusstatusFilter == "" %}selected{% endif %}>--- Select Surplus Status ---</option>
+                    {% for surplusstatus in surplusstatuses %}
+                    <option value="{{surplusstatus}}" {% if surplusstatus == surplusstatusFilter %}selected{% endif %}>{{surplusstatus|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="casesearchstatusFilter">Case Search Status</label><br>
+                <select style="width:85%;" id="casesearchstatusFilter" name="casesearchstatusFilter" onchange="this.form.submit()">
+                    <option value="" {% if casesearchstatusFilter == "" %}selected{% endif %}>--- Case Search Status ---</option>
+                    {% for casesearchstatus in casesearchstatuses %}
+                    <option value="{{casesearchstatus}}" {% if casesearchstatus == casesearchstatusFilter %}selected{% endif %}>{{casesearchstatus|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="publishedstatusFilter">Published Status</label><br>
+                <select style="width:85%;" id="publishedstatusFilter" name="publishedstatusFilter" onchange="this.form.submit()">
+                    <option value="False" {% if publishedstatusFilter == "" or "False" %}selected{% endif %}>False</option>
+                    <option value="True" {% if publishedstatusFilter == "True" %}selected{% endif %}>True</option>
+                </select>
+            </div>
+        </div>    
+        <div class="section-filter-full" id="filters"> 
+            <div class="onefourth">
+                <label for="selectedUser">Assigned To</label><br>
+                <select style="width:85%;" id="selectedUser" name="selectedUser" onchange="this.form.submit()">
+                    <option value="">--- Select User ---</option>
+                    {% for user in userList %}
+                    <option value="{{user.username}}" {% if selectedUser == user.username %}selected{% endif %}>{{user.username|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="stateFilter">Select State</label><br>
+                <select style="width:85%;" id="stateFilter" name="stateFilter" onchange="this.form.submit()">
+                    <option value="" {% if stateFilter == "" %}selected{% endif %}>--- Select State ---</option>
+                    {% for state in states %}
+                    <option value="{{state}}" {% if state == stateFilter %}selected{% endif %}>{{state|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="countyFilter">Select County</label><br>
+                <select style="width:85%;" id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if stateFilter == "" %}disabled{% endif %}>
+                    <option value="" {% if countyFilter == "" %}selected{% endif %}>--- Select County ---</option>
+                    {% for county in counties %}
+                    <option value="{{county}}" {% if county == countyFilter %}selected{% endif %}>{{county|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="saletypeFilter">Sale Type</label><br>
+                <select style="width:85%;" id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if stateFilter == "" %}disabled{% endif %}>
+                    <option value="" {% if saletypeFilter == "" %}selected{% endif %}>All</option>
+                    {% for saletype in saletypes %}
+                    <option value="{{saletype}}" {% if saletype == saletypeFilter %}selected{% endif %}>{{saletype|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>     
         </div>
+    </form>
+</div>
+
+<div style="margin-top: 20px;" class="body-section">
+    <div class="section-header">
+        <h4>Actions</h4>
     </div>
 
     <div class="filter-body">
         <div class="onefourth" style="padding:10px; display:inline-block;">
         <form method="post", action="{% url 'update_case_assignment' %}">      
         {% csrf_token %}
-            <input type="hidden" name="sel_state" value="{{sel_state}}">
+            <input type="hidden" name="stateFilter" value="{{stateFilter}}">
             
-            <select style="width:100%;" name="assign_to" id="assign_to">
+            <select style="width:100%;" name="assignCaseSearch" id="assignCaseSearch">
                 <option value="">-- Assign Case Search --</option>
-                {% for user in DA %}
+                {% for user in userList %}
                 <option value="{{ user.username }}" {% if user.username == request.POST.assign_to %}selected{% endif %}>{{ user.username|upper }}</option>
                 {% endfor %}
             </select>
@@ -90,22 +164,27 @@ New Leads
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
+                    <th>Edit</th>
                     <th>State</th>
                     <th>County</th>
-                    <th>Date Added</th>
-                    <th>Case Search Status</th>
-                    <th>Assigned To</th>
-                    <th>AddField</th>
-                    <th>AddField</th>
+                    <th>Date Created</th>
+                    <th>Date Updated</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Judgment</th>
+                    <th>Sold for</th>
+                    <th>Ps Surplus</th>
+                    <th>Vf Surplus</th>
                     <th>Action</th>
                 </tr>
-            <thead>    
+            <thead>
             <tbody>
-                {% for Lead in NewLeads %}
+                {% for Lead in leads %}
                 <tr>
-                    <form id="search-form" method="post" action="{% url 'new_leads' %}">
+                    <form id="search-form" method="post" action="{% url 'all_data' %}">
                         {% csrf_token %}
                         <input type="hidden" name="leadid" value="{{ Lead.pk }}">
+                        <td><a href="/add_edit_foreclosure/?fcl_id={{ Lead.id }}">Edit</a></td>
                         <td><input style="width: 150px; " type="text" id="state" value="{{Lead.state}}" name="state"></td>
                         <td><input style="width: 150px;" type="text" id="county" value="{{Lead.county}}" name="county"></td>
                         <td><input style="width: 150px;" type="date" id="added" value="{{Lead.created_at}}" name="added"></td>
@@ -118,27 +197,6 @@ New Leads
                     </form>
                 </tr>
                 {% endfor %}
-                <tr>
-                    <form id="search-form" method="post" action="{% url 'search_create_property' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="caseid" value="{{ current_fcl_instance.pk }}">
-                        <td><input style="width: 130px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="icounty" placeholder="County" name="county"></td>
-                        <td><input style="width: 180px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="iparcel" placeholder="Parcel" name="parcel"></td>
-                        <td><input style="width: 100px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="ihouse" placeholder="House" name="house"></td>
-                        <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="istreet" placeholder="Street" name="road"></td>
-                        <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="isttype" placeholder="Type" name="type"></td>
-                        <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="idir" placeholder="Dir" name="dir"></td>
-                        <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="iapt" placeholder="A/B/U" name="apt"></td>
-                        <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="iext" placeholder="Ext" name="ext"></td>
-                        <td><input style="width: 130px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="icity" placeholder="City" name="city"></td>
-                        <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="istate" placeholder="State" name="state"></td>                      
-                        <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="izip" placeholder="Zip" name="zip"></td>
-                        <td><input type="submit" style="border: 2px solid #08c88e;" Value="{% if current_fcl_instance %}Create and Add{% else %}Create{% endif %}"></td>
-                    </form>
-                </tr>
-            </tbody>
-            <tbody id="address-results">
-            </tbody>
         </table>
     </div>
 </div>
