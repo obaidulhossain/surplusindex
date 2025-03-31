@@ -1,6 +1,6 @@
 <div class="d-flex">
     <button id="toggle-btn" type="button">
-        <i class="lni lni-shield-dollar"></i>
+        <i class="bi bi-coin"></i>
     </button>
     <div class="sidebar-logo">
         <a href="#">Surplus Index</a>
@@ -14,46 +14,46 @@
 <ul class="sidebar-nav">
     <li class="sidebar-item">
         <a href="{% url 'dashboard' %}" class="sidebar-link">
-            <i class="lni lni-bar-chart-4"></i>
+            <i class="bi bi-columns-gap"></i>
             <span>Dashboard</span>
         </a>
     </li>
     <li class="sidebar-item">
         <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#projects"
             aria-expanded="false" aria-controls="leads">
-            <i class="lni lni-dashboard-square-1"></i>
+            {% comment %} <i class="lni lni-dashboard-square-1"></i> {% endcomment %}
             <span>Projects</span>
         </a>
         <ul id="projects" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-arrow-all-direction"></i>
+                    {% comment %} <i class="lni lni-arrow-all-direction"></i> {% endcomment %}
                     <span>All Projects</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-agenda"></i>
+                    {% comment %} <i class="lni lni-agenda"></i> {% endcomment %}
                     <span>Task Manager</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-pen-to-square"></i>
+                    {% comment %} <i class="lni lni-pen-to-square"></i> {% endcomment %}
                     <span>Active Tasks</span>
                 </a>
             </li>
 
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-check-square-2"></i>
+                    {% comment %} <i class="lni lni-check-square-2"></i> {% endcomment %}
                     <span>Delivered Tasks</span>
                 </a>
             </li>
 
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-sliders-horizontal-square-2"></i>
+                    {% comment %} <i class="lni lni-sliders-horizontal-square-2"></i> {% endcomment %}
                     <span>Project Settings</span>
                 </a>
             </li>
@@ -62,32 +62,32 @@
     <li class="sidebar-item">
         <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#clients"
             aria-expanded="false" aria-controls="leads">
-            <i class="lni lni-hand-shake"></i>
+            {% comment %} <i class="lni lni-hand-shake"></i> {% endcomment %}
             <span>Clients</span>
         </a>
         <ul id="clients" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-user-multiple-4"></i>
+                    {% comment %} <i class="lni lni-user-multiple-4"></i> {% endcomment %}
                     <span>All Clients</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-hand-taking-user"></i>
+                    {% comment %} <i class="lni lni-hand-taking-user"></i> {% endcomment %}
                     <span>Help Center</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-target-user"></i>
+                    {% comment %} <i class="lni lni-target-user"></i> {% endcomment %}
                     <span>Follow Ups</span>
                 </a>
             </li>
 
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-refresh-user-1"></i>
+                    {% comment %} <i class="lni lni-refresh-user-1"></i> {% endcomment %}
                     <span>Client Settings</span>
                 </a>
             </li>
@@ -96,19 +96,19 @@
     <li class="sidebar-item">
         <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#team"
             aria-expanded="false" aria-controls="leads">
-            <i class="lni lni-hierarchy-1"></i>
+            {% comment %} <i class="lni lni-hierarchy-1"></i> {% endcomment %}
             <span>Team</span>
         </a>
         <ul id="team" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-search-text"></i>
+                    {% comment %} <i class="lni lni-search-text"></i> {% endcomment %}
                     <span>Data Analysts</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-search-2"></i>
+                    {% comment %} <i class="lni lni-search-2"></i> {% endcomment %}
                     <span>Virtual Assistants</span>
                 </a>
             </li>
@@ -138,32 +138,32 @@
     <li class="sidebar-item">
         <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#data"
             aria-expanded="false" aria-controls="leads">
-            <i class="lni lni-database-2"></i>
+            <i class="bi bi-database"></i>
             <span>Data</span>
         </a>
         <ul id="data" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
             
             <li class="sidebar-item child">
                 <a href="{% url 'all_data' %}" class="sidebar-link">
-                    <i class="lni lni-cloud-check-circle"></i>
+                    <i class="bi bi-journal-text"></i>
                     <span>All Data</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-cloud-refresh-clockwise"></i>
+                    <i class="bi bi-clipboard-data"></i>
                     <span>Edit Data</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="{% url 'add_edit_fcl' %}" class="sidebar-link">
-                    <i class="lni lni-cloud-refresh-clockwise"></i>
+                    <i class="bi bi-bank"></i>
                     <span>Foreclosure</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    <i class="lni lni-cloud-iot-2"></i>
+                    <i class="bi bi-database-gear"></i>
                     <span>Data Settings</span>
                 </a>
             </li>
@@ -172,19 +172,19 @@
     <li class="sidebar-item">
         <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse"
             data-bs-target="#auction-calendar" aria-expanded="false" aria-controls="leads">
-            <i class="lni lni-calendar-days"></i>
+            <i class="bi bi-calendar3"></i>
             <span>Calendar</span>
         </a>
         <ul id="auction-calendar" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
             <li class="sidebar-item child">
                 <a href="{% url 'auction_calendar' %}" class="sidebar-link">
-                    <i class="lni lni-calendar-days"></i>
+                    <i class="bi bi-calendar2-week"></i>
                     <span>Auction Calendar</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="{% url 'calendar_settings' %}" class="sidebar-link">
-                    <i class="lni lni-weight-machine-1"></i>
+                    <i class="bi bi-calendar2-check"></i>
                     <span>Calendar Settings</span>
                 </a>
             </li>
@@ -194,19 +194,19 @@
     <li class="sidebar-item">
         <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#auth"
             aria-expanded="false" aria-controls="auth">
-            <i class="lni lni-shield-2-check"></i>
+            <i class="bi bi-person-circle"></i>
             <span>Account</span>
         </a>
         <ul id="auth" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
             <li class="sidebar-item child">
                 <a href="{% url 'profile' %}" class="sidebar-link">
-                    <i class="lni lni-user-4"></i>
+                    <i class="bi bi-person-lines-fill"></i>
                     <span>Profile</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="{% url 'settings' %}" class="sidebar-link">
-                    <i class="lni lni-gear-1"></i>
+                    <i class="bi bi-gear"></i>
                     <span>Settings</span>
                 </a>
             </li>
@@ -214,15 +214,9 @@
     </li>
     <li class="sidebar-item">
         <a href="{% url 'user-logout' %}" class="sidebar-link">
-            <i class="lni lni-exit"></i>
+            <i class="bi bi-box-arrow-left"></i>
             <span>Logout</span>
         </a>
     </li>
 </ul>
 
-<!-- <div class="sidebar-footer">
-    <a href="{% url  'user-logout' %}" class="sidebar-link">
-        <i class="lni lni-exit"></i>
-        <span>Logout</span>
-    </a>
-</div> -->
