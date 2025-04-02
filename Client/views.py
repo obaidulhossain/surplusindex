@@ -186,38 +186,34 @@ def myLeads(request):
         vsmin = request.GET.get('vs_min','')
         showArchived = request.GET.get('show_Archived','')
     
+    leads_queryset = Status.objects.filter(client=user)    #.prefetch_related('foreclosure_as_lead')
 
-    statusinstances = Status.objects.filter(client=user)
-    leads_queryset = Foreclosure.objects.filter(foreclosure_as_lead__in=statusinstances).prefetch_related('foreclosure_as_lead')
-    states=leads_queryset.values_list("state", flat=True).distinct()
+    states=leads_queryset.values_list("lead__state", flat=True).distinct()
+
     if not selectedState:
-        counties=Foreclosure.objects.values_list("county", flat=True).distinct()
-        saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
-
+        counties = leads_queryset.values_list("lead__county", flat=True).distinct()
+        saletypes = leads_queryset.values_list("lead__sale_type", flat=True).distinct()
     else:
-        counties=Foreclosure.objects.filter(state=selectedState).values_list("county", flat=True).distinct()
-        saletypes=Foreclosure.objects.filter(state=selectedState).values_list("sale_type", flat=True).distinct()
-        leads_queryset = leads_queryset.filter(state__iexact=selectedState)
+        counties = leads_queryset.filter(lead__state__iexact=selectedState).values_list("lead__county", flat=True).distinct()
+        saletypes = leads_queryset.filter(lead__state__iexact=selectedState).values_list("lead__sale_type", flat=True).distinct()
+        leads_queryset = leads_queryset.filter(lead__state__iexact=selectedState)
     
     if not showArchived == "show":
-        leads_queryset = leads_queryset.exclude(archived_by=user)
+        leads_queryset = leads_queryset.filter(archived=False)
     else:
-        leads_queryset = leads_queryset.filter(archived_by=user)
+        leads_queryset = leads_queryset.filter(archived=True)
 
     if selectedCounty:
-        leads_queryset = leads_queryset.filter(county__iexact=selectedCounty)
+        leads_queryset = leads_queryset.filter(lead__county__iexact=selectedCounty)
 
     if selectedSaletype:
-        leads_queryset = leads_queryset.filter(sale_type__iexact=selectedSaletype)
+        leads_queryset = leads_queryset.filter(lead__sale_type__iexact=selectedSaletype)
 
     if psmin:
-        leads_queryset = leads_queryset.filter(possible_surplus__gte=psmin)
+        leads_queryset = leads_queryset.filter(lead__possible_surplus__gte=psmin)
 
     if vsmin:
-        leads_queryset = leads_queryset.filter(verified_surplus__gte=vsmin)
-
-    
-
+        leads_queryset = leads_queryset.filter(lead__verified_surplus__gte=vsmin)   
 
 
     total_leads = leads_queryset.count()
@@ -249,19 +245,25 @@ def myLeads(request):
 def archivefromMyLeads(request):
     showArchived = request.POST.get('show_archived','')
     if request.method == "POST":
-        selected_leads_ids = request.POST.getlist('selected_items')
+        selected_status_ids = request.POST.getlist('selected_items')
         
-        for lead_id in selected_leads_ids:
-            fclinstance = Foreclosure.objects.get(pk=lead_id)
-            if not request.user in fclinstance.archived_by.all():
-                fclinstance.archived_by.add(request.user)
+        for status_id in selected_status_ids:
+            statusinstance = Status.objects.get(pk=status_id)
+            fclinstance = Foreclosure.objects.get(pk=statusinstance.lead_id)
 
-            else:
+            if statusinstance.archived == False:
+                statusinstance.archived = True
+                fclinstance.archived_by.add(request.user)
+            elif statusinstance.archived == True:
+                statusinstance.archived = False
                 fclinstance.archived_by.remove(request.user)
+            statusinstance.save()
+            
+            
         if showArchived == 'show':
-            messages.success(request, str(len(selected_leads_ids)) + ' Leads unarchived!')
+            messages.success(request, str(len(selected_status_ids)) + ' Leads unarchived!')
         else:
-            messages.success(request, str(len(selected_leads_ids)) + ' Leads archived!')
+            messages.success(request, str(len(selected_status_ids)) + ' Leads archived!')
         return redirect('myleads')
     else:
         return HttpResponse("Invalid Request", status=400)
