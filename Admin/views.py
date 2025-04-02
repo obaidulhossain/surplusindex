@@ -29,7 +29,7 @@ def All_Data(request):
         assignCaseSearch = request.POST.get('assignCaseSearch','')
         skp_assign_to = request.POST.get('skp_assign_to','')
         casesearchStatus = request.POST.get('casesearchStatus','')
-        publishStatus = request.POST.get('publishStatus','')      
+        publishStatus = request.POST.get('publishStatus','')
         
     else:
         salestatusFilter = request.GET.get('salestatusFilter','')
@@ -123,21 +123,24 @@ def All_Data(request):
             for lead in leads_queryset:
                 lead.case_search_status = "Pending"
                 lead.save()
+            messages.success(request, f"{len(leads_queryset)} Leads Case Search Status Changed to Pending")
         elif casesearchStatus == "Completed":
             for lead in leads_queryset:
                 lead.case_search_status = "Completed"
                 lead.save()
+            messages.success(request, f"{len(leads_queryset)} Leads Case Search Status Changed to Completed")
         elif casesearchStatus == "Verified":
             for lead in leads_queryset:
                 lead.case_search_status = "Verified"
                 lead.save()
+            messages.success(request, f"{len(leads_queryset)} Leads Case Search Status Changed to Verified")
 
-        if publishStatus == "Unpublish":
+        if publishStatus and publishStatus == "Unpublish":
             for lead in leads_queryset:
                 lead.published = False
                 lead.save()
             messages.success(request, f"{len(leads_queryset)} Leads Unpublished")
-        elif publishStatus == "Publish":
+        elif publishStatus and publishStatus == "Publish":
             for lead in leads_queryset:
                 lead.published = True
                 lead.save()

@@ -13,15 +13,13 @@ New Leads
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-
-<div style="margin-top: 20px;" class="body-section">
-    <div class="section-header">
-        <h4>Filters</h4>
-        <a href="{% url 'all_data' %}" class="button">Clear Filter</a>
-    </div>
-
-    <form method="post" action="{% url 'all_data' %}">
-        {% csrf_token %}
+<form method="post" action="{% url 'all_data' %}">
+    {% csrf_token %}
+    <div style="margin-top: 20px;" class="body-section">
+        <div class="section-header">
+            <h4>Filters</h4>
+            <a href="{% url 'all_data' %}" class="button">Clear Filter</a>
+        </div>  
         <div class="section-filter-full" id="filters">
             <div class="onefourth">
                 <label for="salestatusFilter">Sale Status</label><br>
@@ -97,26 +95,13 @@ New Leads
                 </select>
             </div>     
         </div>
-    {% comment %} </form> {% endcomment %}
-</div>
-
-<div style="margin-top: 20px;" class="body-section">
-    <div class="section-header">
-        <h4>Actions</h4>
+        </div>
     </div>
-
-    <div class="filter-body">
-        {% comment %} <form method="post", action="{% url 'updatedataStatus' %}">      
-        {% csrf_token %}
-            <input type="hidden" name="salestatusFilter" value="{{salestatusFilter}}">
-            <input type="hidden" name="surplusstatusFilter" value="{{surplusstatusFilter}}">
-            <input type="hidden" name="casesearchstatusFilter" value="{{casesearchstatusFilter}}">
-            <input type="hidden" name="publishedstatusFilter" value="{{publishedstatusFilter}}">
-            <input type="hidden" name="selectedUser" value="{{selectedUser}}">
-            <input type="hidden" name="stateFilter" value="{{stateFilter}}">
-            <input type="hidden" name="countyFilter" value="{{countyFilter}}">
-            <input type="hidden" name="saletypeFilter" value="{{saletypeFilter}}"> {% endcomment %}
-            
+    <div style="margin-top: 20px;" class="body-section"> 
+        <div class="section-header">
+            <h4>Actions</h4>
+        </div>
+        <div class="filter-body">      
             <div class="onefourth" style="padding:10px; display:inline-block;">
                 <select style="width:100%;" name="assignCaseSearch" id="assignCaseSearch">
                     <option value="">-- Assign Case Search --</option>
@@ -125,37 +110,37 @@ New Leads
                     {% endfor %}
                 </select>
                 <input type="submit" value="Assign Case Search">
-        </div>
-        <div class="onefourth" style="padding:10px; display:inline-block;">
-            <select style="width:100%;" name="skp_assign_to" id="skp_assign_to">
-                <option value="">-- Assign Skiptracing --</option>
-                {% for user in userList %}
-                <option value="{{ user.username }}" {% if user.username == request.POST.assign_to %}selected{% endif %}>{{ user.username|upper }}</option>
-                {% endfor %}
-            </select>
-            <input type="submit" value="Assign Skiptracing">
-        </div>
-
-        <div class="onefourth" style="padding:10px; display:inline-block;">
-            <select style="width:100%;" name="casesearchStatus" id="status">
-                <option value="">-- Select Status --</option>
-                <option value="Pending">Pending</option>
-                <option value="Completed">Completed</option>
-                <option value="Verified">Verified</option>
-            </select>
-            <input type="submit" value="Update Case Search Status">
-        </div>
-        <div class="onefourth" style="padding:10px; display:inline-block;">
-            <select style="width:100%;" name="publishStatus" id="publish">
-                <option value="">-- Select Publish Status --</option>
-                <option value="Publish">Publish</option>
-                <option value="Unpublish">Unpublish</option>
-            </select>
-            <input type="submit" value="Update Publish Status">
-            
+            </div>
+            <div class="onefourth" style="padding:10px; display:inline-block;">
+                <select style="width:100%;" name="skp_assign_to" id="skp_assign_to">
+                    <option value="">-- Assign Skiptracing --</option>
+                    {% for user in userList %}
+                    <option value="{{ user.username }}" {% if user.username == request.POST.assign_to %}selected{% endif %}>{{ user.username|upper }}</option>
+                    {% endfor %}
+                </select>
+                <input type="submit" value="Assign Skiptracing">
+            </div>
+            <div class="onefourth" style="padding:10px; display:inline-block;">
+                <select style="width:100%;" name="casesearchStatus">
+                    <option value="">-- Select Status --</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Completed">Completed</option>
+                    <option value="Verified">Verified</option>
+                </select>
+                <input type="submit" value="Update Case Search Status">
+            </div>
+            <div class="onefourth" style="padding:10px; display:inline-block;">
+                <select style="width:100%;" name="publishStatus">
+                    <option value="">-- Select Publish Status --</option>
+                    <option value="Unpublish">Unpublish</option>
+                    <option value="Publish">Publish</option>
+                </select>
+                <input type="submit" value="Update Publish Status">
+                
+            </div>
         </div>
     </div>
-</div>
+</form>
 <div style="margin-top: 20px;" class="body-section">
     <div class="section-header">
         <h4>Foreclosure Data</h4>
@@ -208,8 +193,8 @@ New Leads
 
                         <td>
                             <select name="publishStatus">
-                                <option value="False" {% if Lead.published == "False" %}selected{% endif %}>Unpublished</option>
-                                <option value="True" {% if Lead.published == "True" %}selected{% endif %}>Published</option>
+                                <option value="False" {% if Lead.published is False %}selected{% endif %}>Unpublished</option>
+                                <option value="True" {% if Lead.published is True %}selected{% endif %}>Published</option>
                             </select>
                         </td>
                         
