@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from Admin.utils.threadlocal import get_current_user
 # ----- CHOICES FOR GLOBAL USE -------------------------------- # 
 ACTIVE = 'active'                                               # 
 INACTIVE = 'inactive'                                           # 
@@ -18,6 +18,22 @@ class OperationStat(models.Model):                              #
     changed_at = models.DateTimeField(auto_now=True)            #
     class Meta:                                                 #
         abstract = True                                         #
+
+
+    def save(self, *args, **kwargs):
+        user = get_current_user()  # Get the user from thread-local storage
+        
+        if user and user.groups.filter(name="client").exists():
+            # Prevent updating `changed_at` for users in RestrictedGroup
+            if self.pk:  # If instance exists, fetch current changed_at value
+                existing = self.__class__.objects.get(pk=self.pk)
+                self.changed_at = existing.changed_at  
+
+        super().save(*args, **kwargs)
+
+
+
+
 # ----- ABSTRACT CLASS TO BE USED IN OTHER MODELS ------------- #
  
 # ------------------------------------------------------------- #

@@ -22,8 +22,8 @@ Auction Calendar
     <form method="post" action="{% url 'auction_calendar' %}">
         {% csrf_token %}
         <div class="onefifth">
-            <label for="selectedUser">Data Analyst</label>
-            <select id="selectedUser" name="selectedUser" onchange="this.form.submit()">
+            <label for="selectedUser">Data Analyst</label><br>
+            <select id="selectedUser" name="selectedUser" onchange="this.form.submit()" style="width:95%;">
                 <option value="">--- Select User ---</option>
                 {% for user in userList %}
                 <option value="{{user.username}}" {% if selectedUser == user.username %}selected{% endif %}>{{user.username|upper}}</option>
@@ -32,7 +32,7 @@ Auction Calendar
         </div>
         <div class="onefifth">
             <label for="stateFilter">Select State</label><br>
-            <select id="stateFilter" name="stateFilter" onchange="this.form.submit()">
+            <select id="stateFilter" name="stateFilter" onchange="this.form.submit()" style="width:95%;">
                 <option value="" {% if stateFilter == "" %}selected{% endif %}>--- Select State ---</option>
                 {% for state in states %}
                 <option value="{{state}}" {% if state == stateFilter %}selected{% endif %}>{{state|upper}}</option>
@@ -41,7 +41,7 @@ Auction Calendar
         </div>
         <div class="onefifth">
             <label for="countyFilter">Select County</label><br>
-            <select id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if stateFilter == "" %}disabled{% endif %}>
+            <select id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if stateFilter == "" %}disabled{% endif %} style="width:95%;">
                 <option value="" {% if countyFilter == "" %}selected{% endif %}>--- Select County ---</option>
                 {% for county in counties %}
                 <option value="{{county}}" {% if county == countyFilter %}selected{% endif %}>{{county|upper}}</option>
@@ -49,8 +49,8 @@ Auction Calendar
             </select>
         </div>
         <div class="onefifth">
-            <label for="saletypeFilter">Update Event Type</label>
-            <select id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if stateFilter == "" %}disabled{% endif %}>
+            <label for="saletypeFilter">Update Event Type</label><br>
+            <select id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if stateFilter == "" %}disabled{% endif %} style="width:95%;">
                 <option value="" {% if saletypeFilter == "" %}selected{% endif %}>All</option>
                 {% for saletype in saletypes %}
                 <option value="{{saletype}}" {% if saletype == saletypeFilter %}selected{% endif %}>{{saletype|upper}}</option>
@@ -58,8 +58,8 @@ Auction Calendar
             </select>
         </div>
         <div class="onefifth">
-        <label for="saledateFilter">Event Timeline</label>
-        <select id="saledateFilter" name="saledateFilter" onchange="this.form.submit()">
+        <label for="saledateFilter">Event Timeline</label><br>
+        <select id="saledateFilter" name="saledateFilter" onchange="this.form.submit()" style="width:95%;">
             <option value=""{% if saledateFilter == "" %}selected{% endif %}>See All Events</option>
             <option value="past" {% if saledateFilter == "past" %}selected{% endif %}>Past Events</option>
             <option value="upcoming" {% if saledateFilter == "upcoming" %}selected{% endif %}>Upcoming Events</option>

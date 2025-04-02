@@ -11,7 +11,7 @@ urlpatterns = [
     path('update_case_search_status', views.update_case_search_status, name='update_case_search_status'),
     path('update_publish_status', views.update_publish_status, name='update_publish_status'),
     
-
+    path('updatedataStatus', views.updatedataStatus, name='updatedataStatus'),
 
 
 ]

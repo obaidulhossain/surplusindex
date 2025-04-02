@@ -26,9 +26,10 @@ def All_Data(request):
         countyFilter = request.POST.get('countyFilter','')
         saletypeFilter = request.POST.get('saletypeFilter','')
 
-        assignCaseSearch = request.POST.get('')
-        
-        
+        assignCaseSearch = request.POST.get('assignCaseSearch','')
+        skp_assign_to = request.POST.get('skp_assign_to','')
+        casesearchStatus = request.POST.get('casesearchStatus','')
+        publishStatus = request.POST.get('publishStatus','')      
         
     else:
         salestatusFilter = request.GET.get('salestatusFilter','')
@@ -97,6 +98,52 @@ def All_Data(request):
     if saletypeFilter:
         leads_queryset = leads_queryset.filter(sale_type=saletypeFilter)
 
+# update status--------------------------
+    if request.method == 'POST':
+        if not assignCaseSearch == "":
+            userinstance = User.objects.get(username=assignCaseSearch)
+            for lead in leads_queryset:
+                lead.case_search_assigned_to = userinstance
+                lead.save()
+            messages.success(request, f"{len(leads_queryset)} Leads Case Search Assigned to {assignCaseSearch}")
+
+        if not skp_assign_to == "":
+            i = 0
+            userinstance = User.objects.get(username=skp_assign_to)
+            for lead in leads_queryset:
+                contacts_to_skp = lead.defendant.all()
+                for contact in contacts_to_skp:
+                        i += 1
+                        if contact.skiptraced == False:
+                            contact.skp_assignedto.add(userinstance)
+                            contact.save()
+            messages.success(request, f"{i} Contacts from {len(leads_queryset)} Leads Assigned to {skp_assign_to} for skiptracing")
+
+        if casesearchStatus == "Pending":
+            for lead in leads_queryset:
+                lead.case_search_status = "Pending"
+                lead.save()
+        elif casesearchStatus == "Completed":
+            for lead in leads_queryset:
+                lead.case_search_status = "Completed"
+                lead.save()
+        elif casesearchStatus == "Verified":
+            for lead in leads_queryset:
+                lead.case_search_status = "Verified"
+                lead.save()
+
+        if publishStatus == "Unpublish":
+            for lead in leads_queryset:
+                lead.published = False
+                lead.save()
+            messages.success(request, f"{len(leads_queryset)} Leads Unpublished")
+        elif publishStatus == "Publish":
+            for lead in leads_queryset:
+                lead.published = True
+                lead.save()
+            messages.success(request, f"{len(leads_queryset)} Leads Published")
+
+
     total_leads = leads_queryset.count()
     p = Paginator(leads_queryset, 30)
     page = request.GET.get('page')
@@ -132,6 +179,112 @@ def All_Data(request):
 
     }
     return render(request, 'Admin/new_leads.html', context)
+
+
+def updatedataStatus(request):
+    
+    if request.method == 'POST':
+        leads_queryset = Foreclosure.objects.all()
+
+        salestatusFilter = request.POST.get('salestatusFilter','')
+        surplusstatusFilter = request.POST.get('surplusstatusFilter','')
+        casesearchstatusFilter = request.POST.get('casesearchstatusFilter','')
+        publishedstatusFilter = request.POST.get('publishedstatusFilter','')
+        selectedUser = request.POST.get('selectedUser','')
+        stateFilter = request.POST.get('stateFilter','')
+        countyFilter = request.POST.get('countyFilter','')
+        saletypeFilter = request.POST.get('saletypeFilter','')
+
+        assignCaseSearch = request.POST.get('assignCaseSearch','')
+        skp_assign_to = request.POST.get('skp_assign_to','')
+        casesearchStatus = request.POST.get('casesearchStatus','')
+        publishStatus = request.POST.get('publishStatus','')
+
+
+        if salestatusFilter:
+            leads_queryset = leads_queryset.filter(sale_status=salestatusFilter)
+
+        if surplusstatusFilter:
+            leads_queryset = leads_queryset.filter(surplus_status=surplusstatusFilter)
+            
+        if casesearchstatusFilter:
+            leads_queryset = leads_queryset.filter(case_search_status=casesearchstatusFilter)
+            
+        if publishedstatusFilter == "False":
+            leads_queryset = leads_queryset.filter(published=False)
+        else:
+            leads_queryset = leads_queryset.filter(published=True)
+        
+        if selectedUser:
+            selectedUserInstance = User.objects.get(username=selectedUser)
+            leads_queryset = leads_queryset.filter(case_search_assigned_to=selectedUserInstance)
+
+        if stateFilter:
+            leads_queryset = leads_queryset.filter(state=stateFilter)
+            
+        if countyFilter:
+            leads_queryset = leads_queryset.filter(county=countyFilter)
+        
+        if saletypeFilter:
+            leads_queryset = leads_queryset.filter(sale_type=saletypeFilter)
+
+        if not assignCaseSearch == "":
+            userinstance = User.objects.get(username=assignCaseSearch)
+            for lead in leads_queryset:
+                lead.case_search_assigned_to = userinstance
+                lead.save()
+            messages.success(request, f"{len(leads_queryset)} Leads Case Search Assigned to {assignCaseSearch}")
+
+        if not skp_assign_to == "":
+            i = 0
+            userinstance = User.objects.get(username=skp_assign_to)
+            for lead in leads_queryset:
+                contacts_to_skp = lead.defendant.all()
+                for contact in contacts_to_skp:
+                     i += 1
+                     if contact.skiptraced == False:
+                          contact.skp_assignedto.add(userinstance)
+                          contact.save()
+            messages.success(request, f"{i} Contacts from {len(leads_queryset)} Leads Assigned to {skp_assign_to} for skiptracing")
+
+        if casesearchStatus == "Pending":
+            for lead in leads_queryset:
+                lead.case_search_status = "Pending"
+                lead.save()
+        elif casesearchStatus == "Completed":
+            for lead in leads_queryset:
+                lead.case_search_status = "Completed"
+                lead.save()
+        elif casesearchStatus == "Verified":
+            for lead in leads_queryset:
+                lead.case_search_status = "Verified"
+                lead.save()
+
+        if publishStatus == "Unpublish":
+            for lead in leads_queryset:
+                lead.published = False
+                lead.save()
+        elif publishStatus == "Publish":
+            for lead in leads_queryset:
+                lead.published = True
+                lead.save()
+        messages.success(request, f"{len(leads_queryset)} Leads {publishStatus}ed")
+
+
+
+
+
+    return redirect('all_data')
+
+
+
+
+
+
+
+
+
+
 
 def assign_leads(request):
     assign_to = request.POST.get('assign_to')
@@ -199,7 +352,6 @@ def assign_skiptracing(request):
         foreclosures = Foreclosure.objects.filter(state=state)
         if assign_to:
             for foreclosure in foreclosures:
-                print(foreclosure.case_number)
                 contacts_to_update = foreclosure.defendant.all()
                 for contact in contacts_to_update:
                      if contact.skiptraced == False:
