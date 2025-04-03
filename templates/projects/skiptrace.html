@@ -14,7 +14,7 @@ Skiptracing
 
 <!--Foreclosure Section               End -->
 <div style="margin-top: 20px;" class="body-section">
-    <div class="section-header">
+    <div class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
         {% if contact_selected == "" %}
         <h4>Create Contact</h4>
         {% else %}
@@ -124,7 +124,7 @@ Skiptracing
 
 <!--Mailing Address Section               Start -->
 <div style="margin-top: 20px;" class="body-section">
-    <div id="mailing_address" class="section-header">
+    <div id="mailing_address" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
         <h4>Mailing Addresses</h4>
         <form method="post" action="{% url 'fetch_mailing_address' %}">
             {% csrf_token %}
@@ -284,7 +284,7 @@ Skiptracing
 <!--Email section-start-->
 
 <div style="margin-top:20px;" class="body-section onethird">
-    <div id="em" class="section-header">
+    <div id="em" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
         <h4>Emails</h4>
     </div>
     <div class="section-body-full">
@@ -381,7 +381,7 @@ Skiptracing
 <!--Wireless section-start-->
 
 <div style="margin-top:20px;" class="body-section onethird">
-    <div id="wn" class="section-header">
+    <div id="wn" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
         <h4>Wireless Numbers</h4>   
     </div>
     <div class="section-body-full">
@@ -478,7 +478,7 @@ Skiptracing
 
 <!--Landline section-start-->
 <div style="margin-top:20px;" class="body-section onethird">
-    <div id="ln" class="section-header">
+    <div id="ln" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
         <h4>Landline Numbers</h4>   
     </div>
     <div class="section-body-full">
@@ -583,7 +583,7 @@ Skiptracing
 
 {% if not related_contact %}
 <div style="margin-top: 20px;" class="body-section">
-    <div id="rc" class="section-header">
+    <div id="rc" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
         <h4>Related Contacts</h4>
     </div>
     <div class="section-body-full">
