@@ -711,7 +711,7 @@ Skiptracing
         {% csrf_token %}
         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
         <input type="hidden" name="related_contact" value="{{ related_contact }}">
-        <input type="submit" {% if related_contact.skiptraced == False %}style="background-color: #fe8420;" value="Skiptrace"{% endif %} value="Mark as Skiptraced">
+        <input type="submit" {% if not related_contact == "" %}style="background-color: #fe8420; color: #101010;" value="Mark Related as Skiptraced"{% else %}style="background-color: #b1cc16; color: #101010;" value="Mark as Skiptraced"{% endif %}>
 
     </form>
 </div>
