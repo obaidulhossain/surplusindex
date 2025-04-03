@@ -149,7 +149,6 @@ New Leads
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th>Edit</th>
                     <th>State</th>
                     <th>County</th>
                     <th>Date Created</th>
@@ -160,9 +159,12 @@ New Leads
                     <th>Sold for</th>
                     <th>Ps Surplus</th>
                     <th>Vf Surplus</th>
+                    <th>Defendants</th>
                     <th>CS Status</th>
                     <th>Publish</th>
-                    <th>Action</th>
+                    <th>Edit</th>
+                    <th>Update</th>
+                    
                 </tr>
             <thead>
             <tbody>
@@ -171,7 +173,7 @@ New Leads
                     <form id="search-form" method="post" action="{% url 'all_data' %}">
                         {% csrf_token %}
                         <input type="hidden" name="leadid" value="{{ Lead.pk }}">
-                        <td><a class="button" href="/add_edit_foreclosure/?fcl_id={{ Lead.id }}">Edit</a></td>
+                        
                         <td>{{Lead.state|title}}</td>
                         <td>{{Lead.county|title}}</td>
                         <td>{{Lead.created_at|date:'m/d/Y'}}</td>
@@ -183,6 +185,11 @@ New Leads
                         <td>{{Lead.possible_surplus|currency}}</td>
                         <td>{{Lead.verified_surplus|currency}}</td>
                         <td>
+                            {% for def in Lead.defendant.all %}        
+                            <span {% if def.skiptraced == False %}style="color: red;"{% endif %}>{% if def.business_name == "" %}{{def.name_prefix}} {{def.first_name}} {{def.middle_name}} {{def.last_name}} {{def.name_suffix}}{% else %}{{def.business_name}}{% endif %}</span>,
+                            {% endfor %}
+                        </td>
+                        <td>
                             <select name="CS_Status">
                                 <option value="" {% if Lead.case_search_status == "" %}selected{% endif %}>-- Select Status --</option>
                                 <option value="Pending" {% if Lead.case_search_status == "Pending" %}selected{% endif %}>Pending</option>
@@ -190,15 +197,15 @@ New Leads
                                 <option value="Verified" {% if Lead.case_search_status == "Verified" %}selected{% endif %}>Verified</option>
                             </select>
                         </td>
-
                         <td>
                             <select name="publishStatus">
                                 <option value="False" {% if Lead.published is False %}selected{% endif %}>Unpublished</option>
                                 <option value="True" {% if Lead.published is True %}selected{% endif %}>Published</option>
                             </select>
                         </td>
-                        
+                        <td><a class="button" href="/add_edit_foreclosure/?fcl_id={{ Lead.id }}">Edit</a></td>            
                         <td><input type="submit" value="Update" ></td>
+                        
                     </form>
                 </tr>
                 {% endfor %}
