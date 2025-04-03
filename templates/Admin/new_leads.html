@@ -161,18 +161,18 @@ New Leads
                     <th>Vf Surplus</th>
                     <th>Defendants</th>
                     <th>CS Status</th>
-                    <th>Publish</th>
+                    
                     <th>Edit</th>
-                    <th>Update</th>
+                    <th>P Status</th>
                     
                 </tr>
             <thead>
             <tbody>
                 {% for Lead in leads %}
-                <tr>
-                    <form id="search-form" method="post" action="{% url 'all_data' %}">
+                <tr data-id="{{ Lead.id }}">
+                    {% comment %} <form id="search-form" method="post" action="{% url 'updatedataStatus' %}">
                         {% csrf_token %}
-                        <input type="hidden" name="leadid" value="{{ Lead.pk }}">
+                        <input type="hidden" name="leadid" value="{{ Lead.pk }}"> {% endcomment %}
                         
                         <td>{{Lead.state|title}}</td>
                         <td>{{Lead.county|title}}</td>
@@ -197,16 +197,16 @@ New Leads
                                 <option value="Verified" {% if Lead.case_search_status == "Verified" %}selected{% endif %}>Verified</option>
                             </select>
                         </td>
-                        <td>
-                            <select name="publishStatus">
+                        {% comment %} <td>
+                            <select name="publishStatus" class="publishStatus">
                                 <option value="False" {% if Lead.published is False %}selected{% endif %}>Unpublished</option>
                                 <option value="True" {% if Lead.published is True %}selected{% endif %}>Published</option>
                             </select>
-                        </td>
+                        </td> {% endcomment %}
                         <td><a class="button" href="/add_edit_foreclosure/?fcl_id={{ Lead.id }}">Edit</a></td>            
-                        <td><input type="submit" value="Update" ></td>
-                        
-                    </form>
+                        {% comment %} <td><input type="submit" value="Update" ></td> {% endcomment %}
+                        <td><button class="button publishStatus" onclick="saveData(this)" value={{Lead.published}}>{% if Lead.published == False %}Publish{% else %}Unpublish{% endif %}</button></td>
+                    {% comment %} </form> {% endcomment %}
                 </tr>
                 {% endfor %}
         </table>
@@ -232,6 +232,7 @@ New Leads
             </ul>
         </div>
     </div>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
 </div>
 
 {% endblock content %}

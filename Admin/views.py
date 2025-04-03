@@ -3,7 +3,9 @@ from propertydata.models import *
 from django.contrib import messages
 from django.core.paginator import Paginator
 # Create your views here.
-
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
 
 #----------------Data--------------------start
 
@@ -184,8 +186,62 @@ def All_Data(request):
     return render(request, 'Admin/new_leads.html', context)
 
 
-def updatedataStatus(request):
-    
+@csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
+def publishStatus(request):  
+
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+            
+            
+            fcl_id = data.get('id')
+            publish_Status = data.get('publish_Status')
+            
+
+            # Fetch the corresponding event object from the database
+            fcl_instance = Foreclosure.objects.get(id=fcl_id)
+
+            # Update the fields
+            if publish_Status and fcl_instance.published == False:
+                fcl_instance.published = True
+            else:
+                fcl_instance.published = False
+                
+            # Save the updated object
+            fcl_instance.save()
+
+            # Respond with success
+            
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+
+        except Foreclosure.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Event not found.'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     if request.method == 'POST':
         leads_queryset = Foreclosure.objects.all()
 
