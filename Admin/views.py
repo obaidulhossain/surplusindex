@@ -154,7 +154,7 @@ def All_Contacts(request):
 
         
 
-    p = Paginator(leads_queryset, 30)
+    p = Paginator(leads_queryset, 150)
     page = request.GET.get('page')
     leads = p.get_page(page)
 
@@ -331,7 +331,7 @@ def All_Data(request):
 
 
     total_leads = leads_queryset.count()
-    p = Paginator(leads_queryset, 30)
+    p = Paginator(leads_queryset, 150)
     page = request.GET.get('page')
     leads = p.get_page(page)
 
