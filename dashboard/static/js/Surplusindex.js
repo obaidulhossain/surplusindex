@@ -163,3 +163,65 @@ function saveData(button) {
         });
 }
 
+function AssignSKP(select) {
+    const row = select.closest('tr');
+    const rowId = row.getAttribute('data-id');
+    const assigntoUser = row.querySelector('.assigntoUser').value;
+
+
+    // Prepare data for updating
+    const updatedData = {
+        id: rowId,
+        assignto_User: assigntoUser,
+    };
+
+    // Send data to the server using fetch
+    fetch('/assignSKP/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (!assigntoUser) {
+                    // Change button style to indicate success
+
+                    select.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    select.style.backgroundColor = "#f66"; // Green background
+                    select.style.color = "#fff"; // White text
+
+                    // Reset the button after a short delay
+                    setTimeout(() => {
+
+                        select.style.backgroundColor = ""; // Reset to original background
+                        select.style.color = ""; // Reset to original text color
+                    }, 1500); // Reset after 1.5 seconds
+                } else {
+                    // Change select style to indicate success
+
+                    select.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    select.style.backgroundColor = "#4CAF50"; // Green background
+                    select.style.color = "#fff"; // White text
+
+                    // Reset the select after a short delay
+                    setTimeout(() => {
+
+                        select.style.backgroundColor = ""; // Reset to original background
+                        select.style.color = ""; // Reset to original text color
+                    }, 1500); // Reset after 1.5 seconds
+                }
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
+}

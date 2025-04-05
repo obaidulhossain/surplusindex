@@ -130,7 +130,7 @@ class Contact(OperationStat):
     landline = models.ManyToManyField(Landline_Number, related_name='contact_as_landline', blank=True, verbose_name='Landline Numbers')
     emails = models.ManyToManyField(Email, related_name='contact_as_email', blank=True, verbose_name='Email Addresses')
     related_contacts = models.ManyToManyField('self', blank=True, symmetrical=True)
-    skp_assignedto = models.ManyToManyField(User, related_name='assign_skp', blank=True, null=True)
+    skp_assignedto = models.ForeignKey(User, related_name='assign_skp', on_delete=models.CASCADE, blank=True, null=True)
     skiptraced = models.BooleanField(default=False)
     
     def __str__(self):

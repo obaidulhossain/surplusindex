@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% block title %}
+New Leads
+{% endblock title %}
+
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/nouislider.min.css' %}" rel="stylesheet">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<form method="post" action="{% url 'all_contacts' %}">
+    {% csrf_token %}
+    <div style="margin-top: 20px;" class="body-section">
+        <div class="section-header">
+            <h4>Filters</h4>
+            <a href="{% url 'all_contacts' %}" class="button">Clear Filter</a>
+        </div>  
+        <div class="section-filter-full" id="filters">
+            <div class="onefourth">
+                <label for="salestatusFilter">Sale Status</label><br>
+                <select style="width:85%;" id="salestatusFilter" name="salestatusFilter" onchange="this.form.submit()">
+                    <option value="" {% if salestatusFilter == "" %}selected{% endif %}>--- Select Sale Status ---</option>
+                    {% for salestatus in salestatuses %}
+                    <option value="{{salestatus}}" {% if salestatus == salestatusFilter %}selected{% endif %}>{{salestatus|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="surplusstatusFilter">Surplus Status</label><br>
+                <select style="width:85%;" id="surplusstatusFilter" name="surplusstatusFilter" onchange="this.form.submit()">
+                    <option value="" {% if surplusstatusFilter == "" %}selected{% endif %}>--- Select Surplus Status ---</option>
+                    {% for surplusstatus in surplusstatuses %}
+                    <option value="{{surplusstatus}}" {% if surplusstatus == surplusstatusFilter %}selected{% endif %}>{{surplusstatus|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="casesearchstatusFilter">Case Search Status</label><br>
+                <select style="width:85%;" id="casesearchstatusFilter" name="casesearchstatusFilter" onchange="this.form.submit()">
+                    <option value="" {% if casesearchstatusFilter == "" %}selected{% endif %}>--- Case Search Status ---</option>
+                    {% for casesearchstatus in casesearchstatuses %}
+                    <option value="{{casesearchstatus}}" {% if casesearchstatus == casesearchstatusFilter %}selected{% endif %}>{{casesearchstatus|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="publishedstatusFilter">Published Status</label><br>
+                <select style="width:85%;" id="publishedstatusFilter" name="publishedstatusFilter" onchange="this.form.submit()">
+                    <option value="" {% if publishedstatusFilter == "" %}selected{% endif %}>--- Published Status ---</option>
+                    <option value="False" {% if publishedstatusFilter == "False" %}selected{% endif %}>False</option>
+                    <option value="True" {% if publishedstatusFilter == "True" %}selected{% endif %}>True</option>
+                </select>
+            </div>
+        </div>    
+        <div class="section-filter-full" id="filters"> 
+            <div class="onefourth">
+                <label for="selectedUser">Skiptrace Assigned To</label><br>
+                <select style="width:85%;" id="selectedUser" name="selectedUser" onchange="this.form.submit()">
+                    <option value="">--- Select User ---</option>
+                    {% for user in userList %}
+                    <option value="{{user.username}}" {% if selectedUser == user.username %}selected{% endif %}>{{user.username|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="stateFilter">Select State</label><br>
+                <select style="width:85%;" id="stateFilter" name="stateFilter" onchange="this.form.submit()">
+                    <option value="" {% if stateFilter == "" %}selected{% endif %}>--- Select State ---</option>
+                    {% for state in states %}
+                    <option value="{{state}}" {% if state == stateFilter %}selected{% endif %}>{{state|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="countyFilter">Select County</label><br>
+                <select style="width:85%;" id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if stateFilter == "" %}disabled{% endif %}>
+                    <option value="" {% if countyFilter == "" %}selected{% endif %}>--- Select County ---</option>
+                    {% for county in counties %}
+                    <option value="{{county}}" {% if county == countyFilter %}selected{% endif %}>{{county|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefourth">
+                <label for="saletypeFilter">Sale Type</label><br>
+                <select style="width:85%;" id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if stateFilter == "" %}disabled{% endif %}>
+                    <option value="" {% if saletypeFilter == "" %}selected{% endif %}>All</option>
+                    {% for saletype in saletypes %}
+                    <option value="{{saletype}}" {% if saletype == saletypeFilter %}selected{% endif %}>{{saletype|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>     
+        </div>
+        </div>
+    </div>
+    <div style="margin-top: 20px;" class="body-section"> 
+        <div class="section-header">
+            <h4>Actions</h4>
+        </div>
+        <div class="filter-body">      
+
+            <div class="onefourth" style="padding:10px; display:inline-block;">
+                <select style="width:100%;" name="skp_assign_to" id="skp_assign_to" onchange="this.form.submit()" >
+                    <option value="">-- Assign Skiptracing --</option>
+                    {% for user in userList %}
+                    <option value="{{ user.username }}">{{ user.username|upper }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+</form>
+<div style="margin-top: 20px;" class="body-section">
+    <div class="section-header">
+        <h4>Foreclosure Data</h4>
+    </div>
+    <div class="section-body-full">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>County</th>
+                    <th>Case Number</th>
+                    <th>Contact Name</th>
+                    <th>Designation</th>
+                    <th>Business Name</th>
+                    <th>Assigned to</th>
+                    <th>Contact</th>
+                    <th>Case</th>
+                </tr>
+            <thead>
+            <tbody>
+                {% for Lead in leads %}
+                    {% if selectedUser %}
+                        {% for defendant in Lead.filtered_defendants %}
+                        <tr data-id="{{ defendant.id }}">
+                        
+                            <td>{{Lead.state|title}}</td>
+                            <td>{{Lead.county|title}}</td>
+                            <td>{{Lead.case_number|upper}}{% if Lead.case_number_ext != '' and Lead.case_number_ext != '0' and Lead.case_number_ext != None and Lead.case_number_ext != 'None' %}({{ Lead.case_number_ext }}){% endif %}</td>
+                            <td><span {% if defendant.skiptraced == False %}style="color:red;"{% endif %}>{{defendant.name_prefix|upper}} {{defendant.first_name|title}} {{defendant.middle_name|title}} {{defendant.last_name|title}} {{defendant.name_suffix|upper}}</span></td>
+                            <td>{{defendant.designation|upper}}</td>
+                            <td>{{defendant.business_name|upper}}</td>
+                            <td>
+                                <select onchange="AssignSKP(this)" class="assigntoUser">
+                                    <option value="" {% if not defendant.skp_assignedto %}selected{% endif %}>Not Assigned</option>
+                                    {% for user in userList %}
+                                    <option value="{{ user.username }}" {% if defendant.skp_assignedto and user.id == defendant.skp_assignedto.id %}selected{% endif %}>{{ user.username|upper }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td><a class="button" href="/skiptrace/?con_id={{ defendant.id }}">Contact</a></td>
+                            <td><a class="button" href="/add_edit_foreclosure/?fcl_id={{ Lead.id }}">Case</a></td>
+                        </tr>
+
+                        {% endfor %}    
+                    {% else %}
+                        {% for defendant in Lead.defendant.all %}
+                    
+                    
+                    <tr data-id="{{ defendant.id }}">
+                       
+                        <td>{{Lead.state|title}}</td>
+                        <td>{{Lead.county|title}}</td>
+                        <td>{{Lead.case_number|upper}}{% if Lead.case_number_ext != '' and Lead.case_number_ext != '0' and Lead.case_number_ext != None and Lead.case_number_ext != 'None' %}({{ Lead.case_number_ext }}){% endif %}</td>
+                        <td><span {% if defendant.skiptraced == False %}style="color:red;"{% endif %}>{{defendant.name_prefix|upper}} {{defendant.first_name|title}} {{defendant.middle_name|title}} {{defendant.last_name|title}} {{defendant.name_suffix|upper}}</span></td>
+                        <td>{{defendant.designation|upper}}</td>
+                        <td>{{defendant.business_name|upper}}</td>
+                        <td>
+                            <select onchange="AssignSKP(this)" class="assigntoUser">
+                                <option value="" {% if not defendant.skp_assignedto %}selected{% endif %}>Not Assigned</option>
+                                {% for user in userList %}
+                                <option value="{{ user.username }}" {% if defendant.skp_assignedto and user.id == defendant.skp_assignedto.id %}selected{% endif %}>{{ user.username|upper }}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td><a class="button" href="/skiptrace/?con_id={{ defendant.id }}">Contact</a></td>
+                        <td><a class="button" href="/add_edit_foreclosure/?fcl_id={{ Lead.id }}">Case</a></td>
+                    </tr>
+
+                        {% endfor %}
+                    {% endif %}
+                {% endfor %}
+        </table>
+    </div>
+    <div class="clearfix">
+        <div class="hint-text">Showing Page <b>{{ leads.number }}</b> out of <b>{{ leads.paginator.num_pages }}</b> Pages | Leads count ({{total_leads}}) Contacts count {{total_contacts}} </div>
+            <ul class="pagination">
+                {% if leads.has_previous %}
+                <li class="page-item"><a href="?salestatusFilter={{salestatusFilter}}&surplusstatusFilter={{surplusstatusFilter}}&casesearchstatusFilter={{casesearchstatusFilter}}&publishedstatusFilter={{publishedstatusFilter}}&selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page=1" class="page-link">First</a></li>
+                <li class="page-item"><a href="?salestatusFilter={{salestatusFilter}}&surplusstatusFilter={{surplusstatusFilter}}&casesearchstatusFilter={{casesearchstatusFilter}}&publishedstatusFilter={{publishedstatusFilter}}&selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ leads.previous_page_number }}">Previous</a></li>
+                <li class="page-item"><a href="?salestatusFilter={{salestatusFilter}}&surplusstatusFilter={{surplusstatusFilter}}&casesearchstatusFilter={{casesearchstatusFilter}}&publishedstatusFilter={{publishedstatusFilter}}&selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ leads.previous_page_number }}" class="page-link">{{ leads.previous_page_number }}</a></li>
+                {% endif %}
+
+                <li class="page-item active"><a href="#" class="page-link">{{ leads.number }}</a></li>
+
+                {% if leads.has_next %}
+                <li class="page-item"><a href="?salestatusFilter={{salestatusFilter}}&surplusstatusFilter={{surplusstatusFilter}}&casesearchstatusFilter={{casesearchstatusFilter}}&publishedstatusFilter={{publishedstatusFilter}}&selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ leads.next_page_number }}" class="page-link">{{ leads.next_page_number }}</a></li>
+                <li class="page-item"><a href="?salestatusFilter={{salestatusFilter}}&surplusstatusFilter={{surplusstatusFilter}}&casesearchstatusFilter={{casesearchstatusFilter}}&publishedstatusFilter={{publishedstatusFilter}}&selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ second_previous }}" class="page-link">{{ second_previous }}</a></li>
+                <li class="page-item"><a href="?salestatusFilter={{salestatusFilter}}&surplusstatusFilter={{surplusstatusFilter}}&casesearchstatusFilter={{casesearchstatusFilter}}&publishedstatusFilter={{publishedstatusFilter}}&selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{leads.next_page_number}}" class="page-link">Next</a></li>
+                <li class="page-item"><a href="?salestatusFilter={{salestatusFilter}}&surplusstatusFilter={{surplusstatusFilter}}&casesearchstatusFilter={{casesearchstatusFilter}}&publishedstatusFilter={{publishedstatusFilter}}&selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ leads.paginator.num_pages }}">Last</a></li>
+                {% endif %}
+
+            </ul>
+        </div>
+    </div>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+</div>
+
+{% endblock content %}
