@@ -506,12 +506,14 @@ def saveskiptraceComment(request):
             con_instance = Contact.objects.get(id=con_id)
             
             # Update the fields
-            
-            try:
-                con_instance.skiptrace_comment = "Not Found"
-            except User.DoesNotExist:
-                return JsonResponse({'status': 'error', 'message': 'User not found.'}, status=404)
-            con_instance.save()
+            if con_instance.skiptrace_comment == "Not Found":
+                con_instance.skiptraced = False
+            else:
+                try:
+                    con_instance.skiptrace_comment = "Not Found"
+                except User.DoesNotExist:
+                    return JsonResponse({'status': 'error', 'message': 'User not found.'}, status=404)
+                con_instance.save()
            
             return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
 
