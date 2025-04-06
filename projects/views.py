@@ -489,6 +489,16 @@ def mark_as_skiptraced(request):
     related_contact_instance = Contact.objects.get(pk=related_contact)
     
     related_contact_instance.skiptraced = True
+    related_contact_instance.skiptrace_comment = "Done"
+    related_contact_instance.save()
+    return HttpResponseRedirect(f"/skiptrace/?con_id={selected_contact if selected_contact else related_contact}#rc")
+
+def markasNotfound(request):
+    selected_contact = request.POST.get('related_contact') #reversed contact instance to current contact
+    related_contact = request.POST.get('con_id')#10-skiptrace
+    related_contact_instance = Contact.objects.get(pk=related_contact)
+    
+    related_contact_instance.skiptrace_comment = "Not Found"
     related_contact_instance.save()
     return HttpResponseRedirect(f"/skiptrace/?con_id={selected_contact if selected_contact else related_contact}#rc")
 
@@ -502,6 +512,7 @@ def CreateUpdateContact(request):
     suffix = request.POST.get('suffix', '')
     b_name = request.POST.get('b_name','')
     designation = request.POST.get('designation','')
+
 
     if contact_selected:
         contact_instance = Contact.objects.get(pk=contact_selected)

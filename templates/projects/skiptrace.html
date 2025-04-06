@@ -706,14 +706,23 @@ Skiptracing
     });
 </script>
 {% endif %}
-<div style="margin-top: 20px; float:right;" class="body-section">
-    <form  method="post" action="{% url 'mark_as_skiptraced' %}">
+<div style="margin-top: 20px; float:right; display=block;" class="body-section">
+
+    <form  method="post" action="{% url 'mark_as_skiptraced' %}" style="display:inline-block;">
         {% csrf_token %}
         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
         <input type="hidden" name="related_contact" value="{{ related_contact }}">
         <input type="submit" {% if not related_contact == "" %}style="background-color: #fe8420; color: #101010;" value="Mark Related as Skiptraced"{% else %}style="background-color: #b1cc16; color: #101010;" value="Mark as Skiptraced"{% endif %}>
 
     </form>
+
+    <form  method="post" action="{% url 'mark_as_notfound' %}" style="display:inline-block;">
+        {% csrf_token %}
+        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
+        <input type="hidden" name="related_contact" value="{{ related_contact }}">
+        <input type="submit" style="background-color: #fe8420; color: #101010;" value="Mark as Not Found">
+    </form>
+
 </div>
 <script src="{% static 'js/Surplusindex.js' %}"></script>
 {% endblock content %}

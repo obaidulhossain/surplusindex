@@ -132,6 +132,7 @@ class Contact(OperationStat):
     related_contacts = models.ManyToManyField('self', blank=True, symmetrical=True)
     skp_assignedto = models.ForeignKey(User, related_name='assign_skp', on_delete=models.CASCADE, blank=True, null=True)
     skiptraced = models.BooleanField(default=False)
+    skiptrace_comment = models.CharField(max_length=255, blank=True, null=True)
     
     def __str__(self):
         return f"{self.name_prefix} {self.first_name} {self.middle_name} {self.last_name} {self.name_suffix} | {self.designation} : {self.business_name}"

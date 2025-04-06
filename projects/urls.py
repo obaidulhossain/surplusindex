@@ -37,6 +37,7 @@ path('def-ajax_search', views.defendant_search, name='def-ajax_search'),
 # Urls for Skipptracing Section---------------------------------------------------------------------------
 path('skiptrace/', views.skiptrace, name="skiptrace"),
 path('mark_as_skiptraced', views.mark_as_skiptraced, name="mark_as_skiptraced"),
+path('mark_as_notfound', views.markasNotfound, name="mark_as_notfound"),
 
     #urls for Create, Edit or Update Contact section
 path('create_update_contact', views.CreateUpdateContact, name="create_update_contact"),

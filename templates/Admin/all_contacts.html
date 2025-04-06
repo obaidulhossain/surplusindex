@@ -136,6 +136,7 @@ New Leads
                     <th>Contact Name</th>
                     <th>Designation</th>
                     <th>Business Name</th>
+                    <th>Comment</th>
                     <th>Assigned to</th>
                     <th>Contact</th>
                     <th>Case</th>
@@ -153,6 +154,7 @@ New Leads
                             <td><span {% if defendant.skiptraced == False %}style="color:red;"{% endif %}>{{defendant.name_prefix|upper}} {{defendant.first_name|title}} {{defendant.middle_name|title}} {{defendant.last_name|title}} {{defendant.name_suffix|upper}}</span></td>
                             <td>{{defendant.designation|upper}}</td>
                             <td>{{defendant.business_name|upper}}</td>
+                            <td>{{defendant.skiptrace_comment|title}}</td>
                             <td>
                                 <select onchange="AssignSKP(this)" class="assigntoUser">
                                     <option value="" {% if not defendant.skp_assignedto %}selected{% endif %}>Not Assigned</option>
@@ -178,6 +180,7 @@ New Leads
                         <td><span {% if defendant.skiptraced == False %}style="color:red;"{% endif %}>{{defendant.name_prefix|upper}} {{defendant.first_name|title}} {{defendant.middle_name|title}} {{defendant.last_name|title}} {{defendant.name_suffix|upper}}</span></td>
                         <td>{{defendant.designation|upper}}</td>
                         <td>{{defendant.business_name|upper}}</td>
+                        <td>{{defendant.skiptrace_comment|title}}</td>
                         <td>
                             <select onchange="AssignSKP(this)" class="assigntoUser">
                                 <option value="" {% if not defendant.skp_assignedto %}selected{% endif %}>Not Assigned</option>
