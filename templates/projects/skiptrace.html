@@ -24,7 +24,10 @@ Skiptracing
         {% if researcher %}
         <a class="headerbutton" href="{% url 'skiptracing_checklist' %}">Skiptracing Checklist</a>
         {% endif %}
-        <a class="headerbutton" href="{% url 'skiptrace' %}">Create New Contact</a>      
+        <a class="headerbutton" href="{% url 'skiptrace' %}">Create New Contact</a>
+        {% if not related_contact %}
+        <button class="button markas_notfound" onclick="markasNotfound(this)" value={{current_con_instance.pk}}>Mark as Not Found</button>
+        {% endif %}
         </div>
     </div>
     <div class="section-body-full">
@@ -713,16 +716,7 @@ Skiptracing
         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
         <input type="hidden" name="related_contact" value="{{ related_contact }}">
         <input type="submit" {% if not related_contact == "" %}style="background-color: #fe8420; color: #101010;" value="Mark Related as Skiptraced"{% else %}style="background-color: #b1cc16; color: #101010;" value="Mark as Skiptraced"{% endif %}>
-
     </form>
-
-    <form  method="post" action="{% url 'mark_as_notfound' %}" style="display:inline-block;">
-        {% csrf_token %}
-        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-        <input type="hidden" name="related_contact" value="{{ related_contact }}">
-        <input type="submit" style="background-color: #fe8420; color: #101010;" value="Mark as Not Found">
-    </form>
-
 </div>
 <script src="{% static 'js/Surplusindex.js' %}"></script>
 {% endblock content %}

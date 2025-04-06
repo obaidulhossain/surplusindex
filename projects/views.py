@@ -1,9 +1,9 @@
 from django.shortcuts import redirect, render, get_object_or_404, HttpResponseRedirect
-
+from django.views.decorators.csrf import csrf_exempt
 from django.utils.timezone import now
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-
+import json
 from django.contrib import messages
 from datetime import timedelta
 
@@ -493,14 +493,41 @@ def mark_as_skiptraced(request):
     related_contact_instance.save()
     return HttpResponseRedirect(f"/skiptrace/?con_id={selected_contact if selected_contact else related_contact}#rc")
 
-def markasNotfound(request):
-    selected_contact = request.POST.get('related_contact') #reversed contact instance to current contact
-    related_contact = request.POST.get('con_id')#10-skiptrace
-    related_contact_instance = Contact.objects.get(pk=related_contact)
-    
-    related_contact_instance.skiptrace_comment = "Not Found"
-    related_contact_instance.save()
-    return HttpResponseRedirect(f"/skiptrace/?con_id={selected_contact if selected_contact else related_contact}#rc")
+@csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
+def saveskiptraceComment(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+            
+            
+            con_id = data.get('id')          
+            # Fetch the corresponding event object from the database
+            con_instance = Contact.objects.get(id=con_id)
+            
+            # Update the fields
+            
+            try:
+                con_instance.skiptrace_comment = "Not Found"
+            except User.DoesNotExist:
+                return JsonResponse({'status': 'error', 'message': 'User not found.'}, status=404)
+            con_instance.save()
+           
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+
+        except Contact.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Contact not found.'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
 
 def CreateUpdateContact(request):
     contact_selected = request.POST.get('con_id','')
