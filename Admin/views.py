@@ -491,7 +491,7 @@ def assignSKP(request):
             con_instance = Contact.objects.get(id=con_id)
             
             # Update the fields
-            if not assignto_User:
+            if assignto_User == "":
                 con_instance.skp_assignedto = None
             else:
                 try:
