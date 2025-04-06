@@ -64,15 +64,10 @@ Available Leads
             <div class="action-item">
                 <button class="button" id="archive-button" data-requires-selection type="submit">{% if showArchived %}Unarchive{% else %}Archive{% endif %} <span data-selected-count>0</span> Selected</button>
             </div>
-            {% if user.is_authenticated %}
-                {% for group in user.groups.all %}
-                    {% if group.name == "admin" %}
-                    <div class="action-item">
-                        <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmHideLeads()" formaction="{% url 'export_mylead' %}">Export <span data-selected-count>0</span> Selected Leads</button>
-                    </div>
-                    {% endif %}
-                {% endfor %}
-                {% endif %}
+
+            <div class="action-item">
+                <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmExport()" formaction="{% url 'export_mylead' %}">Export <span data-selected-count>0</span> Selected Leads</button>
+            </div>
         </div>
         <div class="table-wrapper">
             <table id="leads-table" class="table table-striped table-hover">

@@ -76,7 +76,7 @@ Available Leads
                 {% for group in user.groups.all %}
                     {% if group.name == "admin" %}
                     <div class="action-item">
-                        <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmHideLeads()" formaction="{% url 'export_filtered_data' %}">Export <span data-selected-count>0</span> Selected Leads</button>
+                        <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmExport()" formaction="{% url 'export_filtered_data' %}">Export <span data-selected-count>0</span> Selected Leads</button>
                     </div>
                     {% endif %}
                 {% endfor %}

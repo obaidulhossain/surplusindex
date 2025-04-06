@@ -163,3 +163,18 @@ function confirmUnarchive() {
     const message = `Are you sure you want to Unarchive ${selectedLeads} selected leads? These leads can be found in My Leads Section.`;
     return confirm(message); // Returns true if OK is clicked, false otherwise
 }
+
+function confirmExport() {
+    // Get the count of selected checkboxes
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to Export');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to Export ${selectedLeads} selected leads?`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
