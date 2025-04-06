@@ -15,5 +15,8 @@ urlpatterns = [
     path('update_status', views.updateStatus, name="update_status"),
 
     path('export_filtered_data', views.export_data, name="export_filtered_data"),
+    path('export_mylead', views.exportMyleads, name="export_mylead"),
+
+    
 
 ]

@@ -311,7 +311,28 @@ def updateStatus(request):
 
 
 def export_data(request):
-    data = Foreclosure.objects.filter(surplus_status="Fund Available").prefetch_related('defendant__wireless', 'defendant__landline', 'defendant__emails')
+    data = set()
+    if request.method == "POST":
+        selected_leads_ids = request.POST.getlist('selected_items')
+        for lead in selected_leads_ids:
+            data.add(Foreclosure.objects.get(pk=lead))
+
+    # data = Foreclosure.objects.filter(surplus_status="Fund Available").prefetch_related('defendant__wireless', 'defendant__landline', 'defendant__emails')
+    resources = ClientModelResource()
+    dataset = resources.export(data)
+    response = HttpResponse(dataset.csv, content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename="filtered_data.csv"'
+    return response
+
+def exportMyleads(request):
+    data = set()
+    if request.method == "POST":
+        selected_status_ids = request.POST.getlist('selected_items')
+        for status in selected_status_ids:
+            status_instance = Status.objects.get(pk=status)
+            data.add(status_instance.lead)
+
+    # data = Foreclosure.objects.filter(surplus_status="Fund Available").prefetch_related('defendant__wireless', 'defendant__landline', 'defendant__emails')
     resources = ClientModelResource()
     dataset = resources.export(data)
     response = HttpResponse(dataset.csv, content_type="text/csv")
