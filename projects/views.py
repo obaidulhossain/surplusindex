@@ -506,7 +506,7 @@ def saveskiptraceComment(request):
             con_instance = Contact.objects.get(id=con_id)
             
             # Update the fields
-            if con_instance.skiptrace_comment is "Not Found":
+            if con_instance.skiptrace_comment == "Not Found":
                 con_instance.skiptraced = False
                 con_instance.save()
             else:
