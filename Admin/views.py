@@ -18,8 +18,10 @@ def All_Contacts(request):
         surplusstatusFilter = request.POST.get('surplusstatusFilter','')
         casesearchstatusFilter = request.POST.get('casesearchstatusFilter','')
         publishedstatusFilter = request.POST.get('publishedstatusFilter','')
+        
 
         selectedUser = request.POST.get('selectedUser','')
+        skiptraceStatus = request.POST.get('skiptraceStatus','')
         stateFilter = request.POST.get('stateFilter','')
         countyFilter = request.POST.get('countyFilter','')
         saletypeFilter = request.POST.get('saletypeFilter','')
@@ -35,12 +37,36 @@ def All_Contacts(request):
         publishedstatusFilter = request.GET.get('publishedstatusFilter','')
 
         selectedUser = request.GET.get('selectedUser','')
+        skiptraceStatus = request.GET.get('skiptraceStatus','')
         stateFilter = request.GET.get('stateFilter','')
         countyFilter = request.GET.get('countyFilter','')
         saletypeFilter = request.GET.get('saletypeFilter','')
     
     if selectedUser:
         filtered_defendants = Contact.objects.filter(skp_assignedto__username=selectedUser)
+        if skiptraceStatus and skiptraceStatus == "Completed":
+            filtered_defendants = filtered_defendants.filter(skiptraced=True)
+        elif skiptraceStatus and skiptraceStatus == "Pending":
+            filtered_defendants = filtered_defendants.filter(skiptraced=False)
+
+        leads_queryset = Foreclosure.objects.prefetch_related(
+            Prefetch(
+                'defendant',  # related_name on Foreclosure -> Contact
+                queryset=filtered_defendants,
+                to_attr='filtered_defendants'  # this will hold the filtered results
+            )
+        )
+    elif skiptraceStatus and skiptraceStatus == "Completed":
+        filtered_defendants = Contact.objects.filter(skiptraced=True)
+        leads_queryset = Foreclosure.objects.prefetch_related(
+            Prefetch(
+                'defendant',  # related_name on Foreclosure -> Contact
+                queryset=filtered_defendants,
+                to_attr='filtered_defendants'  # this will hold the filtered results
+            )
+        )
+    elif skiptraceStatus and skiptraceStatus == "Pending":
+        filtered_defendants = Contact.objects.filter(skiptraced=False)
         leads_queryset = Foreclosure.objects.prefetch_related(
             Prefetch(
                 'defendant',  # related_name on Foreclosure -> Contact
@@ -50,7 +76,7 @@ def All_Contacts(request):
         )
     else:
         leads_queryset = Foreclosure.objects.all()
-        # foreclosures = Foreclosure.objects.prefetch_related('defendant')
+    # foreclosures = Foreclosure.objects.prefetch_related('defendant')
 
 
     # leads_queryset = Foreclosure.objects.all()
@@ -168,6 +194,7 @@ def All_Contacts(request):
         'second_previous':second_previous,
         'userList':userList,
         'selectedUser':selectedUser,
+        'skiptraceStatus':skiptraceStatus,
         'stateFilter':stateFilter,
         'countyFilter':countyFilter,
         'saletypeFilter':saletypeFilter,
@@ -365,6 +392,44 @@ def All_Data(request):
 
     }
     return render(request, 'Admin/new_leads.html', context)
+
+
+@csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
+def caseSearchStatus(request):
+
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+            
+            
+            fcl_id = data.get('id')
+            selected_Status = data.get('selected_Status')
+            
+
+            # Fetch the corresponding event object from the database
+            fcl_instance = Foreclosure.objects.get(id=fcl_id)
+
+            # Update the fields
+            if selected_Status:
+                fcl_instance.case_search_status = selected_Status
+            fcl_instance.save()
+
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+
+        except Foreclosure.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Event not found.'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
 
 
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.

@@ -6,6 +6,7 @@ from . import views
 urlpatterns = [
     path('all_data/',views.All_Data, name='all_data'),
     path('publish/', views.publishStatus, name='publish'),
+    path('updatecaseSearchStatus/', views.caseSearchStatus, name="updatecaseSearchStatus"),
     # path('update_case_assignment', views.assign_leads, name='update_case_assignment'),
     # path('update_skp_assignment', views.assign_skiptracing, name='update_skp_assignment'),
 

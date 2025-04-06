@@ -5,11 +5,11 @@ function toggleFilters(togglebtn, hide_id) {
     const section = document.getElementById(hide_id); // hide_id = section id to be hidden
     const button = document.getElementById(togglebtn); // togglebtn = button id that will perform the action
 
-    if (section.style.display === "flex" || section.style.display === "") {
+    if (section.style.display === "block" || section.style.display === "") {
         section.style.display = "none";
         button.innerText = "Show";
     } else {
-        section.style.display = "flex";
+        section.style.display = "block";
         button.innerText = "Hide";
     }
 }
@@ -36,4 +36,241 @@ function copyToClipboard(button) {
     }).catch(err => {
         alert("Failed to copy URL: " + err);
     });
+}
+
+
+// Reuseable function
+// -------------------------count checkbox checked-----(start)-----------------------------
+//Example Usage: <button class="button" id="archive-button" data-requires-selection disabled="disabled" type="submit" onclick="return confirmArchiveLeads()">Archive <span data-selected-count>0</span> Selected</button>
+
+function updateButtonStates() {
+    // Get all checkboxes with the class 'checkbox'
+    const checkboxes = document.querySelectorAll('.checkbox');
+    const selectedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+
+    // Count the selected checkboxes
+    const selectedCount = selectedCheckboxes.length;
+
+    // Update all elements with the 'data-selected-count' attribute
+    document.querySelectorAll('[data-selected-count]').forEach(element => {
+        element.textContent = selectedCount;
+    });
+
+    // Enable or disable buttons based on selection
+    document.querySelectorAll('[data-requires-selection]').forEach(button => {
+        button.disabled = selectedCount === 0;
+    });
+}
+
+// Attach event listeners and initialize states
+document.addEventListener('DOMContentLoaded', () => {
+    const checkboxes = document.querySelectorAll('.checkbox');
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateButtonStates);
+    });
+
+    // Initialize button states on page load
+    updateButtonStates();
+});
+
+// -------------------------count checkbox checked-----(end)-----------------------------
+
+
+//<input type="text" id="phone" maxlength="14" placeholder="(123) 456-7890">
+const phoneInput = document.getElementById('phone');
+
+phoneInput.addEventListener('input', (e) => {
+    let input = e.target.value.replace(/\D/g, ''); // Remove all non-digit characters
+    let formatted = '';
+
+    if (input.length > 0) {
+        formatted = '(' + input.substring(0, 3);
+    }
+    if (input.length > 3) {
+        formatted += ') ' + input.substring(3, 6);
+    }
+    if (input.length > 6) {
+        formatted += '-' + input.substring(6, 10);
+    }
+
+    e.target.value = formatted;
+});
+
+
+function saveCasesearchstatus(select) {
+    const row = select.closest('tr');
+    const rowId = row.getAttribute('data-id');
+    const selectedStatus = row.querySelector('.casesearchStatus').value;
+
+
+    // Prepare data for updating
+    const updatedData = {
+        id: rowId,
+        selected_Status: selectedStatus,
+    };
+
+    // Send data to the server using fetch
+    fetch('/updatecaseSearchStatus/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                select.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                select.style.backgroundColor = "#f66"; // Green background
+                select.style.color = "#fff"; // White text
+
+                // Reset the button after a short delay
+                setTimeout(() => {
+
+                    select.style.backgroundColor = ""; // Reset to original background
+                    select.style.color = ""; // Reset to original text color
+                }, 1500); // Reset after 1.5 seconds
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+
+
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
+}
+
+
+
+
+
+function saveData(button) {
+    const row = button.closest('tr');
+    const rowId = row.getAttribute('data-id');
+    const publishStatus = row.querySelector('.publishStatus').value;
+
+
+    // Prepare data for updating
+    const updatedData = {
+        id: rowId,
+        publish_Status: publishStatus,
+    };
+
+    // Send data to the server using fetch
+    fetch('/publish/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (publishStatus === 'False') {
+                    // Change button style to indicate success
+                    button.innerHTML = "Published";
+                    button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    button.style.backgroundColor = "#4CAF50"; // Green background
+                    button.style.color = "#fff"; // White text
+
+                    // Reset the button after a short delay
+                    setTimeout(() => {
+                        button.innerHTML = "Unpublish";
+                        button.style.backgroundColor = ""; // Reset to original background
+                        button.style.color = ""; // Reset to original text color
+                    }, 1500); // Reset after 1.5 seconds
+                } else {
+                    // Change button style to indicate success
+                    button.innerHTML = "Unpublished";
+                    button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    button.style.backgroundColor = "#4CAF50"; // Green background
+                    button.style.color = "#fff"; // White text
+
+                    // Reset the button after a short delay
+                    setTimeout(() => {
+                        button.innerHTML = "Publish";
+                        button.style.backgroundColor = ""; // Reset to original background
+                        button.style.color = ""; // Reset to original text color
+                    }, 1500); // Reset after 1.5 seconds
+                }
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
+}
+
+function AssignSKP(select) {
+    const row = select.closest('tr');
+    const rowId = row.getAttribute('data-id');
+    const assigntoUser = row.querySelector('.assigntoUser').value;
+
+
+    // Prepare data for updating
+    const updatedData = {
+        id: rowId,
+        assignto_User: assigntoUser,
+    };
+
+    // Send data to the server using fetch
+    fetch('/assignSKP/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (!assigntoUser) {
+                    // Change button style to indicate success
+
+                    select.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    select.style.backgroundColor = "#f66"; // Green background
+                    select.style.color = "#fff"; // White text
+
+                    // Reset the button after a short delay
+                    setTimeout(() => {
+
+                        select.style.backgroundColor = ""; // Reset to original background
+                        select.style.color = ""; // Reset to original text color
+                    }, 1500); // Reset after 1.5 seconds
+                } else {
+                    // Change select style to indicate success
+
+                    select.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    select.style.backgroundColor = "#4CAF50"; // Green background
+                    select.style.color = "#fff"; // White text
+
+                    // Reset the select after a short delay
+                    setTimeout(() => {
+
+                        select.style.backgroundColor = ""; // Reset to original background
+                        select.style.color = ""; // Reset to original text color
+                    }, 1500); // Reset after 1.5 seconds
+                }
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
 }

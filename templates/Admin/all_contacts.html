@@ -58,7 +58,7 @@ New Leads
             </div>
         </div>    
         <div class="section-filter-full" id="filters"> 
-            <div class="onefourth">
+            <div class="onefifth">
                 <label for="selectedUser">Skiptrace Assigned To</label><br>
                 <select style="width:85%;" id="selectedUser" name="selectedUser" onchange="this.form.submit()">
                     <option value="">--- Select User ---</option>
@@ -67,7 +67,15 @@ New Leads
                     {% endfor %}
                 </select>
             </div>
-            <div class="onefourth">
+            <div class="onefifth">
+                <label for="selectedUser">Skiptrace Status</label><br>
+                <select style="width:85%;" id="skiptraceStatus" name="skiptraceStatus" onchange="this.form.submit()">
+                    <option value="" {% if skiptraceStatus == "" %}selected{% endif %}>--- All ---</option>
+                    <option value="Completed" {% if skiptraceStatus == "Completed" %}selected{% endif %}>Completed</option>
+                    <option value="Pending" {% if skiptraceStatus == "Pending" %}selected{% endif %}>Pending</option>
+                </select>
+            </div>
+            <div class="onefifth">
                 <label for="stateFilter">Select State</label><br>
                 <select style="width:85%;" id="stateFilter" name="stateFilter" onchange="this.form.submit()">
                     <option value="" {% if stateFilter == "" %}selected{% endif %}>--- Select State ---</option>
@@ -76,7 +84,7 @@ New Leads
                     {% endfor %}
                 </select>
             </div>
-            <div class="onefourth">
+            <div class="onefifth">
                 <label for="countyFilter">Select County</label><br>
                 <select style="width:85%;" id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if stateFilter == "" %}disabled{% endif %}>
                     <option value="" {% if countyFilter == "" %}selected{% endif %}>--- Select County ---</option>
@@ -85,7 +93,7 @@ New Leads
                     {% endfor %}
                 </select>
             </div>
-            <div class="onefourth">
+            <div class="onefifth">
                 <label for="saletypeFilter">Sale Type</label><br>
                 <select style="width:85%;" id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if stateFilter == "" %}disabled{% endif %}>
                     <option value="" {% if saletypeFilter == "" %}selected{% endif %}>All</option>
@@ -135,7 +143,7 @@ New Leads
             <thead>
             <tbody>
                 {% for Lead in leads %}
-                    {% if selectedUser %}
+                    {% if selectedUser or skiptraceStatus %}
                         {% for defendant in Lead.filtered_defendants %}
                         <tr data-id="{{ defendant.id }}">
                         
