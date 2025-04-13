@@ -7,7 +7,9 @@ from django.contrib.auth.models import User
 from . models import UserDetail, UserPayment
 # - authentication models and functions
 from django.contrib.auth.models import auth
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
+
 from django.urls import reverse
 #stripe settings
 import stripe
@@ -19,7 +21,44 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 # Create your views here.
 
+@login_required(login_url="login")
+def userSettings(request):
+    current_user = request.user
+    user_instance = User.objects.get(username=current_user)
+    if UserDetail.objects.filter(user=current_user).exists():
+        current_user_detail = get_object_or_404(UserDetail,user=current_user)
+        user_form = UpdateUserForm(instance=current_user)
+        detail_form = UserDetailForm(instance=current_user_detail)
+        password_form = PasswordChangeForm(request.user)
+        context = {
+            'user_form':user_form,
+            'detail_form':detail_form,
+            'password_form':password_form,
+            'user_instance':user_instance,
+        }
+        return render(request, 'si_user/user_settings.html', context)
+    else:
+        UserDetail.objects.create(user=current_user)
+        return redirect('settings')
 
+def changePassword(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  # Important!
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('settings')
+        else:
+            messages.error(request, 'Please correct the errors below.')
+            context = {
+                'user_form': UpdateUserForm(instance=request.user),
+                'detail_form': UserDetailForm(instance=request.user.userdetail) if hasattr(request.user, 'userdetail') else None,
+                'password_form': form,
+            }
+            return render(request, 'si_user/user_settings.html', context)
+    else:
+        return redirect('settings')
 
     
 # ------------------------------------- Login View
@@ -61,22 +100,6 @@ def register (request):
 def dashboard(request):
     
     return render(request, 'dashboard.html')
-
-@login_required(login_url="login")
-def userSettings(request):
-    current_user = request.user
-    if UserDetail.objects.filter(user=current_user).exists():
-        current_user_detail = get_object_or_404(UserDetail,user=current_user)
-        user_form = UpdateUserForm(instance=current_user)
-        detail_form = UserDetailForm(instance=current_user_detail)
-        context = {
-            'user_form':user_form,
-            'detail_form':detail_form,
-        }
-        return render(request, 'si_user/user_settings.html', context)
-    else:
-        UserDetail.objects.create(user=current_user)
-        return redirect('settings')
 
 @login_required(login_url="login")
 def updateUserCredentials(request):

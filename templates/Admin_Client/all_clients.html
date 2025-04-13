@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %}
+Clients
+{% endblock title %}
+
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+
+<div class="body-section">
+    <div class="section-header">
+        <h4>Filters</h4>
+        <form method='post' action='{% url 'all_clients' %}'>
+        {% csrf_token %}
+            <select name="clientType" onchange="this.form.submit()">
+                {% comment %} <option value="" {% if selectedClientType == "" %}selected{% endif %}> -- Select Client Type --</option> {% endcomment %}
+                <option value="si_client" {% if selectedClientType == "si_client" or selectedClientType == "" %}selected{% endif %}>SI Client</option>
+                <option value="manual_client" {% if selectedClientType == "manual_client" %}selected{% endif %}>Manual Client</option>
+            <select>
+        </form>
+    </div>
+
+    <div class="section-filter-full" id="filters">
+    {% if selectedClientType == "manual_client" %}
+    
+    {% else %}
+
+    {% endif %}
+    </div>
+    {% if selectedClientType == "manual_client" %}
+    <div class="section-header" style="margin-top:20px;">
+    <h4>Custom CLients</h4>
+    </div>
+    <div class="section-body-full"> 
+        <div class="table-wrapper">
+            <table id="leads-table" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>CLID</th>
+                        <th>Client Name</th>
+                        <th>Email</th>
+                        <th>Order Date</th>
+                        <th>Pending</th>
+                        <th>Ready</th>
+                        <th>Next Delivery</th>
+                        <th>Order Status</th>
+                        <th>Payment Status</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for client in clients %}
+                {% for group in client.user.groups.all %}
+                {% if 'clients' in group.name %}
+                    {% for order in client.orders.all %}
+                    <tr>
+                        <td>{{client.user.id}}</td>
+                        <td>{{client.user.first_name}} {{client.user.last_name}}</td>
+                        <td>{{client.user.email}}</td>
+                        <td>{{order.date_ordered}}</td>
+                        {% if order.undelivered_count > 0 %}
+                        <td>{{ order.undelivered_count }}</td>
+                        {% else %}
+                        <td>0</td>
+                        {% endif %}
+                        {% if order.ready_count > 0 %}
+                        <td>{{ order.ready_count }}</td>
+                        {% else %}
+                        <td>0</td>
+                        {% endif %}
+                        <td>{{order.nearest_delivery_date}}</td>
+                        <td>{{order.order_status|title}}</td>
+                        <td>{{order.payment_status|title}}</td>
+                        <td><a class="button" href="/client_detail/?client={{client.id}}">View</a></td>
+                    </tr>
+                    {% endfor %} 
+                {% endif %}
+                {% endfor %}    
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {% else %}
+
+    <div class="section-header" style="margin-top:20px;">
+    <h4>SI CLients</h4>
+    </div>
+    <div class="section-body-full"> 
+        <div class="table-wrapper">
+            <table id="leads-table" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th>CLID</th>
+                        <th>Client Name</th>
+                        <th>Email</th>
+                        <th>Total Free Credit</th>
+                        <th>Free Credit Balance</th>
+                        <th>Total Purchased</th>
+                        <th>Purchased Credit Balance</th>
+                        <th>Total Credit Balance</th>
+                        <th>View</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for client in clients %}
+                {% for group in client.user.groups.all %}
+                {% if 'clients' in group.name %}
+                    <tr>
+                        <td>{{client.user.id}}</td>
+                        <td>{{client.user.first_name}} {{client.user.last_name}}</td>
+                        <td>{{client.user.email}}</td>
+                        <td></td>
+                        <td>{{client.free_credit_balance}}</td>
+                        <td></td>
+                        <td>{{client.purchased_credit_balance}}</td>
+                        <td>{{client.Total_credits}}</td>
+                        <td>
+                            <button onclick="">View</button>
+                        </td>
+                    </tr>
+            
+                {% endif %}
+                {% endfor %}    
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    <div class="clearfix">
+        <div class="hint-text">Showing Page <b>{{ events.number }}</b> out of <b>{{ events.paginator.num_pages }}</b> Pages | Events count ({{total_events}})</div>
+        <ul class="pagination">
+            {% if events.has_previous %}
+            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page=1" class="page-link">First</a></li>
+            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ events.previous_page_number }}">Previous</a></li>
+            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ events.previous_page_number }}" class="page-link">{{ events.previous_page_number }}</a></li>
+            {% endif %}
+
+            <li class="page-item active"><a href="#" class="page-link">{{ events.number }}</a></li>
+
+            {% if events.has_next %}
+            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ events.next_page_number }}" class="page-link">{{ events.next_page_number }}</a></li>
+            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ second_previous }}" class="page-link">{{ second_previous }}</a></li>
+            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{events.next_page_number}}" class="page-link">Next</a></li>
+            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ events.paginator.num_pages }}">Last</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+
+
+{% endblock content %}

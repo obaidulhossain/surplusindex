@@ -11,5 +11,7 @@ urlpatterns = [
     path('subscriptions/',views.userSubscription, name='subscriptions'),
     path('checkout/', views.checkout, name='checkout'),
     path('stripe_webhook/', views.stripe_webhook, name='stripe_webhook'),
+
+    path('settings/password/', views.changePassword, name='changePassword'),
 ]
 #stripe listen --forward-to localhost:8000/stripe_webhook/

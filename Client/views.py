@@ -140,6 +140,7 @@ def purchaseLeads(request):
                 Status.objects.create(lead_id=lead_id, client=request.user)
                 fcl = Foreclosure.objects.get(pk=lead_id)
                 fcl.purchased_by.add(request.user)
+                
             return redirect('leads')
     else:
         return HttpResponse("Invalid Request", status=400)

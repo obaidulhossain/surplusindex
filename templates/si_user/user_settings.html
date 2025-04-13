@@ -3,46 +3,70 @@
 {% block title %}User Settings{% endblock title %}
 {% load static %}
 {% block content%}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
 
+<div class="body-section">
+    <div class="section-header">
+    <h4>User Settings | {{user_instance.first_name}} {{user_instance.last_name}}</h4>
+    </div>
+    <div class="section-body-full">
+        <div class="onehalf" style="display:inline-block;">
+            <div class="full-section">
+                <h4>USER CREDENTIALS</h4>
+                <form method="post" autocomplete="off" action="{% url 'updateuserDetail' %}">
+                    {% csrf_token %}
+                    <label for="first_name" class="form-label">First Name: </label>
+                    {{ user_form.first_name|add_class:"form-control"}}
+                    <label for="id_last_name" class="form-label">Last Name: </label>
+                    {{ user_form.last_name|add_class:"form-control" }}
 
-<h1>Settings | SurplusIndex</h1>
-<div class="full-section">
-    <h2>USER CREDENTIALS</h2>
-
-    <form method="post" autocomplete="off" action="{% url 'updateuserDetail' %}">
-        <div class=" sec-small">
-            {% csrf_token %}
-            <div class="mb-3">
-                <label for="first_name" class="form-label">First Name: </label>
-                {{ user_form.first_name|add_class:"form-control"}}
-            </div>
-
-            <div class="mb-3">
-                <label for="id_email" class="form-label">Email</label>
-                {{ user_form.email|add_class:"form-control" }}
-            </div>
-        </div>
-        <div class="sec-small">
-            <div class="mb-3">
-                <label for="id_last_name" class="form-label">Last Name: </label>
-                {{ user_form.last_name|add_class:"form-control" }}
-            </div>
-            <div class="mb-3">
-                <label for="id_phone" class="form-label">Contact Number: </label>
-                {{ detail_form.phone|add_class:"form-control" }}
+                    <label for="id_email" class="form-label">Email</label>
+                    {{ user_form.email|add_class:"form-control" }}
+                    <label for="id_phone" class="form-label">Contact Number: </label>
+                    {{ detail_form.phone|add_class:"form-control" }}
+                    <br>
+                    <button type="submit" class="btn btn-primary">Update Information</button>
+                </form>
             </div>
         </div>
-        <div class="text-center">
-            <button type="submit" class="btn btn-primary">Update Information</button>
+        <div class="onehalf" style="display:inline-block;">
+            <div class="full-section">
+                <h4>CHANGE PASSWORD</h4>
+                <form method="post" action="{% url 'changePassword' %}" autocomplete="off">
+                    {% csrf_token %}
+                    {% if password_form.errors %}
+                    <div class="alert alert-danger">
+                        {% for field in password_form %}
+                        {% if field.errors %}
+                        {% for error in field.errors %}
+                        <div><strong>{{ field.label }}</strong>: {{ error }}</div>
+                        {% endfor %}
+                        {% endif %}
+                        {% endfor %}
+                        {% if password_form.non_field_errors %}
+                        {% for error in password_form.non_field_errors %}
+                        <div><strong>Error:</strong> {{ error }}</div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+        
+                    <label for="{{ password_form.old_password.id_for_label }}" class="form-label">Old Password:</label>
+                    {{ password_form.old_password|add_class:"form-control" }}
+        
+                    <label for="{{ password_form.new_password1.id_for_label }}" class="form-label">New Password:</label>
+                    {{ password_form.new_password1|add_class:"form-control" }}
+               
+                    <label for="{{ password_form.new_password2.id_for_label }}" class="form-label">Confirm New Password:</label>
+                    {{ password_form.new_password2|add_class:"form-control" }}<br>
+        
+                    <button type="submit" class="btn btn-warning">Change Password</button>
+                </form>
+            </div>
         </div>
-
-    </form>
-
-
-
-
-
+    </div>
 </div>
+
 
 
 

@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}
+Clients
+{% endblock title %}
+
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+
+<div class="body-section">
+
+    <div class="section-header">
+        <h4>{{client_instance.user.first_name}} {{client_instance.user.last_name}}</h4>
+        <h4>{{client_instance.user.username}}</h4>
+    </div>
+
+    <div class="section-filter-full" id="filters">
+        {% if client_instance.user_type == 'si_client' %}
+        
+        {% else %}
+
+        {% endif %}
+    </div>
+
+    {% for order in orders %}
+
+    <div class="section-header" style="margin-top:20px;" data-id="{{order.id}}">
+        <h4>Order id: {{order.id}}</h4>
+        
+        <select id="order_status" onchange="updateOrderStatus(this)" {% if order.undelivered_count > 0 %}disabled{% elif not order.payment_status == 'paid' %}disabled{% endif %}>
+            <option value="running" {% if order.order_status == 'running' %}selected{% endif %}>Running</option>
+            <option value="completed" {% if order.order_status == 'completed' %}selected{% endif %}>Completed</option>
+        </select>
+    </div>
+
+    <div class="section-body-full">
+        <div class="onesixth">
+            <label for="date-ordered">Date Ordered</label>
+            <h4 id="date-ordered">{{order.date_ordered|date:"d/m/Y"}}</h4>
+        </div>
+        <div class="onesixth">
+            <label for="num-deliveries">Deliveries</label>
+            <h4 id="num-deliveries">{{deliveries}}</h4>
+        </div>
+        <div class="onesixth">
+            <label for="num-delivered">Completed</label>
+            <h4 id="num-delivered">{{delivered}}</h4>
+        </div>
+        <div class="onesixth">
+            <label for="num-pending">Pending</label>
+            <h4 id="num-pending">{{pending}}</h4>
+        </div>
+        <div class="onesixth">
+            <label for="order-price">Order Price</label>
+            <h4 id="order-price">{{order.order_price|currency}}</h4>
+        </div>
+        <div class="onesixth">
+            <label for="payment-status">Payment Status</label>
+            <h4 id="payment-status">{{order.payment_status|title}}</h4>
+        </div>
+    </div>
+    <div class="table-wrapper">
+        <table id="leads-table" class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Delivery ID</th>
+                    <th>Delivery Date</th>
+                    <th>Detail</th>
+                    <th>Delivered In</th>
+                    <th>Delivery Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for delivery in order.deliveries.all %}
+                <tr data-id="{{delivery.id}}">
+                    <td>{{delivery.id}}</td>
+                    <td>{{delivery.delivery_date|date:"d/m/Y"}}</td>
+                    <td>{{delivery.delivery_note}}</td>
+                    <td>{{delivery.delivered_in|date:"d/m/Y"}}</td>
+                    <td>
+                        <select class="delivery_status" name="delivery_status" onchange="saveDeliverystatus(this)">
+                            <option value=""{% if not delivery.delivery_status %}selected{% endif %}>Select Status</option>
+                            <option value="assigned" {% if delivery.delivery_status == 'assigned' %}selected{% endif %}>Assigned</option>
+                            <option value="ready" {% if delivery.delivery_status == 'ready' %}selected{% endif %}>Ready To Deliver</option>
+                            <option value="delivered" {% if delivery.delivery_status == 'delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="revision" {% if delivery.delivery_status == 'revision' %}selected{% endif %}>Revision</option>
+                        </select>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+    <script src="{% static 'js/Surplusindex.js' %}"></script>
+    <script src="{% static 'js/Admin_Client.js' %}"></script>
+</div>
+
+
+{% endblock content %}

@@ -62,32 +62,32 @@
     <li class="sidebar-item">
         <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#clients"
             aria-expanded="false" aria-controls="leads">
-            {% comment %} <i class="lni lni-hand-shake"></i> {% endcomment %}
+            <i class="bi bi-c-circle"></i>
             <span>Clients</span>
         </a>
         <ul id="clients" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
             <li class="sidebar-item child">
-                <a href="#" class="sidebar-link">
-                    {% comment %} <i class="lni lni-user-multiple-4"></i> {% endcomment %}
+                <a href="{% url 'all_clients' %}" class="sidebar-link">
+                    <i class="bi bi-fingerprint"></i>
                     <span>All Clients</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    {% comment %} <i class="lni lni-hand-taking-user"></i> {% endcomment %}
+                    <i class="bi bi-person-raised-hand"></i>
                     <span>Help Center</span>
                 </a>
             </li>
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    {% comment %} <i class="lni lni-target-user"></i> {% endcomment %}
+                    <i class="bi bi-phone-flip"></i>
                     <span>Follow Ups</span>
                 </a>
             </li>
 
             <li class="sidebar-item child">
                 <a href="#" class="sidebar-link">
-                    {% comment %} <i class="lni lni-refresh-user-1"></i> {% endcomment %}
+                    <i class="bi bi-gear-wide-connected"></i>
                     <span>Client Settings</span>
                 </a>
             </li>

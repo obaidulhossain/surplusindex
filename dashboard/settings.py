@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'realestate_directory',
     'import_export',
     'Admin',
+    'Admin_Client',
     'Client',
     'DA',
 ]

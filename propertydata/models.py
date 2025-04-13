@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.utils.timezone import now
 from Admin.utils.threadlocal import get_current_user
 # ----- CHOICES FOR GLOBAL USE -------------------------------- # 
 ACTIVE = 'active'                                               # 
@@ -11,26 +12,36 @@ STATUSCHOICES = (                                               #
 # ----- CHOICES FOR GLOBAL USE -------------------------------- # 
 
 # ------------------------------------------------------------- #
-
+import logging
+logger = logging.getLogger(__name__)
 # ----- ABSTRACT CLASS TO BE USED IN OTHER MODELS ------------- # 
 class OperationStat(models.Model):                              #
     created_at = models.DateTimeField(auto_now_add=True)        #
-    changed_at = models.DateTimeField(auto_now=True)            #
+    changed_at = models.DateTimeField(null=True, blank=True)            #
     class Meta:                                                 #
         abstract = True                                         #
-
-
     def save(self, *args, **kwargs):
         user = get_current_user()  # Get the user from thread-local storage
-        
-        if user and user.groups.filter(name="client").exists():
-            # Prevent updating `changed_at` for users in RestrictedGroup
-            if self.pk:  # If instance exists, fetch current changed_at value
+        if user and user.groups.filter(name="researcher").exists():
+            self.changed_at = now()
+        else:
+            if self.pk:
                 existing = self.__class__.objects.get(pk=self.pk)
-                self.changed_at = existing.changed_at  
-
+                self.changed_at = existing.changed_at
         super().save(*args, **kwargs)
 
+
+        # if user:
+        #     # Check if the user belongs to 'client' or 'admin' groups
+            
+        #     user_groups = {group.name for group in user.groups.all()}
+        #     print(user_groups)
+        #     restricted_groups = {"client", "admin"}
+        #     if restricted_groups.intersection(user_groups):
+
+        #         if self.pk:  # If instance exists, fetch the current `changed_at` value
+        #             existing = self.__class__.objects.get(pk=self.pk)
+        #             self.changed_at = existing.changed_at  # Preserve the original `changed_at` value
 
 
 
@@ -241,6 +252,7 @@ class Foreclosure(OperationStat):
     purchased_by = models.ManyToManyField(User, related_name='purchased_leads', blank=True)
     archived_by = models.ManyToManyField(User, related_name='archived_leads', blank=True)
     case_search_assigned_to = models.ForeignKey(User,related_name='case_assigned_to',blank=True, null=True, on_delete=models.CASCADE)
+    case_search_updated = models.DateField(null=True, blank=True)
     case_search_status = models.CharField(max_length=100, choices=CASE_SEARCH_STATUS, blank=True)
     published = models.BooleanField(default=False)
     def update_possible_surplus(self):

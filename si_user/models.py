@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from Admin_Client.models import*
 
 # Create your models here.
     
@@ -9,8 +10,16 @@ from django.contrib.auth.models import User
 #     pay_as_you_go = models.BooleanField(default=False)
 
 class UserDetail(models.Model):
+    SI_CLIENT = 'si_client'
+    MANUAL_CLIENT = 'manual_client'
+    CL_TYPE = (
+        (SI_CLIENT, 'SI Client'),
+        (MANUAL_CLIENT, 'Manual Client'),
+        )
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True, related_name='credits')
     phone = models.CharField(max_length=12, blank=True)
+    user_type = models.CharField(max_length=100, choices=CL_TYPE, null=True, blank=True, default="SI Client")
+    orders = models.ManyToManyField(Orders, blank=True)
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
     free_credit_balance = models.IntegerField(default=20)
     purchased_credit_balance = models.IntegerField(default=0)
