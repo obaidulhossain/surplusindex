@@ -41,12 +41,15 @@ Clients
                         <th>CLID</th>
                         <th>Client Name</th>
                         <th>Email</th>
-                        <th>Order Date</th>
+                        <th>Total Order</th>
+                        <th>Running Order</th>
+                        <th>Completed Order</th>
+                        {% comment %} <th>Order Date</th>
                         <th>Pending</th>
                         <th>Ready</th>
                         <th>Next Delivery</th>
                         <th>Order Status</th>
-                        <th>Payment Status</th>
+                        <th>Payment Status</th> {% endcomment %}
                         <th>View</th>
                     </tr>
                 </thead>
@@ -54,12 +57,15 @@ Clients
                 {% for client in clients %}
                 {% for group in client.user.groups.all %}
                 {% if 'clients' in group.name %}
-                    {% for order in client.orders.all %}
+                    {% comment %} {% for order in client.orders.all %} {% endcomment %}
                     <tr>
                         <td>{{client.user.id}}</td>
                         <td>{{client.user.first_name}} {{client.user.last_name}}</td>
                         <td>{{client.user.email}}</td>
-                        <td>{{order.date_ordered}}</td>
+                        <td>{{client.total_orders}}</td>
+                        <td>{{client.total_running}}</td>
+                        <td>{{client.total_completed}}</td>
+                        {% comment %} <td>{{order.date_ordered}}</td>
                         {% if order.undelivered_count > 0 %}
                         <td>{{ order.undelivered_count }}</td>
                         {% else %}
@@ -72,10 +78,10 @@ Clients
                         {% endif %}
                         <td>{{order.nearest_delivery_date}}</td>
                         <td>{{order.order_status|title}}</td>
-                        <td>{{order.payment_status|title}}</td>
+                        <td>{{order.payment_status|title}}</td> {% endcomment %}
                         <td><a class="button" href="/client_detail/?client={{client.id}}">View</a></td>
                     </tr>
-                    {% endfor %} 
+                    {% comment %} {% endfor %}  {% endcomment %}
                 {% endif %}
                 {% endfor %}    
                 {% endfor %}

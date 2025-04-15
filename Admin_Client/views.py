@@ -166,6 +166,10 @@ def allClients(request):
         client_queryset = client_queryset.filter(user_type='si_client')
 
     for client in client_queryset:
+        client.total_orders = client.orders.all().count
+        client.total_running = client.orders.filter(order_status="running").count
+        client.total_completed = client.orders.filter(order_status="completed").count
+     
         for order in client.orders.all():
             order.undelivered_count = order.deliveries.exclude(delivery_status='delivered').count()
             order.ready_count = order.deliveries.filter(delivery_status='ready').count()
