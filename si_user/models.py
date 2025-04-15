@@ -1,7 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
-# from Admin_Client.models import *
+from django.utils.timezone import now
 
+class Timelogger(models.Model):
+    
+    created_at = models.DateTimeField(default=now)
+    changed_at = models.DateTimeField(auto_now=True, null=True, blank=True)
+    class Meta:
+        abstract = True
+
+# from Admin_Client.models import *
+# created_at = models.DateTimeField(auto_now_add=True)
 # Create your models here.
     
 # class subscription(models.Model):
@@ -9,7 +18,7 @@ from django.contrib.auth.models import User
 #     monthly_free_credit = models.IntegerField(default=20)
 #     pay_as_you_go = models.BooleanField(default=False)
 
-class UserDetail(models.Model):
+class UserDetail(Timelogger):
     SI_CLIENT = 'si_client'
     MANUAL_CLIENT = 'manual_client'
     CL_TYPE = (
@@ -29,7 +38,7 @@ class UserDetail(models.Model):
         self.save()
 
 
-class UserPayment(models.Model):
+class UserPayment(Timelogger):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
     stripe_checkout_id = models.CharField(max_length=255, blank=True, null=True)

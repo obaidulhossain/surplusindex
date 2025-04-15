@@ -122,10 +122,14 @@ def updateUserCredentials(request):
 
 @login_required(login_url="login")
 def userProfile(request):
+    user = request.user
+    user_instance = User.objects.get(username=user)
+    transactions = UserPayment.objects.filter(user=user_instance)
     user_credits = request.user.credits
     user_credits.update_total_credits()
     context = {
-
+        'transactions':transactions,
+        
     }
     return render(request, 'si_user/user_profile.html', context)
 
