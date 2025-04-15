@@ -25,7 +25,7 @@ class UserDetail(models.Model):
     purchased_credit_balance = models.IntegerField(default=0)
     Total_credits = models.IntegerField(default=0)
     def update_total_credits(self):
-        self.total_credits = self.free_credit_balance + self.purchased_credit_balance
+        self.Total_credits = self.free_credit_balance + self.purchased_credit_balance
         self.save()
 
 

@@ -48,6 +48,9 @@ def CreateOrder(request):
         
         order_instance.save()
         client_instance.orders.add(order_instance)
+        client_instance.purchased_credit_balance = client_instance.purchased_credit_balance + int(order_price)
+        client_instance.update_total_credits()
+        client_instance.save()
         
 
         return HttpResponseRedirect(f"/client_detail/?client={client}&order-status={selected_orderstatus}")
