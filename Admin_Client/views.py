@@ -1,21 +1,107 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect, HttpResponseRedirect
 from django.core.paginator import Paginator
 from si_user.models import *
 from .models import *
 from django.db.models import Min
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.db.models import Sum
 import json
 # Create your views here.
-def clientDetail(request):
+def CreateOrder(request):
     if request.method == 'POST':
         client = request.POST.get('client','')
+        client_instance = UserDetail.objects.get(pk=client)
+        User_instance = User.objects.get(pk=client_instance.user.pk)
+        selected_orderstatus = request.POST.get('order-status','')
+        
+        order_date = request.POST.get('order-date','')
+        order_status = request.POST.get('status','')
+        order_price = request.POST.get('order_price','')
+        payment_status = request.POST.get('payment-status','')
+        payment_method = request.POST.get('payment-method','')
+        order_detail = request.POST.get('order-detail','')
+
+        customer_id = request.POST.get('customer_id','')
+        checkout_id = request.POST.get('checkout_id','')
+
+        transaction = UserPayment.objects.create(
+            user = User_instance,
+            stripe_customer_id = customer_id,
+            stripe_checkout_id = checkout_id,
+            amount = order_price,
+            number_of_leads = order_price,
+            currency = "USD",
+            has_paid = True if payment_status == "paid" else False,
+        )
+        transaction.save()
+
+        order_instance = Orders.objects.create(
+            date_ordered = order_date,
+            order_detail = order_detail,
+            order_status = order_status,
+            order_price = order_price,
+            payment_method = payment_method,
+            payment_status = payment_status,
+            transaction = transaction,
+        )
+        
+        order_instance.save()
+        client_instance.orders.add(order_instance)
+        
+
+        return HttpResponseRedirect(f"/client_detail/?client={client}&order-status={selected_orderstatus}")
+    return redirect('client_detail')
+
+def UpdatePaymentStatus(request):
+    if request.method == 'POST':
+        client = request.POST.get('client','')
+        selected_orderstatus = request.POST.get('order-status','')
+        order = request.POST.get('order','')
+        Selected_Status = request.POST.get('payment-status','')
+
+        order_instance = Orders.objects.get(pk=order)
+        transaction_instance = UserPayment.objects.get(pk=order_instance.transaction.id)
+        if Selected_Status == "paid":
+            transaction_instance.has_paid = True
+        else:
+            transaction_instance.has_paid = False
+        transaction_instance.save()
+         
+        order_instance.payment_status = Selected_Status
+        order_instance.save()
+        return HttpResponseRedirect(f"/client_detail/?client={client}&order-status={selected_orderstatus}")
+    return redirect('client_detail')
+
+def clientDetail(request):
+    deliveries = ""
+    delivered = ""
+    pending = ""
+
+    if request.method == 'POST':
+        client = request.POST.get('client','')
+        selected_orderstatus = request.POST.get('order-status','')
     else:
         client = request.GET.get('client','')
+        selected_orderstatus = request.GET.get('order-status','')
     if client:
         client_instance = UserDetail.objects.get(pk=client)
+        stat_instance = UserDetail.objects.get(pk=client)
+        running_orders = len(stat_instance.orders.filter(order_status='running'))
+        completed_orders = len(stat_instance.orders.filter(order_status='completed'))
+        total_order_amount = stat_instance.orders.aggregate(total_amount=Sum('order_price'))['total_amount']
+        total_paid = stat_instance.orders.filter(payment_status=Orders.PAID).aggregate(paid_amount=Sum('order_price'))['paid_amount']
+        total_unpaid = stat_instance.orders.exclude(payment_status=Orders.PAID).aggregate(unpaid_amount=Sum('order_price'))['unpaid_amount']
+
         orders = client_instance.orders.all()
+        if selected_orderstatus and selected_orderstatus == "running":
+            orders = orders.filter(order_status="running")
+        elif selected_orderstatus and selected_orderstatus == "completed":
+            orders = orders.filter(order_status="completed")
+        
+        
         for order in orders:
+            
             deliveries = len(order.deliveries.all())
             delivered = len(order.deliveries.filter(delivery_status='delivered'))
             pending = deliveries - delivered
@@ -25,6 +111,13 @@ def clientDetail(request):
     context = {
         'client':client,
         'client_instance':client_instance,
+        'selected_orderstatus':selected_orderstatus,
+        'all_orders':len(orders),
+        'running_orders':running_orders,
+        'completed_orders':completed_orders,
+        'total_order_amount':total_order_amount,
+        'total_paid':total_paid,
+        'total_unpaid':total_unpaid,
         'orders':orders,
         'deliveries':deliveries,
         'delivered':delivered,

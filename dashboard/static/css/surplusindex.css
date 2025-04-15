@@ -80,6 +80,12 @@ label {
     vertical-align: top;
 }
 
+.twothird {
+    width: 66%;
+    display: inline-block;
+    vertical-align: top;
+}
+
 .onefourth {
     width: 24%;
     display: inline-block;

@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from Admin_Client.models import*
+# from Admin_Client.models import *
 
 # Create your models here.
     
@@ -19,7 +19,7 @@ class UserDetail(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True, related_name='credits')
     phone = models.CharField(max_length=12, blank=True)
     user_type = models.CharField(max_length=100, choices=CL_TYPE, null=True, blank=True, default="SI Client")
-    orders = models.ManyToManyField(Orders, blank=True)
+    orders = models.ManyToManyField('Admin_Client.Orders', blank=True)
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
     free_credit_balance = models.IntegerField(default=20)
     purchased_credit_balance = models.IntegerField(default=0)
@@ -32,7 +32,7 @@ class UserDetail(models.Model):
 class UserPayment(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
-    stripe_checkout_id = models.CharField(max_length=255)
+    stripe_checkout_id = models.CharField(max_length=255, blank=True, null=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     number_of_leads = models.IntegerField()
     currency = models.CharField(max_length=3)

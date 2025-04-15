@@ -1,5 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
+# from si_user.models import UserPayment
+
 
 # Create your models here.
 class Deliveries(models.Model):
@@ -27,13 +28,14 @@ class Orders(models.Model):
     (COMPLETED, 'Completed'),
     )
 
-    PENDING = 'pending'
+    
     REQUESTED = 'requested'
+    IN_ESCROW = 'in_escrow'
     PAID = 'paid'
     NOT_PAID = 'not_paid'
     PAYMENTCHOICES = (
-        (PENDING, 'Pending'),
         (REQUESTED, 'Requested'),
+        (IN_ESCROW, 'In Escrow'),
         (PAID, 'Paid'),
         (NOT_PAID, 'Not Paid')
     )
@@ -44,5 +46,6 @@ class Orders(models.Model):
     order_price = models.DecimalField(decimal_places=2, max_digits=12, null=True, blank=True)
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_status = models.CharField(max_length=100, blank=True, choices=PAYMENTCHOICES)
+    transaction = models.ForeignKey('si_user.UserPayment', on_delete=models.CASCADE, null=True, blank=True)
 
 

@@ -13,14 +13,86 @@ Clients
 
     <div class="section-header">
         <h4>{{client_instance.user.first_name}} {{client_instance.user.last_name}}</h4>
-        <h4>{{client_instance.user.username}}</h4>
+        <h4>{{client_instance.user.username}} </h4>
+        
     </div>
 
     <div class="section-filter-full" id="filters">
         {% if client_instance.user_type == 'si_client' %}
         
         {% else %}
+        <div class="onefourth">
+            <label for="all-orders">Total Order (Price)</label>
+            <h4 id="all-orders">{{all_orders}} (${{total_order_amount}})</h4>
+        </div>
+        <div class="onefourth">
+            <label for="completed-orders">Completed Order (Paid)</label>
+            <h4 id="completed-orders">{{completed_orders}} (${{total_paid}})</h4>
+        </div>
+        <div class="onefourth">
+            <label for="running-orders">Running Order (Updaid)</label>
+            <h4 id="running-orders">{{running_orders}} (${{total_unpaid}})</h4>
+        </div>
+        
+        <div class="onefourth">
+            <label for="order-status">Show Orders by Status</label>
+            <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="client" value="{{client_instance.pk}}">
+            <select name="order-status" onchange="this.form.submit()">
+                <option value="" {% if selected_orderstatus == "" %}selected{% endif %}>Show All Orders</option>
+                <option value="running" {% if selected_orderstatus == "running" %}selected{% endif %}>Running Orders</option>
+                <option value="completed"  {% if selected_orderstatus == "completed" %}selected{% endif %}>Completed Orders</option>
+            </select>
+            </form>
+        </div>
+        
+        <div class="section-header" style="margin-top:20px; background-color: #587b98">
+        <h4>Create Order</h4>
+        </div>
 
+        <div class="section-body-full">
+            <form method="post" action='{% url 'CreateOrder' %}'>
+                {% csrf_token %}
+                <input type="hidden" name="client" value="{{client_instance.pk}}">
+                <input type="hidden" name="order-status" value="{{selected_orderstatus}}">
+                
+                <div class="onefifth">
+                    <label for="order-date">Date Ordered</label>
+                    <input type="date" name="order-date">
+                </div>
+                <div class="onefifth">
+                    <label for="status">Order Status</label>
+                    <select name="status">
+                        <option value="">Select</option>
+                        <option value="Running" selected>Running</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+                <div class="onefifth">
+                    <label for="order_price">Order Price</label>
+                    <input type="number" name="order_price">
+                </div>
+                <div class="onefifth">
+                    <label for="payment-status">Payment Status</label>
+                    <select name="payment-status">
+                        <option value="">-- Select --</option>
+                        <option value="requested">Payment Requested</option>
+                        <option value="in_escrow">In Escrow Account</option>
+                        <option value="paid">Paid</option>
+                        <option value="not_paid">Not Paid</option>
+                    </select>
+                </div>
+                <div class="onefifth">
+                    <label for="payment-method">Payment Method</label>
+                    <input type="text" name="payment-method">
+                </div>
+                <input type="text" name="order-detail" placeholder="Order Detail" style="width:96%; margin:15px 0px;">
+                <input type="text" name="customer_id" placeholder="Customer ID" style="width:48%; margin:0px 0px 15px 0px;">
+                <input type="text" name="checkout_id" placeholder="Checkout ID" style="width:48%; margin:0px 0px 15px 0px;">
+                <input type="submit" value="Create Order">
+            </form>
+        </div>
         {% endif %}
     </div>
 
@@ -29,7 +101,7 @@ Clients
     <div class="section-header" style="margin-top:20px;" data-id="{{order.id}}">
         <h4>Order id: {{order.id}}</h4>
         
-        <select id="order_status" onchange="updateOrderStatus(this)" {% if order.undelivered_count > 0 %}disabled{% elif not order.payment_status == 'paid' %}disabled{% endif %}>
+        <select class="order_status" onchange="updateOrderStatus(this)" {% if order.undelivered_count > 0 %}disabled{% elif not order.payment_status == 'paid' %}disabled{% endif %}>
             <option value="running" {% if order.order_status == 'running' %}selected{% endif %}>Running</option>
             <option value="completed" {% if order.order_status == 'completed' %}selected{% endif %}>Completed</option>
         </select>
@@ -58,7 +130,19 @@ Clients
         </div>
         <div class="onesixth">
             <label for="payment-status">Payment Status</label>
-            <h4 id="payment-status">{{order.payment_status|title}}</h4>
+            <form method="post" action='{% url 'UpdatePaymentStatus' %}'>
+            {% csrf_token %}
+            <input type="hidden" name="client" value="{{client_instance.pk}}">
+            <input type="hidden" name="order" value="{{order.id}}">
+            <input type="hidden" name="order-status" value="{{selected_orderstatus}}">
+            <select name="payment-status" onchange="this.form.submit()">
+                <option value="" {% if order.payment_status == "" %}selected{% endif %}>-- Select --</option>
+                <option value="requested" {% if order.payment_status == "requested" %}selected{% endif %}>Payment Requested</option>
+                <option value="in_escrow"  {% if order.payment_status == "in_escrow" %}selected{% endif %}>In Escrow Account</option>
+                <option value="paid"  {% if order.payment_status == "paid" %}selected{% endif %}>Paid</option>
+                <option value="not_paid"  {% if order.payment_status == "not_paid" %}selected{% endif %}>Not Paid</option>
+            </select>
+            </form>
         </div>
     </div>
     <div class="table-wrapper">

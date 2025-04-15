@@ -50,7 +50,7 @@ function saveDeliverystatus(select) {
 function updateOrderStatus(select) {
     const row = select.closest('div');
     const rowId = row.getAttribute('data-id');
-    const selectedOrderStatus = row.querySelector('order_status').value;
+    const selectedOrderStatus = row.querySelector('.order_status').value;
 
 
     // Prepare data for updating
