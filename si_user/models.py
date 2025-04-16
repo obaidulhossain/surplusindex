@@ -51,7 +51,7 @@ class UserPayment(Timelogger):
 
 class CreditUsage(Timelogger):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    credits_used = models.IntegerField(null=True, blank=True, max_length=3)
-    number_of_free = models.IntegerField(null=True, blank=True, max_length=3)
-    number_of_purchased = models.IntegerField(null=True, blank=True, max_length=3)
+    credits_used = models.IntegerField(null=True, blank=True)
+    number_of_free = models.IntegerField(null=True, blank=True)
+    number_of_purchased = models.IntegerField(null=True, blank=True)
     leads = models.ManyToManyField('propertydata.Status', blank=True)
