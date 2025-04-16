@@ -165,20 +165,22 @@ Clients
         <table id="leads-table" class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th>Delivery ID</th>
+                    <th>S_ID</th>
                     <th>Delivery Date</th>
-                    <th>Detail</th>
                     <th>Delivered In</th>
+                    <th>Detail</th>
                     <th>Delivery Status</th>
+                    <th>Action</th>
+                    
                 </tr>
             </thead>
             <tbody>
             {% for delivery in order.deliveries.all %}
                 <tr data-id="{{delivery.id}}">
-                    <td>{{delivery.id}}</td>
-                    <td>{{delivery.delivery_date|date:"d/m/Y"}}</td>
-                    <td>{{delivery.delivery_note}}</td>
-                    <td>{{delivery.delivered_in|date:"d/m/Y"}}</td>
+                    <td>{{forloop.counter|stringformat:"02d"}}_{{delivery.id|stringformat:"02d"}}</td>
+                    <td><input type="date" name="delivery_date" value="{{delivery.delivery_date|date:'Y-m-d'}}"></td>
+                    <td><input type="date" name="delivered_date" value="{{delivery.delivered_in|date:'Y-m-d'}}"></td>
+                    <td><input type="text" name="delivery_note" value="{{delivery.delivery_note}}" style="min-width:700px;"></td>
                     <td>
                         <select class="delivery_status" name="delivery_status" onchange="saveDeliverystatus(this)">
                             <option value=""{% if not delivery.delivery_status %}selected{% endif %}>Select Status</option>
@@ -188,8 +190,32 @@ Clients
                             <option value="revision" {% if delivery.delivery_status == 'revision' %}selected{% endif %}>Revision</option>
                         </select>
                     </td>
+                    <td><input type="submit" value="Save"></td>
+                    
                 </tr>
             {% endfor %}
+                <tr>
+                    <form method="post" action="{% url 'createDelivery' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="order_id" value="{{order.id}}">
+                    <input type="hidden" name="client_id" value="{{client_instance.pk}}">
+                    <td></td>
+                    <td><input type="date" name="delivery_date"></td>
+                    <td><input type="date" name="delivered_date"></td>
+                    <td><input type="text" name="delivery_note" style="min-width:700px;" placeholder="Add Delivery Note"></td>
+                    
+                    <td>
+                        <select name="delivery_status">
+                            <option value="">Select Status</option>
+                            <option value="assigned">Assigned</option>
+                            <option value="ready">Ready To Deliver</option>
+                            <option value="delivered">Delivered</option>
+                            <option value="revision">Revision</option>
+                        </select>
+                    </td>
+                    <td><input type="submit" value="Add Delivery"></td>
+                    </form>
+                <tr>
             </tbody>
         </table>
     </div>

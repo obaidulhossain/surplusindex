@@ -7,6 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db.models import Sum
 from Admin.utils.sessions import get_logged_in_users
+from django.utils.timezone import now
 import json
 # Create your views here.
 def CreateOrder(request):
@@ -133,6 +134,31 @@ def clientDetail(request):
 
     }
     return render(request, 'Admin_Client/client_detail.html', context)
+def createDelivery(request):
+    if request.method == "POST":
+        client_id = request.POST.get('client_id','')
+        order_id = request.POST.get('order_id', '')
+        delivery_date = request.POST.get('delivery_date','')
+        delivery_note = request.POST.get('delivery_note', '')
+        delivered_date = request.POST.get('delivered_date','')
+        delivery_status = request.POST.get('delivery_status', '')
+
+        delivery_instance = Deliveries.objects.create(
+            delivery_date = delivery_date,
+            delivery_status = delivery_status,
+            delivery_note = delivery_note,
+        )
+        if not delivered_date == "":
+            delivery_instance.delivered_in = delivered_date
+        
+            
+            
+        
+        delivery_instance.save()
+        order_instance = Orders.objects.get(pk=order_id)
+        order_instance.deliveries.add(delivery_instance)
+    return HttpResponseRedirect (f"/client_detail/?client={client_id}")
+
 @csrf_exempt
 def updateDeliveryStatus(request):
     if request.method == 'POST':

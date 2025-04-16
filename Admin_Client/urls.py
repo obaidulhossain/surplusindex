@@ -10,6 +10,7 @@ urlpatterns = [
     path('updateOrderStatus/', views.updateOrderStatus, name="updateOrderStatus"),
     path('UpdatePaymentStatus', views.UpdatePaymentStatus, name="UpdatePaymentStatus"),
     path('CreateOrder', views.CreateOrder, name="CreateOrder"),
+    path('createDelivery', views.createDelivery, name="createDelivery"),
     
 
 ]
