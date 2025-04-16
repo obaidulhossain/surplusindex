@@ -125,7 +125,7 @@ def userProfile(request):
     user = request.user
     user_instance = User.objects.get(username=user)
     transactions = UserPayment.objects.filter(user=user_instance)
-    credit_usage = CreditUsage.objects.filter(user=request.user)
+    credit_usage = CreditUsage.objects.filter(user=user_instance)
     user_credits = request.user.credits
     user_credits.update_total_credits()
     context = {

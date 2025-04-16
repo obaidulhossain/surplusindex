@@ -50,6 +50,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                {% if transactions.count > 0 %}
                     {% for transaction in transactions %}
                     <tr>
                         <td>{{forloop.counter|stringformat:"03d"}}_{{transaction.id|stringformat:"04d"}}</td>    
@@ -59,6 +60,11 @@
                         <td>{% if transaction.has_paid == True %}<span style="color:green;">Successful</span>{% else %}<span style="color:red;">Failed</span>{% endif %}</td>
                     </tr>
                     {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan=6>No Transaction History </td>
+                    </tr>
+                {% endif %}
                 </tbody>
             </table>
         </div>    
@@ -83,6 +89,7 @@
                     </tr>
                 </thead>
                 <tbody>
+                {% if credit_usage.count > 0 %}
                     {% for usage in credit_usage %}
                     <tr>
                         <td>{{forloop.counter|stringformat:"03d"}}_{{usage.id|stringformat:"04d"}}</td>
@@ -101,6 +108,11 @@
                         <td>{{usage.leads.count}}</td>
                     </tr>
                     {% endfor %}
+                {% else %}
+                    <tr>
+                    <td colspan=6>No Usage History</td>
+                    </tr>
+                {% endif %}
                 </tbody>
             </table>
         </div>    
