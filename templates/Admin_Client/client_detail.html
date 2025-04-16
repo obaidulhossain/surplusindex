@@ -21,20 +21,20 @@ Clients
         {% if client_instance.user_type == 'si_client' %}
         
         {% else %}
-        <div class="onefourth">
+        <div class="onefourth boxed-filter" >
             <label for="all-orders">Total Order (Price)</label>
             <h4 id="all-orders">{{all_orders}} (${{total_order_amount}})</h4>
         </div>
-        <div class="onefourth">
+        <div class="onefourth boxed-filter">
             <label for="completed-orders">Completed Order (Paid)</label>
             <h4 id="completed-orders">{{completed_orders}} (${{total_paid}})</h4>
         </div>
-        <div class="onefourth">
+        <div class="onefourth boxed-filter">
             <label for="running-orders">Running Order (Updaid)</label>
             <h4 id="running-orders">{{running_orders}} (${{total_unpaid}})</h4>
         </div>
         
-        <div class="onefourth">
+        <div class="onefourth boxed-filter">
             <label for="order-status">Show Orders by Status</label>
             <form method="post">
             {% csrf_token %}
@@ -46,55 +46,71 @@ Clients
             </select>
             </form>
         </div>
-        
-        <div class="section-header" style="margin-top:20px; background-color: #587b98">
-        <h4>Create Order</h4>
+        <div class="onefourth boxed-filter">
+            <label for="free-balance">Available Free Credits</label>
+            <h4 id="free-balance">{{client_instance.free_credit_balance}}</h4>
         </div>
-
-        <div class="section-body-full">
-            <form method="post" action='{% url 'CreateOrder' %}'>
-                {% csrf_token %}
-                <input type="hidden" name="client" value="{{client_instance.pk}}">
-                <input type="hidden" name="order-status" value="{{selected_orderstatus}}">
-                
-                <div class="onefifth">
-                    <label for="order-date">Date Ordered</label>
-                    <input type="date" name="order-date">
-                </div>
-                <div class="onefifth">
-                    <label for="status">Order Status</label>
-                    <select name="status">
-                        <option value="">Select</option>
-                        <option value="Running" selected>Running</option>
-                        <option value="Completed">Completed</option>
-                    </select>
-                </div>
-                <div class="onefifth">
-                    <label for="order_price">Order Price</label>
-                    <input type="number" name="order_price">
-                </div>
-                <div class="onefifth">
-                    <label for="payment-status">Payment Status</label>
-                    <select name="payment-status">
-                        <option value="">-- Select --</option>
-                        <option value="requested">Payment Requested</option>
-                        <option value="in_escrow">In Escrow Account</option>
-                        <option value="paid">Paid</option>
-                        <option value="not_paid">Not Paid</option>
-                    </select>
-                </div>
-                <div class="onefifth">
-                    <label for="payment-method">Payment Method</label>
-                    <input type="text" name="payment-method">
-                </div>
-                <input type="text" name="order-detail" placeholder="Order Detail" style="width:96%; margin:15px 0px;">
-                <input type="text" name="customer_id" placeholder="Customer ID" style="width:48%; margin:0px 0px 15px 0px;">
-                <input type="text" name="checkout_id" placeholder="Checkout ID" style="width:48%; margin:0px 0px 15px 0px;">
-                <input type="submit" value="Create Order">
-            </form>
+        <div class="onefourth boxed-filter">
+            <label for="purchased-balance">Available Purchased Credits</label>
+            <h4 id="purchased-balance">{{client_instance.purchased_credit_balance}}</h4>
         </div>
-        {% endif %}
+        <div class="onefourth boxed-filter">
+            <label for="total-balance">Total Credits</label>
+            <h4 id="total-balance">{{client_instance.Total_credits}}</h4>
+        </div>
+        <div class="onefourth boxed-filter">
+            <label for="last-online">Online Status</label>
+            <h4 id="last-online"><span style="{% if login_status == "Online" %}color:#1db170{% else %}color:#587b98{% endif %}">{{login_status}}</span></h4>
+        </div>    
     </div>
+    <div class="section-header" style="margin-top:20px; background-color: #587b98">
+    <h4>Create Order</h4>
+    </div>
+
+    <div class="section-body-full">
+        <form method="post" action='{% url 'CreateOrder' %}'>
+            {% csrf_token %}
+            <input type="hidden" name="client" value="{{client_instance.pk}}">
+            <input type="hidden" name="order-status" value="{{selected_orderstatus}}">
+            
+            <div class="onefifth">
+                <label for="order-date">Date Ordered</label>
+                <input type="date" name="order-date">
+            </div>
+            <div class="onefifth">
+                <label for="status">Order Status</label>
+                <select name="status">
+                    <option value="">Select</option>
+                    <option value="Running" selected>Running</option>
+                    <option value="Completed">Completed</option>
+                </select>
+            </div>
+            <div class="onefifth">
+                <label for="order_price">Order Price</label>
+                <input type="number" name="order_price">
+            </div>
+            <div class="onefifth">
+                <label for="payment-status">Payment Status</label>
+                <select name="payment-status">
+                    <option value="">-- Select --</option>
+                    <option value="requested">Payment Requested</option>
+                    <option value="in_escrow">In Escrow Account</option>
+                    <option value="paid">Paid</option>
+                    <option value="not_paid">Not Paid</option>
+                </select>
+            </div>
+            <div class="onefifth">
+                <label for="payment-method">Payment Method</label>
+                <input type="text" name="payment-method">
+            </div>
+            <input type="text" name="order-detail" placeholder="Order Detail" style="width:96%; margin:15px 0px;">
+            <input type="text" name="customer_id" placeholder="Customer ID" style="width:48%; margin:0px 0px 15px 0px;">
+            <input type="text" name="checkout_id" placeholder="Checkout ID" style="width:48%; margin:0px 0px 15px 0px;">
+            <input type="submit" value="Create Order">
+        </form>
+    </div>
+    {% endif %}
+</div>
 
     {% for order in orders %}
 

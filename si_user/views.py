@@ -4,7 +4,7 @@ from . forms import CreateUserForm, LoginForm, UpdateUserForm, UserDetailForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.models import User
-from . models import UserDetail, UserPayment
+from . models import *
 # - authentication models and functions
 from django.contrib.auth.models import auth
 from django.contrib.auth.forms import PasswordChangeForm
@@ -125,11 +125,12 @@ def userProfile(request):
     user = request.user
     user_instance = User.objects.get(username=user)
     transactions = UserPayment.objects.filter(user=user_instance)
+    credit_usage = CreditUsage.objects.filter(user=request.user)
     user_credits = request.user.credits
     user_credits.update_total_credits()
     context = {
         'transactions':transactions,
-        
+        'credit_usage':credit_usage,
     }
     return render(request, 'si_user/user_profile.html', context)
 

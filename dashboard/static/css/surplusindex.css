@@ -68,6 +68,14 @@ label {
     max-width: 99%;
 }
 
+.boxed-filter {
+    background-color: #d6d6d6;
+    padding: 20px;
+    border: 1px solid #b6b6b6;
+    border-radius: 9px;
+    margin: 5px;
+}
+
 .onehalf {
     width: 48%;
     display: inline-block;

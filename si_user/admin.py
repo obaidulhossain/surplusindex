@@ -7,9 +7,12 @@ class UserDetailAdmin(admin.ModelAdmin):
 class UserPaymentAdmin(admin.ModelAdmin):
     list_display = ('stripe_customer_id','stripe_checkout_id', 'amount','number_of_leads','has_paid','currency')
 
+class CreditUsageAdmin(admin.ModelAdmin):
+    list_display = ('user', 'credits_used', 'number_of_free', 'number_of_purchased')
 
 admin.site.register(UserDetail, UserDetailAdmin)
 admin.site.register(UserPayment, UserPaymentAdmin)
+admin.site.register(CreditUsage, CreditUsageAdmin)
 
 
 

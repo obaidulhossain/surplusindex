@@ -6,6 +6,7 @@ from django.db.models import Min
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.db.models import Sum
+from Admin.utils.sessions import get_logged_in_users
 import json
 # Create your views here.
 def CreateOrder(request):
@@ -109,7 +110,10 @@ def clientDetail(request):
             delivered = len(order.deliveries.filter(delivery_status='delivered'))
             pending = deliveries - delivered
             order.undelivered_count = order.deliveries.exclude(delivery_status='delivered').count()
-        
+        user_instance = client_instance.user
+        logged_in_users = get_logged_in_users()
+        login_status = "Online" if user_instance in logged_in_users else user_instance.last_login
+
 
     context = {
         'client':client,
@@ -125,6 +129,7 @@ def clientDetail(request):
         'deliveries':deliveries,
         'delivered':delivered,
         'pending':pending,
+        'login_status':login_status,
 
     }
     return render(request, 'Admin_Client/client_detail.html', context)

@@ -108,13 +108,16 @@ def purchaseLeads(request):
             messages.error(request, "Insufficient credits to add the selected leads.")
             return redirect('leads')  # Redirect back to the leads page
         else:
+            credit_usage = CreditUsage.objects.create(user=request.user)
             # Deduct credits
             remaining_leads = lead_count
-
+            credit_usage.credits_used = remaining_leads
             # Deduct from free credits first
             if free_credit >= remaining_leads:
                 user_details.free_credit_balance -= remaining_leads
+                credit_usage.number_of_free = remaining_leads
                 remaining_leads = 0
+                
                 messages.info(request, str(lead_count) + ' Credits have been deducted from free credits')
                 messages.success(request,str(lead_count) + ' successfully added to My Leads. Visit My Leads Tab to explore lead details.')
 
@@ -122,22 +125,26 @@ def purchaseLeads(request):
                 if free_credit >= 1:
 
                     remaining_leads -= free_credit
+                    credit_usage.number_of_free = free_credit
                     user_details.free_credit_balance = 0
                     # Deduct the rest from purchased credits
                     user_details.purchased_credit_balance -= remaining_leads
+                    credit_usage.number_of_purchased = remaining_leads
                     messages.info(request, str(free_credit) + ' free credit and '+str(remaining_leads)+' purchased credit have beed deducted.') 
                     messages.success(request,str(lead_count) + ' successfully added to My Leads. Visit My Leads Tab to explore lead details.')
                 else:
                     user_details.purchased_credit_balance -= remaining_leads
+                    credit_usage.number_of_purchased = remaining_leads
                     messages.info(request, str(remaining_leads)+' credits deducted from purchased credit balance.') 
                     messages.success(request,str(lead_count) + ' successfully added to My Leads. Visit My Leads Tab to explore lead details.')
             # Save updated credit balances
             user_details.save()
             user_details.update_total_credits()
-
+            credit_usage.save()
 
             for lead_id in selected_leads_ids:
-                Status.objects.create(lead_id=lead_id, client=request.user)
+                status = Status.objects.create(lead_id=lead_id, client=request.user)
+                credit_usage.leads.add(status)
                 fcl = Foreclosure.objects.get(pk=lead_id)
                 fcl.purchased_by.add(request.user)
                 
