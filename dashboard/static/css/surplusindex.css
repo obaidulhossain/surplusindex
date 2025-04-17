@@ -73,7 +73,7 @@ label {
     padding: 20px;
     border: 1px solid #b6b6b6;
     border-radius: 9px;
-    margin: 5px;
+    margin: 10px;
 }
 
 .onehalf {
@@ -83,7 +83,7 @@ label {
 }
 
 .onethird {
-    width: 33%;
+    width: 31%;
     display: inline-block;
     vertical-align: top;
 }

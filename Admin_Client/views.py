@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.contrib.auth.models import User, Group
 from django.core.paginator import Paginator
 from si_user.models import *
 from .models import *
@@ -9,7 +10,64 @@ from django.db.models import Sum
 from Admin.utils.sessions import get_logged_in_users
 from django.utils.timezone import now
 import json
+from django.contrib import messages
 # Create your views here.
+def clientSettings(request):
+    if request.method == 'POST':
+        client = request.POST.get('client','')
+    else:
+        client = request.GET.get('client','')
+    context = {
+
+    }
+    return render(request, 'Admin_Client/client_settings.html', context)
+
+def registerClient(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+        phone = request.POST.get('phone')
+        first_name = request.POST.get('first_name','')
+        last_name = request.POST.get('last_name','')
+        customer_id = request.POST.get('customer_id','')
+        if not User.objects.filter(username=username).exists():
+            if not User.objects.filter(email=email).exists():
+                user = User.objects.create_user(username=username, email=email)
+                user.set_password(password)
+                user.is_active=True
+                user.first_name = first_name
+                user.last_name = last_name
+                user.groups.add(Group.objects.get(name='clients'))
+                user.save()
+                userinstance = User.objects.get(username=username)
+                if not UserDetail.objects.filter(user=userinstance).exists():
+                    userdetail = UserDetail.objects.create(
+                        user = userinstance,
+                        phone = phone,
+                        user_type = "manual_client",
+                        customer_id = customer_id,
+                    )
+                else:
+                    userdetail = UserDetail.objects.get(user__username=username)
+                    userdetail.phone = phone
+                    userdetail.user_type = "manual_client"
+                    userdetail.stripe_customer_id = customer_id,
+
+                userdetail.update_total_credits()
+                userdetail.save()
+
+                messages.success(request, 'Client Instance Created')
+            else:
+                messages.success(request, 'Email already Exist')
+        else:
+            messages.success(request, 'Username already Exist')
+    return redirect ('client_settings')
+
+
+
+
+
 def CreateOrder(request):
     if request.method == 'POST':
         client = request.POST.get('client','')

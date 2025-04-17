@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}
+Clients
+{% endblock title %}
+
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+
+<div class="body-section">
+
+    <div class="section-header">
+    <h4>Client Settings</h4>
+    </div>
+
+    <div class="section-filter-full">
+    </div>
+
+    <div class="section-header" style="margin-top:30px;">
+    <h4>Create Client Instance</h4>
+    </div>
+
+    <div class="section-body-full">
+        <div class="onethird boxed-filter">
+            <form action="{% url 'create_client'%}" method="post">
+            {% csrf_token %}
+            {% include 'partials/_messages.html' %}
+            <input type="text" name="username" id="usernameField" placeholder="User Name" style="width:95%;">
+            <input type="email" name="email" id="emailField" placeholder="Email" style="width:95%;">
+            <input type="password" name="password" id="passwordField" placeholder="Password"style="width:95%;">
+            <h6 style="width:20%;" class="showPasswordToggle">SHOW</h6><br>
+            <input type="text" name="first_name" placeholder="First Name" style="width:95%;">
+            <input type="text" name="last_name" placeholder="Last Name" style="width:95%;">
+            <input type="text" id="phone" name="phone" maxlength="14" placeholder="(123) 456-7890" style="width:95%;">
+            <input type="text" name="customer_id" placeholder="Customer ID" style="width:95%;">
+            <input type="submit" value="Register" class="submit-btn">
+            <div class="invalid_feedback invalid-feedback" style="display: none;"></div>
+            <div class="emailFeedBackArea invalid-feedback" style="display: none;"></div>
+
+        </div>
+        <div class="onethird boxed-filter">
+            
+            
+
+        </div>
+        <div class="onethird boxed-filter">
+            
+        </div>
+        </form>
+    </div>
+<script src="{% static 'js/register.js' %}"></script>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+</div>
+{% endblock content %}
