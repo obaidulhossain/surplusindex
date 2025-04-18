@@ -19,7 +19,13 @@ from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
-# Create your views here.
+## test if api key is working
+# try:
+#     stripe.Product.list(limit=1)  # Fetch a product to test the connection
+#     print("API key is okay")
+# except stripe.error.AuthenticationError:
+#     print("Invalid Stripe API key.")
+## end test if api key is working
 
 @login_required(login_url="login")
 def userSettings(request):
@@ -190,14 +196,13 @@ def userSubscription(request):
 #         'stripe_public_key':settings.STRIPE_PUBLISHABLE_KEY,
 #     })
     
-@login_required
-@csrf_exempt
+# @login_required
+# @csrf_exempt
 def checkout(request):
     user = request.user
-
     if request.method == 'POST':
         data = json.loads(request.body)
-        price_id = data.get('price_id')
+        priceID = data.get('price_id')
         leads = data.get('leads')
         amount = data.get('amount')
 
@@ -215,7 +220,7 @@ def checkout(request):
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[{
-                'price': price_id,  # Use dynamic price_id here
+                'price': priceID,  # Use dynamic price_id here
                 'quantity': 1,
             }],
             mode='payment',
