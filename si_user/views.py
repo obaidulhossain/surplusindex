@@ -232,57 +232,56 @@ def checkout(request):
 
 from django.db import transaction
 import logging #cgpt code
-logger = logging.getLogger(__name__) #cgpt code
+import os
+# Configure the logger
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
 @csrf_exempt
 def stripe_webhook(request):
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-    # You can find your endpoint's secret in your webhook settings
-    endpoint_secret = 'whsec_53LCGPSZ7vhmDNOLGZ375sCmi5iwom7P'
- 
+    endpoint_secret = settings.STRIPE_WEBHOOK_ENDPOINT
     payload = request.body
-    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE','') #.get and ,'' is added by cgpt
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
     event = None
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
-        )
+        event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
     except ValueError as e:
-        logger.error("Invalid Payload", exc_info=e) #cgpt code
-        #Invalid Payload
-        return HttpResponse("Invalid Payload", status=400)
+        return HttpResponse("Invalid payload", status=400)
     except stripe.error.SignatureVerificationError as e:
-        logger.error("Invalid Signature", exc_info=e)
-        #Invalid Signature
-        return HttpResponse("Invalid Signature", status=400)
-    #Handle the checkout.session.completed event
+        return HttpResponse("Invalid signature", status=400)
+
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
         try:
-            # Fetch the line items using Stripe API
             line_items = stripe.checkout.Session.list_line_items(session['id'])
-            price_id = line_items['data'][0]['price']['id']
+            if not line_items['data']:
+                return HttpResponse("No line items found", status=400)
 
-            # Determine the number of leads based on the price ID
-            if price_id == 'price_1QojYpG4c6thWCjhaNxkWBYH':  # Example price ID
-                num_leads = 10
-            elif price_id == 'price_1QojZ9G4c6thWCjh9Ye4cxI9':
-                num_leads = 50
-            elif price_id == 'price_1QoOCJG4c6thWCjhpEhUuWtH':
-                num_leads = 100
-            elif price_id == 'price_1QojZNG4c6thWCjh4c4ljD2U':
-                num_leads = 300
-            else:
-                num_leads = 0
-                    # Extract other session data
+            price_id = line_items['data'][0]['price']['id']
+            price_map = {
+                os.getenv('TEN_LEADS'): 10,
+                os.getenv('FIFTY_LEADS'): 50,
+                os.getenv('HUNDRED_LEADS'): 100,
+                os.getenv('THREEHUNDRED_LEADS'): 300
+            }
+            num_leads = price_map.get(price_id, 0)
+
             customer_id = session.get('customer')
             checkout_id = session.get('id')
-            amount_paid = session.get('amount_total') / 100  # Stripe uses cents
+            amount_total = session.get('amount_total')
+            if amount_total is None:
+                return HttpResponse("Invalid session data", status=400)
+            amount_paid = amount_total / 100
             currency = session.get('currency')
             user_id = session.get('client_reference_id')
 
-            # Update user details and create payment record
-            user = User.objects.get(id=user_id)
+            try:
+                user = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                return HttpResponse("User not found", status=404)
 
             with transaction.atomic():
                 UserPayment.objects.create(
@@ -298,101 +297,90 @@ def stripe_webhook(request):
                 user_detail.purchased_credit_balance += num_leads
                 user_detail.update_total_credits()
                 user_detail.save()
-
-
-            # UserPayment.objects.create(
-            #     user=user,
-            #     stripe_customer_id=customer_id,
-            #     stripe_checkout_id=checkout_id,
-            #     amount=amount_paid,
-            #     number_of_leads=num_leads,
-            #     currency=currency,
-            #     has_paid=True,
-            # )
-            # user_detail = get_object_or_404(UserDetail, user=user)
-            # user_detail.purchased_credit_balance += num_leads
-            # user_detail.update_total_credits()
-
         except Exception as e:
-            logger.error(f"Error processing Stripe webhook: {str(e)}", exc_info=True)
+            logger.error(f"Error processing Stripe webhook: {str(e)}")
             return HttpResponse("Error processing webhook", status=400)
 
-
-        # customer_id = session.get('customer')
-        # checkout_id = session.get('id')
-        # amount_paid = session.get('amount_total') / 100  # Stripe uses cents
-        # currency = session.get('currency')
-        # user_id = session.get('client_reference_id')
-
-        # # Determine number of leads based on the price ID or other logic
-        # price_id = session.get('line_items')['data'][0].get('price')['id']
-        # if price_id == 'price_1QojYpG4c6thWCjhaNxkWBYH':
-        #     num_leads = 10
-        # elif price_id == 'price_1QojZ9G4c6thWCjh9Ye4cxI9':
-        #     num_leads = 50
-        # elif price_id == 'price_1QoOCJG4c6thWCjhpEhUuWtH':
-        #     num_leads = 100
-        # elif price_id == 'price_1QojZNG4c6thWCjh4c4ljD2U':
-        #     num_leads = 300
-        # else:
-        #     num_leads = 0  # Default or error case
-
-        # try:
-        #     user = User.objects.get(id=user_id)
-        #     UserPayment.objects.create(
-        #         user=user,
-        #         stripe_customer_id=customer_id,
-        #         stripe_checkout_id=checkout_id,
-        #         amount=amount_paid,
-        #         number_of_leads=num_leads,
-        #         currency=currency,
-        #         has_paid=True,
-        #     )
-        #     update_user_detail = get_object_or_404(UserDetail, user=user)
-        #     update_user_detail.purchased_credit_balance += num_leads
-        #     update_user_detail.update_total_credits()
-        # except User.DoesNotExist:
-        #     logger.error(f"User with ID {user_id} does not exist.")
-        #     return HttpResponse("User does not exist", status=400)
-        
-
-
-
-
-
-
-        # session = event['data']['object']
-        # # print(json.dumps(session,indent=4))
-        
-        # customer_id = session.get('customer')
-        # checkout_id = session.get('id')
-        # amount_paid = session.get('amount_total') / 100  # Stripe uses cents
-        # currency = session.get('currency')
-        # user_id = session.get('client_reference_id')  # Pass this in the checkout creation
-        # num_leads = 100  # This could vary depending on your logic
-
-        # try:
-        #     user = User.objects.get(id=user_id)
-        #     UserPayment.objects.create(
-        #         user=user,
-        #         stripe_customer_id=customer_id,
-        #         stripe_checkout_id=checkout_id,
-        #         amount=amount_paid,
-        #         number_of_leads=num_leads,
-        #         currency=currency,
-        #         has_paid=True,
-        #     )
-        #     update_user_detail = get_object_or_404(UserDetail,user=user)
-        #     update_user_detail.purchased_credit_balance += num_leads
-        #     update_user_detail.update_total_credits()
-        #     # update_user_detail.save()
-
-        #     logger.info(f"Payment successfully recorded for user {user.username}")
-        # except User.DoesNotExist:
-        #     logger.error(f"User with ID {user_id} does not exist.")
-        #     return HttpResponse("User does not exist", status=400)
-    
+    else:
+        logger.info(f"Unhandled event type: {event['type']}")
     return HttpResponse(status=200)
+
+
+
+
+
+# @csrf_exempt
+# def stripe_webhook(request):
+#     # stripe.api_key = settings.STRIPE_SECRET_KEY
+#     # You can find your endpoint's secret in your webhook settings
+#     endpoint_secret = settings.STRIPE_WEBHOOK_ENDPOINT
+ 
+#     payload = request.body
+#     sig_header = request.META['HTTP_STRIPE_SIGNATURE'] #.get and ,'' is added by cgpt
+#     event = None
+
+#     try:
+#         event = stripe.Webhook.construct_event(
+#             payload, sig_header, endpoint_secret
+#         )
+#     except ValueError as e:
+        
+#         #Invalid Payload
+#         return HttpResponse("Invalid Payload", status=400)
+#     except stripe.error.SignatureVerificationError as e:
+        
+#         #Invalid Signature
+#         return HttpResponse("Invalid Signature", status=400)
+#     #Handle the checkout.session.completed event
+#     if event['type'] == 'payment_intent.succeeded':
+#         session = event['data']['object']
+#         try:
+#             # Fetch the line items using Stripe API
+#             line_items = stripe.checkout.Session.list_line_items(session['id'])
+#             price_id = line_items['data'][0]['price']['id']
+
+#             # Determine the number of leads based on the price ID
+#             if price_id == 'price_1QojYpG4c6thWCjhaNxkWBYH':  # Example price ID
+#                 num_leads = 10
+#             elif price_id == 'price_1QojZ9G4c6thWCjh9Ye4cxI9':
+#                 num_leads = 50
+#             elif price_id == 'price_1QoOCJG4c6thWCjhpEhUuWtH':
+#                 num_leads = 100
+#             elif price_id == 'price_1QojZNG4c6thWCjh4c4ljD2U':
+#                 num_leads = 300
+#             else:
+#                 num_leads = 0
+#                     # Extract other session data
+#             customer_id = session.get('customer')
+#             checkout_id = session.get('id')
+#             amount_paid = session.get('amount_total') / 100  # Stripe uses cents
+#             currency = session.get('currency')
+#             user_id = session.get('client_reference_id')
+
+
+#             user = User.objects.get(id=user_id)
+
+#             with transaction.atomic():
+#                 UserPayment.objects.create(
+#                     user=user,
+#                     stripe_customer_id=customer_id,
+#                     stripe_checkout_id=checkout_id,
+#                     amount=amount_paid,
+#                     number_of_leads=num_leads,
+#                     currency=currency,
+#                     has_paid=True,
+#                 )
+#                 user_detail = get_object_or_404(UserDetail, user=user)
+#                 user_detail.purchased_credit_balance += num_leads
+#                 user_detail.update_total_credits()
+#                 user_detail.save()
+
+#         except Exception as e:
+          
+#             return HttpResponse("Error processing webhook", status=400)
+
+
+#     return HttpResponse(status=200)
 
 
 
