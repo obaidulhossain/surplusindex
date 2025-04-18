@@ -27,58 +27,36 @@
         <a href="#" class="button button-large" role="button" data-price-id="price_1QoMwzG4c6thWCjhNTX0bjlY" data-leads="300" data-amount="270">Buy 300 Credits for $270</a>
         {% comment %} test price id for 300 = price_1QojZNG4c6thWCjh4c4ljD2U {% endcomment %}
     </div>
-    <div class="mid-section">
+    
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const buyButtons = document.querySelectorAll('.button');
 
-        <script src="https://js.stripe.com/v3/"></script>
-        <!-- <script>
+    buyButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
 
-            const buy_now_button = document.querySelector('#buy_now_btn')
-            buy_now_button.addEventListener('click', event => {
-                fetch('/checkout/')
-                    .then((result) => { return result.json() })
-                    .then((data) => {
-                        var stripe = Stripe(data.stripe_public_key);
-                        stripe.redirectToCheckout({
-                            sessionId: data.session_id
-                        }).then(function (result) {
-                        });
-                    })
+            const priceId = this.getAttribute('data-price-id');
+            const leads = this.getAttribute('data-leads');
+            const amount = this.getAttribute('data-amount');
+
+            fetch('/checkout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for Django
+                },
+                body: JSON.stringify({ price_id: priceId, leads: leads, amount: amount })
             })
-        </script> -->
-        <script>
-            const buyButtons = document.querySelectorAll('.button');
-
-            buyButtons.forEach(button => {
-                button.addEventListener('click', function (event) {
-                    event.preventDefault();
-
-                    const priceId = this.getAttribute('data-price-id');
-                    const leads = this.getAttribute('data-leads');
-                    const amount = this.getAttribute('data-amount');
-
-                    fetch('/checkout/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for Django
-                        },
-                        body: JSON.stringify({ price_id: priceId, leads: leads, amount: amount })
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            const stripe = Stripe(data.stripe_public_key);
-                            stripe.redirectToCheckout({ sessionId: data.session_id });
-                        })
-                        .catch(error => console.error('Error:', error));
-                });
-            });
-        </script>
-    </div>
+                .then(response => response.json())
+                .then(data => {
+                    const stripe = Stripe(data.stripe_public_key);
+                    stripe.redirectToCheckout({ sessionId: data.session_id });
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+</script>  
 </div>
-
-
-
-
-
 
 {% endblock content%}
