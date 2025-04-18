@@ -44,7 +44,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'  // CSRF token for Django
+                    'X-CSRFToken': '{{ csrf_token }}',  // CSRF token for Django
                 },
                 body: JSON.stringify({ price_id: priceId, leads: leads, amount: amount })
             })
