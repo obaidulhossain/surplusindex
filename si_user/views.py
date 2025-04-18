@@ -22,7 +22,7 @@ import os
 
 logging.basicConfig(level=logging.INFO)
 
-stripe.api_key = settings.STRIPE_SECRET_KEY
+stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 
 ## test if api key is working
@@ -189,6 +189,7 @@ def checkout(request):
                     user.credits.save()
                 except stripe.error.StripeError as e:
                     return JsonResponse({'error': 'Failed to create Stripe customer.'}, status=400)
+            logger.info(f"Attempting to create Stripe session with priceID: {priceID}")
             try:
                 session = stripe.checkout.Session.create(
                     payment_method_types=['card'],
