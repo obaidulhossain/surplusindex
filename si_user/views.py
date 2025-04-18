@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect, get_object_or_404
-import stripe.webhook
 from . forms import CreateUserForm, LoginForm, UpdateUserForm, UserDetailForm
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -9,7 +8,6 @@ from . models import *
 from django.contrib.auth.models import auth
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
-
 from django.urls import reverse
 #stripe settings
 import stripe
@@ -17,7 +15,15 @@ import json
 from django.conf import settings
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db import transaction
+import logging #cgpt code
+import os
+# Configure the logger
+
+logging.basicConfig(level=logging.INFO)
+
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
 
 ## test if api key is working
 # try:
@@ -162,87 +168,61 @@ def userSubscription(request):
 
 # @login_required
 # @csrf_exempt
-# def checkout(request):
-#     user = request.user
-
-#     if not request.user.credits.stripe_customer_id:
-#         try:
-#             # Create a Stripe customer
-#             customer = stripe.Customer.create(
-#                 email=request.user.email,
-#                 name=f"{request.user.first_name} {request.user.last_name}",
-#             )
-#             request.user.credits.stripe_customer_id = customer.id
-#             request.user.credits.save()
-#         except stripe.error.StripeError as e:
-#             # Handle Stripe API errors
-#             return JsonResponse({'error': str(e)}, status=400)
-
-#     session = stripe.checkout.Session.create(
-#     payment_method_types=['card'],
-#     line_items=[{
-#         'price' : 'price_1QoOCJG4c6thWCjhpEhUuWtH',
-#         'quantity' : 1,
-#     }],
-#     mode = 'payment',
-#     success_url = request.build_absolute_uri(reverse('subscriptions')) + '?session_id={CHECKOUT_SESSION_ID}',
-#     cancel_url = request.build_absolute_uri(reverse('subscriptions')),
-#     customer=user.credits.stripe_customer_id,  # Link the customer ID
-#     client_reference_id=user.id,
-#     )
-
-#     return JsonResponse({
-#         'session_id':session.id,
-#         'stripe_public_key':settings.STRIPE_PUBLISHABLE_KEY,
-#     })
-    
-# @login_required
-# @csrf_exempt
+logger = logging.getLogger(__name__)
 def checkout(request):
     user = request.user
     if request.method == 'POST':
-        data = json.loads(request.body)
-        priceID = data.get('price_id')
-        leads = data.get('leads')
-        amount = data.get('amount')
-
-        if not user.credits.stripe_customer_id:
+        try:
+            data = json.loads(request.body)
+            priceID = data.get('price_id')
+            leads = data.get('leads')
+            amount = data.get('amount')
+            if not priceID or leads is None or amount is None:
+                    return JsonResponse({'error': 'price_id, leads, or amount are missing'}, status=400)
+            if not user.credits.stripe_customer_id:
+                try:
+                    customer = stripe.Customer.create(
+                        email=user.email,
+                        name=f"{user.first_name} {user.last_name}",
+                    )
+                    user.credits.stripe_customer_id = customer.id
+                    user.credits.save()
+                except stripe.error.StripeError as e:
+                    return JsonResponse({'error': 'Failed to create Stripe customer.'}, status=400)
             try:
-                customer = stripe.Customer.create(
-                    email=user.email,
-                    name=f"{user.first_name} {user.last_name}",
+                session = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    line_items=[{
+                        'price': priceID,  # Use dynamic price_id here
+                        'quantity': 1,
+                    }],
+                    mode='payment',
+                    success_url=request.build_absolute_uri(reverse('subscriptions')) + '?session_id={CHECKOUT_SESSION_ID}',
+                    cancel_url=request.build_absolute_uri(reverse('subscriptions')),
+                    customer=user.credits.stripe_customer_id,
+                    client_reference_id=user.id,
                 )
-                user.credits.stripe_customer_id = customer.id
-                user.credits.save()
             except stripe.error.StripeError as e:
-                return JsonResponse({'error': str(e)}, status=400)
+                logger.error(f"Error creating Stripe checkout session: {e}")
+                return JsonResponse({'error': 'Failed to create Stripe checkout session.'}, status=400)
+            try:
+                return JsonResponse({
+                    'session_id': session.id,
+                    'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
+                })
+            except Exception as e:
+                logger.error(f"Error creating JSON response: {e}")
+                return JsonResponse({'error': 'Failed to create JSON response.'}, status=500)
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON in request body: {e}")
+            return JsonResponse({'error': 'Invalid JSON in request body.'}, status=400)
+        except Exception as e:
+            logger.error(f"An unexpected error occurred: {e}")
+            return JsonResponse({'error': 'An unexpected server error occurred.'}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
-        session = stripe.checkout.Session.create(
-            payment_method_types=['card'],
-            line_items=[{
-                'price': priceID,  # Use dynamic price_id here
-                'quantity': 1,
-            }],
-            mode='payment',
-            success_url=request.build_absolute_uri(reverse('subscriptions')) + '?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=request.build_absolute_uri(reverse('subscriptions')),
-            customer=user.credits.stripe_customer_id,
-            client_reference_id=user.id,
-        )
 
-        return JsonResponse({
-            'session_id': session.id,
-            'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
-        })
-
-from django.db import transaction
-import logging #cgpt code
-import os
-# Configure the logger
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.INFO)
-
-stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @csrf_exempt
 def stripe_webhook(request):
