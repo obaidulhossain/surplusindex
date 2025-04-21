@@ -180,7 +180,7 @@ def All_Contacts(request):
 
         
 
-    p = Paginator(leads_queryset, 150)
+    p = Paginator(leads_queryset, 50)
     page = request.GET.get('page')
     leads = p.get_page(page)
 
