@@ -43,7 +43,10 @@ def All_Contacts(request):
         saletypeFilter = request.GET.get('saletypeFilter','')
     
     if selectedUser:
-        filtered_defendants = Contact.objects.filter(skp_assignedto__username=selectedUser)
+        if selectedUser == "none":
+            filtered_defendants = Contact.objects.filter(skp_assignedto__isnull=True)
+        else:
+            filtered_defendants = Contact.objects.filter(skp_assignedto__username=selectedUser)
         if skiptraceStatus and skiptraceStatus == "Completed":
             filtered_defendants = filtered_defendants.filter(skiptraced=True)
         elif skiptraceStatus and skiptraceStatus == "Pending":

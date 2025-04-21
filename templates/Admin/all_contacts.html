@@ -62,6 +62,7 @@ New Leads
                 <label for="selectedUser">Skiptrace Assigned To</label><br>
                 <select style="width:85%;" id="selectedUser" name="selectedUser" onchange="this.form.submit()">
                     <option value="">--- Select User ---</option>
+                    <option value="none"{% if selectedUser == "none" %}selected{% endif %}>Not Assigned</option>
                     {% for user in userList %}
                     <option value="{{user.username}}" {% if selectedUser == user.username %}selected{% endif %}>{{user.username|upper}}</option>
                     {% endfor %}
