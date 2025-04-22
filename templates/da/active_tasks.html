@@ -25,9 +25,9 @@ Checklists
             <label for="casestatusFilter">Checklist</label>
             <select id="casestatusFilter" name="casestatusFilter" onchange="this.form.submit()">
                 <option value="">--- Select Checklist ---</option>
-                <option value="verified" {% if status == "Verified" %}selected{% endif %}>Active Checklist</option>
-                <option value="pending" {% if status == "Pending" %}selected{% endif %}>New Cases</option>
-                <option value="completed" {% if status == "Completed" %}selected{% endif %}>Completed</option>
+                <option value="verified" {% if status == "verified" %}selected{% endif %}>Active Checklist</option>
+                <option value="pending" {% if status == "pending" %}selected{% endif %}>New Cases</option>
+                <option value="completed" {% if status == "completed" %}selected{% endif %}>Completed</option>
             </select>
         </div>
         <div class="onefifth">
