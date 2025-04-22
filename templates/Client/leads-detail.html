@@ -143,7 +143,7 @@ Leads Detail
                             <input name="f_c_email" type="text" {% if status_instance.first_contact_email %}value="{{status_instance.first_contact_email}}"{% else %}placeholder="Email"{% endif %} style="width:80%;">
 
                             <label for="f_c_phone">Phone</label>
-                            <input id="phone" maxlength="14" name="f_c_phone" type="text" {% if status_instance.first_contact_phone %}value="{{status_instance.first_contact_phone}}"{% else %}placeholder="Contact Number"{% endif %} style="width:80%;">
+                            <input id="phone" maxlength="14" name="f_c_phone" type="text" {% if status_instance.first_contact_phone %}value="{{status_instance.first_contact_phone}}"{% else %}placeholder="Ex (123) 456-7890"{% endif %} style="width:80%;">
                             
                             <label for="f_c_address">Address</label>
                             <input name="f_c_address" type="text" {% if status_instance.first_contact_address %}value="{{status_instance.first_contact_address}}"{% else %}placeholder="Current Mailing Address"{% endif %} style="width:80%;">
