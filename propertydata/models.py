@@ -297,9 +297,19 @@ class Status(models.Model):
         (WAITING_FOR_COURTS_DECISION, 'Waiting for Courts Decision'),
         (FUND_DISBURSED, 'Fund Disbursed')
         )
+    NOT_ASSIGNED = 'not_assigned'
+    ASSIGNED = 'assigned'
+    COMPLETED = 'completed'
+    VERIFIED = 'verified'
+    CONTACTSTATUS = (
+        (NOT_ASSIGNED,'Not Assigned'),
+        (ASSIGNED, 'Assigned'),
+        (COMPLETED, 'Completed'),
+        (VERIFIED, 'Verified'),
+    )
     client = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name='user_as_client', default=1)
     lead = models.ForeignKey(Foreclosure, blank=True, related_name='foreclosure_as_lead', on_delete=models.CASCADE, default=1)
-    number_in_use = models.CharField(max_length=14, null=True, blank=True)
+    
     call_status = models.CharField(max_length=255, blank=True, default='Need to Call')
     call_comment = models.TextField(max_length=500, blank=True)
     agreement_status = models.CharField(max_length=255, blank=True, choices=AG_STATUS, default='Not Signed')
@@ -307,8 +317,20 @@ class Status(models.Model):
     claim_status = models.CharField(max_length=255, blank=True, choices=CLAIM_STATUS, default='Not Signed')
     claim_comment = models.TextField(max_length=500, blank=True)
     archived = models.BooleanField(default=False)
-    find_contact_status = models.CharField(max_length=255, blank=True)
-    find_contact_comment = models.TextField(max_length=500, blank=True)
+    find_contact_status = models.CharField(max_length=255, blank=True, choices=CONTACTSTATUS, default="Not Assigned")
+    first_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    first_contact_email = models.CharField(max_length=100, blank=True, null=True)
+    first_contact_phone = models.CharField(max_length=14, blank=True, null=True)
+    first_contact_address = models.CharField(max_length=100, blank=True, null=True)
+    first_contact_comment = models.CharField(max_length=255, blank=True, null=True)
+    second_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    second_contact_email = models.CharField(max_length=100, blank=True, null=True)
+    second_contact_phone = models.CharField(max_length=14, blank=True, null=True)
+    second_contact_address = models.CharField(max_length=100, blank=True, null=True)
+    second_contact_comment = models.CharField(max_length=255, blank=True, null=True)
+    find_contact_notes = models.CharField(max_length=255, blank=True)
+    
+    
     call_negotiate_status = models.CharField(max_length=255, blank=True)
     call_negotiate_comment = models.TextField(max_length=500, blank=True)
     follow_up_status = models.CharField(max_length=255, blank=True)

@@ -417,8 +417,9 @@ button:disabled:hover {
 }
 
 .instruction {
-    margin: 10px;
-    width: 100%;
+    margin: 5px;
+    width: 98%;
+    padding: 10px;
     border: 1px solid black;
     background-color: beige;
 }

@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from authentication.decorators import allowed_users
@@ -307,14 +307,100 @@ def leadsDetail(request):
     
 
 def updateStatus(request):
-    selected_status = request.POST.get('status_id')
+    if request.method == "POST":
+        selected_status = request.POST.get('status_id')
+        assigned_to = request.POST.get('assigned_to','')
+
+        f_c_name = request.POST.get('f_c_name','')
+        f_c_email = request.POST.get('f_c_email','')
+        f_c_phone = request.POST.get('f_c_phone','')
+        f_c_address = request.POST.get('f_c_address','')
+        f_c_notes = request.POST.get('f_c_notes','')
+        s_c_name = request.POST.get('s_c_name','')
+        s_c_email = request.POST.get('s_c_email','')
+        s_c_phone = request.POST.get('s_c_phone','')
+        s_c_address = request.POST.get('s_c_address','')
+        s_c_notes = request.POST.get('s_c_notes','')
+        find_contact_comment = request.POST.get('find_contact_comment','')
+        find_contact_status= request.POST.get('find_contact_status','')
+    
+    else:
+        selected_status = request.GET.get('status_id')
+
+        f_c_name = request.GET.get('f_c_name','')
+        f_c_email = request.GET.get('f_c_email','')
+        f_c_phone = request.GET.get('f_c_phone','')
+        f_c_address = request.GET.get('f_c_address','')
+        f_c_notes = request.GET.get('f_c_notes','')
+        s_c_name = request.GET.get('s_c_name','')
+        s_c_email = request.GET.get('s_c_email','')
+        s_c_phone = request.GET.get('s_c_phone','')
+        s_c_address = request.GET.get('s_c_address','')
+        s_c_notes = request.GET.get('s_c_notes','')
+        find_contact_comment = request.GET.get('find_contact_comment','')
+        find_contact_status = request.GET.get('find_contact_status','')
+    
     status_instance = Status.objects.get(pk=selected_status)
-    numberinuse = request.POST.get('numberinuse','')
+#    numberinuse = request.POST.get('numberinuse','')
+    if f_c_name:
+        status_instance.first_contact_name = f_c_name
+    if f_c_email:
+        status_instance.first_contact_email = f_c_email
+    if f_c_phone:
+        status_instance.first_contact_phone = f_c_phone
+    if f_c_address:
+        status_instance.first_contact_address = f_c_address
+    if f_c_notes:
+        status_instance.first_contact_comment = f_c_notes
+    if s_c_name:
+        status_instance.second_contact_name = s_c_name
+    if s_c_email:
+        status_instance.second_contact_email = s_c_email
+    if s_c_phone:
+        status_instance.second_contact_phone = s_c_phone
+    if s_c_address:
+        status_instance.second_contact_address = s_c_address
+    if s_c_notes:
+        status_instance.second_contact_comment = s_c_notes
+    if find_contact_comment:
+        status_instance.find_contact_notes = find_contact_comment
+    if find_contact_status:
+        status_instance.find_contact_status = find_contact_status
 
-    status_instance.number_in_use = numberinuse
+#    status_instance.number_in_use = numberinuse
     status_instance.save()
+    
 
-    return redirect('leads-detail')
+    return HttpResponseRedirect(f"/leads-detail/?status_id={status_instance.pk}")
+
+@csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
+def updateStatus_ajax(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+          
+            StatusID = data.get('Status_id')
+            SelectedStatus = data.get('selected_status')
+            # Fetch the corresponding event object from the database
+            status_instance = Status.objects.get(id=StatusID)
+            status_instance.find_contact_status = SelectedStatus
+            status_instance.save()
+           # Respond with success
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+
+        except Status.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Status not found.'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
 
