@@ -35,12 +35,12 @@ def caseChecklist(request):
     # states=Foreclosure.objects.values_list("state", flat=True).distinct()
 
     leads_queryset = Foreclosure.objects.filter(case_search_assigned_to=user)
-    if status == "Pending":
-        leads_queryset = leads_queryset.filter(case_search_status="Pending")
-    elif status == "Completed":
-        leads_queryset = leads_queryset.filter(case_search_status="Completed")
-    elif status == "Verified":
-        leads_queryset = leads_queryset.filter(case_search_status="Verified", changed_at__lt=now().date() - timedelta(days=7)).exclude(surplus_status='Fund Claimed').exclude(surplus_status='No Surplus').exclude(sale_status='Cancelled')
+    if status == "pending":
+        leads_queryset = leads_queryset.filter(case_search_status="pending")
+    elif status == "completed":
+        leads_queryset = leads_queryset.filter(case_search_status="completed")
+    elif status == "verified":
+        leads_queryset = leads_queryset.filter(case_search_status="verified", changed_at__lt=now().date() - timedelta(days=7)).exclude(surplus_status='Fund Claimed').exclude(surplus_status='No Surplus').exclude(sale_status='Cancelled')
     
     states = leads_queryset.values_list("state", flat=True).distinct()
 
