@@ -382,10 +382,21 @@ def updateStatus_ajax(request):
           
             StatusID = data.get('Status_id')
             SelectedStatus = data.get('selected_status')
+            StatusFor = data.get('status_for')
             # Fetch the corresponding event object from the database
             status_instance = Status.objects.get(id=StatusID)
-            status_instance.find_contact_status = SelectedStatus
-            status_instance.save()
+
+            # Check if the field exists in the model
+            if hasattr(status_instance, StatusFor):
+                # Dynamically set the value for the field
+                setattr(status_instance, StatusFor, SelectedStatus)
+                status_instance.save()
+
+
+
+            # status_instance.StatusFor = SelectedStatus
+
+            # status_instance.save()
            # Respond with success
             return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
 

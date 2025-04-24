@@ -136,7 +136,8 @@ def update_foreclosure(request):
             case_number=case,
             sale_type=sale_type,
             sale_status=sale_status,
-            case_search_status="Pending"
+            case_search_status="Pending",
+            changed_at=now()
             )
         
     fcl_instance.save()

@@ -4,12 +4,14 @@ function UpdateStatus(select) {
     // const rowId = row.getAttribute('data-id');
     const StatusID = document.getElementById('statusID').value;
     const SelectedStatus = document.getElementById('Pros_Status').value;
+    const StatusFor = document.getElementById('Pros_Status').getAttribute('for');
 
 
     // Prepare data for updating
     const updatedData = {
         Status_id: StatusID,
         selected_status: SelectedStatus,
+        status_for: StatusFor,
     };
 
     // Send data to the server using fetch
@@ -135,3 +137,53 @@ function confirmExport() {
     const message = `Are you sure you want to Export ${selectedLeads} selected leads?`;
     return confirm(message); // Returns true if OK is clicked, false otherwise
 }
+
+
+function PostStatus(select) {
+    const row = select.closest('div');
+    const statusSelected = row.querySelector('.call_status').value;
+    const field = row.getAttribute('field');
+    const StatusID = document.getElementById('statusID').value;
+
+
+    // Prepare data for updating
+    const updatedData = {
+        Status_id: StatusID,
+        selected_status: statusSelected,
+        status_for: field,
+    };
+
+    // Send data to the server using fetch
+    fetch('/updateStatus_ajax/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                select.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                select.style.backgroundColor = "#4CAF50"; // Green background
+                select.style.color = "#fff"; // White text
+
+                // Reset the select after a short delay
+                setTimeout(() => {
+
+                    select.style.backgroundColor = ""; // Reset to original background
+                    select.style.color = ""; // Reset to original text color
+                }, 1500); // Reset after 1.5 seconds
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
+}
+
