@@ -178,9 +178,9 @@ Leads Detail
                 </div>
 
                 <div id="Negotiate" class="tabcontent">
-                    <div class="section-header" field="call_negotiate_status">
+                    <div class="section-header">
                     <h4>Make Call and Negotiate</h4>
-                    <select onchange="PostStatus(this)" name="call_negotiate_status">
+                    <select onchange="PostStatus(this, 'call_negotiate_status', this.id)" id="call_status">
                         <option value="not_assigned" {% if status_instance.find_contact_status == "not_assigned" %}selected{% endif %}>Not Assigned</option>
                         <option value="assigned" {% if status_instance.find_contact_status == "assigned" %}selected{% endif %}>Assigned</option>
                         <option value="completed" {% if status_instance.find_contact_status == "completed" %}selected{% endif %}>Completed</option>

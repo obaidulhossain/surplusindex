@@ -331,7 +331,7 @@ class Status(models.Model):
     find_contact_notes = models.CharField(max_length=255, blank=True)
     
     
-    call_negotiate_status = models.CharField(max_length=255, blank=True)
+    call_negotiate_status = models.CharField(max_length=255, choices=CONTACTSTATUS, blank=True)
     call_negotiate_comment = models.TextField(max_length=500, blank=True)
     follow_up_status = models.CharField(max_length=255, blank=True)
     follow_up_comment = models.TextField(max_length=500, blank=True)

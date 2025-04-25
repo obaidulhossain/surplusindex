@@ -139,10 +139,9 @@ function confirmExport() {
 }
 
 
-function PostStatus(select) {
-    const row = select.closest('div');
-    const statusSelected = row.querySelector('.call_status').value;
-    const field = row.getAttribute('field');
+function PostStatus(select, field, status) {
+    const statusSelected = document.getElementById(status).value;
+    const update_field = field;
     const StatusID = document.getElementById('statusID').value;
 
 
@@ -150,7 +149,7 @@ function PostStatus(select) {
     const updatedData = {
         Status_id: StatusID,
         selected_status: statusSelected,
-        status_for: field,
+        status_for: update_field,
     };
 
     // Send data to the server using fetch
