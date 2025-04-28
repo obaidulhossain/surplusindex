@@ -167,8 +167,8 @@ def defendant_search(request):
     middle = request.GET.get('middle', '')
     last = request.GET.get('last', '')
     suffix = request.GET.get('suffix', '')
-    business = request.GET.get('business', '')
-    designation = request.GET.get('designation', '')
+    business = request.GET.get('business_def', '')
+    designation = request.GET.get('designation_def', '')
     
     defendant = Contact.objects.all()
     if prefix:
@@ -583,7 +583,8 @@ def filter_contact(request):
         middlename = request.GET.get('m_name','')
         lastname = request.GET.get('l_name','')
         suffix = request.GET.get('suffix','')
-        business = request.GET.get('business','')
+        business = request.GET.get('b_name','')
+        designation = request.GET.get('b_desig','')
         
         contact = Contact.objects.all()
         if prefix:
@@ -598,6 +599,9 @@ def filter_contact(request):
             contact = contact.filter(name_suffix__icontains=suffix)
         if business:
             contact = contact.filter(business_name__icontains=business)
+        if designation:
+            contact = contact.filter(designation__icontains=designation)
+
         results = []
         for con in contact:
             mailing_addresses = []

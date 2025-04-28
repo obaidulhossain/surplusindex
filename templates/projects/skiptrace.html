@@ -43,7 +43,7 @@ Skiptracing
             <input type="text" name="suffix" id="suffix" placeholder="Suffix" value="{{current_con_instance.suffix}}"></br>
             <label>Business Name</label><br>
             <input type="text" style="width:600px;" name="b_name" id="b_name" placeholder="Business Name" value="{{current_con_instance.business_name}}">
-            <input type="text" name="designation" id="designation" placeholder="Designation" value="{{current_con_instance.designation}}">              
+            <input type="text" name="designation" id="b_desig" placeholder="Designation" value="{{current_con_instance.designation}}">              
             <input type="submit" style="margin-top:20px;" value="{% if contact_selected == "" %}Create Contact Instance{% else %}Update Contact{% endif %}">
         </form>
     </div>
@@ -72,6 +72,7 @@ Skiptracing
             const lName = $('#l_name').val();
             const suffix = $('#suffix').val();
             const business = $('#b_name').val();
+            const desig = $('#b_desig').val();
 
             $.ajax({
                 url: "{% url 'filter-con' %}",
@@ -82,6 +83,7 @@ Skiptracing
                     l_name: lName,
                     suffix: suffix,
                     b_name: business,
+                    b_desig: desig,
                 },
                 success: function (data) {
                     const contact = data.contact;
@@ -119,7 +121,7 @@ Skiptracing
             });
         }
         // Trigger AJAX call on input change
-        $('#prefix, #f_name, #m_name, #l_name, #suffix, #b_name').on('input', conResults);
+        $('#prefix, #f_name, #m_name, #l_name, #suffix, #b_name, #b_desig',).on('input', conResults);
     });
 </script>
 
