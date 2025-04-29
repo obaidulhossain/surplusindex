@@ -386,7 +386,11 @@ def address_search(request):
     street = request.GET.get('street', '')
     sttype = request.GET.get('sttype', '')
 
-    address = Property.objects.all()
+    if not any([parcel, state, county, house, street, sttype]):
+        address = Property.objects.all()[:0]
+    else:
+        address = Property.objects.all()
+    #address = Property.objects.all()
     if parcel:
         address = address.filter(parcel__icontains=parcel)
     if state:
@@ -586,7 +590,10 @@ def filter_contact(request):
         business = request.GET.get('b_name','')
         designation = request.GET.get('b_desig','')
         
-        contact = Contact.objects.all()
+        if not any([prefix, firstname, middlename, lastname, suffix, business, designation]):
+            contact = Contact.objects.all()[:0]
+        else:
+            contact = Contact.objects.all()
         if prefix:
             contact = contact.filter(name_prefix__icontains=prefix)
         if firstname:
@@ -744,9 +751,12 @@ def search_create_email(request):
 
 def filterEmail(request):
     emailaddress = request.GET.get('email')
+
     emails = Email.objects.all()
     if emailaddress:
         emails = emails.filter(email_address__icontains=emailaddress)
+    else:
+        emails = Email.objects.all()[:0]
     results = list(emails.values('id', 'email_address'))
     return JsonResponse({'emails':results})
 
@@ -810,6 +820,8 @@ def filterWireless(request):
     wireless = Wireless_Number.objects.all()
     if w_number:
         wireless = wireless.filter(w_number__icontains=w_number)
+    else:
+        wireless = Wireless_Number.objects.all()[:0]
     results = list(wireless.values('id', 'w_number'))
     return JsonResponse({'wireless':results})
 
@@ -873,6 +885,8 @@ def filterLandline(request):
     landline = Landline_Number.objects.all()
     if l_number:
         landline = landline.filter(l_number__icontains=l_number)
+    else:
+        landline = Landline_Number.objects.all()[:0]
     results = list(landline.values('id', 'l_number'))
     return JsonResponse({'landline':results})
 
@@ -898,9 +912,12 @@ def filter_related_contact(request):
     middlename = request.GET.get('rc_middle','')
     lastname = request.GET.get('rc_last','')
     suffix = request.GET.get('rc_suffix','')
-    related_contact = request.POST.get('related_contact','')
+    otherquery = request.GET.get('search_query','')
     
-    contact = Contact.objects.all()
+    if not any([prefix, firstname, middlename, lastname, suffix, otherquery]):
+        contact = Contact.objects.all()[:0]
+    else:
+        contact = Contact.objects.all()
     if prefix:
         contact = contact.filter(name_prefix__icontains=prefix)
     if firstname:
@@ -911,6 +928,10 @@ def filter_related_contact(request):
         contact = contact.filter(last_name__icontains=lastname)
     if suffix:
         contact = contact.filter(name_suffix__icontains=suffix)
+    if otherquery:
+        if len(contact.filter(business_name__icontains=otherquery)) > 0:
+            contact = contact.filter(business_name__icontains=otherquery)
+        # elif contact.filter(business_name__icontains=otherquery).count > 0:
     
     results = []
     for con in contact:

@@ -658,6 +658,7 @@ Skiptracing
             const rc_middle = $('#rc_middle').val();
             const rc_last = $('#rc_last').val();
             const rc_suffix = $('#rc_suffix').val();
+            const search_query = $('#search_query').val();
             
 
             $.ajax({
@@ -668,6 +669,7 @@ Skiptracing
                     rc_middle: rc_middle,
                     rc_last: rc_last,
                     rc_suffix: rc_suffix,
+                    search_query: search_query,
                     
                 },
                 success: function (data) {
@@ -707,7 +709,7 @@ Skiptracing
             });
         }
         // Trigger AJAX call on input change
-        $('#rc_prefix, #rc_first, #rc_middle, #rc_last, #rc_suffix').on('input', rcresults);
+        $('#rc_prefix, #rc_first, #rc_middle, #rc_last, #rc_suffix, #search_query').on('input', rcresults);
     });
 </script>
 {% endif %}
