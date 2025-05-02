@@ -60,7 +60,10 @@ def filter_foreclosure(request):
     sale_type = request.GET.get('sale_type','')
     sale_status = request.GET.get('sale_status','')
 
-    foreclosure = Foreclosure.objects.all()
+    if not any([state, county, case_num, sale_type, sale_status]):
+        foreclosure = Foreclosure.objects.all()[:0]
+    else:
+        foreclosure = Foreclosure.objects.all()
     if state:
         foreclosure = foreclosure.filter(state__icontains=state)
     if county:
@@ -169,8 +172,12 @@ def defendant_search(request):
     suffix = request.GET.get('suffix', '')
     business = request.GET.get('business_def', '')
     designation = request.GET.get('designation_def', '')
-    
-    defendant = Contact.objects.all()
+
+    if not any([prefix, first, middle, last, suffix, business, designation]):
+        defendant = Contact.objects.all()[:0]    
+    else:
+        defendant = Contact.objects.all()
+        
     if prefix:
         defendant = defendant.filter(name_prefix__icontains=prefix)
     if first:
@@ -291,8 +298,12 @@ def plaintiff_search(request):
     business = request.GET.get('business_name', '')
     dba = request.GET.get('dba', '')
     contact = request.GET.get('contact_name', '')
-    
-    plaintiff = ForeclosingEntity.objects.all()
+
+    if not any([business, dba, contact]):
+        plaintiff = ForeclosingEntity.objects.all()[:0]
+    else:
+        plaintiff = ForeclosingEntity.objects.all()
+
     if business:
         plaintiff = plaintiff.filter(business_name__icontains=business)
     if dba:
