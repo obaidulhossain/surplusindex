@@ -159,6 +159,7 @@ New Leads
                     <th>Sold for</th>
                     <th>Ps Surplus</th>
                     <th>Vf Surplus</th>
+                    <th>Surplus Status</th>
                     <th>Defendants</th>
                     <th>CS Status</th>
                     
@@ -184,6 +185,7 @@ New Leads
                         <td>{{Lead.sale_price|currency}}</td>
                         <td>{{Lead.possible_surplus|currency}}</td>
                         <td>{{Lead.verified_surplus|currency}}</td>
+                        <td>{{Lead.surplus_status|title}}</td>
                         <td>
                             {% for def in Lead.defendant.all %}        
                             <span {% if def.skiptraced == False %}style="color: red;"{% endif %}>{% if def.business_name == "" %}{{def.name_prefix}} {{def.first_name}} {{def.middle_name}} {{def.last_name}} {{def.name_suffix}}{% else %}{{def.business_name}}{% endif %}</span>,
