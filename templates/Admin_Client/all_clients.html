@@ -60,7 +60,7 @@ Clients
                 {% for group in client.user.groups.all %}
                 {% if 'clients' in group.name %}
                     {% comment %} {% for order in client.orders.all %} {% endcomment %}
-                    <tr>
+                    <tr class="{% if client.created_at|date:"Y-m-d" == today_date|date:"Y-m-d" %}highlight-today{% elif client.created_at|date:"Y-m-d" >= today_date|add:"-3 days"|date:"Y-m-d" %}highlight-recent{% endif %}">
                         <td>{{client.user.id}}</td>
                         <td>{{client.created_at|date:"m/d/Y"}}</td>
                         <td>{{client.user.first_name}} {{client.user.last_name}}</td>
@@ -121,7 +121,8 @@ Clients
                 {% for client in clients %}
                 {% for group in client.user.groups.all %}
                 {% if 'clients' in group.name %}
-                    <tr>
+                    
+                    <tr class="{% if client.created_at|date:"Y-m-d" == today_date|date:"Y-m-d" %}highlight-today{% elif client.created_at|date:"Y-m-d" >= today_date|add:"-3 days"|date:"Y-m-d" %}highlight-recent{% endif %}">
                         <td>{{client.user.id}}</td>
                         <td>{{client.created_at|date:"m/d/Y"}}</td>
                         <td>{{client.user.first_name}} {{client.user.last_name}}</td>

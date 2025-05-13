@@ -243,15 +243,16 @@ def updateDeliveryStatus(request):
 
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
-
+from datetime import date
 def allClients(request):
+    today_date = date.today()
     if request.method == 'POST':
         selectedClientType = request.POST.get('clientType','')
     else:
         selectedClientType = request.GET.get('clientType','')
 
 
-    client_queryset = UserDetail.objects.all().prefetch_related('orders', 'orders__deliveries')
+    client_queryset = UserDetail.objects.all().order_by('-created_at').prefetch_related('orders', 'orders__deliveries')
     if selectedClientType == 'manual_client':
         client_queryset = client_queryset.filter(user_type='manual_client')
     else:
@@ -278,7 +279,7 @@ def allClients(request):
     context = {
         'selectedClientType':selectedClientType,
         'clients':clients,
-
+        'today_date':today_date,
         'second_previous':second_previous,
     }
     return render(request, 'Admin_Client/all_clients.html', context)

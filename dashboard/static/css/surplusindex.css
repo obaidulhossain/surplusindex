@@ -277,7 +277,15 @@ table.table tr td {
 }
 
 
+.highlight-today table tbody tr td {
+    background-color: #96ff76;
+    color: rgb(0, 0, 0);
+}
 
+.highlight-recent table tbody tr td {
+    background-color: #d8fa9c;
+    color: black;
+}
 
 
 
