@@ -27,7 +27,7 @@ class UserDetail(Timelogger):
         )
     user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True, related_name='credits')
     phone = models.CharField(max_length=17, blank=True)
-    user_type = models.CharField(max_length=100, choices=CL_TYPE, null=True, blank=True, default="SI Client")
+    user_type = models.CharField(max_length=100, choices=CL_TYPE, null=True, blank=True, default="si_client")
     orders = models.ManyToManyField('Admin_Client.Orders', blank=True)
     stripe_customer_id = models.CharField(max_length=255, blank=True, null=True)
     free_credit_balance = models.IntegerField(default=20)
