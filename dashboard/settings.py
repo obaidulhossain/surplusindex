@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'Admin_Client',
     'Client',
     'DA',
+    'Assistance',
 ]
 
 MIDDLEWARE = [

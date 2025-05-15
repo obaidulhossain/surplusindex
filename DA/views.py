@@ -40,7 +40,7 @@ def caseChecklist(request):
     elif status == "completed":
         leads_queryset = leads_queryset.filter(case_search_status="completed")
     elif status == "verified":
-        leads_queryset = leads_queryset.filter(case_search_status="verified", changed_at__lt=now().date() - timedelta(days=7)).exclude(surplus_status='FUND_CLAIMED').exclude(surplus_status='NO_SURPLUS').exclude(sale_status='CANCELLED')
+        leads_queryset = leads_queryset.filter(case_search_status="verified", changed_at__lt=now().date() - timedelta(days=7)).exclude(surplus_status='fund claimed').exclude(surplus_status='no surplus').exclude(sale_status='cancelled')
     
     states = leads_queryset.values_list("state", flat=True).distinct()
     counties=leads_queryset.values_list("county", flat=True).distinct()

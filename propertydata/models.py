@@ -217,7 +217,7 @@ class Foreclosure(OperationStat):
     )
 
     ACTIVE = 'pending'
-    SOLD = 'completed'
+    SOLD = 'sold'
     CANCELLED = 'cancelled'
     SALE_STATUS = (
         (ACTIVE, 'Active'),

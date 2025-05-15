@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    
     path('leads/', views.availableLeads, name="leads"),
     path('purchaseLeads', views.purchaseLeads, name="purchaseLeads"),
     path('hide-leads', views.hidefromallLeads, name="hide-leads"),
@@ -17,7 +18,7 @@ urlpatterns = [
 
     path('export_filtered_data', views.export_data, name="export_filtered_data"),
     path('export_mylead', views.exportMyleads, name="export_mylead"),
-
+    
     
 
 ]
