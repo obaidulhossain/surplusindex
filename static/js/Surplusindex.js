@@ -96,6 +96,51 @@ phoneInput.addEventListener('input', (e) => {
     e.target.value = formatted;
 });
 
+function markasNotfound(button) {
+    const conId = document.querySelector('.markas_notfound').value;
+
+    // Prepare data for updating
+    const updatedData = {
+        id: conId,
+    };
+
+    // Send data to the server using fetch
+    fetch('/markas_notfound/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                button.innerText = "Marked"
+                button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                button.style.backgroundColor = "#fe8420"; // Green background
+                button.style.color = "#fff"; // White text
+
+                // Reset the button after a short delay
+                setTimeout(() => {
+                    button.disabled = disabled
+                    button.style.backgroundColor = ""; // Reset to original background
+                    button.style.color = ""; // Reset to original text color
+                }, 1500); // Reset after 1.5 seconds
+            } else {
+                // Show error message box
+                alert("Failed to mark as not found: " + (data.message || "Unknown error"));
+            }
+
+
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving. Please try again.");
+        });
+}
+
 
 function saveCasesearchstatus(select) {
     const row = select.closest('tr');
@@ -122,7 +167,7 @@ function saveCasesearchstatus(select) {
         .then(data => {
             if (data.status === 'success') {
                 select.style.transition = "background-color 0.3s ease, color 0.3s ease";
-                select.style.backgroundColor = "#f66"; // Green background
+                select.style.backgroundColor = "#4CAF50"; // Green background
                 select.style.color = "#fff"; // White text
 
                 // Reset the button after a short delay

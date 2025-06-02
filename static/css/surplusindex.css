@@ -68,6 +68,14 @@ label {
     max-width: 99%;
 }
 
+.boxed-filter {
+    background-color: #d6d6d6;
+    padding: 20px;
+    border: 1px solid #b6b6b6;
+    border-radius: 9px;
+    margin: 10px;
+}
+
 .onehalf {
     width: 48%;
     display: inline-block;
@@ -75,7 +83,13 @@ label {
 }
 
 .onethird {
-    width: 33%;
+    width: 31%;
+    display: inline-block;
+    vertical-align: top;
+}
+
+.twothird {
+    width: 66%;
     display: inline-block;
     vertical-align: top;
 }
@@ -263,7 +277,15 @@ table.table tr td {
 }
 
 
+.highlight-today table tbody tr td {
+    background-color: #96ff76;
+    color: rgb(0, 0, 0);
+}
 
+.highlight-recent table tbody tr td {
+    background-color: #d8fa9c;
+    color: black;
+}
 
 
 
@@ -403,8 +425,9 @@ button:disabled:hover {
 }
 
 .instruction {
-    margin: 10px;
-    width: 100%;
+    margin: 5px;
+    width: 98%;
+    padding: 10px;
     border: 1px solid black;
     background-color: beige;
 }

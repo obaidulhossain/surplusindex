@@ -133,9 +133,7 @@ Clients
                         <td>{{client.purchased_credit_balance}}</td>
                         <td>{{client.Total_credits}}</td>
                         <td>{{client.changed_at|date:"m/d/Y"}}</td>
-                        <td>
-                            <button onclick="">View</button>
-                        </td>
+                        <td><a class="button" href="/client_detail/?client={{client.id}}">View</a></td>
                     </tr>
             
                 {% endif %}

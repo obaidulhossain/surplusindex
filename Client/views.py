@@ -373,6 +373,37 @@ def updateStatus(request):
 
     return HttpResponseRedirect(f"/leads-detail/?status_id={status_instance.pk}")
 
+
+@csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
+def updateArchived(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+          
+            StatusID = data.get('Status_id')
+            
+            # Fetch the corresponding event object from the database
+            status_instance = Status.objects.get(id=StatusID)
+
+            if status_instance.archived == True:
+                status_instance.archived = False
+            else:
+                status_instance.archived = True
+            status_instance.save()
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+        except Status.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Status not found.'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def updateStatus_ajax(request):
     if request.method == 'POST':
@@ -391,7 +422,7 @@ def updateStatus_ajax(request):
                 # Dynamically set the value for the field
                 setattr(status_instance, StatusFor, SelectedStatus)
                 status_instance.save()
-
+        
 
 
             # status_instance.StatusFor = SelectedStatus

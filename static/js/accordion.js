@@ -1,3 +1,9 @@
+function selectTab(tabid) {
+    document.getElementById(tabid).click();
+}
+
+
+
 function openCity(evt, cityName) {
     var i, tabcontent, tablinks;
     tabcontent = document.getElementsByClassName("tabcontent");

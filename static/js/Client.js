@@ -1,93 +1,52 @@
 
-
-// $(document).ready(function () {
-//     var checkbox = $('table tbody tr input[type="checkbox"]');
-//     $("#selectAll").click(function () {
-//         if (this.checked) {
-//             checkbox.each(function () {
-//                 this.checked = true;
-//             });
-//         } else {
-//             checkbox.each(function () {
-//                 this.checked = false;
-//             });
-//         }
-//     });
-//     checkbox.click(function () {
-//         if (!this.checked) {
-//             $("#selectAll").prop("checked", false);
-//         }
-//     });
-// })
-
-// function updateDatabase() {
-//     const checkboxes = document.querySelectorAll('.checkbox:checked');
-//     const selectedIds = Array.from(checkboxes).map(checkbox => checkbox.value);
-
-//     if (selectedIds.length === 0) {
-//         alert('No rows selected.');
-//         return;
-//     }
-
-//     fetch("{% url 'update-leads' %}", {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json',
-//             'X-CSRFToken': '{{ csrf_token }}'
-//         },
-//         body: JSON.stringify({ selected_ids: selectedIds })
-//     })
-//         .then(response => response.json())
-//         .then(data => {
-//             if (data.success) {
-//                 alert('Database updated successfully.');
-//                 location.reload();
-//             } else {
-//                 alert('Error updating database.');
-//             }
-//         })
-//         .catch(error => {
-//             console.error('Error:', error);
-//             alert('An error occurred.');
-//         });
-// }
+function UpdateStatus(select) {
+    // const row = select.closest('div');
+    // const rowId = row.getAttribute('data-id');
+    const StatusID = document.getElementById('statusID').value;
+    const SelectedStatus = document.getElementById('Pros_Status').value;
+    const StatusFor = document.getElementById('Pros_Status').getAttribute('for');
 
 
+    // Prepare data for updating
+    const updatedData = {
+        Status_id: StatusID,
+        selected_status: SelectedStatus,
+        status_for: StatusFor,
+    };
 
+    // Send data to the server using fetch
+    fetch('/updateStatus_ajax/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                select.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                select.style.backgroundColor = "#4CAF50"; // Green background
+                select.style.color = "#fff"; // White text
 
+                // Reset the select after a short delay
+                setTimeout(() => {
 
-
-
-
-
-// function updateButtonStates() {
-//     // Get all checkboxes within the table
-//     const checkboxes = document.querySelectorAll('.checkbox');
-//     const selectedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
-
-//     // Update the count of selected checkboxes
-//     const selectedCount = selectedCheckboxes.length;
-//     document.getElementById('selected-count').textContent = selectedCount;
-//     document.getElementById('selected-count-hide').textContent = selectedCount;
-//     // document.getElementById('selected-count-archive').textContent = selectedCount;
-
-//     // Enable or disable buttons based on selection
-//     document.getElementById('add-button').disabled = selectedCount === 0;
-//     document.getElementById('hide-button').disabled = selectedCount === 0;
-//     // document.getElementById('archive-button').disabled = selectedCount === 0;
-// }
-
-// // Attach event listeners to checkboxes
-// document.addEventListener('DOMContentLoaded', () => {
-//     const checkboxes = document.querySelectorAll('.checkbox');
-//     checkboxes.forEach(checkbox => {
-//         checkbox.addEventListener('change', updateButtonStates);
-//     });
-
-//     // Also initialize button states on page load
-//     updateButtonStates();
-// });
-
+                    select.style.backgroundColor = ""; // Reset to original background
+                    select.style.color = ""; // Reset to original text color
+                }, 1500); // Reset after 1.5 seconds
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
+}
 
 
 
@@ -177,4 +136,52 @@ function confirmExport() {
     // Show the confirmation dialog with the count of selected leads
     const message = `Are you sure you want to Export ${selectedLeads} selected leads?`;
     return confirm(message); // Returns true if OK is clicked, false otherwise
+}
+
+
+function PostStatus(select, field, status) {
+    const statusSelected = document.getElementById(status).value;
+    const update_field = field;
+    const StatusID = document.getElementById('statusID').value;
+
+
+    // Prepare data for updating
+    const updatedData = {
+        Status_id: StatusID,
+        selected_status: statusSelected,
+        status_for: update_field,
+    };
+
+    // Send data to the server using fetch
+    fetch('/updateStatus_ajax/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                select.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                select.style.backgroundColor = "#4CAF50"; // Green background
+                select.style.color = "#fff"; // White text
+
+                // Reset the select after a short delay
+                setTimeout(() => {
+
+                    select.style.backgroundColor = ""; // Reset to original background
+                    select.style.color = ""; // Reset to original text color
+                }, 1500); // Reset after 1.5 seconds
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
 }

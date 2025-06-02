@@ -278,6 +278,25 @@ class Foreclosure(OperationStat):
 
 
 class Status(models.Model):
+    NEED_TO_CALL = 'need_to_call'
+    RESPONDED = 'responded'
+    NOT_RESPONDED = 'not_responded'
+    RE_SKIPTRACE = 're_skiptrace'
+    CN_STATUS = (
+        (NEED_TO_CALL, 'Need to Call'),
+        (RESPONDED, 'Responded'),
+        (NOT_RESPONDED, 'Not Responded'),
+        (RE_SKIPTRACE, 'Re Skiptrace'),
+    )
+    INTERESTED = 'interested'
+    NOT_INTERESTED = 'not_interested'
+    NOT_SURE = 'not_sure'
+    NG_STATUS = (
+        (INTERESTED, 'Interested'),
+        (NOT_INTERESTED, 'Not Interested'),
+        (NOT_SURE, 'Not Sure'),
+    )
+
     NOT_SIGNED = 'not signed'
     AGREEMENT_MAILED = 'agreement mailed'
     AGREEMENT_SIGNED = 'agreement signed'
@@ -310,8 +329,9 @@ class Status(models.Model):
 
     client = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name='user_as_client', default=1)
     lead = models.ForeignKey(Foreclosure, blank=True, related_name='foreclosure_as_lead', on_delete=models.CASCADE, default=1)
-    
-    call_status = models.CharField(max_length=255, blank=True, default='Need to Call')
+    call_status = models.CharField(max_length=255, blank=True, choices=CN_STATUS, default='NEED_TO_CALL')
+    negotiation_status = models.CharField(max_length=255, blank=True, choices=NG_STATUS)
+
     call_comment = models.TextField(max_length=500, blank=True)
     agreement_status = models.CharField(max_length=255, blank=True, choices=AG_STATUS, default='Not Signed')
     agreement_comment = models.TextField(max_length=500, blank=True)

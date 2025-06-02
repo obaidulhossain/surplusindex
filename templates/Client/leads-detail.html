@@ -106,9 +106,9 @@ Leads Detail
             <div class="tab">
                 <button class="tablinks" onclick="openCity(event, 'Skiptrace')" id="defaultOpen">Find The Right Contact</button>
                 <button class="tablinks" onclick="openCity(event, 'Negotiate')">Call and Negotiate</button>
-                <button class="tablinks" onclick="openCity(event, 'Followup')">Follow Up</button>
-                <button class="tablinks" onclick="openCity(event, 'Agreement')">Do the Paperwork</button>
-                <button class="tablinks" onclick="openCity(event, 'Confirm')">Confirm Fund</button>
+                <button class="tablinks" onclick="openCity(event, 'Followup')" id="followUps">Follow Up</button>
+                <button class="tablinks" onclick="openCity(event, 'Agreement')" id="closedeal">Close The Deal</button>
+                <button class="tablinks" onclick="openCity(event, 'Confirm')">Action Timeline</button>
                 <button class="tablinks" onclick="openCity(event, 'Submit')">Submit Paperwork</button>
                 <button class="tablinks" onclick="openCity(event, 'Wait')">Waiting for Approval</button>
                 <button class="tablinks" onclick="openCity(event, 'Collect')">Collect Percentage</button>
@@ -180,29 +180,80 @@ Leads Detail
                 <div id="Negotiate" class="tabcontent">
                     <div class="section-header">
                     <h4>Make Call and Negotiate</h4>
-                    <select onchange="PostStatus(this, 'call_negotiate_status', this.id)" id="call_status">
+                    {% comment %} <select onchange="PostStatus(this, 'call_negotiate_status', this.id)" id="call_status">
                         <option value="not_assigned" {% if status_instance.find_contact_status == "not_assigned" %}selected{% endif %}>Not Assigned</option>
                         <option value="assigned" {% if status_instance.find_contact_status == "assigned" %}selected{% endif %}>Assigned</option>
                         <option value="completed" {% if status_instance.find_contact_status == "completed" %}selected{% endif %}>Completed</option>
                         <option value="verified" {% if status_instance.find_contact_status == "verified" %}selected{% endif %}>Verified</option>
-                    </select>
+                    </select> {% endcomment %}
                     </div>
                     <div class="section-body-full">
                         <div class="instruction">
-                        <p>This feature will arrive soon! Thank your for your patience.</p>
+                        <p>Update call and response status here in the respective fields.</p>
+                        </div>
+                        <div class="onehalf">
+                        <div class="section-header" style="margin-top:20px;">
+                        <h4>{% if status_instance.first_contact_name %}{{status_instance.first_contact_name}}{% else %}Contact person 1 (NA){% endif %}</h4>
+                        <div>
+                            {% if status_instance.first_contact_email %}<a href="mailto:{{status_instance.first_contact_email}}" class="button"><i class="bi bi-envelope"></i><a/>{% endif %}
+                            {% if status_instance.first_contact_phone %}<a href="tel:+1{{status_instance.first_contact_phone}}" class="button"><i class="bi bi-telephone"></i><a/>{% endif %}
+                        </div>
+                        </div>
+                        <div class="section-body-full" style="text-align: justify;">
+                            <h6>Phone: {{status_instance.first_contact_phone}}</h6>
+                            <h6>Email: {{status_instance.first_contact_email}}</h6>  
                         </div>
                     </div>
-                    <h3></h3>
-                    <p></p> 
-                </div>
+                    <div class="onehalf">
+                        <div class="section-header" style="margin-top:20px;">
+                        <h4>{% if status_instance.second_contact_name %}{{status_instance.second_contact_name}}{% else %}Contact person 2 (NA){% endif %}</h4>
+                        <div>
+                            {% if status_instance.second_contact_email %}<a href="mailto:{{status_instance.second_contact_email}}" class="button"><i class="bi bi-envelope"></i><a/>{% endif %}
+                            {% if status_instance.second_contact_phone %}<a href="tel:+1{{status_instance.second_contact_phone}}" class="button"><i class="bi bi-telephone"></i><a/>{% endif %}
+                        </div>
+                        </div>
+                        <div class="section-body-full" style="text-align: justify;">
+                            <h6>Phone: {{status_instance.second_contact_phone}}</h6>
+                            <h6>Email: {{status_instance.second_contact_email}}</h6>
+                            
+                        </div>
 
+                    </div>
+                    <div style="margin-top:20px; text-align-last:left;">
+                    <label for"CN_status" style="width:200px;">Call Status</label>
+                    <select onchange="PostStatus(this, 'call_status', this.id)" id="CN_status" style="width:350px;">
+                        <option value="need_to_call" {% if status_instance.call_status == "need_to_call" %}selected{% endif %}>Need To Call</option>
+                        <option value="responded" {% if status_instance.call_status == "responded" %}selected{% endif %}>Call Responded</option>
+                        <option value="not_responded" {% if status_instance.call_status == "not_responded" %}selected{% endif %}>No Response</option>
+                        <option value="re_skiptrace" {% if status_instance.call_status == "re_skiptrace" %}selected{% endif %}>Skiptrace Again</option>
+                    </select>
+                    </div>
+                    <div id="Negotiation_Status" style="{% if not status_instance.call_status == "responded" %}display:none;{% endif %} margin-top:20px; text-align-last:left;">
+                        <label style="width:200px;">Negotiation Status</label>
+                        <select onchange="PostStatus(this, 'negotiation_status', this.id)" id="NG_status" style="width:350px;">
+                            <option value="" {% if status_instance.negotiation_status == "" %}selected{% endif %}>Select Negotiation Status</option>
+                            <option id="interested" value="interested" {% if status_instance.negotiation_status == "interested" %}selected{% endif %}>Interested in Service Agreement</option>
+                            <option value="not_interested" {% if status_instance.negotiation_status == "not_interested" %}selected{% endif %}>Not Interested</option>
+                            <option value="not_sure" {% if status_instance.negotiation_status == "not_sure" %}selected{% endif %}>Not Sure (Follow Up)</option>
+                        </select>
+                    </div>
+                    <div id="Action_Archive_Case" style="display: none; margin: 20px 0px 0px 205px; text-align-last: left;">
+                    <button id="archivebtn" class="button" type="button" style="width:350px;" onclick="Archive(this)">{% if status_instance.archived == False %}Archive Case{% else %}Unarchive Case{% endif %}</button>
+                    </div>
+                    <div id="Action_FollowUp" style="display: none; margin: 20px 0px 0px 205px; text-align-last: left;">
+                    <button class="button" type="button" style="width:350px;" onclick="selectTab('followUps')">Follow Up</button>
+                    </div>
+                    
+                    
+                </div>
                 <div id="Followup" class="tabcontent">
                     <h3>Follow Up</h3>
                     <p>This feature will arrive soon! Thank your for your patience.</p> 
                 </div>
                 <div id="Agreement" class="tabcontent">
-                    <h3>Do the Paperword</h3>
-                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+                    <h3>Close The Deal</h3>
+                    <p>This feature will arrive soon! Thank your for your patience.</p>
+
                 </div>
                 <div id="Confirm" class="tabcontent">
                     <h3>Confirm Fund</h3>
@@ -227,7 +278,53 @@ Leads Detail
     </div>   
     </div>
 </div>
+<script>
+    // Get references to the select elements
+    const firstSelect = document.getElementById('CN_status');
+    const secondSelect = document.getElementById('Negotiation_Status');
+    const selected_interested = document.getElementById('NG_status');
+    const close_deals = document.getElementById('closedeal');
+    const follow_up = document.getElementById('followUps');
+    const SkiptraceTab = document.getElementById('defaultOpen');
+    const archive_case = document.getElementById('Action_Archive_Case');
+    const FollowUp = document.getElementById('Action_FollowUp');
+    
+    
+    function selectTab(tabid) {
+        document.getElementById(tabid).click();
+    }
 
+    selected_interested.addEventListener('change', function (){
+        if (this.value === 'interested') {
+            close_deals.click();
+        } else if (this.value === 'not_interested') {
+            archive_case.style.display = 'block';
+            FollowUp.style.display = 'none';
+        } else if (this.value === 'not_sure') {
+            archive_case.style.display = 'block';
+            FollowUp.style.display = 'block';
+        } else {
+            archive_case.style.display = 'none';
+            FollowUp.style.display = 'none';
+        }
+    });
+    // Add an event listener to the first select element
+    firstSelect.addEventListener('change', function () {
+    if (this.value === 'responded') {
+        secondSelect.style.display = 'block';
+        archive_case.style.display = 'none';
+        FollowUp.style.display = 'none';
+    } else if (this.value === 'not_responded') {
+        archive_case.style.display = 'block';
+        FollowUp.style.display = 'block';
+        secondSelect.style.display = 'none';
+    } else if (this.value === 're_skiptrace') {
+        SkiptraceTab.click();
+    } else {
+        secondSelect.style.display = 'none';
+        }
+    });
+</script>
 
 
 </br>

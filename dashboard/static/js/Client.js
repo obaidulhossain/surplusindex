@@ -137,7 +137,53 @@ function confirmExport() {
     const message = `Are you sure you want to Export ${selectedLeads} selected leads?`;
     return confirm(message); // Returns true if OK is clicked, false otherwise
 }
+function Archive(button) {
+    const StatusID = document.getElementById('statusID').value;
+    const buttonInnerText = document.getElementById('archivebtn').innerText
+    const StatusId = {
+        Status_id: StatusID,
+    };
+    fetch('/updateArchived/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(StatusId)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                button.style.backgroundColor = "#4CAF50"; // Green background
+                button.style.color = "#fff"; // White text
+                if (buttonInnerText === 'Archive Case') {
+                    button.innerText = "Archived";
+                } else {
+                    button.innerText = "Unarchived";
+                }
 
+                // Reset the button after a short delay
+                setTimeout(() => {
+                    if (buttonInnerText === 'Archive Case') {
+                        button.innerText = "Unarchive Case";
+                    } else {
+                        button.innerText = "Archive Case";
+                    }
+                    button.style.backgroundColor = ""; // Reset to original background
+                    button.style.color = ""; // Reset to original text color
+                }, 1500); // Reset after 1.5 seconds
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
+}
 
 function PostStatus(select, field, status) {
     const statusSelected = document.getElementById(status).value;
@@ -185,4 +231,3 @@ function PostStatus(select, field, status) {
             alert("An error occurred while saving the row. Please try again.");
         });
 }
-
