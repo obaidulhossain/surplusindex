@@ -13,13 +13,21 @@ urlpatterns = [
 
     path('myleads/', views.myLeads, name="myleads"),
     path('leads-detail/', views.leadsDetail, name="leads-detail"),
-    path('update_status', views.updateStatus, name="update_status"),
+    path('update_contact', views.updateContact, name="update_contact"), #delete when not used
     path('updateStatus_ajax/', views.updateStatus_ajax, name="updateStatus_ajax"),
+    path('updateText/', views.UpdateText, name="updateText"),
     path('updateArchived/', views.updateArchived, name="updateArchived"),
+
+
 
     path('export_filtered_data', views.export_data, name="export_filtered_data"),
     path('export_mylead', views.exportMyleads, name="export_mylead"),
     
-    
+    path('createFollowup/', views.createFollowup, name="createFollowup"),
+    path('update-followup-status/', views.updateFstatus, name="updateFstatus"),
+    path('save-followup-details/', views.saveFDetails, name="saveFDetails"),
+    path('updateCLStatus/', views.update_CLStatus, name="update_CLStatus"),
 
+    path('cd-addnotes', views.CloseDealNote, name="cd-addnotes"),
+    path('updated_closed', views.updatedClosed, name="updated_closed"),
 ]

@@ -50,4 +50,5 @@ body {
     width: 70%;
     border-left: none;
     height: 570px;
+    display: none;
 }

@@ -14,7 +14,7 @@ from si_user.models import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-
+from .constants import *
 
 
 def availableLeads(request):
@@ -293,20 +293,93 @@ def leadsDetail(request):
     alldef = status_instance.lead.defendant.all()
     allplt = status_instance.lead.plaintiff.all()
     alladdress = status_instance.lead.property.all()
-    
+    followups = FollowUp.objects.filter(leads=status_instance).order_by('-followup_date')
+    Actions = ActionHistory.objects.filter(lead=status_instance).order_by('-created_at')
+    CDNotes = Actions.filter(action_source = "Close Deal", action_type = "Note")
+    FCNotes = Actions.filter(action_source = "Find Contact", action_type = "Note")
     context = {
         
         'status_instance':status_instance,
         'alldef':alldef,
         'allplt':allplt,
         'alladdress':alladdress,
+        'followups':followups,
+        'actions':Actions,
+        'fcnotes':FCNotes,
+        'cdnotes':CDNotes,
 
         # 'fcl_instance':fcl_instance,
     }
     return render(request, 'Client/leads-detail.html', context)
-    
 
-def updateStatus(request):
+@csrf_exempt
+def saveFDetails(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+          
+            followupId = data.get('id')
+            notesInput = data.get('notes')
+            responseInput = data.get('response')
+
+            
+            # Fetch the corresponding event object from the database
+            f_instance = FollowUp.objects.get(id=followupId)
+            if f_instance:
+                f_instance.f_note = notesInput
+                f_instance.f_result = responseInput
+            f_instance.save()
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+        except FollowUp.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Status not found.'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+@csrf_exempt
+def updateFstatus(request):
+    
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+          
+            followupId = data.get('id')
+            newStatus = data.get('f_status')
+            
+            # Fetch the corresponding event object from the database
+            f_instance = FollowUp.objects.get(id=followupId)
+
+            if f_instance.f_status == "pending":
+                f_instance.f_status = "completed"
+            else:
+                f_instance.f_status = "pending"
+            f_instance.save()
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+        except FollowUp.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Status not found.'}, status=404)
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+
+
+
+
+def updateContact(request):
     if request.method == "POST":
         selected_status = request.POST.get('status_id')
         assigned_to = request.POST.get('assigned_to','')
@@ -404,6 +477,56 @@ def updateArchived(request):
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
+
+@csrf_exempt
+def createFollowup(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+          
+            StatusID = data.get('status_id')
+            FDate= data.get('f_date')
+            FTask = data.get('f_task')
+            user = request.user
+            # Fetch the corresponding event object from the database
+            status_instance = Status.objects.get(id=StatusID)
+
+            # Check if the field exists in the model
+            if status_instance:
+                Fcreate = FollowUp.objects.create(
+                    client = user,
+                    leads = status_instance,
+                    followup_date = FDate,
+                    f_note = FTask,
+                    f_status = "pending"
+                )
+                Fcreate.save()
+     
+            # status_instance.StatusFor = SelectedStatus
+
+            # status_instance.save()
+           # Respond with success
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+
+        except FollowUp.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Status not found.'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+
+
+
+
+
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def updateStatus_ajax(request):
     if request.method == 'POST':
@@ -414,6 +537,7 @@ def updateStatus_ajax(request):
             StatusID = data.get('Status_id')
             SelectedStatus = data.get('selected_status')
             StatusFor = data.get('status_for')
+            Section = data.get('section')
             # Fetch the corresponding event object from the database
             status_instance = Status.objects.get(id=StatusID)
 
@@ -422,7 +546,72 @@ def updateStatus_ajax(request):
                 # Dynamically set the value for the field
                 setattr(status_instance, StatusFor, SelectedStatus)
                 status_instance.save()
+            Action = ""
+            if SelectedStatus:
+                Action = SelectedStatus
+            FAction = STATUS_MAPPING.get(Action, Action)
+            user=request.user
+            Timeline_instance = ActionHistory.objects.create(
+                client = user,
+                lead = status_instance,
+                action_source = Section, #add action source dynamically
+                action_type = "Status",
+                action = FAction,
+                details = "",
+            )
+            Timeline_instance.save()
+
+
+            # status_instance.StatusFor = SelectedStatus
+
+            # status_instance.save()
+           # Respond with success
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+
+        except Status.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Status not found.'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+@csrf_exempt
+def UpdateText(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+          
+            StatusID = data.get('Status_id')
+            StatusFor = data.get('status_for')
+            TextValue = data.get('Text')
+            Name = data.get('Action')
+            Section = data.get('section')
         
+            # Fetch the corresponding event object from the database
+            status_instance = Status.objects.get(id=StatusID)
+
+            # Check if the field exists in the model
+            if hasattr(status_instance, StatusFor):
+                # Dynamically set the value for the field
+                setattr(status_instance, StatusFor, TextValue)
+                status_instance.save()
+            
+            Timeline_instance = ActionHistory.objects.create(
+                client = request.user,
+                lead = status_instance,
+                action_source = Section, #add action source dynamically
+                action_type = "Text",
+                action = Name,
+                details = TextValue,
+            )
+            Timeline_instance.save()
 
 
             # status_instance.StatusFor = SelectedStatus
@@ -475,3 +664,110 @@ def exportMyleads(request):
     response['Content-Disposition'] = 'attachment; filename="filtered_data.csv"'
     return response
 
+@csrf_exempt
+def update_CLStatus(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+          
+            StatusID = data.get('status_id')
+            selectedValue = data.get('status')
+
+            # Fetch the corresponding event object from the database
+            status_instance = Status.objects.get(id=StatusID)
+
+            # Check if the field exists in the model
+            if status_instance:
+                # Dynamically set the value for the field
+                status_instance.closing_status = selectedValue
+                status_instance.save()
+            Action = ""
+            if selectedValue:
+                Action = selectedValue
+            FAction = STATUS_MAPPING.get(Action, Action)
+            Timeline_instance = ActionHistory.objects.create(
+            client = request.user,
+            lead = status_instance,
+            action_source = "Close Deal",
+            action_type = "Status",
+            action = FAction,
+            details = "",
+            )
+            Timeline_instance.save()
+        
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+
+        except Status.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Status not found.'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+
+
+
+def CloseDealNote(request):
+    if request.method == "POST":
+        selected_status = request.POST.get('SID')
+        status_instance = Status.objects.get(pk=selected_status)
+        CD_note = request.POST.get('CD_note')
+
+        PDoc_Status = request.POST.get('PDoc_Status')
+        AGSent_Status = request.POST.get('AGSent_Status')
+        LP_Status = request.POST.get('LP_Status')
+        CC_NotFunded = request.POST.get('CC_NotFunded')
+        Action = ""
+        if PDoc_Status:
+            Action = PDoc_Status
+        elif AGSent_Status:
+            Action = AGSent_Status
+        elif LP_Status:
+            Action = LP_Status
+        elif CC_NotFunded:
+            Action = CC_NotFunded
+        FAction = STATUS_MAPPING.get(Action, Action)
+        Timeline_instance = ActionHistory.objects.create(
+            client = request.user,
+            lead = status_instance,
+            action_source = "Close Deal",
+            action_type = "Note",
+            action = FAction,
+            details = CD_note,
+            )
+        Timeline_instance.save()
+        messages.success(request, "Notes Added.")
+
+    return HttpResponseRedirect(f"/leads-detail/?status_id={status_instance.pk}")
+
+from decimal import Decimal
+def updatedClosed(request):
+    if request.method == 'POST':
+        selected_status = request.POST.get('StatusID')
+        disbursed = request.POST.get('disbursed')
+        f_share = request.POST.get('f_share')
+        a_cost = request.POST.get('a_cost')
+        o_cost = request.POST.get('o_cost')
+
+
+
+        status_instance = Status.objects.get(pk=selected_status)
+        if disbursed:
+            status_instance.total_disbursed = Decimal(disbursed)
+        if f_share:
+            status_instance.fee_agreement_share = Decimal(f_share)
+        if a_cost:
+            status_instance.attorney_cost = Decimal(a_cost)
+        if o_cost:
+            status_instance.other_costs = Decimal(o_cost)
+        status_instance.update_net_profit()
+        status_instance.save()
+        messages.success(request, 'Accounting Updated')
+    return HttpResponseRedirect(f"/leads-detail/?status_id={status_instance.pk}")

@@ -277,7 +277,50 @@ class Foreclosure(OperationStat):
 
 
 
-class Status(models.Model):
+class Status(models.Model):     
+    client = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name='user_as_client', default=1)
+    lead = models.ForeignKey(Foreclosure, blank=True, related_name='foreclosure_as_lead', on_delete=models.CASCADE, default=1)   
+    archived = models.BooleanField(default=False)
+    #----------------------------------------- Prospecting timeline section
+    #-----Find The Right Contact Section------------------------Start------
+    NOT_ASSIGNED = 'not_assigned'
+    ASSIGNED = 'assigned'
+    COMPLETED = 'completed'
+    VERIFIED = 'verified'
+    CONTACTSTATUS = (
+        (NOT_ASSIGNED,'Not Assigned'),
+        (ASSIGNED, 'Assigned'),
+        (COMPLETED, 'Completed'),
+        (VERIFIED, 'Verified'),
+    )
+
+    PENDING = 'pending'
+    SKIPTRACED_FOUND = 'skiptraced_found'
+    SKIPTRACED_NOT_FOUND = 'skiptraced_not_found'
+    COLD_CALLING_LOCATED = 'cold_calling_located'
+    COLD_CALLING_NOT_LOCATED = 'cold_calling_not_located'
+    SKIPSTATUS = (
+        (PENDING, 'Pending'),
+        (SKIPTRACED_FOUND, 'Skiptraced Found'),
+        (SKIPTRACED_NOT_FOUND, 'Skiptraced Not Found'),
+        (COLD_CALLING_LOCATED, 'Cold Calling Located'),
+        (COLD_CALLING_NOT_LOCATED, 'Cold Calling Not Located'),
+    )
+
+    find_contact_status = models.CharField(max_length=255, blank=True, choices=CONTACTSTATUS, default="Not Assigned")
+    skiptracing_status = models.CharField(max_length=255, blank=True, choices=SKIPSTATUS, default="Pending")
+    first_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    first_contact_email = models.CharField(max_length=100, blank=True, null=True)
+    first_contact_phone = models.CharField(max_length=14, blank=True, null=True)
+    first_contact_address = models.CharField(max_length=100, blank=True, null=True)
+    first_contact_comment = models.CharField(max_length=255, blank=True, null=True)
+    second_contact_name = models.CharField(max_length=100, blank=True, null=True)
+    second_contact_email = models.CharField(max_length=100, blank=True, null=True)
+    second_contact_phone = models.CharField(max_length=14, blank=True, null=True)
+    second_contact_address = models.CharField(max_length=100, blank=True, null=True)
+    second_contact_comment = models.CharField(max_length=255, blank=True, null=True)
+    find_contact_notes = models.CharField(max_length=255, blank=True)
+    #-----Call and Negotiate Section--------------------------Start--------
     NEED_TO_CALL = 'need_to_call'
     RESPONDED = 'responded'
     NOT_RESPONDED = 'not_responded'
@@ -296,77 +339,66 @@ class Status(models.Model):
         (NOT_INTERESTED, 'Not Interested'),
         (NOT_SURE, 'Not Sure'),
     )
-
-    NOT_SIGNED = 'not signed'
-    AGREEMENT_MAILED = 'agreement mailed'
-    AGREEMENT_SIGNED = 'agreement signed'
-    AG_STATUS = (
-        (NOT_SIGNED, 'Not Signed'),
-        (AGREEMENT_MAILED, 'Agreement Mailed'),
-        (AGREEMENT_SIGNED, 'Agreement Signed')
-        )
-    PREPARING_DOCUMENTS = 'preparing documents'
-    CLAIM_SUBMITTED = 'claim submitted'
-    WAITING_FOR_COURTS_DECISION = 'waiting for courts decision'
-    FUND_DISBURSED = 'fund disbursed'
-    CLAIM_STATUS = (
-        (NOT_SIGNED, 'Not Signed'),
-        (PREPARING_DOCUMENTS, 'Preparing Documents'),
-        (CLAIM_SUBMITTED, 'Claim Submitted'),
-        (WAITING_FOR_COURTS_DECISION, 'Waiting for Courts Decision'),
-        (FUND_DISBURSED, 'Fund Disbursed')
-        )
-    NOT_ASSIGNED = 'not_assigned'
-    ASSIGNED = 'assigned'
-    COMPLETED = 'completed'
-    VERIFIED = 'verified'
-    CONTACTSTATUS = (
-        (NOT_ASSIGNED,'Not Assigned'),
-        (ASSIGNED, 'Assigned'),
-        (COMPLETED, 'Completed'),
-        (VERIFIED, 'Verified'),
-    )
-
-    client = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, related_name='user_as_client', default=1)
-    lead = models.ForeignKey(Foreclosure, blank=True, related_name='foreclosure_as_lead', on_delete=models.CASCADE, default=1)
-    call_status = models.CharField(max_length=255, blank=True, choices=CN_STATUS, default='NEED_TO_CALL')
+    call_status = models.CharField(max_length=255, blank=True, choices=CN_STATUS, default='NEED_TO_CALL')  
     negotiation_status = models.CharField(max_length=255, blank=True, choices=NG_STATUS)
-
-    call_comment = models.TextField(max_length=500, blank=True)
-    agreement_status = models.CharField(max_length=255, blank=True, choices=AG_STATUS, default='Not Signed')
-    agreement_comment = models.TextField(max_length=500, blank=True)
-    claim_status = models.CharField(max_length=255, blank=True, choices=CLAIM_STATUS, default='Not Signed')
-    claim_comment = models.TextField(max_length=500, blank=True)
-    archived = models.BooleanField(default=False)
-    find_contact_status = models.CharField(max_length=255, blank=True, choices=CONTACTSTATUS, default="Not Assigned")
-    first_contact_name = models.CharField(max_length=100, blank=True, null=True)
-    first_contact_email = models.CharField(max_length=100, blank=True, null=True)
-    first_contact_phone = models.CharField(max_length=14, blank=True, null=True)
-    first_contact_address = models.CharField(max_length=100, blank=True, null=True)
-    first_contact_comment = models.CharField(max_length=255, blank=True, null=True)
-    second_contact_name = models.CharField(max_length=100, blank=True, null=True)
-    second_contact_email = models.CharField(max_length=100, blank=True, null=True)
-    second_contact_phone = models.CharField(max_length=14, blank=True, null=True)
-    second_contact_address = models.CharField(max_length=100, blank=True, null=True)
-    second_contact_comment = models.CharField(max_length=255, blank=True, null=True)
-    find_contact_notes = models.CharField(max_length=255, blank=True)
+    #-----------follow up section model reference: Clients>models.py>FollowUp----------
+    #-----Close the deal Section------------------------------------------Start--------
+    PREPARING_DOCUMENTS = 'preparing_documents'
+    AGREEMENT_SENT = 'agreement_sent'
+    CONVERSION_IN_PROGRESS = 'conversion_in_progress'
+    CLOSED_FUNDED = 'closed_funded'
+    CLOSED_NOT_FUNDED = 'closed_not_funded'
+    CL_STATUS = (
+        (PREPARING_DOCUMENTS, 'Preparing Documents'),
+        (AGREEMENT_SENT, 'Agreement Sent'),
+        (CONVERSION_IN_PROGRESS, 'Conversion In Progress'),
+        (CLOSED_FUNDED, 'Closed Funded'),      
+        (CLOSED_NOT_FUNDED, 'Closed Not Funded')
+        )
+    closing_status = models.CharField(max_length=255, blank=True, choices=CL_STATUS)
     
+    NOT_STARTED = 'not_started'
+    STARTED = 'started'
+    PREPARED = 'prepared'
+    MAILED = 'mailed'
+    PREP_DOC_STATUS = (
+        (NOT_STARTED, 'Not Started'),
+        (STARTED, 'Started'),
+        (PREPARED, 'Prepared'),
+        (MAILED, 'Mailed'),
+    )
+    doc_status = models.CharField(max_length=255, blank=True, choices=PREP_DOC_STATUS)
+
+    NOT_DELIVERED = 'not_delivered'
+    DELIVERED = 'delivered'
+    RETURNED_SIGNED = 'returned_signed'
+    RETURNED_NOT_SIGNED = 'returned_not_signed'
+    AG_SENT_STATUS = (
+        (NOT_DELIVERED, 'Not Delivered'),
+        (DELIVERED, 'Delivered'),
+        (RETURNED_SIGNED, 'Returned Signed'),
+        (RETURNED_NOT_SIGNED, 'Returned Not Signed'),
+    )
+    ag_sent_status = models.CharField(max_length=255, blank=True, choices=AG_SENT_STATUS)
     
-    call_negotiate_status = models.CharField(max_length=255, choices=CONTACTSTATUS, blank=True)
-    call_negotiate_comment = models.TextField(max_length=500, blank=True)
-    follow_up_status = models.CharField(max_length=255, blank=True)
-    follow_up_comment = models.TextField(max_length=500, blank=True)
-    paperwork_status = models.CharField(max_length=255, blank=True)
-    paperwork_comment = models.TextField(max_length=500, blank=True)
-    fund_confirm_status = models.CharField(max_length=255, blank=True)
-    fund_confirm_comment = models.TextField(max_length=500, blank=True)
-    submit_paperwork_status = models.CharField(max_length=255, blank=True)
-    submit_paperwork_comment = models.TextField(max_length=500, blank=True)
-    waiting_status = models.CharField(max_length=255, blank=True)
-    waiting_comment = models.TextField(max_length=500, blank=True)
-    fund_collection_status = models.CharField(max_length=255, blank=True)
-    fund_collection_comment = models.TextField(max_length=500, blank=True)
+    ATT_SUBMIT = 'attorney_submit'
+    DIRECT_SUBMIT = 'direct_submit'
+    MOTION_GRANTED = 'motion_granted'
+    MOTION_DENIED = 'motion_denied'
+    LPROCEDURES_STATUS = (
+        (ATT_SUBMIT, 'Attorney Submit'),
+        (DIRECT_SUBMIT, 'Direct Submit'),
+        (MOTION_GRANTED, 'Motion Granted'),
+        (MOTION_DENIED, 'Motion Denied')
+    )
+    lp_status = models.CharField(max_length=255, blank=True, choices=LPROCEDURES_STATUS)
+
+    total_disbursed = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    fee_agreement_share = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    attorney_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    other_costs = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    net_profit = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    def update_net_profit(self):
+        self.net_profit = self.total_disbursed - self.fee_agreement_share - self.attorney_cost - self.other_costs
+        self.save()
     
-
-
-

@@ -39,8 +39,8 @@ class ForeclosureAdmin(admin.ModelAdmin):
     list_display = ('id', 'state', 'county', 'case_number', 'case_search_assigned_to', 'sale_date', 'sale_type', 'sale_status', 'sale_price', 'possible_surplus','verified_surplus')
 
 class StatusAdmin(admin.ModelAdmin):
-    list_display = ('call_status', 'agreement_status', 'claim_status')
-
+    list_display = ('client_id', 'lead_id','find_contact_status', 'skiptracing_status', 'call_status','negotiation_status','closing_status')
+    
 
 admin.site.register(Property, PropertyAdmin)
 admin.site.register(Contact, ContactAdmin)

@@ -18,5 +18,7 @@ urlpatterns = [
     path('all_contacts', views.All_Contacts, name='all_contacts'),
     path('assignSKP/', views.assignSKP, name="assignSKP"),
 
+    
+
 
 ]

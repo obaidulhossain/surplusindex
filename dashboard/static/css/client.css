@@ -1,0 +1,111 @@
+.client-sec-header {
+    border-radius: 7px 7px 0px 0px;
+    background-color: #066066;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 15px;
+    margin-top: 20px;
+}
+
+.client-sec-header h4 {
+    margin: 5px;
+    font-size: 22px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.client-sec-sub-header {
+    border-radius: 7px 7px 0px 0px;
+    background-color: #82d4d1;
+    color: #262b2b;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 15px;
+    margin-top: 10px;
+}
+
+.client-sec-sub-header h4 {
+    margin: 3px;
+    font-size: 18px;
+    text-transform: uppercase;
+
+}
+
+.with-button {
+    justify-content: end !important;
+    gap: 10px;
+}
+
+.client-button {
+    padding: 4px 20px;
+    cursor: pointer;
+    background-color: #e7d123;
+    color: #272a2a !important;
+    border: 2px solid #024529;
+    border-radius: 4px;
+    transition: ease-in-out 500ms;
+}
+
+.client-button:hover {
+    transition: 500ms;
+    background-color: #df7119;
+    color: #fff !important;
+}
+
+.info-button {
+    padding: 5px 12px;
+    cursor: pointer;
+    background-color: #c8de6b;
+    color: #272a2a !important;
+    border: 2px solid #024529;
+    border-radius: 20px;
+    transition: ease-in-out 500ms;
+    font-weight: bold;
+
+}
+
+.info-button:hover {
+    transition: 500ms;
+    background-color: #be9d0c;
+    color: #fff !important;
+}
+
+.exit-button {
+    padding: 5px 12px;
+    cursor: pointer;
+    background-color: #f0776e;
+    color: #272a2a !important;
+    border: 2px solid #024529;
+    border-radius: 20px;
+    transition: ease-in-out 500ms;
+    font-weight: bold;
+
+}
+
+.exit-button:hover {
+    transition: 500ms;
+    background-color: #bd3e35;
+    color: #fff !important;
+}
+
+.icon-button {
+    padding: 5px 7px;
+    cursor: pointer;
+    background-color: #ddd432;
+    color: #272a2a;
+    border: 2px solid #353602;
+    border-radius: 20px;
+    transition: ease-in-out 500ms;
+
+
+}
+
+.icon-button:hover {
+    transition: 500ms;
+    background-color: #df7119;
+    color: #fff !important;
+    border-right-style: dotted;
+}

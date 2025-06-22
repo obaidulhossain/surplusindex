@@ -9,195 +9,215 @@ Leads Detail
 {% load static %}
 {% load custom_filters %}
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/client.css' %}" rel="stylesheet">
 <link href="{% static 'css/accordion.css' %}" rel="stylesheet">
 <link href="{% static 'css/nouislider.min.css' %}" rel="stylesheet">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
-
+<input type="hidden" id="statusID" name="status_id" value="{{status_instance.pk}}">
 <div style="margin-top: 20px;" class="body-section">
-<div class="section-header">
-<h2>Foreclosure Detail</h2>
-</div>
-<div class="section-body-full">
-    <div class="table-wrapper">
-        <table class="infotable">
-            <thead>
-                <tr>
-                    <th>State</th>
-                    <th>County</th>
-                    <th>Case Number</th>
-                    <th>Sale Date</th>
-                    <th>Sale Type</th>
-                    <th>Sale Status</th>
-                </tr>
-            <thead>
-            <tbody>
-                <tr>
-                    <td>{{status_instance.lead.state|title}}</td>
-                    <td>{{status_instance.lead.county|title}}</td>
-                    <td>{{status_instance.lead.case_number|upper}}</td>
-                    <td>{{status_instance.lead.sale_date|date:"m/d/Y"}}</td>
-                    <td>{{status_instance.lead.sale_type|title}}</td>
-                    <td>{{status_instance.lead.sale_status|title}}</td>
-                </tr>
-            <tbody>
-        </table>
-    </div>
-        <div class="table-wrapper" style="margin-top:15px; text-align-last: left;">
-        <table class="infotable">
-            <thead>
-                <tr>
-                    <th>Defendants</th>
-                    <th></th>
-                    <th>Plaintiffs</th>
-                    <th></th>
-                    <th>Property Address</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-            <tr>
-                <td colspan=2>{% for def in alldef %}{{def.business_name|upper}}<br>{% if not def.first_name == "" and def.business_name != "" %} {{def.designation|upper}}: {% endif %}{{def.name_prefix|title}} {{def.first_name|title}} {{def.middle_name|title}} {{def.last_name|title}} {{def.name_suffix|title}}<br><br>{% endfor %}</td>
-                <td colspan=2>{% for plt in allplt %}{{plt}}<br>{% endfor %}</td>
-                <td colspan=2>{% for address in alladdress %}{{address.house_number}} {{address.road_name}} {{address.road_type}}{% if not address.direction == "" %} {{address.direction}}{% endif %}{% if not address.apt_unit == "" %} {{address.apt_unit}}{% endif %}{% if not address.extention == "" %} {{address.extention}}{% endif %}, {{address.city}}, {{address.state}} {{address.zip_code}}<br>{% endfor %}</td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div style="margin-top: 20px;" class="body-section">
-<div class="section-header">
-<h2>Financial Information</h2>
-</div>
-<div class="section-body-full">
-    <div class="table-wrapper">
-        <table class="infotable">
-            <thead>
-                <tr>
-                    <th>Final Judgment</th>
-                    <th>Sale Price</th>
-                    <th>Possible Surplus</th>
-                    <th>Verified Surplus</th>
-                    <th>Surplus Status</th>
-                </tr>
-            <thead>
-            <tbody>
-                <tr>
-                    <td>{{status_instance.lead.fcl_final_judgment|currency}}</td>
-                    <td>{{status_instance.lead.sale_price|currency}}</td>
-                    <td>{{status_instance.lead.possible_surplus|currency}}</td>
-                    <td>{{status_instance.lead.verified_surplus|currency}}</td>
-                    <td>{{status_instance.lead.surplus_status|upper}}</td>
-                    
-                </tr>
-            <tbody>
-        </table>
-    </div>
-</div>
-<div style="margin-top: 20px;" class="body-section">
-    <div class="section-header">
-        <h2>Prospecting Timeline</h2>
+    <div class="client-sec-header">
+        <h4>Foreclosure Detail</h4>
     </div>
     <div class="section-body-full">
-        <div class="wrap">
-        <div style="height:580px;">
+        <div class="table-wrapper">
+            <table class="infotable">
+                <thead>
+                    <tr>
+                        <th>State</th>
+                        <th>County</th>
+                        <th>Case Number</th>
+                        <th>Sale Date</th>
+                        <th>Sale Type</th>
+                        <th>Sale Status</th>
+                    </tr>
+                <thead>
+                <tbody>
+                    <tr>
+                        <td>{{status_instance.lead.state|title}}</td>
+                        <td>{{status_instance.lead.county|title}}</td>
+                        <td>{{status_instance.lead.case_number|upper}}</td>
+                        <td>{{status_instance.lead.sale_date|date:"m/d/Y"}}</td>
+                        <td>{{status_instance.lead.sale_type|title}}</td>
+                        <td>{{status_instance.lead.sale_status|title}}</td>
+                    </tr>
+                <tbody>
+            </table>
+        </div>
+        <div class="table-wrapper" style="margin-top:15px; text-align-last: left;">
+            <table class="infotable">
+                <thead>
+                    <tr>
+                        <th>Defendants</th>
+                        <th></th>
+                        <th>Plaintiffs</th>
+                        <th></th>
+                        <th>Property Address</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td colspan=2>{% for def in alldef %}{{def.business_name|upper}}<br>{% if not def.first_name == "" and def.business_name != "" %} {{def.designation|upper}}: {% endif %}{{def.name_prefix|title}} {{def.first_name|title}} {{def.middle_name|title}} {{def.last_name|title}} {{def.name_suffix|title}}<br><br>{% endfor %}</td>
+                    <td colspan=2>{% for plt in allplt %}{{plt}}<br>{% endfor %}</td>
+                    <td colspan=2>{% for address in alladdress %}{{address.house_number}} {{address.road_name}} {{address.road_type}}{% if not address.direction == "" %} {{address.direction}}{% endif %}{% if not address.apt_unit == "" %} {{address.apt_unit}}{% endif %}{% if not address.extention == "" %} {{address.extention}}{% endif %}, {{address.city}}, {{address.state}} {{address.zip_code}}<br>{% endfor %}</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div style="margin-top: 20px;" class="body-section">
+    <div class="client-sec-header">
+        <h4>Financial Information</h4>
+    </div>
+    <div class="section-body-full">
+        <div class="table-wrapper">
+            <table class="infotable">
+                <thead>
+                    <tr>
+                        <th>Final Judgment</th>
+                        <th>Sale Price</th>
+                        <th>Possible Surplus</th>
+                        <th>Verified Surplus</th>
+                        <th>Surplus Status</th>
+                    </tr>
+                <thead>
+                <tbody>
+                    <tr>
+                        <td>{{status_instance.lead.fcl_final_judgment|currency}}</td>
+                        <td>{{status_instance.lead.sale_price|currency}}</td>
+                        <td>{{status_instance.lead.possible_surplus|currency}}</td>
+                        <td>{{status_instance.lead.verified_surplus|currency}}</td>
+                        <td>{{status_instance.lead.surplus_status|upper}}</td>
+                        
+                    </tr>
+                <tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div style="margin-top: 20px;" class="body-section">
+    <div class="client-sec-header">
+        <h4>Prospecting Timeline</h4>
+    </div>
+    <div class="section-body-full">
+        <div class="wrap" style="height:590px;">
             <div class="tab">
                 <button class="tablinks" onclick="openCity(event, 'Skiptrace')" id="defaultOpen">Find The Right Contact</button>
                 <button class="tablinks" onclick="openCity(event, 'Negotiate')">Call and Negotiate</button>
                 <button class="tablinks" onclick="openCity(event, 'Followup')" id="followUps">Follow Up</button>
                 <button class="tablinks" onclick="openCity(event, 'Agreement')" id="closedeal">Close The Deal</button>
-                <button class="tablinks" onclick="openCity(event, 'Confirm')">Action Timeline</button>
-                <button class="tablinks" onclick="openCity(event, 'Submit')">Submit Paperwork</button>
-                <button class="tablinks" onclick="openCity(event, 'Wait')">Waiting for Approval</button>
-                <button class="tablinks" onclick="openCity(event, 'Collect')">Collect Percentage</button>
+                <button class="tablinks" onclick="openCity(event, 'Confirm')">Action History</button>
             </div>
-            <form method="post" action="{% url 'update_status' %}">
-                {% csrf_token %}
-                <input type="hidden" id="statusID" name="status_id" value="{{status_instance.pk}}">
-                <div id="Skiptrace" class="tabcontent">
-                    <div class="section-header">
+            <div id="Skiptrace" class="tabcontent">
+                <div class="client-sec-sub-header">
                     <h4>Contact Detail</h4>
-                    <select onchange="UpdateStatus(this)" name="find_contact_status" id="Pros_Status" for="find_contact_status">
-                        <option value="not_assigned" {% if status_instance.find_contact_status == "not_assigned" %}selected{% endif %}>Not Assigned</option>
-                        <option value="assigned" {% if status_instance.find_contact_status == "assigned" %}selected{% endif %}>Assigned</option>
-                        <option value="completed" {% if status_instance.find_contact_status == "completed" %}selected{% endif %}>Completed</option>
-                        <option value="verified" {% if status_instance.find_contact_status == "verified" %}selected{% endif %}>Verified</option>
-                    </select>
+                    <div style="float:right;">
+                        <a href="#" class="info-button" onclick="togglePopup(); return false;">i</a>
+                        <div id="popupOverlay" class="overlay" style="display: none;" onclick="closePopup()"></div>
+                        <div id="popup" class="popup" style="display: none;">
+                            <div class="client-sec-header"style="margin-top:0px !important;">
+                                <h4>Instructions</h4>
+                                <a href="#" class="exit-button" onclick="closePopup(); return false;" >X</a>
+                            </div>
+                            
+                            <p>Find the right contact (prior owner or defendant of the foreclosure). Some <a href="#contacts">suggested contacts</a> are provided below</p>
+                        </div>
                     </div>
-                    <div class="section-body-full">
+                </div>
+                <div class="section-body-full">
+                    <div class="onehalf" style="padding:10px;">
+                        <label for="Pros_Status" >Lead Assignment Status</label>
+                        {% comment %} <select onchange="UpdateStatus(this)" name="find_contact_status" id="Pros_Status" for="find_contact_status" style="width:100%;"> {% endcomment %}
+                        <select onchange="PostStatus(this, 'find_contact_status', this.id, 'Find Contact > Assignment')" id="Pros_Status" style="width:100%;">
+                            <option value="not_assigned" {% if status_instance.find_contact_status == "not_assigned" %}selected{% endif %}>Not Assigned</option>
+                            <option value="assigned" {% if status_instance.find_contact_status == "assigned" %}selected{% endif %}>Assigned</option>
+                            <option value="completed" {% if status_instance.find_contact_status == "completed" %}selected{% endif %}>Completed</option>
+                            <option value="verified" {% if status_instance.find_contact_status == "verified" %}selected{% endif %}>Verified</option>
+                        </select>
+                        <label for="Skip_Status" style="margin-top:20px;">Skiptracing Status</label>
+                        <select onchange="PostStatus(this, 'skiptracing_status', this.id, 'Find Contact > Skiptracing')" id="Skip_Status" style="width:100%;">
+                            <option value="pending" {% if status_instance.skiptracing_status == "pending" %}selected{% endif %}>Pending</option>
+                            <option value="skiptraced_found" {% if status_instance.skiptracing_status == "skiptraced_found" %}selected{% endif %}>Skiptraced (Found)</option>
+                            <option value="skiptraced_not_found" {% if status_instance.skiptracing_status == "skiptraced_not_found" %}selected{% endif %}>Skiptraced (Not Found)</option>
+                            <option value="cold_calling_located" {% if status_instance.skiptracing_status == "cold_calling_located" %}selected{% endif %}>Cold Called (Owner Located)</option>
+                            <option value="cold_calling_not_located" {% if status_instance.skiptracing_status == "cold_calling_not_located" %}selected{% endif %}>Cold Called (Owner Not Located)</option>
+                        </select>
+                    </div>
+                    <div class="onehalf">
                         <div class="instruction">
-                        <p>Find the right contact (prior owner or defendant of the foreclosure). Some <a href="#contacts">suggested contacts</a> are provided below</p>
+                            <label for="si_comment">SurplusIndex notes on this case</label>
+                            <p>Surplus Index Notes on this case will appear here</p>
+                            <label for="find_contact_comment">Users Note</label>
+                            <textarea oninput="handleTyping(this, 'find_contact_notes', 'Find Contact', 'Note')" {% if not status_instance.find_contact_notes %}placeholder="Write your Notes here"{% endif %} style="width:100%; height:50px;">{% if status_instance.find_contact_notes %}{{status_instance.find_contact_notes}}{% endif %}</textarea>
                         </div>
                     </div>
                     <div class="onehalf">
-                        <div class="section-header" style="margin-top:20px;">
-                        <h4>Contact person 1</h4>
+                        <div class="client-sec-sub-header">
+                            <h4>Contact person 1</h4>
                         </div>
                         <div class="section-body-full" style="text-align: justify;">
                             <label for="f_c_name">Name</label>
-                            <input name="f_c_name" type="text" {% if status_instance.first_contact_name %}value="{{status_instance.first_contact_name}}"{% else %}placeholder="Contact Name"{% endif %} style="width:80%;">
+                            <input oninput="handleTyping(this, 'first_contact_name', 'Find Contact > 1st Contact', 'Name')" type="text" {% if status_instance.first_contact_name %}value="{{status_instance.first_contact_name}}"{% else %}placeholder="Contact Name"{% endif %} style="width:80%;">
 
                             <label for="f_c_email">Email</label>
-                            <input name="f_c_email" type="text" {% if status_instance.first_contact_email %}value="{{status_instance.first_contact_email}}"{% else %}placeholder="Email"{% endif %} style="width:80%;">
+                            <input oninput="handleTyping(this, 'first_contact_email', 'Find Contact > 1st Contact', 'Email')" type="text" {% if status_instance.first_contact_email %}value="{{status_instance.first_contact_email}}"{% else %}placeholder="Email"{% endif %} style="width:80%;">
 
                             <label for="f_c_phone">Phone</label>
-                            <input id="phone" maxlength="14" name="f_c_phone" type="text" {% if status_instance.first_contact_phone %}value="{{status_instance.first_contact_phone}}"{% else %}placeholder="Ex (123) 456-7890"{% endif %} style="width:80%;">
+                            <input oninput="handleTyping(this, 'first_contact_phone', 'Find Contact > 1st Contact', 'Phone')" id="phone" maxlength="14" name="f_c_phone" type="text" {% if status_instance.first_contact_phone %}value="{{status_instance.first_contact_phone}}"{% else %}placeholder="Ex (123) 456-7890"{% endif %} style="width:80%;">
                             
                             <label for="f_c_address">Address</label>
-                            <input name="f_c_address" type="text" {% if status_instance.first_contact_address %}value="{{status_instance.first_contact_address}}"{% else %}placeholder="Current Mailing Address"{% endif %} style="width:80%;">
-                            <input name="f_c_notes" type="text"  {% if status_instance.first_contact_comment %}value="{{status_instance.first_contact_comment}}"{% else %}placeholder="Comment"{% endif %} style="width:100%;">
+                            <input oninput="handleTyping(this, 'first_contact_address', 'Find Contact > 1st Contact', 'Address')" name="f_c_address" type="text" {% if status_instance.first_contact_address %}value="{{status_instance.first_contact_address}}"{% else %}placeholder="Current Mailing Address"{% endif %} style="width:80%;">
+                            <input oninput="handleTyping(this, 'first_contact_comment', 'Find Contact > 1st Contact', 'Note')" name="f_c_notes" type="text"  {% if status_instance.first_contact_comment %}value="{{status_instance.first_contact_comment}}"{% else %}placeholder="Comment"{% endif %} style="width:100%;">
                         </div>
                     </div>
                     <div class="onehalf">
-                        <div class="section-header" style="margin-top:20px;">
-                        <h4>Contact person 2</h4>
+                        <div class="client-sec-sub-header">
+                            <h4>Contact person 2</h4>
                         </div>
                         <div class="section-body-full" style="text-align: justify;">
                             <label for="s_c_name">Name</label>
-                            <input name="s_c_name" type="text" {% if status_instance.second_contact_name %}value="{{status_instance.second_contact_name}}"{% else %}placeholder="Contact Name"{% endif %} style="width:80%;">
+                            <input oninput="handleTyping(this, 'second_contact_name', 'Find Contact > 2nd Contact', 'Name')" name="s_c_name" type="text" {% if status_instance.second_contact_name %}value="{{status_instance.second_contact_name}}"{% else %}placeholder="Contact Name"{% endif %} style="width:80%;">
 
                             <label for="s_c_email">Email</label>
-                            <input name="s_c_email" type="text" {% if status_instance.second_contact_email %}value="{{status_instance.second_contact_email}}"{% else %}placeholder="Email"{% endif %} style="width:80%;">
+                            <input oninput="handleTyping(this, 'second_contact_email', 'Find Contact > 2nd Contact', 'Email')" name="s_c_email" type="text" {% if status_instance.second_contact_email %}value="{{status_instance.second_contact_email}}"{% else %}placeholder="Email"{% endif %} style="width:80%;">
 
                             <label for="s_c_phone">Phone</label>
-                            <input id="phone" maxlength="14" name="s_c_phone" type="text" {% if status_instance.second_contact_phone %}value="{{status_instance.second_contact_phone}}"{% else %}placeholder="Ex (123) 456-7890"{% endif %} style="width:80%;">
+                            <input oninput="handleTyping(this, 'second_contact_phone', 'Find Contact > 2nd Contact', 'Phone')" id="phone" maxlength="14" name="s_c_phone" type="text" {% if status_instance.second_contact_phone %}value="{{status_instance.second_contact_phone}}"{% else %}placeholder="Ex (123) 456-7890"{% endif %} style="width:80%;">
                             
                             <label for="s_c_address">Address</label>
-                            <input name="s_c_address" type="text" {% if status_instance.second_contact_address %}value="{{status_instance.second_contact_address}}"{% else %}placeholder="Current Mailing Address"{% endif %} style="width:80%;">
-                            <input name="s_c_notes" type="text" {% if status_instance.second_contact_comment %}value="{{status_instance.second_contact_comment}}"{% else %}placeholder="Comment"{% endif %} style="width:100%;">
+                            <input oninput="handleTyping(this, 'second_contact_address', 'Find Contact > 2nd Contact', 'Address')" name="s_c_address" type="text" {% if status_instance.second_contact_address %}value="{{status_instance.second_contact_address}}"{% else %}placeholder="Current Mailing Address"{% endif %} style="width:80%;">
+                            <input oninput="handleTyping(this, 'second_contact_comment', 'Find Contact > 2nd Contact', 'Note')" name="s_c_notes" type="text" {% if status_instance.second_contact_comment %}value="{{status_instance.second_contact_comment}}"{% else %}placeholder="Comment"{% endif %} style="width:100%;">
                         </div>
                     </div>
-                    <div class="section-header" style="margin-top:20px;">
-                        <h4>Comment</h4>
-                    </div>
-                    <div class="section-body-full">
-                    <textarea name="find_contact_comment" {% if not status_instance.find_contact_notes %}placeholder="Write your Notes here"{% endif %} style="width:100%; height:50px;">{% if status_instance.find_contact_notes %}{{status_instance.find_contact_notes}}{% endif %}</textarea>
-                    </div>                        
                 </div>
+            </div>        
 
-                <div id="Negotiate" class="tabcontent">
-                    <div class="section-header">
+            <div id="Negotiate" class="tabcontent">
+                <div class="client-sec-sub-header">
                     <h4>Make Call and Negotiate</h4>
-                    {% comment %} <select onchange="PostStatus(this, 'call_negotiate_status', this.id)" id="call_status">
-                        <option value="not_assigned" {% if status_instance.find_contact_status == "not_assigned" %}selected{% endif %}>Not Assigned</option>
-                        <option value="assigned" {% if status_instance.find_contact_status == "assigned" %}selected{% endif %}>Assigned</option>
-                        <option value="completed" {% if status_instance.find_contact_status == "completed" %}selected{% endif %}>Completed</option>
-                        <option value="verified" {% if status_instance.find_contact_status == "verified" %}selected{% endif %}>Verified</option>
-                    </select> {% endcomment %}
+                    <div style="float:right;">
+                        <a href="#" class="info-button" onclick="displayPopup('callinfopop', 'callinfoOverlay'); return false;">i</a>
+                        <div id="callinfoOverlay" class="overlay" style="display: none;" onclick="exitPopup('callinfopop', 'callinfoOverlay')"></div>
+                        <div id="callinfopop" class="popup" style="display: none;">
+                            <div class="client-sec-header"style="margin-top:0px !important;">
+                                <h4>Instructions</h4>
+                                <a href="#" class="exit-button" onclick="exitPopup('callinfopop', 'callinfoOverlay'); return false;" >X</a>
+                            </div>                           
+                            <p>Update call and response status here in the respective fields.</p>
+                        </div>
                     </div>
-                    <div class="section-body-full">
-                        <div class="instruction">
-                        <p>Update call and response status here in the respective fields.</p>
-                        </div>
-                        <div class="onehalf">
-                        <div class="section-header" style="margin-top:20px;">
-                        <h4>{% if status_instance.first_contact_name %}{{status_instance.first_contact_name}}{% else %}Contact person 1 (NA){% endif %}</h4>
-                        <div>
-                            {% if status_instance.first_contact_email %}<a href="mailto:{{status_instance.first_contact_email}}" class="button"><i class="bi bi-envelope"></i><a/>{% endif %}
-                            {% if status_instance.first_contact_phone %}<a href="tel:+1{{status_instance.first_contact_phone}}" class="button"><i class="bi bi-telephone"></i><a/>{% endif %}
-                        </div>
+                </div>
+                <div class="section-body-full">
+                    <div class="onehalf">
+                        <div class="client-sec-sub-header with-button" style="margin-top:20px;">
+                            <h4>{% if status_instance.first_contact_name %}{{status_instance.first_contact_name}}{% else %}Contact person 1 (NA){% endif %}</h4>
+                            <div>
+                                {% if status_instance.first_contact_email %}<a href="mailto:{{status_instance.first_contact_email}}" class="icon-button"><i class="bi bi-envelope"></i><a/>{% endif %}
+                                {% if status_instance.first_contact_phone %}<a href="tel:+1{{status_instance.first_contact_phone}}" class="icon-button"><i class="bi bi-telephone"></i><a/>{% endif %}
+                            </div>
                         </div>
                         <div class="section-body-full" style="text-align: justify;">
                             <h6>Phone: {{status_instance.first_contact_phone}}</h6>
@@ -205,32 +225,30 @@ Leads Detail
                         </div>
                     </div>
                     <div class="onehalf">
-                        <div class="section-header" style="margin-top:20px;">
-                        <h4>{% if status_instance.second_contact_name %}{{status_instance.second_contact_name}}{% else %}Contact person 2 (NA){% endif %}</h4>
-                        <div>
-                            {% if status_instance.second_contact_email %}<a href="mailto:{{status_instance.second_contact_email}}" class="button"><i class="bi bi-envelope"></i><a/>{% endif %}
-                            {% if status_instance.second_contact_phone %}<a href="tel:+1{{status_instance.second_contact_phone}}" class="button"><i class="bi bi-telephone"></i><a/>{% endif %}
-                        </div>
+                        <div class="client-sec-sub-header with-button" style="margin-top:20px;">
+                            <h4>{% if status_instance.second_contact_name %}{{status_instance.second_contact_name}}{% else %}Contact person 2 (NA){% endif %}</h4>
+                            <div>
+                                {% if status_instance.second_contact_email %}<a href="mailto:{{status_instance.second_contact_email}}" class="icon-button"><i class="bi bi-envelope"></i><a/>{% endif %}
+                                {% if status_instance.second_contact_phone %}<a href="tel:+1{{status_instance.second_contact_phone}}" class="icon-button"><i class="bi bi-telephone"></i><a/>{% endif %}
+                            </div>
                         </div>
                         <div class="section-body-full" style="text-align: justify;">
                             <h6>Phone: {{status_instance.second_contact_phone}}</h6>
                             <h6>Email: {{status_instance.second_contact_email}}</h6>
-                            
                         </div>
-
                     </div>
                     <div style="margin-top:20px; text-align-last:left;">
-                    <label for"CN_status" style="width:200px;">Call Status</label>
-                    <select onchange="PostStatus(this, 'call_status', this.id)" id="CN_status" style="width:350px;">
-                        <option value="need_to_call" {% if status_instance.call_status == "need_to_call" %}selected{% endif %}>Need To Call</option>
-                        <option value="responded" {% if status_instance.call_status == "responded" %}selected{% endif %}>Call Responded</option>
-                        <option value="not_responded" {% if status_instance.call_status == "not_responded" %}selected{% endif %}>No Response</option>
-                        <option value="re_skiptrace" {% if status_instance.call_status == "re_skiptrace" %}selected{% endif %}>Skiptrace Again</option>
-                    </select>
+                        <label for"CN_status" style="width:200px;">Call Status</label>
+                        <select onchange="PostStatus(this, 'call_status', this.id, 'Call and Negotiate > Call')" id="CN_status" style="width:350px;">
+                            <option value="need_to_call" {% if status_instance.call_status == "need_to_call" %}selected{% endif %}>Need To Call</option>
+                            <option value="responded" {% if status_instance.call_status == "responded" %}selected{% endif %}>Call Responded</option>
+                            <option value="not_responded" {% if status_instance.call_status == "not_responded" %}selected{% endif %}>No Response</option>
+                            <option value="re_skiptrace" {% if status_instance.call_status == "re_skiptrace" %}selected{% endif %}>Skiptrace Again</option>
+                        </select>
                     </div>
                     <div id="Negotiation_Status" style="{% if not status_instance.call_status == "responded" %}display:none;{% endif %} margin-top:20px; text-align-last:left;">
                         <label style="width:200px;">Negotiation Status</label>
-                        <select onchange="PostStatus(this, 'negotiation_status', this.id)" id="NG_status" style="width:350px;">
+                        <select onchange="PostStatus(this, 'negotiation_status', this.id, 'Call and Negotiate > Negotiate')" id="NG_status" style="width:350px;">
                             <option value="" {% if status_instance.negotiation_status == "" %}selected{% endif %}>Select Negotiation Status</option>
                             <option id="interested" value="interested" {% if status_instance.negotiation_status == "interested" %}selected{% endif %}>Interested in Service Agreement</option>
                             <option value="not_interested" {% if status_instance.negotiation_status == "not_interested" %}selected{% endif %}>Not Interested</option>
@@ -238,44 +256,244 @@ Leads Detail
                         </select>
                     </div>
                     <div id="Action_Archive_Case" style="display: none; margin: 20px 0px 0px 205px; text-align-last: left;">
-                    <button id="archivebtn" class="button" type="button" style="width:350px;" onclick="Archive(this)">{% if status_instance.archived == False %}Archive Case{% else %}Unarchive Case{% endif %}</button>
+                        <button id="archivebtn" class="client-button" type="button" style="width:350px;" onclick="Archive(this)">{% if status_instance.archived == False %}Archive Case{% else %}Unarchive Case{% endif %}</button>
                     </div>
                     <div id="Action_FollowUp" style="display: none; margin: 20px 0px 0px 205px; text-align-last: left;">
-                    <button class="button" type="button" style="width:350px;" onclick="selectTab('followUps')">Follow Up</button>
-                    </div>
-                    
-                    
+                        <button class="client-button" type="button" style="width:350px;" onclick="selectTab('followUps')">Follow Up</button>
+                    </div>                    
                 </div>
-                <div id="Followup" class="tabcontent">
-                    <h3>Follow Up</h3>
-                    <p>This feature will arrive soon! Thank your for your patience.</p> 
-                </div>
-                <div id="Agreement" class="tabcontent">
-                    <h3>Close The Deal</h3>
-                    <p>This feature will arrive soon! Thank your for your patience.</p>
+            </div>
 
+            <div id="Followup" class="tabcontent">
+                <div class="client-sec-sub-header">
+                    <h4>Manage Follow Ups</h4>
+                    <div style="float:right;">
+                        <a href="#" class="info-button" onclick="displayPopup('Followupinfopop', 'FollowupinfoOverlay'); return false;">i</a>
+                        <div id="FollowupinfoOverlay" class="overlay" style="display: none;" onclick="exitPopup('Followupinfopop', 'FollowupinfoOverlay')"></div>
+                        <div id="Followupinfopop" class="popup" style="display: none;">
+                            <div class="client-sec-header"style="margin-top:0px !important;">
+                                <h4>Instructions</h4>
+                                <a href="#" class="exit-button" onclick="exitPopup('Followupinfopop', 'FollowupinfoOverlay'); return false;" >X</a>
+                            </div>                           
+                            <p>Track and manage all your follow-up activities here.</p>
+                        </div>
+                    </div>
                 </div>
-                <div id="Confirm" class="tabcontent">
-                    <h3>Confirm Fund</h3>
-                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+                <div class="section-body-full" style="overflow:auto; height:90%;">
+                    <input type="date" id="set_fdate">
+                    <input type="text" placeholder="Notes to assist Follow Up operation" id="set_ftask" style="width:50%;">
+                    <button class="client-button" onclick="FCreate(event)" id="cf_button">Add Follow Up Instance</button>
+                    <div id="f_history">
+                        {% for followup in followups %}
+                        <div class="client-sec-header">
+                            <h4>{{followup.followup_date}}</h4>
+                            <select class="status-select" data-id="{{ followup.id }}">
+                                <option value="pending" {% if followup.f_status == "pending" %}selected{% endif %}>Pending</option>
+                                <option value="completed" {% if followup.f_status == "completed" %}selected{% endif %}>Completed</option>
+                            </select>
+                        </div>
+                        <div class="section-body-full">
+                            <input type="text" class="notes-input" placeholder="Notes to assist follow-up operation" style="width:44%;" value="{{ followup.f_note }}">
+                            <input type="text" class="response-input" placeholder="Write follow-up response here" style="width:44%;" value="{{ followup.f_result }}">
+                            <button class="save-button" data-id="{{ followup.id }}" style="width:10%;">Save</button>
+                        </div>
+                        {% endfor %}
+                    </div>
                 </div>
-                <div id="Submit" class="tabcontent">
-                    <h3>Submit Paperwork</h3>
-                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+            </div>
+            <div id="Agreement" class="tabcontent">
+                <div class="section-body-full" style="overflow:auto; height:98%; display:block;">
+                    <div class="client-sec-sub-header">
+                        <h4>Close the deal</h4>
+                    </div>
+                    <div class="section-body-full" style="margin-bottom:20px;">
+                        <div class="onehalf">
+                            <label for="cd_status">Select Status</label>
+                            <select id="statusSelect">
+                                <option value="" {% if status_instance.closing_status == "" %}selected{% endif %}>Select Status</option>
+                                <option value="preparing_documents" {% if status_instance.closing_status == "preparing_documents" %}selected{% endif %}>Preparing Documents</option>
+                                <option value="agreement_sent" {% if status_instance.closing_status == "agreement_sent" %}selected{% endif %}>Agreement Sent</option>
+                                <option value="conversion_in_progress" {% if status_instance.closing_status == "conversion_in_progress" %}selected{% endif %}>Conversion In Progress</option>
+                                <option value="closed_funded" {% if status_instance.closing_status == "closed_funded" %}selected{% endif %}>Case Closed (Funded)</option>
+                                <option value="closed_not_funded" {% if status_instance.closing_status == "closed_not_funded" %}selected{% endif %}>Case Closed (Not Funded)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="preparing_documents" class="onehalf cd_status" style="display: {% if status_instance.closing_status == "preparing_documents" %}inline-block {% else %}none{% endif %}; ">   
+                        <div class="client-sec-sub-header">
+                            <h4>Preparing Documents</h4>
+                        </div>
+                        <div class="section-body-full">
+                            <form method="post" action="{% url 'cd-addnotes' %}">
+                            {% csrf_token %}
+                                <select onchange="PostStatus(this, 'doc_status', this.id, 'Close Deal > Preparing Doc')" id="PDoc_Status" name="PDoc_Status" style="height:45px; margin-right:20px; width:75%">
+                                    <option value="not_started" {% if status_instance.doc_status == "not_started" %}selected{% endif %}>Not Started</option>
+                                    <option value="started" {% if status_instance.doc_status == "started" %}selected{% endif %}>Started Preparing Documents</option>
+                                    <option value="prepared" {% if status_instance.doc_status == "prepared" %}selected{% endif %}>Agreement Prepared</option>
+                                    <option value="mailed" {% if status_instance.doc_status == "mailed" %}selected{% endif %}>Agreement Mailed</option>
+                                </select>
+                                <button class="client-button" disabled>
+                                {% if status_instance.doc_status == "not_started" %}
+                                <i class="bi bi-file-earmark" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% elif status_instance.doc_status == "started" %}
+                                <i class="bi bi-file-earmark-text" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% elif status_instance.doc_status == "prepared" %}
+                                <i class="bi bi-file-earmark-check" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% elif status_instance.doc_status == "mailed" %}
+                                <i class="bi bi-envelope-paper" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% else %}
+                                <i class="bi bi-file-earmark" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% endif %}
+                                </button>
+                                
+                            
+                                <input type="hidden" name="SID" value={{status_instance.pk}}>
+                                <input type="text" name="CD_note" style="height:45px; margin-right:20px; width:75%" placeholder="Add Notes">
+                                <button class="client-button"><i class="bi bi-plus-circle" style="font-size: 1.5rem; vertical-align: middle;"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="agreement_sent" class="onehalf cd_status" style="display: {% if status_instance.closing_status == "agreement_sent" %}inline-block{% else %}none{% endif %};">
+                        <div class="client-sec-sub-header">
+                            <h4>Agreement Sent</h4>
+                        </div>
+                        <div class="section-body-full">
+                            <form method="post" action="{% url 'cd-addnotes' %}">
+                            {% csrf_token %}
+                                <select onchange="PostStatus(this, 'ag_sent_status', this.id, 'Close Deal > Agreement Sent')" id="AGSent_Status" name="AGSent_Status" style="height:45px; margin-right:20px; width:75%">
+                                    <option value="not_delivered" {% if status_instance.ag_sent_status == "not_delivered" %}selected{% endif %}>Not Delivered</option>
+                                    <option value="delivered" {% if status_instance.ag_sent_status == "delivered" %}selected{% endif %}>Delivered to Recipient</option>
+                                    <option value="returned_signed" {% if status_instance.ag_sent_status == "returned_signed" %}selected{% endif %}>Returned (Signed)</option>
+                                    <option value="returned_not_signed" {% if status_instance.ag_sent_status == "returned_not_signed" %}selected{% endif %}>Not Returned / Signed</option>
+                                </select>
+                                <button class="client-button" disabled>
+                                {% if status_instance.ag_sent_status == "not_delivered" %}
+                                <i class="bi bi-mailbox" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% elif status_instance.ag_sent_status == "delivered" %}
+                                <i class="bi bi-send-check" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% elif status_instance.ag_sent_status == "returned_signed" %}
+                                <i class="bi bi-envelope-check" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% elif status_instance.ag_sent_status == "returned_not_signed" %}
+                                <i class="bi bi-envelope-exclamation" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% else %}
+                                <i class="bi bi-mailbox" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% endif %}
+                                </button>
+                                
+                            
+                                <input type="hidden" name="SID" value={{status_instance.pk}}>
+                                <input type="text" name="CD_note" style="height:45px; margin-right:20px; width:75%" placeholder="Add Notes">
+                                <button class="client-button"><i class="bi bi-plus-circle" style="font-size: 1.5rem; vertical-align: middle;"></i></button>
+                            </form>
+                        </div>                           
+                    </div>
+                    <div id="conversion_in_progress" class="onehalf cd_status" style="display: {% if status_instance.closing_status == "conversion_in_progress" %}inline-block{% else %}none{% endif %};">
+                        <div class="client-sec-sub-header">
+                            <h4>Legal Proceedings</h4>
+                        </div>
+                        <div class="section-body-full">
+                            <form method="post" action="{% url 'cd-addnotes' %}">
+                            {% csrf_token %}
+                                <select onchange="PostStatus(this, 'lp_status', this.id, 'Close Deal > Legal Proceeding')" id="LP_Status" name="LP_Status" style="height:45px; margin-right:20px; width:75%">
+                                    <option value="attorney_submit" {% if status_instance.lp_status == "attorney_submit" %}selected{% endif %}>Handed over case to Attorney</option>
+                                    <option value="direct_submit" {% if status_instance.lp_status == "direct_submit" %}selected{% endif %}>Applied For Surplus</option>
+                                    <option value="motion_granted" {% if status_instance.lp_status == "motion_granted" %}selected{% endif %}>Application Granted</option>
+                                    <option value="motion_denied" {% if status_instance.lp_status == "motion_denied" %}selected{% endif %}>Application Denied</option>
+                                </select>
+                                <button class="client-button" disabled>
+                                {% if status_instance.lp_status == "attorney_submit" %}
+                                <i class="bi bi-bank2" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% elif status_instance.lp_status == "direct_submit" %}
+                                <i class="bi bi-bank" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% elif status_instance.lp_status == "motion_granted" %}
+                                <i class="bi bi-coin" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% elif status_instance.lp_status == "motion_denied" %}
+                                <i class="bi bi-x-octagon" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% else %}
+                                <i class="bi bi-cash-coin" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                                {% endif %}
+                                </button>
+                                
+                            
+                                <input type="hidden" name="SID" value={{status_instance.pk}}>
+                                <input type="text" name="CD_note" style="height:45px; margin-right:20px; width:75%" placeholder="Add Notes">
+                                <button class="client-button"><i class="bi bi-plus-circle" style="font-size: 1.5rem; vertical-align: middle;"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="closed_funded" class="onehalf cd_status" style="display: {% if status_instance.closing_status == "closed_funded" %}inline-block{% else %}none{% endif %};">
+                        <div class="client-sec-sub-header">
+                            <h4>Case Closed (Funded)</h4>
+                        </div>
+                        <div class="section-body-full">
+                            <form method="post" action="{% url 'updated_closed' %}">
+                            {% csrf_token %}
+                                <input type="hidden" name="StatusID" value={{status_instance.pk}}>
+                                <input type="text" name="disbursed" {% if status_instance.total_disbursed %}value="{{status_instance.total_disbursed}}"{% endif %} placeholder="Total Surplus $ Disbursed" style="min-height:40px; margin-top:20px; width:90%;">
+                                <input type="text" name="f_share" {% if status_instance.fee_agreement_share %}value="{{status_instance.fee_agreement_share}}"{% endif %} placeholder="Owners Share" style="min-height:40px; margin-top:20px; width:90%;">
+                                <input type="text" name="a_cost" {% if status_instance.attorney_cost %}value="{{status_instance.attorney_cost}}"{% endif %} placeholder="Attorney Cost" style="min-height:40px; margin-top:20px; width:90%;">
+                                <input type="text" name="o_cost" {% if status_instance.other_costs %}value="{{status_instance.other_costs}}"{% endif %} placeholder="Other Costs" style="min-height:40px; margin-top:20px; width:90%;">
+                                <input type="submit" value="Update Accounting" style="min-height:40px; margin-top:20px; width:90%;">
+                                <h3 style="margin-top:20px;">Net Profit: {{ status_instance.net_profit|currency }}</h3>
+                            </form>
+                        </div>
+                    </div>
+                    <div id="closed_not_funded" class="onehalf cd_status" style="display: {% if status_instance.closing_status == "closed_not_funded" %}inline-block{% else %}none{% endif %};">
+                        <div class="client-sec-sub-header">
+                            <h4>Case Closed (Not Funded)</h4>
+                        </div>
+                        <div class="section-body-full">
+                            <form method="post" action="{% url 'cd-addnotes' %}">
+                            
+                            {% csrf_token %}
+                                <label style="margin-top:20px;">Reasonate why the case being closed without releasing fund. This helps analyzing prospecting outcome.</label>
+                                <input type="hidden" name="SID" value={{status_instance.pk}}>
+                                <input type="hidden" name="CC_NotFunded" value="Case Closed (Not Funded)">
+                                <input type="text" name="CD_note" style="height:45px; margin:20px 20px 20px 0px; width:75%" placeholder="Add Notes">
+                                <button class="client-button"><i class="bi bi-plus-circle" style="font-size: 1.5rem; vertical-align: middle;"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="onehalf" style="display:inline-block;">
+                        <div class="client-sec-sub-header">
+                            <h4>Notes on closing deal</h4>
+                        </div>
+                        <div class="section-body-full" style="overflow:auto; height:370px;">
+                            {% for note in cdnotes%}
+                            <div style="float:left; width:100%; border: 1px solid #1d8459; border-radius:7px; padding: 10px; margin-bottom: 10px; background-color: #5fd3a34f;">
+                                <strong>{{note.created_at}}</strong><br>
+                                <strong>{{note.action_source}} - {{note.action}}</strong><br>
+                                <p>{{note.details}}</p>
+                            </div>
+                            {% endfor %}
+                        </div>    
+                    </div>
                 </div>
-                <div id="Wait" class="tabcontent">
-                    <h3>Waiting for Approval</h3>
-                    <p>This feature will arrive soon! Thank your for your patience.</p> 
+            </div>
+            <div id="Confirm" class="tabcontent">
+                        <div class="client-sec-sub-header">
+                            <h4>Users Action History</h4>
+                        </div>
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Action Source<br>Date & Time</th>
+                                    <th>Action Detail</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for action in actions %}
+                                <tr>
+                                    <td><strong>{{action.action_source}}</strong></br>{{action.created_at}}</td>
+                                    <td><strong>{% if action.action_type == "Note" %}Created a Note for {{action.action}}{% elif action.action_type == "Status" %}Status changed to {{action.action}}{% elif action.action_type == "Text" %} {{action.action}} Updated to{% endif %}</strong><br>{{action.details}}</td>
+                                    
+                                </tr>
+                            {% endfor %}
+                            <tbody>
+                        </table>
                 </div>
-                <div id="Collect" class="tabcontent">
-                    <h3>Collect Percentage</h3>
-                    <p>This feature will arrive soon! Thank your for your patience.</p> 
-                </div>
-                    
-        </div>
-        <button class="button full" type="submit">Save</button>
-        </form>
-    </div>   
+            
+        </div>   
     </div>
 </div>
 <script>
@@ -289,7 +507,12 @@ Leads Detail
     const archive_case = document.getElementById('Action_Archive_Case');
     const FollowUp = document.getElementById('Action_FollowUp');
     
-    
+    // Get today's date in the format YYYY-MM-DD
+    const today = new Date().toISOString().split('T')[0];
+    // Set the value of the date input to today's date
+    document.getElementById('set_fdate').value = today;
+
+
     function selectTab(tabid) {
         document.getElementById(tabid).click();
     }
@@ -333,7 +556,7 @@ Leads Detail
 {% for def in alldef %}
 
 <div style="margin-top: 20px;" class="body-section">
-    <div class="section-header">
+    <div class="client-sec-header">
     <h4>{{forloop.counter}} {{def.name_prefix|title}} {{def.first_name|title}} {{def.middle_name|title}} {{def.last_name|title}} {{def.name_suffix|title}}</h4>
     </div>
     <div class="section-body-full">
@@ -378,7 +601,7 @@ Leads Detail
 
 {% for related in def.related_contacts.all %}
 <div style="margin-top: 20px;" class="body-section">
-    <div style="background-color:#3e9b72; padding:0px 30px;" class="section-header">
+    <div class="client-sec-sub-header">
     <h4>{{forloop.parentloop.counter}}.{{forloop.counter}} {{related.name_prefix|title}} {{related.first_name|title}} {{related.middle_name|title}} {{related.last_name|title}} {{related.name_suffix|title}}</h4>
     <h5>Associated with: {{def.name_prefix|title}} {{def.first_name|title}} {{def.middle_name|title}} {{def.last_name|title}} {{def.name_suffix|title}}</h5>
     </div>

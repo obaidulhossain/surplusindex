@@ -34,7 +34,7 @@ select {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-    min-height: 35px;
+    min-height: 30px;
 }
 
 input[type=submit] {
@@ -410,17 +410,17 @@ button:disabled:hover {
     padding: 20px 25px;
     margin: 0px;
     border-radius: 3px;
-    border: 1px solid black;
+    border: 3px solid #066066;
     box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
 }
 
 .wrap {
 
     background: #fff;
-    padding: 20px 25px;
+    padding: 7px;
     margin: 0px;
-    border-radius: 3px;
-    border: 1px solid black;
+    border-radius: 5px;
+    border: 3px solid #066066;
     box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
 }
 
@@ -662,3 +662,56 @@ table.table .avatar {
 .modal form label {
     font-weight: normal;
 }
+
+
+/* Popup Info button styling ------------------ Starts here ----------*/
+.info-icon {
+    width: 50px;
+    height: 50px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    text-decoration: none;
+    line-height: 50px;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+.popup {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 20;
+    max-width: 800px;
+    text-align: center;
+}
+
+.popup p {
+    margin: 30px;
+    font-size: 18px;
+    color: #222527;
+}
+
+.popup-header {
+    background-color: #1db5a3
+}
+
+/* Popup Info button styling ------------------ Ends here ----------*/
