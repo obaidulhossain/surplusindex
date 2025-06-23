@@ -30,4 +30,5 @@ urlpatterns = [
 
     path('cd-addnotes', views.CloseDealNote, name="cd-addnotes"),
     path('updated_closed', views.updatedClosed, name="updated_closed"),
+    path('delete-action/', views.delete_action, name='delete-action'),
 ]

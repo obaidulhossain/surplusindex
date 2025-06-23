@@ -233,13 +233,11 @@ function FCreate(event) {
                     <div class="section-body-full">
                         <input type="text" class="notes-input" placeholder="Notes to assist follow-up operation" style="width:44%;" value="${FTask.value || ""}">
                         <input type="text" class="response-input" placeholder="Write follow-up response here" style="width:44%;" value="">
-                        <button class="save-button" data-id="${data.new_id}" style="width:10%;">Save</button>
+                        <button class="save-button client-button" data-id="${data.new_id}" style="width:10%; padding:2px!important;">Save</button>
                     </div>
                 `;
 
                 FHContainer.insertAdjacentHTML('afterbegin', newFollowUpHTML);
-
-
 
                 // Reset the select after a short delay
                 setTimeout(() => {
@@ -278,10 +276,29 @@ document.querySelectorAll('.save-button').forEach(button => {
                 response: responseInput
             })
         })
-            .then(response => {
-                if (response.ok) {
-                    alert(`Follow-up details saved successfully for ID ${followupId}`);
-                } else {
+
+            // .then(response => {
+            //     if (response.ok) {
+            //         button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+            //         button.style.backgroundColor = "#6fdfa0";
+            //         button.innerText = "Saved!"
+
+            //         alert(`Follow-up details saved successfully for ID ${followupId}`);
+            //     }
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    button.style.backgroundColor = "#6fdfa0"; // Green background
+                    button.innerHTML = "Saved!"
+
+                    // Reset the button after a short delay
+                    setTimeout(() => {
+                        button.style.backgroundColor = ""; // Reset to original background
+                    }, 1500); // Reset after 1.5 seconds
+                }
+
+                else {
                     alert('Failed to save follow-up details.');
                 }
             })
@@ -510,7 +527,7 @@ function processNextInQueue() {
                 setTimeout(() => {
                     textarea.style.border = ""; // Reset to original background
 
-                }, 7000);
+                }, 5000);
             } else {
                 alert("Failed to save row: " + (data.message || "Unknown error"));
             }
@@ -522,6 +539,43 @@ function processNextInQueue() {
         .finally(() => {
             // After this request is complete (success or failure), wait 5 seconds
             // and then process the next item in the queue.
-            setTimeout(processNextInQueue, 100); // 5-second interval between requests
+            setTimeout(processNextInQueue, 5000); // 5-second interval between requests
         });
+}
+
+
+function deleteAction(actionId) {
+    if (confirm("Are you sure you want to delete this action?")) {
+        fetch('/delete-action/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Function to get CSRF token
+            },
+            body: JSON.stringify({ action_id: actionId })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove the row from the DOM
+                    const row = document.getElementById(actionId);
+                    if (row) {
+                        // Add the transition style first
+                        row.style.transition = "border 0.2s ease, color 0.2s ease";
+                        row.style.border = "3px solid #a92e10"; // Change color after transition is set
+                        // Use a small delay to ensure the transition is applied
+
+                        setTimeout(() => {
+                            row.remove();
+                        }, 1000);
+                    }
+                } else {
+                    alert("Failed to delete action: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred while deleting the action.");
+            });
+    }
 }

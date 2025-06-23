@@ -507,7 +507,7 @@ def createFollowup(request):
 
             # status_instance.save()
            # Respond with success
-            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!', 'new_id': Fcreate.id})
 
         except FollowUp.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Status not found.'}, status=404)
@@ -771,3 +771,18 @@ def updatedClosed(request):
         status_instance.save()
         messages.success(request, 'Accounting Updated')
     return HttpResponseRedirect(f"/leads-detail/?status_id={status_instance.pk}")
+
+@csrf_exempt
+def delete_action(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+          
+            actionID = data.get('action_id')           
+            action = ActionHistory.objects.get(pk=actionID)  # Replace `Action` with your model name
+            action.delete()
+            return JsonResponse({'status': 'success'})
+        except ActionHistory.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Action not found'}, status=404)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
