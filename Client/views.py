@@ -280,16 +280,14 @@ def archivefromMyLeads(request):
 def leadsDetail(request):
     if request.method == "POST":
         selected_status = request.POST.get('status_id')
-        status_instance = Status.objects.get(pk=selected_status)
-        numberinuse = request.POST.get('numberinuse','')
-
-        status_instance.number_in_use = numberinuse
-        status_instance.save()
-        messages.info(request, 'Status Updated')
     else:
-        selected_status = request.GET.get('status_id')
+        selected_status = request.GET.get('status_id')   
     
     status_instance = Status.objects.get(pk=selected_status)
+    if status_instance.client != request.user:
+        messages.error(request, "You are not authorized to view this lead.")
+        return redirect('myleads')
+
     alldef = status_instance.lead.defendant.all()
     allplt = status_instance.lead.plaintiff.all()
     alladdress = status_instance.lead.property.all()
