@@ -527,7 +527,7 @@ def createFollowup(request):
 
 
 
-@csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
+@csrf_exempt
 def updateStatus_ajax(request):
     if request.method == 'POST':
         try:
@@ -537,7 +537,7 @@ def updateStatus_ajax(request):
             StatusID = data.get('Status_id')
             SelectedStatus = data.get('selected_status')
             StatusFor = data.get('status_for')
-            Section = data.get('section')
+            Section = data.get('ActionSection')
             # Fetch the corresponding event object from the database
             status_instance = Status.objects.get(id=StatusID)
 

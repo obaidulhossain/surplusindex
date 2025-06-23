@@ -343,7 +343,7 @@ function PostStatus(select, field, status, section) {
         Status_id: StatusID,
         selected_status: statusSelected,
         status_for: update_field,
-        section: Section,
+        ActionSection: Section,
     };
 
     // Send data to the server using fetch
