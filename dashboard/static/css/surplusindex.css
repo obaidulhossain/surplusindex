@@ -769,6 +769,22 @@ table.table .avatar {
     padding: 25px;
 }
 
+.dashboard-table-wrapper {
+    max-height: 400px;
+    overflow-x: auto;
+    border: 15px solid #e6e6e6;
+}
+
+.dashboard-table-button {
+    margin: 3px !important;
+    padding: 2px 18px !important;
+}
+
+.dt-highlight-row {
+    background-color: #ffcccc !important;
+    /* Light red background */
+}
+
 .dashboard-blurb-section {
     max-height: 500px;
     overflow-x: auto;

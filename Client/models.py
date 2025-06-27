@@ -15,6 +15,7 @@ class FollowUp(models.Model):
         (PENDING, 'Pending'),
         (COMPLETED, 'Completed'),
     )
+    created_at = models.DateTimeField(auto_now_add=True)
     client = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     leads = models.ForeignKey(Status, related_name="status_as_lead", on_delete=models.CASCADE)
     followup_date = models.DateField(null=True, blank=True)

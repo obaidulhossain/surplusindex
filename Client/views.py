@@ -16,6 +16,7 @@ from django.views.decorators.csrf import csrf_exempt
 import json
 from .constants import *
 from django.db.models import Count, Q
+from datetime import date
 
 def get_client_dashboard_context(user):
     statuses = Status.objects.filter(client=user)
@@ -39,11 +40,12 @@ def get_client_dashboard_context(user):
         .order_by('state')
     )
 
-    Actions = ActionHistory.objects.filter(client=user).order_by('-created_at')[:20]
+    Actions = ActionHistory.objects.filter(client=user).order_by('-created_at')[:50]
 
+    Followups = FollowUp.objects.filter(client=user).exclude(f_status='completed').order_by('followup_date')
+    for item in Followups:
+        item.is_past_due = item.followup_date and item.followup_date < date.today()
     userDetail = UserDetail.objects.get(user=user)
-    print(statuses.query)  # Outputs the SQL query being executed
-    print(statuses.count())  # Prints the number of records in the queryset
     context= {
         'statuses':statuses,
         'userDetail':userDetail,
@@ -55,6 +57,7 @@ def get_client_dashboard_context(user):
         'notAssigned':notAssigned,
         'stateData':stateData,
         'Actions':Actions,
+        'Followups':Followups,
     }
     # Logic to get context data for client dashboard
     return context
