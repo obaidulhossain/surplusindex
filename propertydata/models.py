@@ -307,8 +307,8 @@ class Status(models.Model):
         (COLD_CALLING_NOT_LOCATED, 'Cold Calling Not Located'),
     )
 
-    find_contact_status = models.CharField(max_length=255, blank=True, choices=CONTACTSTATUS, default="Not Assigned")
-    skiptracing_status = models.CharField(max_length=255, blank=True, choices=SKIPSTATUS, default="Pending")
+    find_contact_status = models.CharField(max_length=255, blank=True, choices=CONTACTSTATUS, default="NOT_ASSIGNED")
+    skiptracing_status = models.CharField(max_length=255, blank=True, choices=SKIPSTATUS, default="PENDING")
     first_contact_name = models.CharField(max_length=100, blank=True, null=True)
     first_contact_email = models.CharField(max_length=100, blank=True, null=True)
     first_contact_phone = models.CharField(max_length=14, blank=True, null=True)

@@ -1,0 +1,93 @@
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/client.css' %}" rel="stylesheet">
+<div class="dashboard-section">
+    <div class="onethird dashboard-status-item">
+        <h4>Credit Balance</h4>
+        <h1 style="font-size:3rem;">{{userDetail.Total_credits|digits:5}}</h1><br>
+        <div class="dashboard-icon-row" style="color: #42ba8e;">
+            <i class="bi bi-credit-card-2-back dashboard-icon-small"></i>
+            <span>Purchased Credit : {{userDetail.purchased_credit_balance|digits:4}}</span>
+        </div>
+        <div class="dashboard-icon-row" style="color: #73b3df;">
+            <i class="bi bi-coin dashboard-icon-small"></i>
+            <span>Free Credit : {{userDetail.free_credit_balance|digits:4}}</span>
+        </div>
+        <div class="dashboard-icon-row" style="color: #e6c325;">
+            <i class="bi bi-person-down dashboard-icon-small"></i>
+            <span>Used Credit : {{statuses.count|digits:4}}</span>
+        </div>
+    </div>
+    <div class="onethird dashboard-status-item">
+        <h4>My Leads</h4>
+        <h1 style="font-size:3rem;">{{ statuses.count|digits:5 }}</h1><br>
+        <div class="dashboard-icon-row" style="color: #42ba8e;">
+            <i class="bi bi-person-gear dashboard-icon-small"></i>
+            <span>Active : {{activeLeads.count|digits:4}}</span>
+        </div>
+        <div class="dashboard-icon-row" style="color: #73b3df;">
+            <i class="bi bi-person-check dashboard-icon-small"></i>
+            <span>Closed : {{closedLeads.count|digits:4}}</span>
+        </div>
+        <div class="dashboard-icon-row" style="color: #e96559;">
+            <i class="bi bi-person-slash dashboard-icon-small"></i>
+            <span>Archived : {{archivedLeads.count|digits:4}}</span>
+        </div>
+    </div>
+    <div class="onethird dashboard-status-item">
+        <h4>Active Leads</h4>
+        <h1 style="font-size:3rem;">{{activeLeads.count|digits:5}}</h1><br>
+        <div class="dashboard-icon-row" style="color: #42ba8e;">
+            <i class="bi bi-menu-button-wide-fill dashboard-icon-small"></i>
+            <span>Closing Deals : {{closingDeals.count|digits:4}}</span>
+        </div>
+        <div class="dashboard-icon-row" style="color: #73b3df;">
+            <i class="bi bi-menu-button-wide dashboard-icon-small"></i>
+            <span>Prospecting : {{activeProspecting.count|digits:4}}</span>
+        </div>
+        <div class="dashboard-icon-row" style="color: #e6c325;">
+            <i class="bi bi-menu-app dashboard-icon-small"></i>
+            <span>Not Assigned : {{notAssigned.count|digits:4}}</span>
+        </div>
+    </div>
+</div>
+<div class="dashboard-table-section onehalf">
+    <h4>SurplusIndex Data Availability</h4>
+    <table class="table table-striped table-hover" style="border: 15px solid #e6e6e6;">
+        <thead>
+            <tr>
+                <th>State</th>
+                <th>Tax</th>
+                <th>Mortgage</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in stateData %}
+            <tr>
+                <td>{{ item.state }}</td>
+                <td>{{ item.tax_count }}</td>
+                <td>{{ item.mortgage_count }}</td>
+                <td>{{ item.total_count }}</td>
+                
+                {% comment %} <td>{{ item.tax_count|add:item.mortgage_count|add:item.new_count }}</td> {% endcomment %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<div class="dashboard-table-section onehalf">
+    <h4>Recent Activities</h4>
+    <div class="dashboard-blurb-section">
+        {% for action in Actions %}
+        
+        <strong>{{action.created_at|date:"m/d/Y"}} > {{ action.lead.lead.state }} > {{ action.lead.lead.county }} > {{ action.lead.lead.case_number }}</strong>
+        <div class="dashboard-blurb">
+            {{action.action_source}} > {% if action.action_type == "Note" %}Created a Note for {{action.action}}{% elif action.action_type == "Status" %}Status changed to {{action.action}}{% elif action.action_type == "Text" %} {{action.action}} Updated to: {% endif %} {{action.details}}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<div>
+</div>

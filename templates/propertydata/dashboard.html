@@ -3,25 +3,25 @@
 {% block content%}
 {% load static %}
 {% if user.is_authenticated %}
-{% for group in user.groups.all %}
+    {% for group in user.groups.all %}
 
-{% if group.name == "admin" %}
-{% include 'partials/dashboards/_admin_dashboard.html' %}
-{% endif %}
+        {% if group.name == "admin" %}
+        {% include 'partials/dashboards/_admin_dashboard.html' %}
+        {% endif %}
 
-{% if group.name == "clients" %}
-{% include 'partials/dashboards/_client_dashboard.html' %}
-{% endif %}
+        {% if group.name == "clients" %}
+        {% include 'partials/dashboards/_client_dashboard.html' %}
+        {% endif %}
 
-{% if group.name == "researcher" %}
-{% include 'partials/dashboards/_da_dashboard.html' %}
-{% endif %}
+        {% if group.name == "researcher" %}
+        {% include 'partials/dashboards/_da_dashboard.html' %}
+        {% endif %}
 
-{% if group.name == "va" %}
-{% include 'partials/dashboards/_va_dashboard.html' %}
-{% endif %}
+        {% if group.name == "va" %}
+        {% include 'partials/dashboards/_va_dashboard.html' %}
+        {% endif %}
 
-{% endfor %}
+    {% endfor %}
 {% endif %}
 
 {% endblock content%}

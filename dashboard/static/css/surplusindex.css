@@ -15,7 +15,7 @@ h4 {
     font-size: 22px;
     text-transform: uppercase;
     font-weight: bold;
-    margin: 0.2rem;
+    margin: 8px;
 }
 
 h5 {
@@ -716,3 +716,73 @@ table.table .avatar {
 }
 
 /* Popup Info button styling ------------------ Ends here ----------*/
+.dashboard-section {
+    min-height: 210px;
+    background-color: #e7e7e7;
+    display: flex;
+    justify-content: space-between;
+    padding: 40px;
+}
+
+.dashboard-icon-row {
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0px;
+    height: 40px;
+    padding: 10px;
+    transition: ease-in-out 300ms;
+
+}
+
+.dashboard-icon-row:hover {
+
+    background-color: #0505051f;
+    transition: ease-in-out 300ms;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 1px solid #aaaaaa;
+
+}
+
+.dashboard-icon-row i {
+    margin-right: 20px;
+    font-size: 30px;
+}
+
+.dashboard-status-item {
+    min-height: 190px;
+    color: #075967;
+    padding: 15px;
+    background-color: #f7f7f7;
+    border-radius: 15px;
+}
+
+.dashboard-status-item:hover {
+    border: 1px solid #aaaaaa;
+}
+
+.dashboard-table-section {
+    margin: 0.9%;
+    padding: 25px;
+}
+
+.dashboard-blurb-section {
+    max-height: 500px;
+    overflow-x: auto;
+    background-color: #e7e7e7;
+    padding: 20px;
+
+}
+
+.dashboard-blurb {
+    padding: 5px 21px;
+    border: 2px solid #c7c7c7;
+    margin-bottom: 25px;
+    background-color: #f7f7f7;
+    border-radius: 7px;
+    color: #4b4b4b;
+
+}

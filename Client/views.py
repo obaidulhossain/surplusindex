@@ -15,6 +15,52 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from .constants import *
+from django.db.models import Count, Q
+
+def get_client_dashboard_context(user):
+    statuses = Status.objects.filter(client=user)
+    activeLeads = statuses.filter(archived=False).exclude(closing_status__in=['closed_funded', 'closed_not_funded'])
+    closedLeads = statuses.filter(closing_status__in=['closed_funded', 'closed_not_funded'])
+    archivedLeads = statuses.filter(archived=True)
+    closingDeals = activeLeads.filter(closing_status = 'conversion_in_progress')
+    activeProspecting = activeLeads.exclude(find_contact_status='not_assigned').exclude(closing_status = 'conversion_in_progress')
+    notAssigned = activeLeads.filter(find_contact_status='not_assigned')
+
+    
+    stateData = (
+        Foreclosure.objects.values('state').exclude(published=False).exclude(surplus_status__in=['fund claimed', 'no surplus'])
+        .annotate(
+            total_count = Count('id'),
+            tax_count = Count('id', filter=Q(sale_type='tax')),
+            mortgage_count=Count('id', filter=Q(sale_type='mortgage')),
+
+
+        )
+        .order_by('state')
+    )
+
+    Actions = ActionHistory.objects.filter(client=user).order_by('-created_at')[:20]
+
+    userDetail = UserDetail.objects.get(user=user)
+    print(statuses.query)  # Outputs the SQL query being executed
+    print(statuses.count())  # Prints the number of records in the queryset
+    context= {
+        'statuses':statuses,
+        'userDetail':userDetail,
+        'activeLeads':activeLeads,
+        'closedLeads':closedLeads,
+        'archivedLeads':archivedLeads,
+        'closingDeals':closingDeals,
+        'activeProspecting':activeProspecting,
+        'notAssigned':notAssigned,
+        'stateData':stateData,
+        'Actions':Actions,
+    }
+    # Logic to get context data for client dashboard
+    return context
+
+
+
 
 
 def availableLeads(request):
@@ -186,6 +232,15 @@ def myLeads(request):
         psmin = request.POST.get('ps_min','')
         vsmin = request.POST.get('vs_min','')
         showArchived = request.POST.get('show_archived','')
+
+        FAssignment = request.POST.get('assnFilter','')
+        SkpStatus = request.POST.get('skpFilter','')
+        CallStatus = request.POST.get('callFilter','')
+        NegStatus = request.POST.get('negFilter','')
+        ClStatus = request.POST.get('clFilter','')
+        PdStatus = request.POST.get('pdFilter','')
+        AdStatus = request.POST.get('adFilter','')
+        LpStatus = request.POST.get('lpFilter','')
     else:
         selectedState = request.GET.get('stateFilter','')
         selectedCounty = request.GET.get('countyFilter','')
@@ -193,7 +248,17 @@ def myLeads(request):
         psmin = request.GET.get('ps_min','')
         vsmin = request.GET.get('vs_min','')
         showArchived = request.GET.get('show_Archived','')
-    
+
+        FAssignment = request.GET.get('assnFilter','')
+        SkpStatus = request.GET.get('skpFilter','')
+        CallStatus = request.GET.get('callFilter','')
+        NegStatus = request.GET.get('negFilter','')
+        ClStatus = request.GET.get('clFilter','')
+        PdStatus = request.GET.get('pdFilter','')
+        AdStatus = request.GET.get('adFilter','')
+        LpStatus = request.GET.get('lpFilter','')
+
+
     leads_queryset = Status.objects.filter(client=user)    #.prefetch_related('foreclosure_as_lead')
 
     states=leads_queryset.values_list("lead__state", flat=True).distinct()
@@ -221,9 +286,43 @@ def myLeads(request):
         leads_queryset = leads_queryset.filter(lead__possible_surplus__gte=psmin)
 
     if vsmin:
-        leads_queryset = leads_queryset.filter(lead__verified_surplus__gte=vsmin)   
+        leads_queryset = leads_queryset.filter(lead__verified_surplus__gte=vsmin)
 
 
+
+    # Prospecting filter goes here -------------------
+    if FAssignment == 'not_assigned':
+        leads_queryset = leads_queryset.filter(find_contact_status__in=['not_assigned', ''])
+    elif FAssignment:
+        leads_queryset = leads_queryset.filter(find_contact_status=FAssignment)
+    
+    if SkpStatus == 'pending':
+        leads_queryset = leads_queryset.filter(skiptracing_status__in =['pending', ''])
+    elif SkpStatus:
+        leads_queryset = leads_queryset.filter(skiptracing_status = SkpStatus)
+
+    if CallStatus == 'need_to_call':
+        leads_queryset = leads_queryset.filter(call_status__in =['need_to_call', ''])
+    elif CallStatus:
+        leads_queryset = leads_queryset.filter(call_status = CallStatus)
+    
+    if NegStatus:
+        leads_queryset = leads_queryset.filter(negotiation_status = NegStatus)
+
+    if ClStatus:
+        leads_queryset = leads_queryset.filter(closing_status = ClStatus)
+
+    if PdStatus:
+        leads_queryset = leads_queryset.filter(doc_status = PdStatus)
+
+    if AdStatus:
+        leads_queryset = leads_queryset.filter(ag_sent_status = AdStatus)
+    
+    if LpStatus:
+        leads_queryset = leads_queryset.filter(lp_status = LpStatus)
+    
+
+    
     total_leads = leads_queryset.count()
     p = Paginator(leads_queryset, 25)
     page = request.GET.get('page')
@@ -244,6 +343,14 @@ def myLeads(request):
         'psmin':psmin,
         'vsmin':vsmin,
         'showArchived':showArchived,
+        'FAssignment':FAssignment,
+        'SkpStatus':SkpStatus,
+        'CallStatus':CallStatus,
+        'NegStatus':NegStatus,
+        'ClStatus':ClStatus,
+        'PdStatus':PdStatus,
+        'AdStatus':AdStatus,
+        'LpStatus':LpStatus,
 
         'second_previous':second_previous
     }
@@ -543,6 +650,11 @@ def updateStatus_ajax(request):
             if hasattr(status_instance, StatusFor):
                 # Dynamically set the value for the field
                 setattr(status_instance, StatusFor, SelectedStatus)
+                
+                status_instance.save()
+            # related field actions----------
+            if SelectedStatus == 're_skiptrace':
+                status_instance.find_contact_status = "assigned"
                 status_instance.save()
             Action = ""
             if SelectedStatus:

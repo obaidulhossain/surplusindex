@@ -7,12 +7,31 @@ from django.core.paginator import Paginator
 from si_user.models import UserDetail
 from django.contrib import messages
 from authentication.decorators import allowed_users
-
+from Client.views import get_client_dashboard_context
 
 # Create your views here.
 @login_required(login_url="login")
 def dashboard(request):
-    return render(request, 'propertydata/dashboard.html')
+    if not request.user.is_authenticated:
+        return redirect("login")  # Redirect unauthenticated users
+
+    group_function_mapping = {
+        # "admin": get_admin_dashboard_context,
+        "clients": get_client_dashboard_context,
+        # "researcher": get_researcher_dashboard_context,
+        # "va": get_va_dashboard_context,
+    }
+
+    # Initialize an empty context
+    context = {}
+
+    # Loop through user groups and gather relevant context
+    for group in request.user.groups.all():
+        if group.name in group_function_mapping:
+            group_context = group_function_mapping[group.name](request.user)
+            context.update(group_context)
+
+    return render(request, 'propertydata/dashboard.html', context)
 
 
 

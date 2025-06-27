@@ -504,6 +504,7 @@ Leads Detail
     const SkiptraceTab = document.getElementById('defaultOpen');
     const archive_case = document.getElementById('Action_Archive_Case');
     const FollowUp = document.getElementById('Action_FollowUp');
+    const FindContact = document.getElementById('Pros_Status')
     
     // Get today's date in the format YYYY-MM-DD
     const today = new Date().toISOString().split('T')[0];
@@ -541,6 +542,12 @@ Leads Detail
         secondSelect.style.display = 'none';
     } else if (this.value === 're_skiptrace') {
         SkiptraceTab.click();
+        FindContact.value = 'assigned';
+        FindContact.style.transition = "background-color 0.5s ease";
+        FindContact.style.backgroundColor = "#6fdfa0";
+        setTimeout(() => {
+            FindContact.style.backgroundColor = "";
+            }, 1500);
     } else {
         secondSelect.style.display = 'none';
         }

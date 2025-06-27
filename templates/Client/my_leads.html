@@ -8,54 +8,159 @@ Available Leads
 {% load static %}
 {% load custom_filters %}
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/client.css' %}" rel="stylesheet">
 <div class="body-section">
-    <div class="section-header">
-        <h2>My Leads</h2>
-        <button id="toggle-filters" class="button" onclick="toggleFilters(this.id, 'filters')">Hide</button>
-    </div>
-    <div class="section-filter-full" id="filters">
-        <form method="post">
+
+    <form method="post">
         {% csrf_token %}
-        <div class="onefifth">
-            <label for="stateFilter">Select State</label><br>
-            <select id="stateFilter" name="stateFilter" onchange="this.form.submit()">
-                <option value="" {% if selectedState == "" %}selected{% endif %}>--- Select State ---</option>
-                {% for state in states %}
-                <option value="{{state}}" {% if state == selectedState %}selected{% endif %}>{{state|upper}}</option>
-                {% endfor %}
-            </select>
+        <div class="client-sec-header" style="margin-top:0px;">
+            <h4>General Filters</h4>
+            <button id="toggle-filters" class="icon-button" onclick="toggleFilters(this.id, 'filters', event)" style="padding: 6px 10px;"><i class="bi bi-eye-slash"></i></button>
         </div>
-        <div class="onefifth">
-        <label for="countyFilter">Select County</label><br>
-        <select id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
-            <option value="">All</option>
-            {% for county in counties %}
-            <option value="{{county}}" {% if county == selectedCounty %}selected{% endif %}>{{county|upper}}</option>
-            {% endfor %}
-        </select>
-        </div>
-        <div class="onefifth">
-        <label for="saletypeFilter">Sale Type</label>
-        <select id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
-            <option value="">All</option>
-            {% for saletype in saletypes %}
-            <option value="{{saletype}}" {% if saletype == selectedSaletype %}selected{% endif %}>{{saletype|upper}}</option>
-            {% endfor %}
-        </select>
-        </div>
-        <div class="onefifth">
-        <label for="possiblesurplusFilter">Possible Surplus</label>
-        <input type="number" placeholder="Set Minimum" name="ps_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if psmin %}{{psmin}}{% endif %}"><br>
-        </div>
-        <div class="onefifth">
-        <label for="verifiedsurplusFilter">Verified Surplus</label>
-        <input type="number" placeholder="Set Minimum" name="vs_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if vsmin %}{{vsmin}}{% endif %}"><br>
-        </div><br>
-        <input type="checkbox" name="show_archived" id="show_archived" value="show" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if showArchived == "show" %}checked{% endif %} {% if selectedState == "" %}disabled{% endif %}>
-        <label for="show_archived">Show Archived Leads</label>
         
-        </form>
-    </div>    
+        <div class="section-filter-full" id="filters">
+            <div class="onefifth">
+                <label for="stateFilter">Select State</label><br>
+                <select id="stateFilter" name="stateFilter" onchange="this.form.submit()">
+                    <option value="" {% if selectedState == "" %}selected{% endif %}>--- Select State ---</option>
+                    {% for state in states %}
+                    <option value="{{state}}" {% if state == selectedState %}selected{% endif %}>{{state|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefifth">
+                <label for="countyFilter">Select County</label><br>
+                <select id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
+                    <option value="">All</option>
+                    {% for county in counties %}
+                    <option value="{{county}}" {% if county == selectedCounty %}selected{% endif %}>{{county|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefifth">
+                <label for="saletypeFilter">Sale Type</label>
+                <select id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
+                    <option value="">All</option>
+                    {% for saletype in saletypes %}
+                    <option value="{{saletype}}" {% if saletype == selectedSaletype %}selected{% endif %}>{{saletype|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onefifth">
+                <label for="possiblesurplusFilter">Possible Surplus</label>
+                <input type="number" placeholder="Set Minimum" name="ps_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if psmin %}{{psmin}}{% endif %}"><br>
+            </div>
+            <div class="onefifth">
+                <label for="verifiedsurplusFilter">Verified Surplus</label>
+                <input type="number" placeholder="Set Minimum" name="vs_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if vsmin %}{{vsmin}}{% endif %}"><br>
+            </div><br>
+            <input type="checkbox" name="show_archived" id="show_archived" value="show" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if showArchived == "show" %}checked{% endif %} {% if selectedState == "" %}disabled{% endif %}>
+            <label for="show_archived">Show Archived Leads</label>
+        </div>
+            
+            
+        <div class="client-sec-header">
+            <h4>Prospecting Filters</h4>
+            <button id="toggle-P-filters" class="icon-button" onclick="toggleFilters(this.id, 'prospecting-filters', event)" style="padding: 6px 10px;"><i class="bi bi-eye-slash"></i></button>
+        </div>
+        
+        <div class="section-filter-full" id="prospecting-filters">
+            <div class="onefifth">
+                <label for="assnFilter">Assignment Status</label><br>
+                <select id="assnFilter" name="assnFilter" onchange="this.form.submit()">
+                    <option value="" {% if FAssignment == "" %}selected{% endif %}>-- Select Assignment Status --</option>
+                    <option value="not_assigned" {% if FAssignment == "not_assigned" %}selected{% endif %}>Not Assigned</option>
+                    <option value="assigned" {% if FAssignment == "assigned" %}selected{% endif %}>Assigned</option>
+                    <option value="completed" {% if FAssignment == "completed" %}selected{% endif %}>Completed</option>
+                    <option value="verified" {% if FAssignment == "verified" %}selected{% endif %}>Contact Verified</option>
+                </select>
+            </div>
+            <div class="onefifth">
+                <label for="skpFilter">Skiptracing Status</label><br>
+                <select id="skpFilter" name="skpFilter" onchange="this.form.submit()">
+                    <option value="" {% if SkpStatus == "" %}selected{% endif %}>-- Select Skiptracing Status --</option>
+                    <option value="pending" {% if SkpStatus == "pending" %}selected{% endif %}>Pending Skiptracing</option>
+                    <option value="skiptraced_found" {% if SkpStatus == "skiptraced_found" %}selected{% endif %}>Skiptraced (Found)</option>
+                    <option value="skiptraced_not_found" {% if SkpStatus == "skiptraced_not_found" %}selected{% endif %}>Skiptraced (Not Found)</option>
+                    <option value="cold_calling_located" {% if SkpStatus == "cold_calling_located" %}selected{% endif %}>Owner Located by Cold calling</option>
+                    <option value="cold_calling_not_located" {% if SkpStatus == "cold_calling_not_located" %}selected{% endif %}>Owner can not be Located</option>
+                </select>
+            </div>
+            <div class="onefifth">
+                <label for="callFilter">Cold Call Status</label><br>
+                <select id="callFilter" name="callFilter" onchange="this.form.submit()">
+                    <option value="" {% if CallStatus == "" %}selected{% endif %}>-- Select Calling Status --</option>
+                    <option value="need_to_call" {% if CallStatus == "need_to_call" %}selected{% endif %}>Call and Close Deal</option>
+                    <option value="responded" {% if CallStatus == "responded" %}selected{% endif %}>Called (Responded)</option>
+                    <option value="not_responded" {% if CallStatus == "not_responded" %}selected{% endif %}>Called (No Response)</option>
+                    <option value="re_skiptrace" {% if CallStatus == "re_skiptrace" %}selected{% endif %}>Assigned for Re-Skiptrace</option>
+                </select>
+            </div>
+            <div class="onefifth">
+                <label for="negFilter">Negotiation Status</label><br>
+                <select id="negFilter" name="negFilter" onchange="this.form.submit()">
+                    <option value="" {% if NegStatus == "" %}selected{% endif %}>-- Select Negotiation Status --</option>
+                    <option value="interested" {% if NegStatus == "interested" %}selected{% endif %}>Interested in Fee Agreement</option>
+                    <option value="not_interested" {% if NegStatus == "not_interested" %}selected{% endif %}>Not Interested</option>
+                    <option value="not_sure" {% if NegStatus == "not_sure" %}selected{% endif %}>Not Sure</option>
+                </select>
+            </div>
+            <div class="onefifth">
+                <label for="clFilter">Close and Claim Status</label><br>
+                <select id="clFilter" name="clFilter" onchange="this.form.submit()">
+                    <option value="" {% if ClStatus == "" %}selected{% endif %}>-- Select Closing Status --</option>
+                    <option value="preparing_documents" {% if ClStatus == "preparing_documents" %}selected{% endif %}>Preparing Documents</option>
+                    <option value="agreement_sent" {% if ClStatus == "agreement_sent" %}selected{% endif %}>Agreement Sent</option>
+                    <option value="conversion_in_progress" {% if ClStatus == "conversion_in_progress" %}selected{% endif %}>Conversion in Progress</option>
+                    <option value="closed_funded" {% if ClStatus == "closed_funded" %}selected{% endif %}>Closed (Funded)</option>
+                    <option value="closed_not_funded" {% if ClStatus == "closed_not_funded" %}selected{% endif %}>Closed (Not Funded)</option>
+                </select>
+            </div>
+            <div>
+                <div class="client-sec-sub-header" style="max-height:36px;">
+                <h4>Closing Deal Filters</h4>
+                </div>
+                <div class="section-body-full">
+                    <div class="onethird">
+                        <label for="pdFilter">Paperwork Status</label><br>
+                        <select id="pdFilter" name="pdFilter" onchange="this.form.submit()">
+                            <option value="" {% if PdStatus == "" %}selected{% endif %}>-- Select Paperwork Status --</option>
+                            <option value="not_started" {% if pdStatus == "not_started" %}selected{% endif %}>Paperwork Not Started</option>
+                            <option value="started" {% if pdStatus == "started" %}selected{% endif %}>Started Processing Paperwork</option>
+                            <option value="prepared" {% if pdStatus == "prepared" %}selected{% endif %}>Agreement Ready to send</option>
+                            <option value="mailed" {% if pdStatus == "mailed" %}selected{% endif %}>Agreement Mailed</option>
+                        </select>
+                    </div>
+                    <div class="onethird">
+                        <label for="adFilter">Agreement Status</label><br>
+                        <select id="adFilter" name="adFilter" onchange="this.form.submit()">
+                            <option value="" {% if AdStatus == "" %}selected{% endif %}>-- Select Agreement Status --</option>
+                            <option value="not_delivered" {% if AdStatus == "not_delivered" %}selected{% endif %}>Delivery in Progress</option>
+                            <option value="delivered" {% if AdStatus == "delivered" %}selected{% endif %}>Agreement Delivered</option>
+                            <option value="returned_signed" {% if AdStatus == "returned_signed" %}selected{% endif %}>Agreement Signed & Returned</option>
+                            <option value="returned_not_signed" {% if AdStatus == "returned_not_signed" %}selected{% endif %}>Agreement Not Returned or Signed</option>
+                        </select>
+                    </div>
+                    <div class="onethird">
+                        <label for="lpFilter">Legal Proceedings Status</label><br>
+                        <select id="lpFilter" name="lpFilter" onchange="this.form.submit()">
+                            <option value="" {% if LpStatus == "" %}selected{% endif %}>-- Select Legal Proceedings Status --</option>
+                            <option value="attorney_submit" {% if LpStatus == "attorney_submit" %}selected{% endif %}>Handed over to Attorney</option>
+                            <option value="direct_submit" {% if LpStatus == "direct_submit" %}selected{% endif %}>Applied for Fund</option>
+                            <option value="motion_granted" {% if LpStatus == "motion_granted" %}selected{% endif %}>Application Granted</option>
+                            <option value="motion_denied" {% if LpStatus == "motion_denied" %}selected{% endif %}>Application Denied</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+
+
+    <div class="client-sec-header">
+        <h4>My Leads</h4>
+    </div>
     <div class="section-body-full">
         <div class="action-section">
             <form method='post' action="{% url 'archive_leads' %}">
@@ -114,7 +219,7 @@ Available Leads
                         <td class="possible-surplus {% if current_user in i.lead.hidden_for.all %}highlight-row{% endif %}">{{i.lead.possible_surplus|currency}}</td>
                         <td class="verified-surplus {% if current_user in i.lead.hidden_for.all %}highlight-row{% endif %}">{{i.lead.verified_surplus|currency}}</td>
                         <td class="{% if current_user in i.lead.hidden_for.all %}highlight-row{% endif %}">{{i.lead.surplus_status|title}}</td>
-                        <td class="{% if current_user in i.lead.hidden_for.all %}highlight-row{% endif %}">{{i.call_status}}</td>
+                        <td class="{% if current_user in i.lead.hidden_for.all %}highlight-row{% endif %}">{{i.get_call_status_display}}</td>
                         <td><a href="{% url 'leads-detail' %}?status_id={{i.id}}" class="button">Detail</a></td>
 {% comment %} 
                         {% for status in i.foreclosure_as_lead.all %}
