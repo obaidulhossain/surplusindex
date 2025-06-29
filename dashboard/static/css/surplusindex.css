@@ -752,6 +752,28 @@ table.table .avatar {
     font-size: 30px;
 }
 
+.dashboard-icon-row-nano {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0px;
+    height: 40px;
+    padding: 10px;
+    transition: ease-in-out 300ms;
+
+}
+
+.dashboard-icon-row-nano:hover {
+    transition: ease-in-out 300ms;
+}
+
+.dashboard-icon-row-nano i {
+    margin-right: 12px;
+    font-size: 20px;
+}
+
 .dashboard-status-item {
     min-height: 190px;
     color: #075967;
@@ -760,8 +782,102 @@ table.table .avatar {
     border-radius: 15px;
 }
 
+.dashboard-status-item-small {
+    min-height: 130px;
+    color: #075967;
+    padding: 15px;
+    background-color: #f7f7f7;
+    border-radius: 15px;
+    display: block;
+    margin: 20px;
+
+}
+
+.dashboard-status-item-header {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dashboard-status-item-small p {
+    line-height: 5px;
+    margin-bottom: 5px;
+}
+
+.dashboard-status-item-small h4 {
+    line-height: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+    font-size: 16px;
+    margin: 0;
+    word-wrap: break-word;
+    line-height: 20px;
+}
+
+.count-section {
+    align-content: center;
+    font-size: 30px;
+    background-color: #0a6041;
+    width: fit-content;
+    padding: 0px 14px;
+    border-radius: 7px;
+    display: inline-block;
+}
+
+.green {
+    color: #fffaf0;
+    background-color: #42ba8e;
+    transition: 500ms;
+}
+
+.blue {
+    color: #fffaf0;
+    background-color: #73b3df;
+    transition: 500ms;
+}
+
+.yellow {
+    color: #fffaf0;
+    background-color: #e6c325;
+    transition: 500ms;
+}
+
+.red {
+    color: #fffaf0;
+    background-color: #e96559;
+    transition: 500ms;
+}
+
+.green:hover {
+    background-color: #2a926a;
+    transition: 500ms;
+}
+
+.blue:hover {
+    background-color: #4c82a5;
+    transition: 500ms;
+}
+
+.yellow:hover {
+    background-color: #b29619;
+    transition: 500ms;
+}
+
+.red:hover {
+    background-color: #b33a2f;
+    transition: 500ms;
+}
+
+.dashboard-status-item-small:hover {
+    border: 2px solid #aaaaaa;
+    cursor: pointer;
+}
+
 .dashboard-status-item:hover {
-    border: 1px solid #aaaaaa;
+    border: 1px solid #6b6b6c;
 }
 
 .dashboard-table-section {

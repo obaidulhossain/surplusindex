@@ -7,15 +7,15 @@
         <h4>Credit Balance</h4>
         <h1 style="font-size:3rem;">{{userDetail.Total_credits|digits:5}}</h1><br>
         <div class="dashboard-icon-row" style="color: #42ba8e;">
-            <i class="bi bi-credit-card-2-back dashboard-icon-small"></i>
+            <i class="bi bi-credit-card-2-back"></i>
             <span>Purchased Credit : {{userDetail.purchased_credit_balance|digits:4}}</span>
         </div>
         <div class="dashboard-icon-row" style="color: #73b3df;">
-            <i class="bi bi-coin dashboard-icon-small"></i>
+            <i class="bi bi-coin"></i>
             <span>Free Credit : {{userDetail.free_credit_balance|digits:4}}</span>
         </div>
         <div class="dashboard-icon-row" style="color: #e6c325;">
-            <i class="bi bi-person-down dashboard-icon-small"></i>
+            <i class="bi bi-person-down"></i>
             <span>Used Credit : {{statuses.count|digits:4}}</span>
         </div>
     </div>
@@ -23,15 +23,15 @@
         <h4>My Leads</h4>
         <h1 style="font-size:3rem;">{{ statuses.count|digits:5 }}</h1><br>
         <div class="dashboard-icon-row" style="color: #42ba8e;">
-            <i class="bi bi-person-gear dashboard-icon-small"></i>
+            <i class="bi bi-person-gear"></i>
             <span>Active : {{activeLeads.count|digits:4}}</span>
         </div>
         <div class="dashboard-icon-row" style="color: #73b3df;">
-            <i class="bi bi-person-check dashboard-icon-small"></i>
+            <i class="bi bi-person-check"></i>
             <span>Closed : {{closedLeads.count|digits:4}}</span>
         </div>
         <div class="dashboard-icon-row" style="color: #e96559;">
-            <i class="bi bi-person-slash dashboard-icon-small"></i>
+            <i class="bi bi-person-slash"></i>
             <span>Archived : {{archivedLeads.count|digits:4}}</span>
         </div>
     </div>
@@ -39,19 +39,46 @@
         <h4>Active Leads</h4>
         <h1 style="font-size:3rem;">{{activeLeads.count|digits:5}}</h1><br>
         <div class="dashboard-icon-row" style="color: #42ba8e;">
-            <i class="bi bi-menu-button-wide-fill dashboard-icon-small"></i>
+            <i class="bi bi-menu-button-wide-fill "></i>
             <span>Closing Deals : {{closingDeals.count|digits:4}}</span>
         </div>
         <div class="dashboard-icon-row" style="color: #73b3df;">
-            <i class="bi bi-menu-button-wide dashboard-icon-small"></i>
+            <i class="bi bi-menu-button-wide "></i>
             <span>Prospecting : {{activeProspecting.count|digits:4}}</span>
         </div>
         <div class="dashboard-icon-row" style="color: #e6c325;">
-            <i class="bi bi-menu-app dashboard-icon-small"></i>
+            <i class="bi bi-menu-app "></i>
             <span>Not Assigned : {{notAssigned.count|digits:4}}</span>
         </div>
     </div>
 </div>
+{% comment %} <div style="margin:30px; justify-content: space-between!important; display:flex; ">
+    <div class="onefourth dashboard-status-item-small green">
+        <div style="width:100%; height:auto; margin-bottom:20px; justify-item:space-between; display:flex; align-items: center; gap: 10px;">
+            <div class="count-section" style="background-color: #0a6041;">
+            {{closingDeals.count}}
+            </div>
+            <div style="flex-grow: 1;">
+                <h4>Document Processing</h4>
+            </div>
+        </div>
+        <div class="dashboard-icon-row-nano" style="color:rgb(240, 240, 240)">
+            <i class="bi bi-circle-fill "></i>
+            <span>Processing : {{notAssigned.count|digits:3}}</span>
+        </div>
+        <div class="dashboard-icon-row-nano" style="color:rgb(240, 240, 240)">
+            <i class="bi bi-circle-fill "></i>
+            <span>Paperwork Sent : {{notAssigned.count|digits:3}}</span>
+        </div>
+        
+    </div>
+    <div class="onefourth dashboard-status-item-small blue">
+    </div>
+    <div class="onefourth dashboard-status-item-small yellow">
+    </div>
+    <div class="onefourth dashboard-status-item-small red">
+    </div>
+</div> {% endcomment %}
 <div class="dashboard-table-section">
     <h4>Upcoming Followup Schedules</h4>
     <div class="dashboard-table-wrapper">
