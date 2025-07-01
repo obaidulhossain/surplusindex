@@ -140,6 +140,20 @@ function confirmExport() {
     const message = `Are you sure you want to Export ${selectedLeads} selected leads?`;
     return confirm(message); // Returns true if OK is clicked, false otherwise
 }
+function confirmAction() {
+    // Get the count of selected checkboxes
+    const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
+
+    // If no leads are selected, show a different alert and prevent action
+    if (selectedLeads === 0) {
+        alert('Please select at least one lead to perform this action');
+        return false;
+    }
+
+    // Show the confirmation dialog with the count of selected leads
+    const message = `Are you sure you want to perform this action for ${selectedLeads} selected leads?`;
+    return confirm(message); // Returns true if OK is clicked, false otherwise
+}
 function Archive(button) {
     const StatusID = document.getElementById('statusID').value;
     const buttonInnerText = document.getElementById('archivebtn').innerText

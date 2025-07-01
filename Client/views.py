@@ -385,6 +385,42 @@ def archivefromMyLeads(request):
         return redirect('myleads')
     else:
         return HttpResponse("Invalid Request", status=400)
+from urllib.parse import urlencode
+from django.urls import reverse
+def updateAssignment(request):
+    if request.method == "POST":
+        assignment_status = request.POST.get('assignment_status')
+        selState = request.POST.get('stateFilter','')
+        selected_status_ids = request.POST.getlist('selected_items')
+        Action = ""
+        for status_id in selected_status_ids:
+            statusinstance = Status.objects.get(pk=status_id)
+            if assignment_status == "not_assigned":
+                statusinstance.find_contact_status = "assigned"
+                Action = 'Assigned'
+            if assignment_status == "assigned":
+                statusinstance.find_contact_status = "completed"
+                Action = 'Completed'
+            if assignment_status == "completed":
+                statusinstance.find_contact_status = "verified"
+                Action = 'Verified'
+            statusinstance.save()
+        messages.success(request, str(len(selected_status_ids)) + ' Lead(s) Marked as ' + Action)
+        context = {'stateFilter': selState}
+
+        # Encode the dictionary into query parameters
+        query_string = urlencode(context)
+
+        # Generate the URL and append the query string
+        url = f"{reverse('myleads')}?{query_string}"
+
+        # Redirect to the URL
+        return HttpResponseRedirect(url)
+        # return HttpResponseRedirect(f"/myleads/?status_id={status_instance.pk}")
+        # return redirect('myleads')
+    else:
+        return HttpResponse("Invalid Request", status=400)
+
 
 
 def leadsDetail(request):

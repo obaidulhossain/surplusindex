@@ -17,6 +17,7 @@ urlpatterns = [
     path('updateStatus_ajax/', views.updateStatus_ajax, name="updateStatus_ajax"),
     path('updateText/', views.UpdateText, name="updateText"),
     path('updateArchived/', views.updateArchived, name="updateArchived"),
+    path('updateAssignment/', views.updateAssignment, name="updateAssignment"),
 
 
 

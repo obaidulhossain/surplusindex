@@ -780,6 +780,7 @@ table.table .avatar {
     padding: 15px;
     background-color: #f7f7f7;
     border-radius: 15px;
+
 }
 
 .dashboard-status-item-small {
@@ -877,7 +878,8 @@ table.table .avatar {
 }
 
 .dashboard-status-item:hover {
-    border: 1px solid #6b6b6c;
+    background-color: #ffffff;
+    transition: 500ms;
 }
 
 .dashboard-table-section {
