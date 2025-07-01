@@ -15,7 +15,7 @@ Available Leads
         {% csrf_token %}
         <div class="client-sec-header" style="margin-top:0px;">
             <h4>General Filters</h4>
-            <button id="toggle-filters" class="icon-button" onclick="toggleFilters(this.id, 'filters', event)" style="padding: 6px 10px;"><i class="bi bi-eye-slash"></i></button>
+            <button id="toggle-filters" class="icon-button" onclick="toggleFilters(this.id, 'filters', event)" style="padding: 2px 7px;"><i class="bi bi-eye-slash"></i></button>
         </div>
         
         <div class="section-filter-full" id="filters">
@@ -61,7 +61,7 @@ Available Leads
             
         <div class="client-sec-header">
             <h4>Prospecting Filters</h4>
-            <button id="toggle-P-filters" class="icon-button" onclick="toggleFilters(this.id, 'prospecting-filters', event)" style="padding: 6px 10px;"><i class="bi bi-eye-slash"></i></button>
+            <button id="toggle-P-filters" class="icon-button" onclick="toggleFilters(this.id, 'prospecting-filters', event)" style="padding: 2px 7px;"><i class="bi bi-eye-slash"></i></button>
         </div>
         
         <div class="section-filter-full" id="prospecting-filters">
@@ -168,7 +168,7 @@ Available Leads
             <input type='hidden' name="show_archived" value="{{showArchived}}">
             <input type='hidden' name="assignment_status" value="{{FAssignment}}">
             <input type='hidden' name="stateFilter" value="{{selectedState}}">
-            {% if FAssignment %}
+            {% if FAssignment and not FAssignment == "verified" %}
             <div class="action-item">
                 <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmAction()" formaction="{% url 'updateAssignment' %}">Mark <span data-selected-count>0</span> as {% if FAssignment == "not_assigned" %}Assigned{% elif FAssignment == "assigned" %}Completed{% elif FAssignment == "completed" %}Verified{% endif %}</button>
             </div>

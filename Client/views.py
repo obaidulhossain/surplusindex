@@ -17,6 +17,8 @@ import json
 from .constants import *
 from django.db.models import Count, Q
 from datetime import date
+from urllib.parse import urlencode
+from django.urls import reverse
 
 def get_client_dashboard_context(user):
     statuses = Status.objects.filter(client=user)
@@ -385,8 +387,7 @@ def archivefromMyLeads(request):
         return redirect('myleads')
     else:
         return HttpResponse("Invalid Request", status=400)
-from urllib.parse import urlencode
-from django.urls import reverse
+
 def updateAssignment(request):
     if request.method == "POST":
         assignment_status = request.POST.get('assignment_status')
@@ -420,7 +421,6 @@ def updateAssignment(request):
         # return redirect('myleads')
     else:
         return HttpResponse("Invalid Request", status=400)
-
 
 
 def leadsDetail(request):
