@@ -33,5 +33,6 @@ class foreclosure_Events(models.Model):
     event_next = models.DateField(blank=True, null=True)
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     directory = models.ForeignKey(directoryData, on_delete=models.CASCADE, blank=True, null=True)
+
     
 

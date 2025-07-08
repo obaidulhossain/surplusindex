@@ -1,5 +1,5 @@
 from django.template import loader
-from django.shortcuts import redirect, render, get_object_or_404, HttpResponse
+from django.shortcuts import redirect, render, get_object_or_404, HttpResponse, HttpResponseRedirect
 from . models import *
 from django.utils.timezone import now
 from django.core.paginator import Paginator
@@ -95,114 +95,6 @@ def auctionCalendar(request):
     return render(request, 'auction_calendar/auction_calendar.html', context)
 
 
-#old codes-------------------------------------
-        # 'filter_option':filter_option, # Pass the current filter option to the template
-        # 'option1':option1,
-        # 'option2':option2,
-        # 'option3':option3,
-        # 'option4':option4,
-        # 'selected_sale_types':selected_sale_types,
-        # 'saletypetax':saletypetax,
-        # 'saletypemtg':saletypemtg,
-        # 'saletypeoth':saletypeoth,
-
-    # all_states = foreclosure_Events.objects.values_list('state', flat=True).distinct()
-    # # Get the filter option from the query parameters
-    # filter_option = request.GET.get('filter', 'all')
-    # state_selected = request.GET.get('states', 'All')
-    # selected_sale_types = request.GET.getlist('sale_type')
-
-
-    # option1 = ""
-    # option2 = ""
-    # option3 = ""
-    # option4 = ""
-    # saletypetax = False
-    # saletypemtg = False
-    # saletypeoth = False
-
-    # if 'Tax' in selected_sale_types:
-    #     saletypetax = True
-    
-    # if 'Mtg' in selected_sale_types:
-    #     saletypemtg = True
-
-    # if 'Oth' in selected_sale_types:
-    #     saletypeoth = True
-    
-    # saletype_selected = []
-    # if saletypetax:
-    #     saletype_selected.append('Tax')
-    # if saletypemtg:
-    #     saletype_selected.append('Mortgage')
-    # if saletypeoth:
-    #     saletype_selected.append('Others')
-    # # Determine the queryset based on the filter option
-    
-    # if filter_option == 'past':
-    #     if state_selected == 'All' or state_selected == '':
-    #         if saletype_selected:
-    #             events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), sale_type__in=saletype_selected)
-    #             option2="selected"
-    #             option4 = 'All'
-    #         else:
-    #             events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date())
-    #             option2="selected"
-    #             option4 = 'All'
-    #     else:
-    #         if saletype_selected:
-    #             events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), state=state_selected, sale_type__in=saletype_selected)
-    #             option2="selected"
-    #             option4=state_selected
-    #         else:
-    #             events_queryset = foreclosure_Events.objects.filter(event_next__lt=now().date(), state=state_selected)
-    #             option2="selected"
-    #             option4=state_selected
-    # elif filter_option == 'upcoming':
-    #     if state_selected == 'All' or state_selected == '':
-    #         if saletype_selected:
-    #             events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), sale_type__in=saletype_selected)
-    #             option3="selected"
-    #             option4='All'
-    #         else:    
-    #             events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date())
-    #             option3="selected"
-    #             option4='All'
-    #     else:
-    #         if saletype_selected:
-    #             events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), state=state_selected, sale_type__in=saletype_selected)
-    #             option3="selected"
-    #             option4=state_selected
-    #         else:    
-    #             events_queryset = foreclosure_Events.objects.filter(event_next__gte=now().date(), state=state_selected)
-    #             option3="selected"
-    #             option4=state_selected
-    # else:  # Default to 'all'
-    #     if state_selected == 'All' or state_selected == '':
-    #         if saletype_selected:
-    #             events_queryset = foreclosure_Events.objects.filter(sale_type__in=saletype_selected)
-    #             option1="selected"
-    #             option4='All'                
-    #         else:
-    #             events_queryset = foreclosure_Events.objects.all()
-    #             option1="selected"
-    #             option4='All'
-    #     else:
-    #         if saletype_selected:
-    #             events_queryset = foreclosure_Events.objects.filter(state=state_selected, sale_type__in=saletype_selected)
-    #             option1="selected"
-    #             option4=state_selected    
-    #         else:
-    #             events_queryset = foreclosure_Events.objects.filter(state=state_selected)
-    #             option1="selected"
-    #             option4=state_selected
-
-
-
-
-
-
-
 
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def update_row(request):
@@ -250,11 +142,92 @@ def update_row(request):
 
 
 
-
-
-
 def calendarSettings(request):
-    return render(request, 'auction_calendar/calendar_settings.html')
+    EventInstance = ""
+    if request.method == 'POST':
+        SelectedEvent = request.POST.get('selectedevent', '')
+        
+        State = request.POST.get('state','')
+        County = request.POST.get('county','')
+        Population = request.POST.get('population','')
+        SaleType = request.POST.get('saletype','')
+        EventStatus = request.POST.get('status','')
+        EventLink = request.POST.get('eventlink','')
+        CaseLink = request.POST.get('caselink','')
+        UpdatedFrom = request.POST.get('updatedfrom','')
+        UpdatedTo = request.POST.get('updatedto','')
+        EventNext = request.POST.get('eventnext','')
+        Assignedto = request.POST.get('assignedto','')
+
+        if not SelectedEvent == "":
+            EventInstance = foreclosure_Events.objects.get(pk=SelectedEvent)
+            if State:
+                EventInstance.state = State
+            if County:
+                EventInstance.county = County
+            if Population:
+                EventInstance.population = Population
+            if SaleType:
+                EventInstance.sale_type = SaleType
+            if EventStatus:
+                EventInstance.event_status = EventStatus
+            if EventLink:
+                EventInstance.event_site = EventLink
+            if CaseLink:
+                EventInstance.event_case_search = CaseLink
+            if UpdatedFrom:
+                EventInstance.event_updated_from = UpdatedFrom
+            if UpdatedTo:
+                EventInstance.event_updated_to = UpdatedTo
+            if EventNext:
+                EventInstance.event_next = EventNext
+            if Assignedto:
+                EventInstance.assigned_to = User.objects.get(pk=Assignedto)
+            EventInstance.save()
+            EventInstance.refresh_from_db()
+            messages.success(request, "Event Updated!")
+        else:
+            EventInstance=foreclosure_Events.objects.create(
+                state = State,
+                county = County,
+                population = Population,
+                sale_type = SaleType,
+                event_status = EventStatus
+                )
+            EventInstance.save()
+            messages.success(request, "Event Created!")
+    Users = User.objects.filter(groups__name='researcher')
+    
+    context = {
+        'EventInstance' : EventInstance,
+        'Users':Users,
+    }
+    
+    return render(request, 'auction_calendar/calendar_settings.html', context)
+
+def FilterEvents(request):
+
+    State = request.GET.get('state', '')
+    County = request.GET.get('county', '')
+    SaleType = request.GET.get('sale_type', '')
+
+
+    if not any([State, County, SaleType]):
+        Events = foreclosure_Events.objects.all()[:0]
+    else:
+        Events = foreclosure_Events.objects.all()
+    
+    if State:
+        Events = Events.filter(state__icontains=State)
+    
+    if County:
+        Events = Events.filter(county__icontains=County)
+    if SaleType:
+        Events = Events.filter(sale_type__icontains=SaleType)
+    
+
+    results = list(Events.values('id', 'state','county','population', 'sale_type', 'event_status'))
+    return JsonResponse({'Events': results})
 
 
 

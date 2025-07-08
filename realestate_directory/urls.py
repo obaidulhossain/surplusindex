@@ -8,6 +8,8 @@ urlpatterns = [
 
     # path('update-date/', views.update_event, name='update_event_date'),
     path('calendar_settings/',views.calendarSettings, name='calendar_settings'),
+    path('filterevents', views.FilterEvents, name='filterevents'),
+
     path('calendar_settings/upload',views.upload_file, name='upload_calendar_data'),
     path('export', views.export_data, name='export_data'),
     # path('calendar_settings/preview-uploaded',views.submit_data, name='submit_data'),
