@@ -2182,6 +2182,16 @@ progress {
     vertical-align: bottom
 }
 
+.table>thead th {
+    position: sticky;
+    /* Make the table header sticky */
+    top: 0;
+    /* Stick to the top of the container */
+    background: #f9f9f9;
+    /* Add a background color to the header */
+    z-index: 1;
+}
+
 .table-group-divider {
     border-top: calc(var(--bs-border-width) * 2) solid currentcolor
 }

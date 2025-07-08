@@ -1,21 +1,59 @@
 // Reuseable function
 // -------------------------toggle filters button-----(start)-----------------------------
 //Example Usage: <button id="toggle-filters" class="toogle-button" onclick="toggleFilters(this.id, 'filters')">Hide</button>
-function toggleFilters(togglebtn, hide_id) {
+function toggleFilters(togglebtn, hide_id, event) {
+    event.preventDefault(); // Prevent the form submission
     const section = document.getElementById(hide_id); // hide_id = section id to be hidden
     const button = document.getElementById(togglebtn); // togglebtn = button id that will perform the action
 
     if (section.style.display === "block" || section.style.display === "") {
         section.style.display = "none";
-        button.innerText = "Show";
+        button.innerHTML = '<i class="bi bi-eye"></i>';
     } else {
         section.style.display = "block";
-        button.innerText = "Hide";
+        button.innerHTML = '<i class="bi bi-eye-slash"></i>';
     }
 }
 
 
 // -------------------------toggle filters button-----(end)-----------------------------
+
+// -------------------------Popup info-----(Start)-----------------------------
+function togglePopup() {
+    const popup = document.getElementById('popup');
+    const overlay = document.getElementById('popupOverlay');
+
+    const isVisible = popup.style.display === 'block';
+
+    popup.style.display = isVisible ? 'none' : 'block';
+    overlay.style.display = isVisible ? 'none' : 'block';
+}
+
+function closePopup() {
+    document.getElementById('popup').style.display = 'none';
+    document.getElementById('popupOverlay').style.display = 'none';
+}
+
+// -------------------------Popup info-----(End)-----------------------------
+
+// -------------------------Popup global info-----(Start)-----------------------------
+function displayPopup(popupSection, Overlay) {
+    const popup = document.getElementById(popupSection);
+    const overlay = document.getElementById(Overlay);
+
+    const isVisible = popup.style.display === 'block';
+
+    popup.style.display = isVisible ? 'none' : 'block';
+    overlay.style.display = isVisible ? 'none' : 'block';
+}
+
+function exitPopup(popupSection, Overlay) {
+    document.getElementById(popupSection).style.display = 'none';
+    document.getElementById(Overlay).style.display = 'none';
+}
+
+// -------------------------Popup global info-----(End)-----------------------------
+
 
 function copyToClipboard(button) {
     const url = button.getAttribute('data'); // Get the URL from the data attribute

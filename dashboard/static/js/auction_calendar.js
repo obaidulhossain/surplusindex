@@ -71,53 +71,43 @@ function saveRow(button) {
         });
 }
 
-
-//start new code
-
-
-
-// end new code
-
-// document.addEventListener("DOMContentLoaded", function () {
-//     const stateFilter = document.getElementById("state-filter");
-//     const tableRows = document.querySelectorAll("tbody tr");
-
-//     // Populate state filter dropdown
-//     function populateStateFilter() {
-//         const states = new Set();
-
-//         // Loop through table rows to extract states
-//         tableRows.forEach((row) => {
-//             const stateCell = row.querySelector(".state")?.textContent.trim();
-//             if (stateCell) {
-//                 states.add(stateCell);
-//             }
-//         });
-//         // Add options to the state filter dropdown
-//         states.forEach((state) => {
-//             const option = document.createElement("option");
-//             option.value = state.toLowerCase();
-//             option.textContent = state;
-//             stateFilter.appendChild(option);
-//         });
-//     }
-//     // Filter the table rows based on selected state and county
-//     function filterTableByState() {
-//         const selectedState = stateFilter.value.toLowerCase();
-
-//         tableRows.forEach((row) => {
-//             const stateCell = row.querySelector(".state").textContent.toLowerCase();
-//             row.style.display = selectedState === "" || stateCell === selectedState ? "" : "none";
-//         });
-//     }
-//     // Attach event listener to the state filter dropdown
-//     stateFilter.addEventListener("change", filterTableByState);
-
-//     // Initialize the state filter dropdown
-//     populateStateFilter();
-
-// });
-
 document.getElementById('select-state').addEventListener('click', function () {
     this.value = '';
 });
+
+
+function deleteEvent(EventID) {
+    if (confirm("Are you sure you want to delete this Event?")) {
+        fetch('/delete-event/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Function to get CSRF token
+            },
+            body: JSON.stringify({ Event_ID: EventID })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove the row from the DOM
+                    const row = document.getElementById(EventID);
+                    if (row) {
+                        // Add the transition style first
+                        row.style.transition = "border 0.2s ease, color 0.2s ease";
+                        row.style.border = "3px solid #a92e10"; // Change color after transition is set
+                        // Use a small delay to ensure the transition is applied
+
+                        setTimeout(() => {
+                            row.remove();
+                        }, 1000);
+                    }
+                } else {
+                    alert("Failed to delete action: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred while deleting the action.");
+            });
+    }
+}

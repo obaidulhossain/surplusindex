@@ -109,6 +109,7 @@
             <th>Sale Type</th>
             <th>Event Status</th>
             <th>Edit</th>
+            <th>Delete</th>
         </tr>
     </thead>
     <tbody id="EventResults">
@@ -142,7 +143,7 @@
                         events.forEach(eventdata => {
                             eventresultsContainer.append(`
 
-                            <tr>
+                            <tr id="${eventdata.id}">
                                 <td>${eventdata.state}</td>
                                 <td>${eventdata.county}</td>
                                 <td>${eventdata.population}</td>
@@ -155,12 +156,13 @@
                                         <input type="submit" value="Edit" onclick="this.form.submit()">
                                     </form>
                                 </td>
+                                <td><button class="button" onclick="deleteEvent('${eventdata.id}')"><i class="bi bi-trash3"></i></button></td>
                             </tr>
                             
                                 `);
                         });
                     } else {
-                        eventresultsContainer.append('<tr><th colspan="6"><center>No Events Record Found!</center></th></tr>');
+                        eventresultsContainer.append('<tr><th colspan="7"><center>No Events Record Found!</center></th></tr>');
                     }
                 }
             });
@@ -172,54 +174,6 @@
 </script>
 
 
-
-{% comment %} 
-<script>
-let countyData = [];
-
-document.getElementById('county-input').addEventListener('input', function () {
-    const query = this.value;
-    if (query.length < 2) return;
-
-    fetch(`/get-county-suggestions/?q=${encodeURIComponent(query)}`)
-        .then(response => response.json())
-        .then(data => {
-            countyData = data;
-            const datalist = document.getElementById('county-list');
-            datalist.innerHTML = '';
-            countyData.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.label;
-                datalist.appendChild(option);
-            });
-        });
-});
-
-document.getElementById('county-input').addEventListener('change', function () {
-    const selectedValue = this.value;
-    const selected = countyData.find(item => item.label === selectedValue);
-    if (selected) {
-        fetch(`/get-county-details/?id=${selected.id}`)
-            .then(response => response.json())
-            .then(data => {
-                document.querySelector('input[name="state"]').value = data.state;
-                document.querySelector('input[name="county"]').value = data.county;
-                document.querySelector('input[name="population"]').value = data.population || '';
-                document.querySelector('select[name="saletype"]').value = data.sale_type || '';
-                document.querySelector('select[name="status"]').value = data.status || '';
-                document.querySelector('input[name="eventlink"]').value = data.event_link || '';
-                document.querySelector('input[name="caselink"]').value = data.case_link || '';
-                document.querySelector('input[name="updatedfrom"]').value = data.updated_from || '';
-                document.querySelector('input[name="updatedto"]').value = data.updated_to || '';
-                document.querySelector('input[name="eventnext"]').value = data.next_sale || '';
-                document.querySelector('select[name="assignedto"]').value = data.assigned_to || '';
-                document.querySelector('select[name="directory"]').value = data.directory || '';
-            });
-    }
-}); 
-</script>
-{% endcomment %}
-
-
+<script src="{% static 'js/auction_calendar.js' %}"></script>
 
 {% endblock content%}

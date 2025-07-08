@@ -230,6 +230,20 @@ def FilterEvents(request):
     return JsonResponse({'Events': results})
 
 
+@csrf_exempt
+def DeleteEvent(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+          
+            EventID = data.get('Event_ID')           
+            Event = foreclosure_Events.objects.get(pk=EventID)
+            Event.delete()
+            return JsonResponse({'status': 'success'})
+        except foreclosure_Events.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Event not found'}, status=404)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
 def upload_file(request):

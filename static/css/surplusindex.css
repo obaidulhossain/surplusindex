@@ -15,7 +15,7 @@ h4 {
     font-size: 22px;
     text-transform: uppercase;
     font-weight: bold;
-    margin: 0.2rem;
+    margin: 8px;
 }
 
 h5 {
@@ -34,7 +34,7 @@ select {
     border: 1px solid #ccc;
     border-radius: 4px;
     box-sizing: border-box;
-    min-height: 35px;
+    min-height: 30px;
 }
 
 input[type=submit] {
@@ -126,6 +126,8 @@ table.table tr th {
     padding: 5px 15px;
     vertical-align: middle;
     text-wrap-mode: nowrap;
+    background-color: #066066;
+    color: #fff;
 }
 
 table.table tr td {
@@ -410,17 +412,17 @@ button:disabled:hover {
     padding: 20px 25px;
     margin: 0px;
     border-radius: 3px;
-    border: 1px solid black;
+    border: 3px solid #066066;
     box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
 }
 
 .wrap {
 
     background: #fff;
-    padding: 20px 25px;
+    padding: 7px;
     margin: 0px;
-    border-radius: 3px;
-    border: 1px solid black;
+    border-radius: 5px;
+    border: 3px solid #066066;
     box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
 }
 
@@ -480,9 +482,8 @@ table.table th i {
 }
 
 table.table td:last-child i {
-    opacity: 0.9;
-    font-size: 22px;
-    margin: 0 5px;
+    font-size: 18px;
+    margin: 0 3px;
 }
 
 /* table.table td a {
@@ -661,4 +662,261 @@ table.table .avatar {
 
 .modal form label {
     font-weight: normal;
+}
+
+
+/* Popup Info button styling ------------------ Starts here ----------*/
+.info-icon {
+    width: 50px;
+    height: 50px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    text-decoration: none;
+    line-height: 50px;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+.popup {
+    position: fixed;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 20;
+    max-width: 800px;
+    text-align: center;
+}
+
+.popup p {
+    margin: 30px;
+    font-size: 18px;
+    color: #222527;
+}
+
+.popup-header {
+    background-color: #1db5a3
+}
+
+/* Popup Info button styling ------------------ Ends here ----------*/
+.dashboard-section {
+    min-height: 210px;
+    background-color: #e7e7e7;
+    display: flex;
+    justify-content: space-between;
+    padding: 40px;
+}
+
+.dashboard-icon-row {
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0px;
+    height: 40px;
+    padding: 10px;
+    transition: ease-in-out 300ms;
+
+}
+
+.dashboard-icon-row:hover {
+
+    background-color: #0505051f;
+    transition: ease-in-out 300ms;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 1px solid #aaaaaa;
+
+}
+
+.dashboard-icon-row i {
+    margin-right: 20px;
+    font-size: 30px;
+}
+
+.dashboard-icon-row-nano {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    margin-bottom: 0px;
+    height: 40px;
+    padding: 10px;
+    transition: ease-in-out 300ms;
+
+}
+
+.dashboard-icon-row-nano:hover {
+    transition: ease-in-out 300ms;
+}
+
+.dashboard-icon-row-nano i {
+    margin-right: 12px;
+    font-size: 20px;
+}
+
+.dashboard-status-item {
+    min-height: 190px;
+    color: #075967;
+    padding: 15px;
+    background-color: #f7f7f7;
+    border-radius: 15px;
+
+}
+
+.dashboard-status-item-small {
+    min-height: 130px;
+    color: #075967;
+    padding: 15px;
+    background-color: #f7f7f7;
+    border-radius: 15px;
+    display: block;
+    margin: 20px;
+
+}
+
+.dashboard-status-item-header {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.dashboard-status-item-small p {
+    line-height: 5px;
+    margin-bottom: 5px;
+}
+
+.dashboard-status-item-small h4 {
+    line-height: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+    font-size: 16px;
+    margin: 0;
+    word-wrap: break-word;
+    line-height: 20px;
+}
+
+.count-section {
+    align-content: center;
+    font-size: 30px;
+    background-color: #0a6041;
+    width: fit-content;
+    padding: 0px 14px;
+    border-radius: 7px;
+    display: inline-block;
+}
+
+.green {
+    color: #fffaf0;
+    background-color: #42ba8e;
+    transition: 500ms;
+}
+
+.blue {
+    color: #fffaf0;
+    background-color: #73b3df;
+    transition: 500ms;
+}
+
+.yellow {
+    color: #fffaf0;
+    background-color: #e6c325;
+    transition: 500ms;
+}
+
+.red {
+    color: #fffaf0;
+    background-color: #e96559;
+    transition: 500ms;
+}
+
+.green:hover {
+    background-color: #2a926a;
+    transition: 500ms;
+}
+
+.blue:hover {
+    background-color: #4c82a5;
+    transition: 500ms;
+}
+
+.yellow:hover {
+    background-color: #b29619;
+    transition: 500ms;
+}
+
+.red:hover {
+    background-color: #b33a2f;
+    transition: 500ms;
+}
+
+.dashboard-status-item-small:hover {
+    border: 2px solid #aaaaaa;
+    cursor: pointer;
+}
+
+.dashboard-status-item:hover {
+    background-color: #ffffff;
+    transition: 500ms;
+}
+
+.dashboard-table-section {
+    margin: 0.9%;
+    padding: 25px;
+}
+
+.dashboard-table-wrapper {
+    max-height: 400px;
+    overflow-x: auto;
+    border: 15px solid #e6e6e6;
+}
+
+.dashboard-table-button {
+    margin: 3px !important;
+    padding: 2px 18px !important;
+}
+
+.dt-highlight-row {
+    background-color: #ffcccc !important;
+    /* Light red background */
+}
+
+.dashboard-blurb-section {
+    max-height: 500px;
+    overflow-x: auto;
+    background-color: #e7e7e7;
+    padding: 20px;
+
+}
+
+.dashboard-blurb {
+    padding: 5px 21px;
+    border: 2px solid #c7c7c7;
+    margin-bottom: 25px;
+    background-color: #f7f7f7;
+    border-radius: 7px;
+    color: #4b4b4b;
+
 }
