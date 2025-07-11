@@ -1,1 +1,42 @@
 admin dashboard
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+
+<div class="section-header">
+<h4>Transactions</h4>
+</div>
+<div class="section-body-full">
+<div class="dashboard-table-wrapper">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <td>Action Date</td>
+                <td>User ID</td>
+                <td>User Name</td>
+                <td>Email</td>
+                <td>Amount</td>
+                <td>Lead</td>
+                <td>Stripe ID</td>
+                <td>Checkout ID</td>
+                <td>Paid</td>
+            </tr>
+        </thead>
+        <tbody>
+        {% for Tran in Transactions %}
+            <tr>
+                <td>{{Tran.created_at}}</td>
+                <td>{{Tran.user.id}}</td>
+                <td>{{Tran.user.username}}</td>
+                <td><input type="button" title="Click to copy Email" class="button" value="{{Tran.user.email}}" data="{{Tran.user.email}}"onclick="copyGlobal(this, '{{Tran.user.email}}');"></td>
+                <td>{{Tran.amount}}</td>
+                <td>{{Tran.number_of_leads}}</td>
+                <td><input type="button" title="Click to copy Stripe Customer ID" class="button" value="Stripe ID" data="{{Tran.stripe_customer_id}}"onclick="copyGlobal(this, 'Stripe ID');"></td>
+                <td><input type="button" title="Click to copy Stripe Checkout ID" class="button" value="Checkout ID" data="{{Tran.stripe_checkout_id}}"onclick="copyGlobal(this, 'Checkout ID');"></td>
+                <td style="padding: 0px 10px;">{% if Tran.has_paid == True %}<i class="bi bi-bag-check-fill" style="color: #099e71; font-size: 30px;"></i>{% else %}<i class="bi bi-bag-x-fill" style="color: #e23018; font-size: 30px;"></i>{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+</div>

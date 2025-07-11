@@ -76,22 +76,7 @@ def updateCredits(request):
         return HttpResponseRedirect(f"/all_clients/?clientType={selectedClientType}")
 
     return HttpResponseRedirect("/all_clients/")
-    # if request.method == "POST":
-    #     count = 0
-    #     selectedClientType = request.POST.get('clientType')
-    #     Clients = UserDetail.objects.filter(user__groups__name='client')
-    #     if selectedClientType == "si_client":
-    #         Clients = Clients.filter(user_type='si_client')
-    #         for client in Clients:
-    #             client.update_total_credits()
-    #             count = count + 1
-    #     elif selectedClientType == "manual_client":
-    #         Clients = Clients.filter(user_type='manual_client')
-    #         for client in Clients:
-    #             client.update_total_credits()
-    #             count = count + 1
-    #     messages.success(request, f"Credits updated for {count} Clients")
-    # return HttpResponseRedirect(f"/all_clients/?clientType={selectedClientType}")
+
 
 
 def clientDetail(request):

@@ -7,7 +7,16 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 from django.db.models import Prefetch
+from si_user.models import UserPayment
 #----------------Data--------------------start
+def get_admin_dashboard_context(user):
+    Transactions = UserPayment.objects.all().order_by('-created_at')
+    context= {
+        'Transactions':Transactions,
+        
+    }
+    # Logic to get context data for client dashboard
+    return context
 
 def All_Contacts(request):
     user = request.user
@@ -522,95 +531,5 @@ def assignSKP(request):
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-# def assign_leads(request):
-#     assign_to = request.POST.get('assign_to')
-#     state = request.POST.get('sel_state')
-#     user = User.objects.get(username=assign_to)
-#     if state:
-#         leads_to_update = Foreclosure.objects.filter(published=False, state=state)
-#         if assign_to:
-#             for lead in leads_to_update:
-#                 lead.case_search_assigned_to = user
-#                 lead.save()
-#         else:
-#             messages.info(request, 'Please select a User to assign lead')
-#     else:
-#             messages.info(request, 'Please select a State to assign lead')
-
-#     return redirect('new_leads')
-
-# def update_case_search_status(request):
-#     status = request.POST.get('status')
-#     state = request.POST.get('sel_state')
-#     # user = User.objects.get(username=assign_to)
-#     if state:
-#         leads_to_update = Foreclosure.objects.filter(published=False, state=state)
-#         if status:
-#             for lead in leads_to_update:
-#                 lead.case_search_status = status
-#                 lead.save()
-#         else:
-#             messages.info(request, 'Please select a status to to update')
-#     else:
-#             messages.info(request, 'Please select a status to to update')
-
-#     return redirect('new_leads')
-
-# def update_publish_status(request):
-#     publish = request.POST.get('publish')
-#     state = request.POST.get('sel_state')
-#     # user = User.objects.get(username=assign_to)
-#     if state:
-#         if publish == "Publish":
-#             leads_to_update = Foreclosure.objects.filter(case_search_status="Pending", state=state) | Foreclosure.objects.filter(case_search_status="Completed", state=state)
-#             for lead in leads_to_update:
-#                 lead.published = True
-#                 lead.save()
-#         else:
-#             leads_to_update = Foreclosure.objects.filter(case_search_status="Pending", state=state) | Foreclosure.objects.filter(case_search_status="Completed", state=state)
-#             for lead in leads_to_update:
-#                 lead.published = False
-#                 lead.save()
-#     else:
-#             messages.info(request, 'Please select a state to to update')
-
-#     return redirect('new_leads')
-# #----------------Data--------------------end
-
-
-
-# def assign_skiptracing(request):
-     
-#     assign_to = request.POST.get('skp_assign_to')
-#     state = request.POST.get('sel_state')
-#     user = User.objects.get(username=assign_to)
-#     if state:
-#         foreclosures = Foreclosure.objects.filter(state=state)
-#         if assign_to:
-#             for foreclosure in foreclosures:
-#                 contacts_to_update = foreclosure.defendant.all()
-#                 for contact in contacts_to_update:
-#                      if contact.skiptraced == False:
-#                           contact.skp_assignedto.add(user)
-#                           contact.save()
-#         else:
-#             messages.info(request, 'Please select a User to assign Skiptracing')
-#     else:
-#             messages.info(request, 'Please select a State to assign Skiptracing')
-
-#     return redirect('new_leads')
 
 

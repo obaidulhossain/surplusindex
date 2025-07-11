@@ -95,7 +95,7 @@ label {
 }
 
 .onefourth {
-    width: 24%;
+    width: 23%;
     display: inline-block;
     vertical-align: top;
 }
@@ -891,6 +891,7 @@ table.table .avatar {
     max-height: 400px;
     overflow-x: auto;
     border: 15px solid #e6e6e6;
+    text-align: center;
 }
 
 .dashboard-table-button {

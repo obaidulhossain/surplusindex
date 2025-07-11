@@ -8,6 +8,8 @@ from si_user.models import UserDetail
 from django.contrib import messages
 from authentication.decorators import allowed_users
 from Client.views import get_client_dashboard_context
+from Admin.views import get_admin_dashboard_context
+
 
 # Create your views here.
 @login_required(login_url="login")
@@ -16,7 +18,7 @@ def dashboard(request):
         return redirect("login")  # Redirect unauthenticated users
 
     group_function_mapping = {
-        # "admin": get_admin_dashboard_context,
+        "admin": get_admin_dashboard_context,
         "clients": get_client_dashboard_context,
         # "researcher": get_researcher_dashboard_context,
         # "va": get_va_dashboard_context,
