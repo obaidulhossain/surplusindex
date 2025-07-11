@@ -18,9 +18,9 @@ Clients
     </div>
 
     <div class="section-filter-full" id="filters">
-        {% if client_instance.user_type == 'si_client' %}
+        {% comment %} {% if client_instance.user_type == 'si_client' %}
         
-        {% else %}
+        {% else %} {% endcomment %}
         <div class="onefourth boxed-filter" >
             <label for="all-orders">Total Order (Price)</label>
             <h4 id="all-orders">{{all_orders}} (${{total_order_amount}})</h4>
@@ -45,7 +45,7 @@ Clients
                 <option value="completed"  {% if selected_orderstatus == "completed" %}selected{% endif %}>Completed Orders</option>
             </select>
             </form>
-        </div>
+        </div><br>
         <div class="onefourth boxed-filter">
             <label for="free-balance">Available Free Credits</label>
             <h4 id="free-balance">{{client_instance.free_credit_balance}}</h4>
@@ -60,7 +60,7 @@ Clients
         </div>
         <div class="onefourth boxed-filter">
             <label for="last-online">Online Status</label>
-            <h4 id="last-online"><span style="{% if login_status == "Online" %}color:#1db170{% else %}color:#587b98{% endif %}">{{login_status}}</span></h4>
+            <h5 id="last-online"><span style="{% if login_status == "Online" %}color:#1db170{% else %}color:#254056{% endif %}">{{login_status}}</span></h5>
         </div>    
     </div>
     <div class="section-header" style="margin-top:20px; background-color: #587b98">
@@ -109,7 +109,6 @@ Clients
             <input type="submit" value="Create Order">
         </form>
     </div>
-    {% endif %}
 </div>
 
     {% for order in orders %}

@@ -108,11 +108,9 @@ Clients
                         <th>Registered</th>
                         <th>Client Name</th>
                         <th>Email</th>
-                        <th>Total Free Credit</th>
-                        <th>Free Credit Balance</th>
-                        <th>Total Purchased</th>
-                        <th>Purchased Credit Balance</th>
-                        <th>Total Credit Balance</th>
+                        <th>Free $</th>
+                        <th>Purchased $</th>
+                        <th>Total $</th>
                         <th>Updated</th>
                         <th>View</th>
                     </tr>
@@ -127,13 +125,12 @@ Clients
                         <td>{{client.created_at|date:"m/d/Y"}}</td>
                         <td>{{client.user.first_name}} {{client.user.last_name}}</td>
                         <td>{{client.user.email}}</td>
-                        <td></td>
                         <td>{{client.free_credit_balance}}</td>
-                        <td></td>
                         <td>{{client.purchased_credit_balance}}</td>
                         <td>{{client.Total_credits}}</td>
                         <td>{{client.changed_at|date:"m/d/Y"}}</td>
                         <td><a class="button" href="/client_detail/?client={{client.id}}">View</a></td>
+                        
                     </tr>
             
                 {% endif %}
@@ -145,21 +142,21 @@ Clients
     </div>
     {% endif %}
     <div class="clearfix">
-        <div class="hint-text">Showing Page <b>{{ events.number }}</b> out of <b>{{ events.paginator.num_pages }}</b> Pages | Events count ({{total_events}})</div>
+        <div class="hint-text">Showing Page <b>{{ clients.number }}</b> out of <b>{{ clients.paginator.num_pages }}</b> Pages | Clients Count ({{total_client}})</div>
         <ul class="pagination">
-            {% if events.has_previous %}
-            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page=1" class="page-link">First</a></li>
-            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ events.previous_page_number }}">Previous</a></li>
-            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ events.previous_page_number }}" class="page-link">{{ events.previous_page_number }}</a></li>
+            {% if clients.has_previous %}
+            <li class="page-item"><a href="?clientType={{selectedClientType}}&page=1" class="page-link">First</a></li>
+            <li class="page-item"><a href="?clientType={{selectedClientType}}&page={{ clients.previous_page_number }}">Previous</a></li>
+            <li class="page-item"><a href="?clientType={{selectedClientType}}&page={{ clients.previous_page_number }}" class="page-link">{{ clients.previous_page_number }}</a></li>
             {% endif %}
 
-            <li class="page-item active"><a href="#" class="page-link">{{ events.number }}</a></li>
+            <li class="page-item active"><a href="#" class="page-link">{{ clients.number }}</a></li>
 
-            {% if events.has_next %}
-            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ events.next_page_number }}" class="page-link">{{ events.next_page_number }}</a></li>
-            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ second_previous }}" class="page-link">{{ second_previous }}</a></li>
-            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{events.next_page_number}}" class="page-link">Next</a></li>
-            <li class="page-item"><a href="?selectedUser={{selectedUser}}&stateFilter={{stateFilter}}&countyFilter={{countyFilter}}&saletypeFilter={{saletypeFilter}}&page={{ events.paginator.num_pages }}">Last</a></li>
+            {% if clients.has_next %}
+            <li class="page-item"><a href="?clientType={{selectedClientType}}&page={{ clients.next_page_number }}" class="page-link">{{ clients.next_page_number }}</a></li>
+            <li class="page-item"><a href="?clientType={{selectedClientType}}&page={{ second_previous }}" class="page-link">{{ second_previous }}</a></li>
+            <li class="page-item"><a href="?clientType={{selectedClientType}}&page={{clients.next_page_number}}" class="page-link">Next</a></li>
+            <li class="page-item"><a href="?clientType={{selectedClientType}}&page={{ clients.paginator.num_pages }}">Last</a></li>
             {% endif %}
         </ul>
     </div>

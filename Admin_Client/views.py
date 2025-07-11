@@ -11,7 +11,113 @@ from Admin.utils.sessions import get_logged_in_users
 from django.utils.timezone import now
 import json
 from django.contrib import messages
+from datetime import date
 # Create your views here.
+
+
+def allClients(request):
+    today_date = date.today()
+    if request.method == 'POST':
+        selectedClientType = request.POST.get('clientType','')
+    else:
+        selectedClientType = request.GET.get('clientType','')
+
+
+    client_queryset = UserDetail.objects.all().order_by('-created_at').prefetch_related('orders', 'orders__deliveries')
+    if selectedClientType == 'manual_client':
+        client_queryset = client_queryset.filter(user_type='manual_client')
+    else:
+        client_queryset = client_queryset.filter(user_type='si_client')
+
+    for client in client_queryset:
+        client.total_orders = client.orders.all().count
+        client.total_running = client.orders.filter(order_status="running").count
+        client.total_completed = client.orders.filter(order_status="completed").count
+     
+        for order in client.orders.all():
+            order.undelivered_count = order.deliveries.exclude(delivery_status='delivered').count()
+            order.ready_count = order.deliveries.filter(delivery_status='ready').count()
+            # Get the nearest delivery date
+            nearest_delivery = order.deliveries.filter(delivery_date__isnull=False).aggregate(Min('delivery_date'))
+            order.nearest_delivery_date = nearest_delivery['delivery_date__min']
+    total_client = client_queryset.count()
+    p = Paginator(client_queryset, 20)
+    page = request.GET.get('page')
+    clients = p.get_page(page)
+
+
+    current_page = int(clients.number)
+    second_previous = current_page + 2
+    context = {
+        'selectedClientType':selectedClientType,
+        'clients':clients,
+        'today_date':today_date,
+        'second_previous':second_previous,
+        'total_client':total_client,
+    }
+    return render(request, 'Admin_Client/all_clients.html', context)
+
+
+
+def clientDetail(request):
+    deliveries = ""
+    delivered = ""
+    pending = ""
+
+    if request.method == 'POST':
+        client = request.POST.get('client','')
+        selected_orderstatus = request.POST.get('order-status','')
+    else:
+        client = request.GET.get('client','')
+        selected_orderstatus = request.GET.get('order-status','')
+    if client:
+        client_instance = UserDetail.objects.get(pk=client)
+        stat_instance = UserDetail.objects.get(pk=client)
+        running_orders = len(stat_instance.orders.filter(order_status='running'))
+        completed_orders = len(stat_instance.orders.filter(order_status='completed'))
+        total_order_amount = stat_instance.orders.aggregate(total_amount=Sum('order_price'))['total_amount']
+        total_paid = stat_instance.orders.filter(payment_status=Orders.PAID).aggregate(paid_amount=Sum('order_price'))['paid_amount']
+        total_unpaid = stat_instance.orders.exclude(payment_status=Orders.PAID).aggregate(unpaid_amount=Sum('order_price'))['unpaid_amount']
+
+        orders = client_instance.orders.all()
+        if selected_orderstatus and selected_orderstatus == "running":
+            orders = orders.filter(order_status="running")
+        elif selected_orderstatus and selected_orderstatus == "completed":
+            orders = orders.filter(order_status="completed")
+        
+        
+        for order in orders:
+            
+            deliveries = len(order.deliveries.all())
+            delivered = len(order.deliveries.filter(delivery_status='delivered'))
+            pending = deliveries - delivered
+            order.undelivered_count = order.deliveries.exclude(delivery_status='delivered').count()
+        user_instance = client_instance.user
+        logged_in_users = get_logged_in_users()
+        login_status = "Online" if user_instance in logged_in_users else user_instance.last_login
+
+
+    context = {
+        'client':client,
+        'client_instance':client_instance,
+        'selected_orderstatus':selected_orderstatus,
+        'all_orders':len(orders),
+        'running_orders':running_orders,
+        'completed_orders':completed_orders,
+        'total_order_amount':total_order_amount,
+        'total_paid':total_paid,
+        'total_unpaid':total_unpaid,
+        'orders':orders,
+        'deliveries':deliveries,
+        'delivered':delivered,
+        'pending':pending,
+        'login_status':login_status,
+
+    }
+    return render(request, 'Admin_Client/client_detail.html', context)
+
+
+
 def clientSettings(request):
     if request.method == 'POST':
         client = request.POST.get('client','')
@@ -136,62 +242,7 @@ def UpdatePaymentStatus(request):
         return HttpResponseRedirect(f"/client_detail/?client={client}&order-status={selected_orderstatus}")
     return redirect('client_detail')
 
-def clientDetail(request):
-    deliveries = ""
-    delivered = ""
-    pending = ""
 
-    if request.method == 'POST':
-        client = request.POST.get('client','')
-        selected_orderstatus = request.POST.get('order-status','')
-    else:
-        client = request.GET.get('client','')
-        selected_orderstatus = request.GET.get('order-status','')
-    if client:
-        client_instance = UserDetail.objects.get(pk=client)
-        stat_instance = UserDetail.objects.get(pk=client)
-        running_orders = len(stat_instance.orders.filter(order_status='running'))
-        completed_orders = len(stat_instance.orders.filter(order_status='completed'))
-        total_order_amount = stat_instance.orders.aggregate(total_amount=Sum('order_price'))['total_amount']
-        total_paid = stat_instance.orders.filter(payment_status=Orders.PAID).aggregate(paid_amount=Sum('order_price'))['paid_amount']
-        total_unpaid = stat_instance.orders.exclude(payment_status=Orders.PAID).aggregate(unpaid_amount=Sum('order_price'))['unpaid_amount']
-
-        orders = client_instance.orders.all()
-        if selected_orderstatus and selected_orderstatus == "running":
-            orders = orders.filter(order_status="running")
-        elif selected_orderstatus and selected_orderstatus == "completed":
-            orders = orders.filter(order_status="completed")
-        
-        
-        for order in orders:
-            
-            deliveries = len(order.deliveries.all())
-            delivered = len(order.deliveries.filter(delivery_status='delivered'))
-            pending = deliveries - delivered
-            order.undelivered_count = order.deliveries.exclude(delivery_status='delivered').count()
-        user_instance = client_instance.user
-        logged_in_users = get_logged_in_users()
-        login_status = "Online" if user_instance in logged_in_users else user_instance.last_login
-
-
-    context = {
-        'client':client,
-        'client_instance':client_instance,
-        'selected_orderstatus':selected_orderstatus,
-        'all_orders':len(orders),
-        'running_orders':running_orders,
-        'completed_orders':completed_orders,
-        'total_order_amount':total_order_amount,
-        'total_paid':total_paid,
-        'total_unpaid':total_unpaid,
-        'orders':orders,
-        'deliveries':deliveries,
-        'delivered':delivered,
-        'pending':pending,
-        'login_status':login_status,
-
-    }
-    return render(request, 'Admin_Client/client_detail.html', context)
 def createDelivery(request):
     if request.method == "POST":
         client_id = request.POST.get('client_id','')
@@ -243,46 +294,6 @@ def updateDeliveryStatus(request):
 
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
-from datetime import date
-def allClients(request):
-    today_date = date.today()
-    if request.method == 'POST':
-        selectedClientType = request.POST.get('clientType','')
-    else:
-        selectedClientType = request.GET.get('clientType','')
-
-
-    client_queryset = UserDetail.objects.all().order_by('-created_at').prefetch_related('orders', 'orders__deliveries')
-    if selectedClientType == 'manual_client':
-        client_queryset = client_queryset.filter(user_type='manual_client')
-    else:
-        client_queryset = client_queryset.filter(user_type='si_client')
-
-    for client in client_queryset:
-        client.total_orders = client.orders.all().count
-        client.total_running = client.orders.filter(order_status="running").count
-        client.total_completed = client.orders.filter(order_status="completed").count
-     
-        for order in client.orders.all():
-            order.undelivered_count = order.deliveries.exclude(delivery_status='delivered').count()
-            order.ready_count = order.deliveries.filter(delivery_status='ready').count()
-            # Get the nearest delivery date
-            nearest_delivery = order.deliveries.filter(delivery_date__isnull=False).aggregate(Min('delivery_date'))
-            order.nearest_delivery_date = nearest_delivery['delivery_date__min']
-    p = Paginator(client_queryset, 20)
-    page = request.GET.get('page')
-    clients = p.get_page(page)
-
-
-    current_page = int(clients.number)
-    second_previous = current_page + 2
-    context = {
-        'selectedClientType':selectedClientType,
-        'clients':clients,
-        'today_date':today_date,
-        'second_previous':second_previous,
-    }
-    return render(request, 'Admin_Client/all_clients.html', context)
 
 @csrf_exempt
 def updateOrderStatus(request):
