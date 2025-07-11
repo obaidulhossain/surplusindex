@@ -19,6 +19,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.urls import reverse
 from .utils import token_generator
 from django.contrib.sites.shortcuts import get_current_site
+from si_user.models import UserDetail
 
 
 
@@ -114,7 +115,10 @@ class VerificationView(View):
                 return redirect('login')
             user.is_active=True
             user.save()
+            update_detail = UserDetail.objects.get(user=user)
+            update_detail.update_total_credits()
             messages.success(request,'Account Successfully Activated')
+            messages.info(request,'You have recieved 20 Free credits. Log in and access thousands of active prospects now.')
             return redirect ('login')
         except Exception as ex:
             pass

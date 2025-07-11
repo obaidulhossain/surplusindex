@@ -23,6 +23,12 @@ Clients
     </div>
 
     <div class="section-filter-full" id="filters">
+    <form method="post" action="{% url 'update_credits' %}">
+    {% csrf_token %}
+        <input type="hidden" value="{{selectedClientType}}" name="clientType">
+        <button class="button" type="submit">Update Client Credit Usage</button>
+    </form>
+
     {% if selectedClientType == "manual_client" %}
     
     {% else %}
