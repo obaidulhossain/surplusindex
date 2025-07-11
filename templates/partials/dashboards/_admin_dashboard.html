@@ -28,7 +28,7 @@ admin dashboard
                 <td>{{Tran.created_at}}</td>
                 <td>{{Tran.user.id}}</td>
                 <td>{{Tran.user.username}}</td>
-                <td><input type="button" title="Click to copy Email" class="button" value="{{Tran.user.email}}" data="{{Tran.user.email}}"onclick="copyGlobal(this, '{{Tran.user.email}}');"></td>
+                <td><input type="button" title="Click to copy Email" class="button" value="{{Tran.user.email}}" data="{{Tran.user.email}}"onclick="copyGlobal(this, '{{Tran.user.email}}');" style="width: -webkit-fill-available;"></td>
                 <td>{{Tran.amount}}</td>
                 <td>{{Tran.number_of_leads}}</td>
                 <td><input type="button" title="Click to copy Stripe Customer ID" class="button" value="Stripe ID" data="{{Tran.stripe_customer_id}}"onclick="copyGlobal(this, 'Stripe ID');"></td>
