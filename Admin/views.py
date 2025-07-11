@@ -9,10 +9,18 @@ import json
 from django.db.models import Prefetch
 from si_user.models import UserPayment
 #----------------Data--------------------start
-def get_admin_dashboard_context(user):
-    Transactions = UserPayment.objects.all().order_by('-created_at')
+def get_admin_dashboard_context(request, user):
+    transaction_queryset = UserPayment.objects.all().order_by('-created_at')
+    total_transactions = transaction_queryset.count()
+    p = Paginator(transaction_queryset, 25)
+    page = request.GET.get('page')
+    Transactions = p.get_page(page)
+    tr_current_page = int(Transactions.number)
+    tr_second_previous = tr_current_page + 2
     context= {
         'Transactions':Transactions,
+        'total_transactions':total_transactions,
+        'tr_second_previous':tr_second_previous,
         
     }
     # Logic to get context data for client dashboard

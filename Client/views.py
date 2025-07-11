@@ -20,7 +20,7 @@ from datetime import date
 from urllib.parse import urlencode
 from django.urls import reverse
 
-def get_client_dashboard_context(user):
+def get_client_dashboard_context(request, user):
     statuses = Status.objects.filter(client=user)
     activeLeads = statuses.filter(archived=False).exclude(closing_status__in=['closed_funded', 'closed_not_funded'])
     closedLeads = statuses.filter(closing_status__in=['closed_funded', 'closed_not_funded'])

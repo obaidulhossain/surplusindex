@@ -30,7 +30,7 @@ def dashboard(request):
     # Loop through user groups and gather relevant context
     for group in request.user.groups.all():
         if group.name in group_function_mapping:
-            group_context = group_function_mapping[group.name](request.user)
+            group_context = group_function_mapping[group.name](request, request.user)
             context.update(group_context)
 
     return render(request, 'propertydata/dashboard.html', context)
