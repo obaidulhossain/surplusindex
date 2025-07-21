@@ -45,7 +45,7 @@ path('filter-con', views.filter_contact, name="filter-con"),
 
     #urls for Mailing Address section
 path('fetch_mailing_address', views.fetch_mailing_address, name="fetch_mailing_address"),
-path('update_contact', views.update_contact, name="update_contact"),#used to update mailing address
+path('update_contacts', views.update_contact, name="update_contacts"),#used to update mailing address
 path('add_mailing', views.addMailing, name="add_mailing"),
         #Note: search_create_property url is used to search and create mailing address----------
 
