@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}
+Manage Subscription
+{% endblock title %}
+
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<script src="{% static 'js/media-picker.js' %}"></script>
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<div style="margin-top: 20px;" class="body-section">
+    <div class="section-header">
+        <h4>{% if SelectedPlan %}Update Plan{% else %}Create a plan{% endif %}</h4>
+        <a href="{% url 'subscription_settings' %}" class="button">Clear</a>
+    </div>
+    <div class="section-body-full">
+    <form method="post" action="{% url 'UpdatePlan' %}">
+        {% csrf_token %}
+        <input type="hidden" name="selected_plan" value={{SelectedPlan.id}}>
+        <div class="onefourth">
+            <label for="sub_name">Subscription Name</label>
+            <input type="text" id="sub_name" name="sub_name" placeholder="Subscription Plan Name" {% if SelectedPlan %}value="{{SelectedPlan.name}}"{% endif %}></br></br>
+            <label for="sub_amount">Subscription Price</label>
+            <input type="number" id="sub_amount" name="sub_amount" placeholder="Price"{% if SelectedPlan %}value="{{SelectedPlan.amount}}"{% endif %}></br></br>
+            <label for="brochure_url">Brochure Url</label>
+            <input type="text" id="brochure_url" name="brochure" placeholder="Select a file" {% if SelectedPlan %}value="{{SelectedPlan.brochure}}"{% endif %}>
+            
+
+        </div>
+        <div class="onefourth">
+            <label for="sub_stripe_product_id">Product ID</label>
+            <input type="text" name="sub_stripe_product_id" placeholder="Stripe Product ID" {% if SelectedPlan %}value="{{SelectedPlan.stripe_product_id}}"{% endif %}></br></br>
+            <label for="sub_type">Subscription Type</label>
+            <select id="sub_type" name="sub_type">
+                <option value="">-Select Subscription Type-</option>
+                <option value="subscription" {% if SelectedPlan and SelectedPlan.type == "subscription" %}selected{% endif %}>Subscription</option>
+                <option value="payperlead"{% if SelectedPlan and SelectedPlan.type == "payperlead" %}selected{% endif %}>Pay Per Lead</option>
+            </select></br></br>
+            <label for="up-button">Upload or Pick a File</label></br>
+            <button class="button" id="up-button"type="button" data-media-picker data-target="#brochure_url">Pick File</button>
+        </div>
+        <div class="onefourth">
+            <label for="sub_price_id">Price ID</label></br>
+            <input type="text" id="sub_price_id" name="sub_price_id" placeholder="Stripe Price ID" {% if SelectedPlan %}value="{{SelectedPlan.price_id}}"{% endif %}></br></br>
+            <label for="sub_interval">Duration</label>
+            <select id="sub_interval" name="sub_interval">
+                <option value="">-Select Subscription Interval-</option>
+                <option value="month"{% if SelectedPlan and SelectedPlan.interval == "month" %}selected{% endif %}>Monthly</option>
+                <option value="half_yearly" {% if SelectedPlan and SelectedPlan.interval == "half_yearly" %}selected{% endif %}>Half Yearly</option>
+                <option value="year" {% if SelectedPlan and SelectedPlan.interval == "year" %}selected{% endif %}>Yearly</option>
+            </select></br></br>
+            <label for="sub_active">Active Status</label></br>
+            <input type="checkbox" name="sub_active" id="sub_active" value="True" style="width: 20px;" {% if SelectedPlan and SelectedPlan.active == True %}checked{% endif %}>
+        </div>
+        
+        <div class="onefourth">
+            <label for="sub_description">Description</label>
+            <textarea id="sub_description" name="sub_description" rows="8" cols="35" placeholder="Write Short Description">{% if SelectedPlan %}{{SelectedPlan.description}}{% endif %}</textarea></br></br>
+            
+        </div>
+        
+        </br></br><input type="submit" value="Submit">
+    </form>
+    </div>
+</div>
+
+<div style="margin-top: 20px;" class="body-section">
+    <div class="section-header">
+        <h4>Available Plans</h4>
+    </div>
+    <div class="section-body-full">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th style="width:300px;">Name</th>
+                <th>Type</th>
+                <th>Price ID</th>
+                <th>Amount</th>
+                <th>Duration</th>
+                <th>Active</th>
+                <th>Edit</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for plan in Plans %}
+            <tr>
+                <td>{{plan.name}}</td>
+                <td>{{plan.get_type_display}}</td>
+                <td>{{plan.price_id}}</td>
+                <td>{{plan.amount}}</td>
+                <td>{{plan.get_interval_display}}</td>
+                <td>{% if plan.active == True %}<i class="bi bi-check-circle-fill" style="color:green;"></i>{% else %}<i class="bi bi-x-circle-fill" style="color:red;"></i>{% endif %}</td>
+                <td>
+                    <form method="post">
+                    {% csrf_token %}
+                        <input type="hidden" name="selected_plan" value="{{plan.id}}">
+                        <input type="submit" value="Edit">
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+{% endblock content %}

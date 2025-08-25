@@ -1,0 +1,236 @@
+{% comment %} {% load static %}
+{% load media_filters %}
+<!doctype html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:12px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+    .card{border:1px solid #eee;padding:8px;border-radius:6px;text-align:center}
+    .thumb{height:100px;object-fit:cover;width:100%}
+    .actions{margin-top:6px}
+    .search{margin-bottom:8px}
+  </style>
+</head>
+<body>
+  <h3>Media Library</h3>
+  <form method="get" class="search">
+    <input name="q" placeholder="Search title or filename" value="{{ query }}">
+    <button type="submit">Search</button>
+    <a href="{% url 'media_manager:upload_media' %}">Upload new</a>
+  </form>
+
+  <div class="grid">
+    {% for file in files %}
+      <div class="card">
+        {% if file.file.url|lower|endswith:'.jpg' or file.file.url|lower|endswith:'.jpeg' or file.file.url|lower|endswith:'.png' or file.file.url|lower|endswith:'.gif' or file.file.url|lower|endswith:'.webp' %}
+          <img src="{{ file.file.url }}" class="thumb">
+        {% else %}
+          <div style="height:100px;display:flex;align-items:center;justify-content:center;">📄</div>
+        {% endif %}
+        <div style="font-size:0.9rem;margin-top:6px;">{{ file.title|default:file.file.name }}</div>
+        <div class="actions">
+          <button onclick="copyLink('{{ file.get_url }}')" type="button">Copy link</button>
+          <button onclick="selectFile('{{ file.get_url }}')" type="button">Select</button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div style="margin-top:10px">Page {{ files.number }} of {{ files.paginator.num_pages }}</div>
+  <div style="margin-top:6px">
+    {% if files.has_previous %}
+      <a href="?page={{ files.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Previous</a>
+    {% endif %}
+    {% if files.has_next %}
+      <a href="?page={{ files.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next</a>
+    {% endif %}
+  </div>
+
+<script>
+function copyLink(url){
+  navigator.clipboard.writeText(url).then(()=>alert('Copied'))
+}
+
+function selectFile(url) {
+  // Send the selected media URL to the parent window
+  if (window.parent) {
+    window.parent.postMessage({ mediaUrl: url }, '*');
+  }
+}
+</script>
+
+</body>
+</html> {% endcomment %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  table { width: 100%; border-collapse: collapse; margin-top: 1rem;}
+  th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<h3>Media Library</h3>
+<form id="search-form">
+  <input type="search" id="search-input" name="q" placeholder="Search title or filename" value="{{ query }}">
+  <button type="submit">Search</button>
+  <a href="{% url 'media_manager:upload_media' %}">Upload new</a>
+</form>
+
+<table id="media-table">
+  <thead>
+    <tr>
+      <th>Preview</th>
+      <th>Title</th>
+      <th>Uploaded At</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div id="pagination" style="margin-top: 10px;">
+  <button id="prev-page" disabled>Previous</button>
+  <span id="page-info"></span>
+  <button id="next-page" disabled>Next</button>
+</div>
+
+<script>
+const csrfToken = '{{ csrf_token }}';
+let currentPage = 1;
+let currentQuery = '{{ query }}';
+
+function fetchMedia(page=1, query='') {
+  fetch(`?page=${page}&q=${encodeURIComponent(query)}`, {
+    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+  })
+  .then(res => res.json())
+  .then(data => {
+    currentPage = data.page;
+    currentQuery = query;
+    renderTable(data.files);
+    updatePagination(data);
+  });
+}
+
+function renderTable(files) {
+  const tbody = document.querySelector('#media-table tbody');
+  tbody.innerHTML = '';
+  if (files.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4">No files found</td></tr>`;
+    return;
+  }
+  files.forEach(file => {
+    const tr = document.createElement('tr');
+    tr.id = 'media-row-' + file.id;
+    tr.innerHTML = `
+      <td><img src="${file.url}" alt="${file.title}" width="50"></td>
+      <td>
+        <span class="file-title">${file.title}</span>
+        <input type="text" class="rename-input hidden" value="${file.title}">
+      </td>
+      <td>${file.uploaded_at}</td>
+      <td>
+        <button class="select-btn" data-url="${file.url}">Select</button>
+        <button class="rename-btn" data-id="${file.id}">Rename</button>
+        <button class="delete-btn" data-id="${file.id}">Delete</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function updatePagination(data) {
+  document.getElementById('page-info').textContent = `Page ${data.page} of ${data.num_pages}`;
+  document.getElementById('prev-page').disabled = !data.has_previous;
+  document.getElementById('next-page').disabled = !data.has_next;
+}
+
+document.getElementById('search-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const query = document.getElementById('search-input').value;
+  fetchMedia(1, query);
+});
+
+document.getElementById('prev-page').addEventListener('click', () => {
+  if (currentPage > 1) fetchMedia(currentPage - 1, currentQuery);
+});
+
+document.getElementById('next-page').addEventListener('click', () => {
+  fetchMedia(currentPage + 1, currentQuery);
+});
+
+document.querySelector('#media-table tbody').addEventListener('click', e => {
+  // Select button sends media URL back to parent window
+  if (e.target.classList.contains('select-btn')) {
+    let url = e.target.dataset.url;
+    if (window.parent) {
+      window.parent.postMessage({ mediaUrl: url }, '*');
+    } else {
+      alert('Selected file URL: ' + url);
+    }
+  }
+  // Delete button
+  else if (e.target.classList.contains('delete-btn')) {
+    let id = e.target.dataset.id;
+    if (confirm('Delete this file?')) {
+      fetch(`/media-manager/delete/${id}/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrfToken}
+      }).then(res => res.json()).then(data => {
+        if (data.success) {
+          fetchMedia(currentPage, currentQuery);
+        } else {
+          alert(data.error || 'Error deleting file');
+        }
+      });
+    }
+  }
+  // Rename button toggles input
+  else if (e.target.classList.contains('rename-btn')) {
+    let row = e.target.closest('tr');
+    let titleSpan = row.querySelector('.file-title');
+    let input = row.querySelector('.rename-input');
+
+    titleSpan.classList.add('hidden');
+    input.classList.remove('hidden');
+    input.focus();
+
+    input.addEventListener('blur', () => {
+      let newTitle = input.value.trim();
+      if (!newTitle) {
+        alert('Title cannot be empty');
+        input.focus();
+        return;
+      }
+      fetch(`/media-manager/rename/${e.target.dataset.id}/`, {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrfToken, 'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `title=${encodeURIComponent(newTitle)}`
+      }).then(res => res.json()).then(data => {
+        if (data.success) {
+          titleSpan.textContent = data.title;
+        } else {
+          alert(data.error || 'Error renaming file');
+        }
+        titleSpan.classList.remove('hidden');
+        input.classList.add('hidden');
+      }, () => {
+        titleSpan.classList.remove('hidden');
+        input.classList.add('hidden');
+      });
+    }, { once: true });
+  }
+});
+
+// Load initial page
+fetchMedia(currentPage, currentQuery);
+
+</script>
+</body>
+</html>

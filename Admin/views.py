@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponseRedirect
 from propertydata.models import *
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -7,10 +7,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 from django.db.models import Prefetch
-from si_user.models import UserPayment
+from si_user.models import *
 #----------------Data--------------------start
 def get_admin_dashboard_context(request, user):
-    transaction_queryset = UserPayment.objects.all().order_by('-created_at')
+    transaction_queryset = UserTransactions.objects.all().order_by('-created_at')
     total_transactions = transaction_queryset.count()
     p = Paginator(transaction_queryset, 25)
     page = request.GET.get('page')
@@ -539,5 +539,83 @@ def assignSKP(request):
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
+def CreateUpdatePlan(request):
+    plan = None
+    if request.method == "POST":
+        selectedPlan = request.POST.get('selected_plan',"")
+        SubName = request.POST.get('sub_name',"")
+        SubAmount = request.POST.get('sub_amount',"")
+        SubProductid = request.POST.get('sub_stripe_product_id',"")
+        SubType = request.POST.get('sub_type',"")
+        SubPriceid= request.POST.get('sub_price_id',"")
+        SubInterval= request.POST.get('sub_interval',"")
+        SubDescription= request.POST.get('sub_description',"")
+        SubActive= request.POST.get('sub_active',"False")
+        SubBrochure = request.POST.get('brochure',"")
+        if selectedPlan:
+            PlanInstance = SubscriptionPlan.objects.get(pk=selectedPlan)
+            PlanInstance.name = SubName
+            PlanInstance.type = SubType
+            PlanInstance.description = SubDescription
+            PlanInstance.price_id = SubPriceid
+            PlanInstance.stripe_product_id = SubProductid
+            PlanInstance.amount = SubAmount
+            PlanInstance.interval = SubInterval
+            if SubActive == "True":
+                PlanInstance.active = True
+            else:
+                PlanInstance.active = False
+            PlanInstance.brochure = SubBrochure
+            PlanInstance.save()
+            plan = PlanInstance.pk
+            messages.info(request, f"{SubName} Plan Updated")
+        else:
+            UpdatePlan, Created = SubscriptionPlan.objects.update_or_create(
+                price_id=SubPriceid,
+                defaults={
+                    'name':SubName,
+                    'type':SubType,
+                    'description':SubDescription,
+                    'stripe_product_id':SubProductid,
+                    'amount':SubAmount,
+                    'interval':SubInterval,
+                    'active' : SubActive,
+                    'brochure' : SubBrochure
+                }
+            )
+            plan = UpdatePlan.pk
+            if Created:
+                messages.success(request, "A new Plan Created")
+            else:
+                messages.info(request, f"{SubName} Plan Updated")
 
+    return HttpResponseRedirect(f"/manage_subscription/?selected_plan={plan}")
 
+def SubscriptionSettings(request):
+    AllPlans = SubscriptionPlan.objects.all().order_by('created_at')
+    PlanInstance = None
+    if request.method == "POST":
+        selectedPlan = request.POST.get('selected_plan',"")
+    else:
+        selectedPlan = request.GET.get('selected_plan',"")
+    if selectedPlan:
+        PlanInstance = SubscriptionPlan.objects.get(pk=selectedPlan)
+    
+
+    context = {
+        'SelectedPlan':PlanInstance,
+        'Plans':AllPlans,
+    }
+    return render(request, 'Admin/manage_subs.html', context)
+
+def ActiveSubscriptions(request):
+    AvailablePlans = SubscriptionPlan.objects.all().order_by('name')
+    Subscriptions = StripeSubscription.objects.all().order_by('current_period_end')
+    if request.method == "POST":
+        selectedPlan = request.POST.get('selectedPlan',"")
+        Subscriptions = Subscriptions.filter(plan=selectedPlan)
+    context = {
+        'AvailablePlans':AvailablePlans,
+        'Subscriptions':Subscriptions
+    }
+    return render(request, 'Admin/active_subs.html', context)

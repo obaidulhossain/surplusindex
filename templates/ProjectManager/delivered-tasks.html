@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}
+Delivered Tasks
+{% endblock title %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<h1>Delivered Tasks</h1>
+
+
+
+
+<script src="{% static 'js/ProjectManager.js' %}"></script>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+{% endblock content %}

@@ -19,40 +19,65 @@
         </a>
     </li>
     <li class="sidebar-item">
-        <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#projects"
-            aria-expanded="false" aria-controls="leads">
-            {% comment %} <i class="lni lni-dashboard-square-1"></i> {% endcomment %}
-            <span>Projects</span>
+        <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#subscription" aria-expanded="false" aria-controls="leads">
+            <i class="bi bi-cart4"></i>
+            <span>Subscription</span>
         </a>
-        <ul id="projects" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
+        <ul id="subscription" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
             <li class="sidebar-item child">
-                <a href="#" class="sidebar-link">
-                    {% comment %} <i class="lni lni-arrow-all-direction"></i> {% endcomment %}
-                    <span>All Projects</span>
+                <a href="{% url 'active_subscription' %}" class="sidebar-link">
+                    <i class="bi bi-cart-check"></i>
+                    <span>Active Subscriptions</span>
                 </a>
             </li>
             <li class="sidebar-item child">
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'subscription_settings' %}" class="sidebar-link">
+                    <i class="bi bi-sliders"></i>
+                    <span>Manage Subscriptions</span>
+                </a>
+            </li>
+        </ul>
+    </li>
+    <li class="sidebar-item">
+        <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#projects"
+            aria-expanded="false" aria-controls="leads">
+            <i class="bi bi-speedometer"></i>
+            <span>Project Manager</span>
+        </a>
+        <ul id="projects" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
+            <li class="sidebar-item child">
+                <a href="{% url 'project_dashboard' %}" class="sidebar-link">
+                    <span>Projects Dashboard</span>
+                </a>
+            </li>
+            <li class="sidebar-item child">
+                <a href="{% url 'project_manager' %}" class="sidebar-link">
+                    {% comment %} <i class="lni lni-arrow-all-direction"></i> {% endcomment %}
+                    <span>Manage Projects</span>
+                </a>
+            </li>
+            <li class="sidebar-item child">
+                <a href="{% url 'task_manager' %}" class="sidebar-link">
                     {% comment %} <i class="lni lni-agenda"></i> {% endcomment %}
                     <span>Task Manager</span>
                 </a>
             </li>
             <li class="sidebar-item child">
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'active_tasks' %}" class="sidebar-link">
                     {% comment %} <i class="lni lni-pen-to-square"></i> {% endcomment %}
                     <span>Active Tasks</span>
                 </a>
             </li>
 
             <li class="sidebar-item child">
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'delivered_tasks' %}" class="sidebar-link">
                     {% comment %} <i class="lni lni-check-square-2"></i> {% endcomment %}
                     <span>Delivered Tasks</span>
                 </a>
             </li>
 
             <li class="sidebar-item child">
-                <a href="#" class="sidebar-link">
+                <a href="{% url 'project_settings' %}" class="sidebar-link">
                     {% comment %} <i class="lni lni-sliders-horizontal-square-2"></i> {% endcomment %}
                     <span>Project Settings</span>
                 </a>

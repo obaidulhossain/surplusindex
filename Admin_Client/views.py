@@ -211,7 +211,7 @@ def CreateOrder(request):
         customer_id = request.POST.get('customer_id','')
         checkout_id = request.POST.get('checkout_id','')
 
-        transaction = UserPayment.objects.create(
+        transaction = UserTransactions.objects.create(
             user = User_instance,
             stripe_customer_id = customer_id,
             stripe_checkout_id = checkout_id,
@@ -250,7 +250,7 @@ def UpdatePaymentStatus(request):
         Selected_Status = request.POST.get('payment-status','')
 
         order_instance = Orders.objects.get(pk=order)
-        transaction_instance = UserPayment.objects.get(pk=order_instance.transaction.id)
+        transaction_instance = UserTransactions.objects.get(pk=order_instance.transaction.id)
         if Selected_Status == "paid":
             transaction_instance.has_paid = True
         else:

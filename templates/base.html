@@ -16,7 +16,7 @@
 <body>
     <div class="wrapper">
 
-        <aside id="sidebar">
+        <aside id="sidebar" class="{% if sidebar_expanded %}expand{% endif %}">
             {% if user.is_authenticated %}
             {% for group in user.groups.all %}
 

@@ -46,6 +46,6 @@ class Orders(models.Model):
     order_price = models.DecimalField(decimal_places=2, max_digits=12, null=True, blank=True)
     payment_method = models.CharField(max_length=255, blank=True, null=True)
     payment_status = models.CharField(max_length=100, blank=True, choices=PAYMENTCHOICES)
-    transaction = models.ForeignKey('si_user.UserPayment', on_delete=models.CASCADE, null=True, blank=True)
+    transaction = models.ForeignKey('si_user.UserTransactions', on_delete=models.CASCADE, null=True, blank=True)
 
 

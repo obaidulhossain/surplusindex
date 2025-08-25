@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% block title %}
+Manage Projects
+{% endblock title %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/admin.css' %}" rel="stylesheet">
+<meta name="csrf-token" content="{{ csrf_token }}">
+{% if not selected_project %}
+<h1>Manage Projects</h1>
+<div class="onehalf section">
+    <h2>Create New Project</h2>
+    <form method ="POST" action="{% url 'create_project' %}">
+    {% csrf_token %}
+        <label for="pr_name" id="pr_name">Project Name</label></br>
+        <input type="text" name="pr_name"></br>
+        <label for="pr_description" >Project Description</label></br>
+        <input type="text" name="pr_description" id="pr_description"></br>
+        <input type="submit" class="primary-btn"></br>
+    </form>
+</div>
+<div class="onefourth section">
+    <h2>Select Project</h2>
+    <form method="POST">
+    {% csrf_token %}
+        
+        <select id="project" name="project" onchange="this.form.submit()" style="width:100%;">
+            <option>Select Project</option>
+            {% for project in projects %}
+            <option value="{{project.id}}" {% if selected_project == project.id %}selected{% endif %}>{{project.name|upper}}</option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+<div class="onefourth section">
+<h2>Navigate</h2>
+</div>
+{% else %}
+<div>
+<h1 style="display: inline-block;">{{project_instance.name|upper}}</h1>
+
+<a href="{% url 'project_manager' %}" style="float:right"><i class="bi bi-x-circle-fill" style="color:#c22323; font-size:25px; margin:0px 3px;"></i></a>
+<a href="#" style="float:right"><i class="bi bi-question-circle-fill" style="color:orange; font-size:25px; margin:0px 3px;"></i></a>
+</div>
+<div class="section-body-full">
+    <div class="section-header">
+    <h4>Update Cycle</h4>
+        <div>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" value="{{project_instance.id}}" name="project">
+            <select name="cycle-year" onchange="this.form.submit()">
+            {% for year in years %}
+            <option value="{{ year }}" {% if year == selected_year %}selected{% endif %}>{{ year }}</option>
+            {% endfor %}
+
+            </select>
+        </form>
+        </div>
+    </div>
+    <div class="section-body-full">
+    {% if load_cycles.count > 0 %}
+        {% for cycle in load_cycles %}
+        <a href="/Project-Manager/get-tasks/{{ cycle.id }}/" class="cycle {% if cycle.status == 'running' %}running{% elif cycle.status == 'active' %}active{% elif cycle.status == 'completed' %}completed{% endif %}" data-cycle-id="{{ cycle.id }}">
+            <h4>{{ cycle.week }}</h4>
+        </a>
+        {% endfor %}    
+    {% else %}
+    <p>No Update Cycle Found</p>
+    <form method="POST" action="{% url 'create_cycles' %}">
+    {% csrf_token %}
+        <input type="hidden" name="project" value="{{selected_project}}">
+        <input type="hidden" name="cycle-year" value="{{selected_year}}">
+        <input type="submit" value="Create Update Cycles for the Year {{selected_year}}">
+    </form>
+    {% endif %}
+    </div>
+</div>
+{% if selected_cycle %}
+<div class="section-body-full" style="margin-top:20px;">
+    <div class="section-header">
+        <h4>Week {{cycle_instance.week}} | {{cycle_instance.year}} <small>({{cycle_instance.cycle_start|date:'m/d/Y'}}-{{cycle_instance.cycle_end|date:'m/d/Y'}})</small></h4>
+    </div>
+    <div class="section-body-full">
+    {% if tasks.count > 0 %}
+        {% for task in tasks %}
+        <div class="task-section {{ task.css_class }}">
+        {% comment %} <div class="task-section {% if task.delivery_date < today and task.status != "delivered"%}delivery-due{% elif task.status == "delivered"%}delivered{% elif task.status == "assigned" %}assigned{% elif task.status == "created" %}created{% endif %}"> {% endcomment %}
+            <div class="onehalf">
+                <h4>{{task.task_name}}</h4>
+                <h6>Sale Range: {{task.cycle.sale_from|date:'m/d/Y'}}-{{task.cycle.sale_to|date:'m/d/Y'}}</h6>
+                <p>{{task.description}}</p>
+
+            </div>
+            <div class="onefourth" style="border-left:2px solid grey; padding:0px 20px;">
+                <h6 style="text-align:left">Assigned To</h6>
+                {% for user in task.template.assigned_to.all %}
+                <div class="checkbox-wrapper">
+                    <input type="checkbox" id="assigned_to_user_{{ user.id }}" onchange="update_assignment({{ user.id }}, {{ task.id }})" {% if user in task.assigned_to.all %} checked {% endif %}>
+                    <label id="assign_label_{{ user.id }}_{{ task.id }}">{{ user.username|upper }} </label><span id="assign_status_{{ user.id }}_{{ task.id }}"></span><br>
+                </div>
+                {% endfor %}
+                    
+                
+            </div>
+            <div class="onefourth">
+                <label for="update_status_{{ task.id }}">Update Status</label></br>
+                <select id="update_status_{{ task.id }}" name="update_status" style="width:95%" onchange="update_task_status({{ task.id }})">
+                    <option value="created" {% if task.status == "created" %}selected{% endif %}>Created</option>
+                    <option value="assigned" {% if task.status == "assigned" %}selected{% endif %}>Assigned</option>
+                    <option value="delivered" {% if task.status == "delivered" %}selected{% endif %}>Delivered</option>
+                    <option value="completed" {% if task.status == "completed" %}selected{% endif %}>Completed</option>
+                </select>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <p>No tasks found for this cycle.</p>
+    <form method="POST" action="/Project-Manager/load-tasks/">
+        {% csrf_token %}
+        <input type="hidden" name="cycle" value="{{selected_cycle}}">
+        <input type="hidden" name="project" value="{{selected_project}}">
+        <input type="hidden" name="year" value="{{selected_year}}">
+        <input type="submit" value="Load Task Events">
+    </form>
+    {% endif %}
+    </div>
+</div>
+
+{% endif %}
+
+{% comment %} <div id="tasks-container" class="section-body-full" style="margin-top:20px;">
+    <div class="section-header">
+    <h4>Tasks will load here | Please Select a cycle Week</h4>
+    </div>
+</div> {% endcomment %}
+
+
+{% endif %}
+<script src="{% static 'js/ProjectManager.js' %}"></script>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+<script>
+
+
+
+
+document.addEventListener("DOMContentLoaded", function() {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
+    const cycles = document.querySelectorAll(".cycle");
+    const tasksContainer = document.getElementById("tasks-container");
+    
+
+    cycles.forEach(cycle => {
+        cycle.addEventListener("click", function() {
+            const cycleId = this.dataset.cycleId;
+
+            fetch(`/Project-Manager/get-tasks/${cycleId}/`)   // ✅ endpoint to load tasks
+                .then(response => response.json())
+                .then(data => {
+                    const today = new Date()
+                    today.setHours(0,0,0,0); // normalize to midnight for safe comparison
+                    
+                    if (data.tasks.length > 0) {
+                        tasksContainer.innerHTML = `
+                            <div class="section-header">
+                            <h4>Week : ${data.cycle.week} | ${data.cycle.year} </h4>
+                            </div>
+                        
+                            ${data.tasks.map(task => {
+                                let taskClass = "task-section";
+                                if (new Date(task.delivery_date) < today && task.status !== "delivered") {
+                                    taskClass += " delivery-due";
+                                } else if (task.status === "delivered") {
+                                    taskClass += " delivered";
+                                } else if (task.status === "assigned") {
+                                    taskClass += " assigned";
+                                }
+                                return `
+                                    <div class="${taskClass}">
+                                        <div class="onehalf">
+                                            <h4>${task.task_name}</h4>
+                                        </div>
+                                        <div class="onefourth">
+                                            <h5>Assigned To</h5>
+                                            <h6>${task.assigned_to.map(u => u.toUpperCase()).join("<br>")}</h6>
+                                        </div>
+                                        <div class="onefourth">
+                                            <h4></h4>
+                                        </div>
+                                        <p>${task.task_group}</p>
+                                        <p>${task.assigned_to.join(", ")}</p>
+                                        <p>${task.status}</p>
+                                    </div>
+                                `;
+                            }).join("")}
+                            `;
+                        
+                    } else {
+                        tasksContainer.innerHTML = `
+                        <div class="section-header">
+                            <h4>Week : ${data.cycle.week} | ${data.cycle.year} </h4>
+                        </div>
+                        <p>No tasks found for this cycle.</p>
+                        <form method="POST" action="/Project-Manager/load-tasks/">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="${csrfToken}">
+                            <input type="hidden" name="cycle" value='${cycleId}'>
+                            <input type="hidden" name="project" value="${data.cycle.project}">
+                            <input type="hidden" name="year" value="${data.cycle.year}">
+                            <input type="submit" value="Load Task Events">
+                        </form>
+                        `;
+                    }
+                });
+        });
+    });
+});
+</script>
+{% endblock content %}

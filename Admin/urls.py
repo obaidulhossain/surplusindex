@@ -17,7 +17,9 @@ urlpatterns = [
 
     path('all_contacts', views.All_Contacts, name='all_contacts'),
     path('assignSKP/', views.assignSKP, name="assignSKP"),
-
+    path('manage_subscription/',views.SubscriptionSettings, name='subscription_settings'),
+    path('active_subscription/',views.ActiveSubscriptions, name='active_subscription'),
+    path('create_update_plan', views.CreateUpdatePlan, name="UpdatePlan")
     
 
 

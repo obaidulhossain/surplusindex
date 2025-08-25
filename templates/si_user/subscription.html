@@ -3,9 +3,155 @@
 {% load static %}
 {% block content%}
 
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
 
 <h1>Welcome {{user.first_name}}</h1>
 
+<div class="full-section" style="height:auto!important;">
+    <h2 class="Hcenter">Manage your Subscriptions</h2></br>
+    
+    <form onsubmit="return false;" class="onehalf">
+        <label for="search_sub">Filter Enrolled Subscriptions</label></br>
+        <input type="text" name="search_sub" id="search_sub" placeholder="Search Enrolled Subscription" style="width:90%">
+    </form>
+    <form method="post" action="{% url 'hide_show_hidden_subscription' %}" class="onefourth" style="text-align: center;">
+    {% csrf_token %}
+        <label for="show_hide_hidden">Show Hidden Plans</label></br>
+        <input type="checkbox" style="width: 20px; align:center;" name="show_hide_hidden" id="show_hide_hidden" onclick="this.form.submit()" {% if request.user.clients.first.manage_sub_show_hidden %} checked {% endif %}>
+    </form>
+    <div class="table-wrapper" style="max-height:400px; overflow-y: auto;margin-top:20px;">
+        {% if subscriptions.count > 0 %}
+        <div id="subscriptions-list">
+            {% for subs in subscriptions %}
+            <div class="section-body-full subscription-item" style="margin-top:20px; border-radius:7px;">
+
+                <div class="onehalf">
+                    <h4 class="sub-name">{{ subs.plan.name }}</h4>
+                    <h6>Started In: {{ subs.created_at|date:"m/d/Y" }}</h6>
+                    <h6>Ending In: {{ subs.current_period_end|date:"m/d/Y" }}</h6>
+                    {% if subs.status == 'canceled' %}
+                    <h6 style="color:red;">Subscription Cancelled</h6>
+                    <form method="post" action="{% url 'hide_show_subscription' %}" style="display:inline;">
+                    {% csrf_token %}
+                        <input type="hidden" name="sub_id" value="{{subs.id}}">
+                        <button type="submit" class="button" onclick="return confirm('Are you sure you want to hide/unhide this subscription entry?');">
+                            {% if subs.hidden %}Unhide{% else %}Hide{% endif %}
+                        </button>
+                    </form>
+                    {% else %}
+                    <a href="{% url 'cancel_subscription' subs.subscription_id %}" class="button" onclick="return confirm('Are you sure you want to cancel this subscription?');">Cancel</a>
+                    {% endif %}
+                </div>
+
+                <div class="onehalf">
+                    <h4>Transaction History</h4>
+                    <table id="leads-table" class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody style="max-height:150px!important; overflow-y: auto!important;">
+                        {% for tx in subs.transactions %}
+                            <tr>
+                                <td>{{ tx.created_at|date:"d/m/Y" }}</td>
+                                <td>{{ tx.amount }} {{ tx.currency|upper }}</td>
+                                <td>{{ tx.status|title }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3">No transactions found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+
+            {% endfor %}
+            <div id="no-result-message" style="display:none;">
+                <h6>No Subscription Enrollment Found <a href="#subscriptions">Enroll Now</a></h6>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <h5>No Subscription Enrollment Found <a href="#subscriptions">Enroll Now</a></h5>
+
+
+    {% endif %}
+<script>
+    document.getElementById("search_sub").addEventListener("input", function() {
+        let filter = this.value.toLowerCase().trim();
+        let items = document.querySelectorAll(".subscription-item");
+        let anyVisible = false;
+
+        items.forEach(function(item) {
+            let name = item.querySelector(".sub-name").textContent.toLowerCase();
+            if (!filter || name.includes(filter)) {
+                item.style.display = "";
+                anyVisible = true;
+            } else {
+                item.style.display = "none";
+                
+            }
+        });
+        document.getElementById("no-result-message").style.display = anyVisible ? "none" : "block";
+    });
+</script>
+</div>
+
+<div class="full-section" style="height:auto!important; margin-top:50px;" id="subscriptions">
+    <h2 class="Hcenter">SUBSCRIPTION BASED SERVICES</h2>
+    <form onsubmit="return false;" class="onehalf">
+        <label for="search_plan">Search Subscription Plans</label></br>
+        <input type="text" name="search_plan" id="search_plan" placeholder="Search with State or full plan name (Ex: Ohio)" style="width:90%">
+    </form>
+    <div class="table-wrapper" style="max-height:600px; overflow-y: auto;margin-top:20px;">
+    <div id="plan-list">
+    {% for plan in Plans %}
+    <div class="section-body-full plan-item" style="2px solid #d2d2d2; border-radius:10px; padding:20px; margin:10px; background-color: #f3f3f3;">
+        <div class="onehalf">
+        <h4 class="plan-name">{{plan.name}}</h4>
+        <p>{{plan.description}}</p>
+        </div>
+        <div class="onefourth">
+        </div>
+        <div class="onefourth">
+            <h3>${{plan.amount}}/Month</h3>
+            <a href="#" class="button button-large buy-button" role="button" data-price-id="{{plan.price_id}}" data-leads="0" data-amount="{{plan.amount}}">Enroll Now</a>
+            <a href={% if plan.brochure %}"{{plan.brochure}}" target="blank"{% else %}"#"{% endif %} class="button button-large">Download Brochure</a>
+        </div>
+    </div>
+    {% endfor %}
+    <div id="not-found-message" style="display:none;">
+        <h6>No Subscription Plan Found. <a href="https://surplusindex.com/#footer" target="blank">Join our newsletter for future coverage updates.</a></h6>
+    </div>
+    </div>
+</div>
+</div>
+<script>
+    document.getElementById("search_plan").addEventListener("input", function() {
+        let search = this.value.toLowerCase().trim();
+        let plans = document.querySelectorAll(".plan-item");
+        let Visible = false;
+
+        plans.forEach(function(plan) {
+            let name = plan.querySelector(".plan-name").textContent.toLowerCase();
+            if (!search || name.includes(search)) {
+                plan.style.display = "";
+                Visible = true;
+            } else {
+                plan.style.display = "none";
+                
+            }
+        });
+        document.getElementById("not-found-message").style.display = Visible ? "none" : "block";
+    });
+</script>
 <div class="full-section">
     <h2 class="Hcenter">PAY AS YOU GO</h2>
     <div class="mid-section">
@@ -18,19 +164,22 @@
             My Leads Tab</p>
     </div>
     <div class="small-section">
-        <a href="#" class="button button-large" role="button" data-price-id="price_1QoMwzG4c6thWCjhGAsWr54h" data-leads="10" data-amount="10">Buy 10 Credits for $10</a>
+        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtTVG4c6thWCjhhzgwxpTf" data-leads="10" data-amount="10">Buy 10 Credits for $10</a>
             {% comment %} test price id for 10 = price_1QojYpG4c6thWCjhaNxkWBYH {% endcomment %}
-        <a href="#" class="button button-large" role="button" data-price-id="price_1QoiT5G4c6thWCjhxMIiPG2D" data-leads="50" data-amount="50">Buy 50 Credits for $50</a>
+        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtTxG4c6thWCjh3mJeI648" data-leads="50" data-amount="50">Buy 50 Credits for $50</a>
             {% comment %} test price id for 50 = price_1QojZ9G4c6thWCjh9Ye4cxI9 {% endcomment %}
-        <a href="#" class="button button-large" role="button" data-price-id="price_1QoMwzG4c6thWCjh2HZPp8Gz" data-leads="100" data-amount="95">Buy 100 Credits for $95</a>
+        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtULG4c6thWCjh6UVGUzm4" data-leads="100" data-amount="95">Buy 100 Credits for $95</a>
             {% comment %} test price id for 100 = price_1QoOCJG4c6thWCjhpEhUuWtH {% endcomment %}
-        <a href="#" class="button button-large" role="button" data-price-id="price_1QoMwzG4c6thWCjhNTX0bjlY" data-leads="300" data-amount="270">Buy 300 Credits for $270</a>
+        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtUXG4c6thWCjhzIDvgDGt" data-leads="300" data-amount="270">Buy 300 Credits for $270</a>
         {% comment %} test price id for 300 = price_1QojZNG4c6thWCjh4c4ljD2U {% endcomment %}
     </div>
     
+  
+</div>
+
 <script src="https://js.stripe.com/v3/"></script>
 <script>
-    const buyButtons = document.querySelectorAll('.button');
+    const buyButtons = document.querySelectorAll('.buy-button');
 
     buyButtons.forEach(button => {
         button.addEventListener('click', function (event) {
@@ -56,7 +205,7 @@
                 .catch(error => console.error('Error:', error));
         });
     });
-</script>  
-</div>
+</script>
+
 
 {% endblock content%}

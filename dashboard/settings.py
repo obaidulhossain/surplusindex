@@ -56,10 +56,14 @@ INSTALLED_APPS = [
     'realestate_directory',
     'import_export',
     'Admin',
+    'AllSettings',
     'Admin_Client',
     'Client',
     'DA',
     'Assistance',
+    'media_manager',
+    'ProjectManager',
+    
 ]
 
 MIDDLEWARE = [
@@ -77,6 +81,9 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'dashboard.urls'
 
+
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -88,6 +95,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'AllSettings.context_processors.sidebar_setting',
             ],
         },
     },
@@ -172,3 +180,5 @@ EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
