@@ -7,8 +7,48 @@ Active Tasks
 {% load static %}
 {% load custom_filters %}
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/admin.css' %}" rel="stylesheet">
 <h1>Active Tasks</h1>
+<div class="section">
+{% for task in active_tasks %}
+    {% if task.status == "assigned" %}
+    <a href="/Project-Manager/task-viewer/?task={{task.id}}" class="task-blurb" style="color: #2a2a2aff">
+    <div>
+        <div class="week-icon">
+            <h4>{{task.cycle.week}}</h4>
+        </div>
+        <h6>{{task.project.name}} | {{task.cycle.year}}</h6>
+        <h6 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;"><small>{{task.task_name}}</small></h6>
+        <div class="task-blurb-info">
+        <i class="bi bi-record-circle"></i>Deadline: {{task.delivery_date|date:'m/d/Y'}}
 
+        </div>
+    </div>
+    </a>
+    {% endif %}
+{% endfor %}
+</div>
+
+<h1>Delivered Tasks</h1>
+<div class="section">
+{% for task in active_tasks %}
+    {% if task.status == "delivered" %}
+    <a href="#" class="task-blurb" style="color: #2a2a2aff">
+    <div>
+        <div class="week-icon">
+            <h4>{{task.cycle.week}}</h4>
+        </div>
+        <h6>{{task.project.name}} | {{task.cycle.year}}</h6>
+        <h6 style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;"><small>{{task.task_name}}</small></h6>
+        <div class="task-blurb-info">
+        <i class="bi bi-record-circle"></i>Deadline: {{task.delivery_date|date:'m/d/Y'}}
+
+        </div>
+    </div>
+    </a>
+    {% endif %}
+{% endfor %}
+</div>
 
 
 <script src="{% static 'js/ProjectManager.js' %}"></script>

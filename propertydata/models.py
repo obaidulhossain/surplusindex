@@ -146,7 +146,33 @@ class Contact(OperationStat):
     skiptrace_comment = models.CharField(max_length=255, blank=True, null=True)
     
     def __str__(self):
-        return f"{self.name_prefix} {self.first_name} {self.middle_name} {self.last_name} {self.name_suffix} | {self.designation} : {self.business_name}"
+        # Build name parts dynamically, skipping blanks
+        name_parts = [
+            self.name_prefix,
+            self.first_name,
+            self.middle_name,
+            self.last_name,
+            self.name_suffix,
+        ]
+        full_name = " ".join(filter(None, [part.strip() for part in name_parts if part]))
+
+        # Add designation and business_name only if they exist
+        designation = self.designation.strip() if self.designation else ""
+        business = self.business_name.strip() if self.business_name else ""
+
+        # Build the final string smartly
+        if designation and business:
+            return f"{full_name} : {designation} : {business}"
+        elif designation:
+            return f"{full_name} : {designation}"
+        elif business:
+            if full_name:
+                return f"{full_name} : {business}"
+            else:
+                return business
+        else:
+            return full_name or "Unnamed Contact"
+        #return f"{self.name_prefix} {self.first_name} {self.middle_name} {self.last_name} {self.name_suffix} | {self.designation} : {self.business_name}"
 
     class Meta:
         verbose_name = 'Contact'

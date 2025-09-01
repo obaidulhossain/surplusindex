@@ -320,6 +320,70 @@ function saveData(button) {
         });
 }
 
+function VerifyPublishStatus(button) {
+    const row = button.closest('tr');
+    const rowId = row.getAttribute('data-id');
+    const publishStatus = row.querySelector('.VerifyPublishStatus').value;
+
+
+    // Prepare data for updating
+    const updatedData = {
+        id: rowId,
+        publish_Status: publishStatus,
+    };
+
+    // Send data to the server using fetch
+    fetch('/publish/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (publishStatus === 'False') {
+                    // Change button style to indicate success
+                    button.innerHTML = "Published";
+                    button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    button.style.backgroundColor = "#4CAF50"; // Green background
+                    button.style.color = "#fff"; // White text
+
+                    // Reset the button after a short delay
+                    setTimeout(() => {
+                        button.innerHTML = "Unpublish";
+                        button.style.backgroundColor = ""; // Reset to original background
+                        button.style.color = ""; // Reset to original text color
+                    }, 1500); // Reset after 1.5 seconds
+                } else {
+                    // Change button style to indicate success
+                    button.innerHTML = "Unpublished";
+                    button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    button.style.backgroundColor = "#4CAF50"; // Green background
+                    button.style.color = "#fff"; // White text
+
+                    // Reset the button after a short delay
+                    setTimeout(() => {
+                        button.innerHTML = "Publish";
+                        button.style.backgroundColor = ""; // Reset to original background
+                        button.style.color = ""; // Reset to original text color
+                    }, 1500); // Reset after 1.5 seconds
+                }
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
+}
+
+
 function AssignSKP(select) {
     const row = select.closest('tr');
     const rowId = row.getAttribute('data-id');

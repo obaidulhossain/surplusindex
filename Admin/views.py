@@ -471,10 +471,12 @@ def publishStatus(request):
             # Update the fields
             if publish_Status and fcl_instance.published == False:
                 fcl_instance.published = True
+                
             else:
                 fcl_instance.published = False
                 
             # Save the updated object
+            fcl_instance.case_search_status = "verified"
             fcl_instance.save()
 
             # Respond with success

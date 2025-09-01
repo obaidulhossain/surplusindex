@@ -7,6 +7,7 @@ Task Manager
 {% load static %}
 {% load custom_filters %}
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/admin.css' %}" rel="stylesheet">
 <h1>Task Manager</h1>
 <div class="section-body-full">
     <div class="section-header">
@@ -54,6 +55,7 @@ Task Manager
             </select>
             <select name="task_duration" style="width:95%;">
                 <option value="">Select Task Duration</option>
+                <option value="0" {% if task_instance.task_duration == 0 %}selected{% endif %}>0</option>
                 <option value="1" {% if task_instance.task_duration == 1 %}selected{% endif %}>1</option>
                 <option value="2" {% if task_instance.task_duration == 2 %}selected{% endif %}>2</option>
                 <option value="3" {% if task_instance.task_duration == 3 %}selected{% endif %}>3</option>
@@ -65,6 +67,12 @@ Task Manager
                 <option value="">Select Task Group</option>
                 <option value="datask" {% if task_instance.task_group == "datask" %}selected{% endif %}>Data Entry</option>
                 <option value="admintask" {% if task_instance.task_group == "admintask" %}selected{% endif %}>Admin</option>
+            </select>
+            <select name="task_view" style="width:95%;">
+                <option value="">Select Task View</option>
+                {% for view in views %}
+                <option value="{{view.id}}" {% if task_instance.taskview == view %}selected{% endif %}>{{view.viewname}}</option>
+                {% endfor %}
             </select>
         </div>
         
@@ -124,7 +132,77 @@ Task Manager
         </tbody>
     </table>
 </div>
+{% else %}
+<form method="POST" action="{% url 'create-update-task-view' %}">
+    {% csrf_token %}
     
+    <div class="onethird">
+        <h6>Task View Detail</h6>
+        <input type="text" name="view_name" placeholder="View Name" style="width:95%">
+        <input type="text" name="task_name" placeholder="Task Name" style="width:95%">
+    
+        <select name="weekday" style="width:95%;">
+            <option value="">Select Weekday</option>
+            <option value="1" {% if task_instance.weekday == "1" %}selected{% endif %}>1 : Monday</option>
+            <option value="2" {% if task_instance.weekday == "2" %}selected{% endif %}>2 : Tuesday</option>
+            <option value="3" {% if task_instance.weekday == "3" %}selected{% endif %}>3: Wednesday</option>
+            <option value="4" {% if task_instance.weekday == "4" %}selected{% endif %}>4: Thursday</option>
+            <option value="5" {% if task_instance.weekday == "5" %}selected{% endif %}>5: Friday</option>
+            <option value="6" {% if task_instance.weekday == "6" %}selected{% endif %}>6: Saturday</option>
+            <option value="7" {% if task_instance.weekday == "7" %}selected{% endif %}>7: Sunday</option>
+        </select>
+        <select name="task_duration" style="width:95%;">
+            <option value="">Select Task Duration</option>
+            <option value="0" {% if task_instance.task_duration == 0 %}selected{% endif %}>0</option>
+            <option value="1" {% if task_instance.task_duration == 1 %}selected{% endif %}>1</option>
+            <option value="2" {% if task_instance.task_duration == 2 %}selected{% endif %}>2</option>
+            <option value="3" {% if task_instance.task_duration == 3 %}selected{% endif %}>3</option>
+            <option value="4" {% if task_instance.task_duration == 4 %}selected{% endif %}>4</option>
+            <option value="5" {% if task_instance.task_duration == 5 %}selected{% endif %}>5</option>
+            <option value="6" {% if task_instance.task_duration == 6 %}selected{% endif %}>6</option>
+        </select>
+        <select name="task_group" style="width:95%;">
+            <option value="">Select Task Group</option>
+            <option value="datask" {% if task_instance.task_group == "datask" %}selected{% endif %}>Data Entry</option>
+            <option value="admintask" {% if task_instance.task_group == "admintask" %}selected{% endif %}>Admin</option>
+        </select>
+        <input type="submit" value="Create Task View Instance" style="width:95%; margin-top:10px;">
+    </div>
+        
+    <div class="twothird">
+    <h6>Available Views</h6>
+
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>View Name</th>
+                <th>Weekday</th>
+                <th>Duration</th>
+                <th>Group</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody style="overflow:auto;">
+        {% for view in views %}
+            <tr>
+                <td title="{{view.taskname}}">{{view.viewname}}</br><small></small></td>
+                <td>{{view.weekday}}</td>
+                <td>{{view.duration}}</td>
+                <td>{{view.group}}</td>
+                <td>
+                <form method="POST">
+                {% csrf_token %}
+                    <input type="hidden" name="view" value="{{ view.id }}">
+                    <input type="submit" value="Delete" class="button">
+                </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    
+</div>
+</form>
 {% endif %}
 
 

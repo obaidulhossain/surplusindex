@@ -19,6 +19,32 @@
         </a>
     </li>
     <li class="sidebar-item">
+        <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#projects"
+            aria-expanded="false" aria-controls="leads">
+            <i class="bi bi-speedometer"></i>
+            <span>Project Manager</span>
+        </a>
+        <ul id="projects" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
+            <li class="sidebar-item child">
+                <a href="{% url 'project_dashboard' %}" class="sidebar-link">
+                    <span>Projects Dashboard</span>
+                </a>
+            </li>
+            <li class="sidebar-item child">
+                <a href="{% url 'active_tasks' %}" class="sidebar-link">
+                    {% comment %} <i class="lni lni-pen-to-square"></i> {% endcomment %}
+                    <span>Active Tasks</span>
+                </a>
+            </li>
+            <li class="sidebar-item child">
+                <a href="{% url 'task_viewer' %}" class="sidebar-link">
+                    {% comment %} <i class="lni lni-pen-to-square"></i> {% endcomment %}
+                    <span>Task Viewer</span>
+                </a>
+            </li>     
+        </ul>
+    </li>
+    <li class="sidebar-item">
         <a href="{% url 'auction_calendar' %}" class="sidebar-link">
             <i class="bi bi-calendar2-week"></i>
             <span>Events Calendar</span>

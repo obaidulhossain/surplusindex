@@ -16,3 +16,11 @@ class TasksTemplateAdmin(admin.ModelAdmin):
 @admin.register(Tasks)
 class TasksAdmin(admin.ModelAdmin):
     list_display = ('project','cycle','task_name','task_group','date_assigned','delivery_date','status')
+    
+@admin.register(TaskViews)
+class TaskViewsAdmin(admin.ModelAdmin):
+    list_display = ('viewname','taskname','weekday','duration','group')
+
+@admin.register(TimeTracker)
+class TimeTrackerAdmin(admin.ModelAdmin):
+    list_display = ('task','user','start_time','end_time','is_paused')

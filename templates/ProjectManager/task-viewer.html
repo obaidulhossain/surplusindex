@@ -1,0 +1,1122 @@
+{% extends 'base.html' %}
+{% block title %}
+Task Viewer
+{% endblock title %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/admin.css' %}" rel="stylesheet">
+
+
+
+
+<h1>Task Viewer</h1>
+<div class="onehalf">
+<form method="POST">
+    {% csrf_token %}
+    <select name="task" onchange="this.form.submit()">
+        <option value="">Select Active Tasks</option>
+        {% for tasks in active_tasks %}
+            {% if tasks.status == "assigned" %}
+        <option value="{{tasks.id}}" {% if tasks.pk|stringformat:"s" == selected_task %}selected{% endif %}>{{tasks.cycle.week}} - {{tasks.delivery_date|date:"m/d/Y"}} - {{tasks.task_name}}</option>
+            {% endif %}
+        {% endfor %}
+        
+    </select>
+</form>
+</div>
+<div class="onehalf">
+<form method="POST">
+    {% csrf_token %}
+    <select name="task" onchange="this.form.submit()">
+        <option value="">Select Delivered Tasks</option>
+        {% for tasks in active_tasks %}
+            {% if tasks.status == "delivered" %}
+        <option value="{{tasks.id}}" {% if tasks.pk|stringformat:"s" == selected_task %}selected{% endif %}>{{tasks.cycle.week}} - {{tasks.delivery_date|date:"m/d/Y"}} - {{tasks.task_name}}</option>
+            {% endif %}
+        {% endfor %}
+        
+    </select>
+</form>
+</div>
+<div class="section">   
+{% if not selected_task %}
+    <h2>Select a Task to Load View</h2>
+{% else %}
+{% if task_instance.template.taskview.viewname == "Pre-Foreclosure List" %}
+    <div class="section-small">
+        <div class="viewer-option-small">
+            <div class="week-icon" style=" border-right: 10px solid #a3c1a6;">
+                <h4>{{task_instance.cycle.week}}</h4>
+            </div>
+        </div>
+        <div class="viewer-option-large">
+            <h4>{{task_instance.task_name}}</h4>
+            <h6>{{task_instance.description}}</h6>
+        </div>
+        <div class="viewer-option-small">
+            {% if task_instance.time_captured > 0 %}
+            <h4><center>{{ task_instance.get_time_display }}</center></h4>
+            {% endif %}
+            <div id="task-controls">
+            {% if task_instance.tracker_status == 'idle' %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start</a>
+            {% elif task_instance.tracker_status == "started" %}
+                <a href="{% url 'pause_task' task_instance.id %}" class="btn btn-warning">Pause</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
+            {% elif task_instance.tracker_status == "paused" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-primary">Resume</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
+            {% elif task_instance.tracker_status == "stopped" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start Again</a>
+                <form method="POST" action="{% url 'deliver-task' %}">
+                {% csrf_token %}
+                    <input type="hidden" name="task_id" value="{{task_instance.id}}">
+                    <input type="text" style="width:100%;" placeholder="Pre-Foreclosure List URL" name="pf_list" {% if task_instance.cycle.pf_list %}value="{{task_instance.cycle.pf_list}}"{% endif %}>
+                    <input type="submit" value="{% if task_instance.status == "delivered" %}Deliver Again{% else %}Deliver Task{% endif %}">
+                </form>
+            {% endif %}
+            </div>
+            
+        </div>
+    </div>
+    <div class="section-small">
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Cycle Duration</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Sale Range</h6>
+            <h6>{{task_instance.cycle.sale_from|date:'m/d/Y'}} - {{task_instance.cycle.sale_to|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Assigned</h6>
+            <h6>{% for user in task_instance.assigned_to.all %}{{user.username|upper}}{% if not forloop.last %}, {% endif %}{% endfor %} in {{task_instance.date_assigned|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Due In</h6>
+            <h6>{{task_instance.delivery_date|date:'m/d/Y'}}</h6>
+
+        </div>
+        <div class="onefifth">
+            <h6>Status</h6>
+            <h6>{{task_instance.get_status_display}} - {{task_instance.get_tracker_status_display}}</h6>
+
+        </div>
+    </div>
+    <form method="POST" action="{% url 'save_note' %}">
+    {% csrf_token %}
+        <input type="hidden" name="task_id" value="{{task_instance.id}}">
+        <input type="text" style="width:100%; text-align: center;" placeholder="Add Notes" name="notes" {% if task_instance.note %}value="{{task_instance.note}}"{% endif %}>
+        <input type="submit" value="Save Note" style="width:100%;">
+    </form>
+    {% if task_instance.tracker_status == "started" %}
+    <div class="table-wrapper">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Sale Type</th>
+                    <th>Next Sale Date</th>
+                    <th>Updated From</th>
+                    <th>Updated To</th>
+                    <th>Website</th>
+                    <th>Save</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for event in events %}
+                <tr data-id="{{ event.id }}">
+                    <td>{{event.state}}</td>
+                    <td>{{event.county}}</td>
+                    <td>{{event.sale_type}}</td>
+                    <td>
+                        <input type="date" class="form-control event_next"
+                            value="{{ event.event_next|date:'Y-m-d' }}">
+                    </td>
+                    <td>
+                        <input type="date" class="form-control event_updated_from"
+                            value="{{ event.event_updated_from|date:'Y-m-d' }}">
+                    </td>
+                    <td>
+                        <input type="date" class="form-control event_updated_to"
+                            value="{{ event.event_updated_to|date:'Y-m-d' }}">
+                    </td>
+                    <td>
+                        <input type="button" class="copyButton" value="Copy" data-url="{{ event.event_site }}"
+                            onclick="copyToClipboard(this);">
+
+
+                        <input TYPE="button" class="small-button" VALUE="Visit"
+                            onclick="window.open('{{ event.event_site }}');">
+                    </td>
+                    <td>
+                        <button class="save-button" onclick="saveRow(this)">Save</button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+    
+{% elif task_instance.template.taskview.viewname == "Format & Upload" %}
+    <div class="section-small">
+        <div class="viewer-option-small">
+            <div class="week-icon" style=" border-right: 10px solid #a3c1a6;">
+                <h4>{{task_instance.cycle.week}}</h4>
+            </div>
+        </div>
+        <div class="viewer-option-large">
+            <h4>{{task_instance.task_name}}</h4>
+            <h6>{{task_instance.description}}</h6>
+        </div>
+        <div class="viewer-option-small">
+            {% if task_instance.time_captured > 0 %}
+            <h4><center>{{ task_instance.get_time_display }}</center></h4>
+            {% endif %}
+            <div id="task-controls">
+            {% if task_instance.tracker_status == 'idle' %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start</a>
+            {% elif task_instance.tracker_status == "started" %}
+                <a href="{% url 'pause_task' task_instance.id %}" class="btn btn-warning">Pause</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a></br>
+                <a href="{{ task_instance.cycle.pf_list }}" class="btn btn-success" target="blank">View List</a>
+                
+                <a href="{% url 'add_edit_fcl' %}" class="btn btn-success" target="blank">Add Foreclosure Record</a>
+                <center><h4>Uploaded: {% if task_instance.lead_volume %}{{task_instance.lead_volume}}{% else %}{{leads.count}}{% endif %}</h4></center>
+
+            {% elif task_instance.tracker_status == "paused" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-primary">Resume</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
+            {% elif task_instance.tracker_status == "stopped" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start Again</a>
+                <form method="POST" action="{% url "deliver-upload-task" %}">
+                {% csrf_token %}
+                    <input type="hidden" name="task_id" value="{{task_instance.id}}">
+                    <input type="submit" value="{% if task_instance.status == "delivered" %}Deliver Again{% else %}Deliver Task{% endif %}">
+                </form>
+                <center><h4>Uploaded: {% if task_instance.lead_volume %}{{task_instance.lead_volume}}{% else %}{{new_leads.count}}{% endif %}</h4></center>
+            {% endif %}
+            </div>
+            
+        </div>
+    </div>
+    <div class="section-small">
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Cycle Duration</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Sale Range</h6>
+            <h6>{{task_instance.cycle.sale_from|date:'m/d/Y'}} - {{task_instance.cycle.sale_to|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Assigned</h6>
+            <h6>{% for user in task_instance.assigned_to.all %}{{user.username|upper}}{% if not forloop.last %}, {% endif %}{% endfor %} in {{task_instance.date_assigned|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Due In</h6>
+            <h6>{{task_instance.delivery_date|date:'m/d/Y'}}</h6>
+
+        </div>
+        <div class="onefifth">
+            <h6>Status</h6>
+            <h6>{{task_instance.get_status_display}} - {{task_instance.get_tracker_status_display}}</h6>
+
+        </div>
+    </div>
+    <form method="POST" action="{% url 'save_note' %}">
+    {% csrf_token %}
+        <input type="hidden" name="task_id" value="{{task_instance.id}}">
+        <input type="text" style="width:100%; text-align: center;" placeholder="Add Notes" name="notes" {% if task_instance.note %}value="{{task_instance.note}}"{% endif %}>
+        <input type="submit" value="Save Note" style="width:100%;">
+    </form>
+    {% if task_instance.tracker_status == "started" %}
+    <div class="table-wrapper">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Plaintiff</th>
+                    <th>Defendant</th>
+                    <th>Address</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in leads %}
+                <tr>
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
+                    <td>{{lead.sale_date}}</td>
+                    <td>{% if lead.plaintiff.individual_name %}{{lead.plaintiff.individual_name}}{% else %}{{lead.plaintiff.business_name}}{% endif %}</td>
+                    <td>{{lead.defendant.first_name}}{% if lead.defendant.middle_name %} {{lead.defendant.middle_name}}{% endif %} {{lead.defendant.last_name}}{% if lead.defendant.name_suffix %} {{lead.defendant.name_suffix}}{% endif %}{% if lead.defendant.business_name %} {{lead.defendant.designation}} for {% endif %}{{lead.defendant.business_name}}</td>
+                    <td>{{lead.property}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="Edit">
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+{% elif task_instance.template.taskview.viewname == "Case Search" %}
+    <div class="section-small">
+        <div class="viewer-option-small">
+            <div class="week-icon" style=" border-right: 10px solid #a3c1a6;">
+                <h4>{{task_instance.cycle.week}}</h4>
+            </div>
+        </div>
+        <div class="viewer-option-large">
+            <h4>{{task_instance.task_name}}</h4>
+            <h6>{{task_instance.description}}</h6>
+        </div>
+        <div class="viewer-option-small">
+            {% if task_instance.time_captured > 0 %}
+            <h4><center>{{ task_instance.get_time_display }}</center></h4>
+            {% endif %}
+            <div id="task-controls">
+            {% if task_instance.tracker_status == 'idle' %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start</a>
+            {% elif task_instance.tracker_status == "started" %}
+                <a href="{% url 'pause_task' task_instance.id %}" class="btn btn-warning">Pause</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a></br>
+                
+                <center><h4>Case Searched</br>{% if task_instance.case_searched %}{{task_instance.case_searched}}{% else %}{{case_searched.count}}{% endif %}</h4></center>
+
+            {% elif task_instance.tracker_status == "paused" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-primary">Resume</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
+            {% elif task_instance.tracker_status == "stopped" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start Again</a>
+                <form method="POST" action="{% url "deliver-casesearch-task" %}" target="_blank">
+                {% csrf_token %}
+                    <input type="hidden" name="task_id" value="{{task_instance.id}}">
+                    <input type="submit" value="{% if task_instance.status == "delivered" %}Deliver Again{% else %}Deliver Task{% endif %}">
+                </form>
+                <center><h4>Case Searched: {% if task_instance.case_searched %}{{task_instance.case_searched}}{% else %}{{case_searched.count}}{% endif %}</h4></center>
+            {% endif %}
+            </div>
+            
+        </div>
+    </div>
+    <div class="section-small">
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Cycle Duration</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Sale Range</h6>
+            <h6>{{task_instance.cycle.sale_from|date:'m/d/Y'}} - {{task_instance.cycle.sale_to|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Assigned</h6>
+            <h6>{% for user in task_instance.assigned_to.all %}{{user.username|upper}}{% if not forloop.last %}, {% endif %}{% endfor %} in {{task_instance.date_assigned|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Due In</h6>
+            <h6>{{task_instance.delivery_date|date:'m/d/Y'}}</h6>
+
+        </div>
+        <div class="onefifth">
+            <h6>Status</h6>
+            <h6>{{task_instance.get_status_display}} - {{task_instance.get_tracker_status_display}}</h6>
+
+        </div>
+    </div>
+    <form method="POST" action="{% url 'save_note' %}">
+    {% csrf_token %}
+        <input type="hidden" name="task_id" value="{{task_instance.id}}">
+        <input type="text" style="width:100%; text-align: center;" placeholder="Add Notes" name="notes" {% if task_instance.note %}value="{{task_instance.note}}"{% endif %}>
+        <input type="submit" value="Save Note" style="width:100%;">
+    </form>
+    {% if task_instance.tracker_status == "started" %}
+    <h4>Pending Case Search</h4>
+    <div class="table-wrapper">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Plaintiff</th>
+                    <th>Defendant</th>
+                    <th>Address</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in leads %}
+            {% if lead.case_search_status == "Pending" %}
+                <tr>
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
+                    <td>{{lead.sale_date}}</td>
+                    <td>{% if lead.plaintiff.individual_name %}{{lead.plaintiff.individual_name}}{% else %}{{lead.plaintiff.business_name}}{% endif %}</td>
+                    <td>{{lead.defendant.first_name}}{% if lead.defendant.middle_name %} {{lead.defendant.middle_name}}{% endif %} {{lead.defendant.last_name}}{% if lead.defendant.name_suffix %} {{lead.defendant.name_suffix}}{% endif %}{% if lead.defendant.business_name %} {{lead.defendant.designation}} for {% endif %}{{lead.defendant.business_name}}</td>
+                    <td>{{lead.property}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="Edit">
+                        </form>   
+                    </td>
+                </tr>
+            {% endif %}    
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h4 style="margin-top:30px;">Completed Case Search</h4>
+    <div class="table-wrapper">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Plaintiff</th>
+                    <th>Defendant</th>
+                    <th>Address</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in leads %}
+            {% if lead.case_search_status == "Completed" or lead.case_search_status == "Verified" %}
+                <tr>
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
+                    <td>{{lead.sale_date}}</td>
+                    <td>{% if lead.plaintiff.individual_name %}{{lead.plaintiff.individual_name}}{% else %}{{lead.plaintiff.business_name}}{% endif %}</td>
+                    <td>{{lead.defendant.first_name}}{% if lead.defendant.middle_name %} {{lead.defendant.middle_name}}{% endif %} {{lead.defendant.last_name}}{% if lead.defendant.name_suffix %} {{lead.defendant.name_suffix}}{% endif %}{% if lead.defendant.business_name %} {{lead.defendant.designation}} for {% endif %}{{lead.defendant.business_name}}</td>
+                    <td>{{lead.property}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="Edit">
+                        </form>   
+                    </td>
+                </tr>
+            {% endif %}    
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+{% elif task_instance.template.taskview.viewname == "Skiptrace" %}
+    <div class="section-small">
+        <div class="viewer-option-small">
+            <div class="week-icon" style=" border-right: 10px solid #a3c1a6;">
+                <h4>{{task_instance.cycle.week}}</h4>
+            </div>
+        </div>
+        <div class="viewer-option-large">
+            <h4>{{task_instance.task_name}}</h4>
+            <h6>{{task_instance.description}}</h6>
+        </div>
+        <div class="viewer-option-small">
+            {% if task_instance.time_captured > 0 %}
+            <h4><center>{{ task_instance.get_time_display }}</center></h4>
+            {% endif %}
+            <div id="task-controls">
+            {% if task_instance.tracker_status == 'idle' %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start</a>
+            {% elif task_instance.tracker_status == "started" %}
+                <a href="{% url 'pause_task' task_instance.id %}" class="btn btn-warning">Pause</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a></br>
+                
+                <center><h4>Skiptraced</br>{% if task_instance.skiptraced %}{{task_instance.skiptraced}}{% else %}{{skiptraced.count}}{% endif %} of {{contacts.count}}</h4></center>
+
+            {% elif task_instance.tracker_status == "paused" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-primary">Resume</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
+            {% elif task_instance.tracker_status == "stopped" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start Again</a>
+                <form method="POST" action="{% url "deliver-skiptrace-task" %}" target="_blank">
+                {% csrf_token %}
+                    <input type="hidden" name="task_id" value="{{task_instance.id}}">
+                    <input type="submit" value="{% if task_instance.status == "delivered" %}Deliver Again{% else %}Deliver Task{% endif %}">
+                </form>
+                <center><h4>Skiptraced</br>{% if task_instance.skiptraced %}{{task_instance.skiptraced}}{% else %}{{skiptraced.count}}{% endif %} of {{contacts.count}}</h4></center>
+            {% endif %}
+            </div>
+            
+        </div>
+    </div>
+    <div class="section-small">
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Cycle Duration</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Sale Range</h6>
+            <h6>{{task_instance.cycle.sale_from|date:'m/d/Y'}} - {{task_instance.cycle.sale_to|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Assigned</h6>
+            <h6>{% for user in task_instance.assigned_to.all %}{{user.username|upper}}{% if not forloop.last %}, {% endif %}{% endfor %} in {{task_instance.date_assigned|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Due In</h6>
+            <h6>{{task_instance.delivery_date|date:'m/d/Y'}}</h6>
+
+        </div>
+        <div class="onefifth">
+            <h6>Status</h6>
+            <h6>{{task_instance.get_status_display}} - {{task_instance.get_tracker_status_display}}</h6>
+
+        </div>
+    </div>
+    <form method="POST" action="{% url 'save_note' %}">
+    {% csrf_token %}
+        <input type="hidden" name="task_id" value="{{task_instance.id}}">
+        <input type="text" style="width:100%; text-align: center;" placeholder="Add Notes" name="notes" {% if task_instance.note %}value="{{task_instance.note}}"{% endif %}>
+        <input type="submit" value="Save Note" style="width:100%;">
+    </form>
+    {% if task_instance.tracker_status == "started" %}
+    <h4>Pending Skiptracing</h4>
+    <div class="table-wrapper">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Defendant</th>
+                    <th>Comment</th>
+                    <th>Assigned to</th>
+                    <th>Skiptrace</th>
+                    <th>View Case</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in leads %}
+                {% for defendant in lead.defendant.all %}
+                {% if defendant.skiptraced == False %}
+                <tr>
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td><span {% if defendant.skiptraced == False %}style="color:red;"{% endif %}>{{defendant}}</span></td>
+                    <td>{{defendant.skiptrace_comment|title}}</td>
+                    <td>{{defendant.skp_assignedto|title}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'skiptrace' %}" target="blank">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{defendant.id}}" name="con_id">
+                            <input type="submit" value="Skiptrace">
+                        </form>   
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}" target="blank">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="View Case">
+                        </form>   
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}    
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h4 style="margin-top:30px">Skiptraced</h4>
+    <div class="table-wrapper">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Defendant</th>
+                    <th>Comment</th>
+                    <th>Assigned to</th>
+                    <th>Skiptrace</th>
+                    <th>View Case</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in leads %}
+                {% for defendant in lead.defendant.all %}
+                {% if defendant.skiptraced == True %}
+                <tr>
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td><span {% if defendant.skiptraced == False %}style="color:red;"{% endif %}>{{defendant}}</span></td>
+                    <td>{{defendant.skiptrace_comment|title}}</td>
+                    <td>{{defendant.skp_assignedto|title}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'skiptrace' %}" target="blank">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{defendant.id}}" name="con_id">
+                            <input type="submit" value="Skiptrace">
+                        </form>   
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}" target="blank">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="View Case">
+                        </form>   
+                    </td>
+                </tr>
+                {% endif %}
+                {% endfor %}    
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+{% elif task_instance.template.taskview.viewname == "QC & Publish" %}
+    <div class="section-small">
+        <div class="viewer-option-small">
+            <div class="week-icon" style=" border-right: 10px solid #a3c1a6;">
+                <h4>{{task_instance.cycle.week}}</h4>
+            </div>
+        </div>
+        <div class="viewer-option-large">
+            <h4>{{task_instance.task_name}}</h4>
+            <h6>{{task_instance.description}}</h6>
+        </div>
+        <div class="viewer-option-small">
+            {% if task_instance.time_captured > 0 %}
+            <h4><center>{{ task_instance.get_time_display }}</center></h4>
+            {% endif %}
+            <div id="task-controls">
+            {% if task_instance.tracker_status == 'idle' %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start</a>
+            {% elif task_instance.tracker_status == "started" %}
+                <a href="{% url 'pause_task' task_instance.id %}" class="btn btn-warning">Pause</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a></br>
+                
+                <center><h4>Published</br>{% if task_instance.published %}{{task_instance.published}}{% else %}{{published.count}}{% endif %} of {{leads.count}}</h4></center>
+
+            {% elif task_instance.tracker_status == "paused" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-primary">Resume</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
+            {% elif task_instance.tracker_status == "stopped" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start Again</a>
+                <form method="POST" action="{% url "deliver-publish-task" %}">
+                {% csrf_token %}
+                    <input type="hidden" name="task_id" value="{{task_instance.id}}">
+                    <input type="submit" value="{% if task_instance.status == "delivered" %}Deliver Again{% else %}Deliver Task{% endif %}">
+                </form>
+                <center><h4>Published</br>{% if task_instance.published %}{{task_instance.published}}{% else %}{{published.count}}{% endif %} of {{leads.count}}</h4></center>
+            {% endif %}
+            </div>
+            
+        </div>
+    </div>
+    <div class="section-small">
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Cycle Duration</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Sale Range</h6>
+            <h6>{{task_instance.cycle.sale_from|date:'m/d/Y'}} - {{task_instance.cycle.sale_to|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Assigned</h6>
+            <h6>{% for user in task_instance.assigned_to.all %}{{user.username|upper}}{% if not forloop.last %}, {% endif %}{% endfor %} in {{task_instance.date_assigned|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Due In</h6>
+            <h6>{{task_instance.delivery_date|date:'m/d/Y'}}</h6>
+
+        </div>
+        <div class="onefifth">
+            <h6>Status</h6>
+            <h6>{{task_instance.get_status_display}} - {{task_instance.get_tracker_status_display}}</h6>
+
+        </div>
+    </div>
+    <form method="POST" action="{% url 'save_note' %}">
+    {% csrf_token %}
+        <input type="hidden" name="task_id" value="{{task_instance.id}}">
+        <input type="text" style="width:100%; text-align: center;" placeholder="Add Notes" name="notes" {% if task_instance.note %}value="{{task_instance.note}}"{% endif %}>
+        <input type="submit" value="Save Note" style="width:100%;">
+    </form>
+    {% if task_instance.tracker_status == "started" %}
+    <h4>Pending Case Search</h4>
+    <div class="table-wrapper" style="overflow-x: auto;">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Plaintiff</th>
+                    <th>Defendant</th>
+                    <th>Address</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in leads %}
+            {% if lead.case_search_status == "Pending" %}
+                <tr>
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
+                    <td>{{lead.sale_date}}</td>
+                    <td>{% if lead.plaintiff.individual_name %}{{lead.plaintiff.individual_name}}{% else %}{{lead.plaintiff.business_name}}{% endif %}</td>
+                    <td>{{lead.defendant.first_name}}{% if lead.defendant.middle_name %} {{lead.defendant.middle_name}}{% endif %} {{lead.defendant.last_name}}{% if lead.defendant.name_suffix %} {{lead.defendant.name_suffix}}{% endif %}{% if lead.defendant.business_name %} {{lead.defendant.designation}} for {% endif %}{{lead.defendant.business_name}}</td>
+                    <td>{{lead.property}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}" target="blank">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="View">
+                        </form>   
+                    </td>
+                </tr>
+            {% endif %}    
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h4 style="margin-top:30px;">Completed Cases</h4>
+    <div class="table-wrapper" style="overflow-x: auto;">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Plaintiff</th>
+                    <th>Defendant</th>
+                    <th>Address</th>
+                    <th>Judgment</th>
+                    <th>View</th>
+                    <th>CS Status</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in leads %}
+            {% if lead.case_search_status == "Completed" %}
+                <tr data-id="{{ lead.id }}" {% if lead.state == "" or lead.county == "" or lead.case_number == "" or lead.property.count < 1 or lead.plaintiff.count < 1 or lead.defendant.count < 1 or lead.sale_date == "" or lead.sale_type == "" or lead.sale_status == "" or lead.fcl_final_judgment < 1 %}
+                    style="border:3px solid red !important;"
+                    {% endif %}>
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
+                    <td>{{lead.sale_date}}</td>
+                    <td>{% if lead.plaintiff.individual_name %}{{lead.plaintiff.individual_name}}{% else %}{{lead.plaintiff.business_name}}{% endif %}</td>
+                    <td>{{lead.defendant.first_name}}{% if lead.defendant.middle_name %} {{lead.defendant.middle_name}}{% endif %} {{lead.defendant.last_name}}{% if lead.defendant.name_suffix %} {{lead.defendant.name_suffix}}{% endif %}{% if lead.defendant.business_name %} {{lead.defendant.designation}} for {% endif %}{{lead.defendant.business_name}}</td>
+                    <td>{{lead.property}}</td>
+                    <td>{{lead.fcl_final_judgment}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}" target="blank">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="View">
+                        </form>   
+                    </td>
+                    <td>
+                        <select name="CS_Status" class="casesearchStatus" onchange="saveCasesearchstatus(this)">
+                            <option value="" {% if lead.case_search_status == "" %}selected{% endif %}>-- Select Status --</option>
+                            <option value="Pending" {% if lead.case_search_status == "Pending" %}selected{% endif %}>Pending</option>
+                            <option value="Completed" {% if lead.case_search_status == "Completed" %}selected{% endif %}>Completed</option>
+                            <option value="Verified" {% if lead.case_search_status == "Verified" %}selected{% endif %}>Verified</option>
+                        </select>
+                    </td>
+                </tr>
+            {% endif %}    
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h4 style="margin-top:30px;">Verified Cases</h4>
+    <div class="table-wrapper" style="overflow-x: auto;">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Plaintiff</th>
+                    <th>Defendant</th>
+                    <th>Address</th>
+                    <th>View</th>
+                    <th>Publish</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in leads %}
+            {% if lead.case_search_status == "Verified" %}
+                <tr data-id="{{ lead.id }}">
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
+                    <td>{{lead.sale_date}}</td>
+                    <td>{% if lead.plaintiff.individual_name %}{{lead.plaintiff.individual_name}}{% else %}{{lead.plaintiff.business_name}}{% endif %}</td>
+                    <td>{{lead.defendant.first_name}}{% if lead.defendant.middle_name %} {{lead.defendant.middle_name}}{% endif %} {{lead.defendant.last_name}}{% if lead.defendant.name_suffix %} {{lead.defendant.name_suffix}}{% endif %}{% if lead.defendant.business_name %} {{lead.defendant.designation}} for {% endif %}{{lead.defendant.business_name}}</td>
+                    <td>{{lead.property}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}" target="blank">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="View">
+                        </form>   
+                    </td>
+                    <td><button class="button publishStatus" onclick="saveData(this)" value={{lead.published}}>{% if lead.published == False %}Publish{% else %}Unpublish{% endif %}</button></td>
+                </tr>
+            {% endif %}    
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+{% elif task_instance.template.taskview.viewname == "Initiate Deliveries" %}
+    <div class="week-icon">
+        <h4>{{task_instance.cycle.week}}</h4>
+    </div>    
+    <div>
+    sdasd
+    </div>
+{% elif task_instance.template.taskview.viewname == "Post Foreclosure Update" %}
+    <div class="section-small">
+        <div class="viewer-option-small">
+            <div class="week-icon" style=" border-right: 10px solid #a3c1a6;">
+                <h4>{{task_instance.cycle.week}}</h4>
+            </div>
+        </div>
+        <div class="viewer-option-large">
+            <h4>{{task_instance.task_name}}</h4>
+            <h6>{{task_instance.description}}</h6>
+        </div>
+        <div class="viewer-option-small">
+            {% if task_instance.time_captured > 0 %}
+            <h4><center>{{ task_instance.get_time_display }}</center></h4>
+            {% endif %}
+            <div id="task-controls">
+            {% if task_instance.tracker_status == 'idle' %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start</a>
+            {% elif task_instance.tracker_status == "started" %}
+                <a href="{% url 'pause_task' task_instance.id %}" class="btn btn-warning">Pause</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a></br>
+                <center><h4>Case Searched</br>{% if task_instance.post_foreclosure_case_searched %}{{task_instance.post_foreclosure_case_searched}}{% else %}{{post_foreclosure_searched}}{% endif %}of {{task_instance.post_foreclosure_case_volume}}</h4></center>
+
+            {% elif task_instance.tracker_status == "paused" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-primary">Resume</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
+            {% elif task_instance.tracker_status == "stopped" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start Again</a>
+                <form method="POST" action="{% url "deliver-post-foreclosure-case-task" %}">
+                {% csrf_token %}
+                    <input type="hidden" name="task_id" value="{{task_instance.id}}">
+                    <input type="submit" value="{% if task_instance.status == "delivered" %}Deliver Again{% else %}Deliver Task{% endif %}">
+                </form>
+                <center><h4>Case Searched</br>{% if task_instance.post_foreclosure_case_searched %}{{task_instance.post_foreclosure_case_searched}}{% else %}{{post_foreclosure_searched}}{% endif %}of {{task_instance.post_foreclosure_case_volume}}</h4></center>
+            {% endif %}
+            </div>
+            
+        </div>
+    </div>
+    <div class="section-small">
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Cycle Duration</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Sale Range</h6>
+            <h6>{{task_instance.cycle.sale_from|date:'m/d/Y'}} - {{task_instance.cycle.sale_to|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Assigned</h6>
+            <h6>{% for user in task_instance.assigned_to.all %}{{user.username|upper}}{% if not forloop.last %}, {% endif %}{% endfor %} in {{task_instance.date_assigned|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Due In</h6>
+            <h6>{{task_instance.delivery_date|date:'m/d/Y'}}</h6>
+
+        </div>
+        <div class="onefifth">
+            <h6>Status</h6>
+            <h6>{{task_instance.get_status_display}} - {{task_instance.get_tracker_status_display}}</h6>
+
+        </div>
+    </div>
+    <form method="POST" action="{% url 'save_note' %}">
+    {% csrf_token %}
+        <input type="hidden" name="task_id" value="{{task_instance.id}}">
+        <input type="text" style="width:100%; text-align: center;" placeholder="Add Notes" name="notes" {% if task_instance.note %}value="{{task_instance.note}}"{% endif %}>
+        <input type="submit" value="Save Note" style="width:100%;">
+    </form>
+    {% if task_instance.tracker_status == "started" %}
+    <h4>Case Search Checklist</h4>
+    <div class="table-wrapper" style="overflow-x: auto;">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Judgment</th>
+                    <th>Sale Price</th>
+                    <th>Possible Surplus</th>
+                    <th>Verified Surplus</th>
+                    <th>Surplus Status</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in post_foreclosure_case_checklist %}
+                <tr {% if lead.case_search_status == "Pending" %}style="border:3px solid red;"{% endif %}>
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
+                    <td>{{lead.sale_date}}</td>
+                    <td>{{lead.fcl_final_judgment}}</td>
+                    <td>{{lead.sale_price}}</td>
+                    <td>{{lead.possible_surplus}}</td>
+                    <td>{{lead.verified_surplus}}</td>
+                    <td>{{lead.surplus_status}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}" target="blank">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="View">
+                        </form>   
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h4 style="margin-top:30px;">Case Search Completed</h4>
+    <div class="table-wrapper" style="overflow-x: auto;">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Judgment</th>
+                    <th>Sale Price</th>
+                    <th>Possible Surplus</th>
+                    <th>Verified Surplus</th>
+                    <th>Surplus Status</th>
+                    <th>View</th>
+            {% if user.is_authenticated %}
+                {% for group in user.groups.all %}
+                    {% if group.name == "admin" %}
+                    <th>Publish</th>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in post_foreclosure_case_completed %}
+                <tr data-id="{{ lead.id }}" {% if lead.case_search_status == "Pending" %}style="border:3px solid red;"{% endif %}>
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
+                    <td>{{lead.sale_date}}</td>
+                    <td>{{lead.fcl_final_judgment}}</td>
+                    <td>{{lead.sale_price}}</td>
+                    <td>{{lead.possible_surplus}}</td>
+                    <td>{{lead.verified_surplus}}</td>
+                    <td>{{lead.surplus_status}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}" target="blank">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="View">
+                        </form>   
+                    </td>
+            {% if user.is_authenticated %}
+                {% for group in user.groups.all %}
+                    {% if group.name == "admin" %}
+                    <td><button class="button VerifyPublishStatus" onclick="VerifyPublishStatus(this)" value={{lead.published}}>{% if lead.published == False %}Publish{% else %}Unpublish{% endif %}</button></td>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+{% elif task_instance.template.taskview.viewname == "Update Cycle" %}
+    <div class="section-small">
+        <div class="viewer-option-small">
+            <div class="week-icon" style=" border-right: 10px solid #a3c1a6;">
+                <h4>{{task_instance.cycle.week}}</h4>
+            </div>
+        </div>
+        <div class="viewer-option-large">
+            <h4>{{task_instance.task_name}}</h4>
+            <h6>{{task_instance.description}}</h6>
+        </div>
+        <div class="viewer-option-small">
+            {% if task_instance.time_captured > 0 %}
+            <h4><center>{{ task_instance.get_time_display }}</center></h4>
+            {% endif %}
+            <div id="task-controls">
+            {% if task_instance.tracker_status == 'idle' %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start</a>
+            {% elif task_instance.tracker_status == "started" %}
+                <a href="{% url 'pause_task' task_instance.id %}" class="btn btn-warning">Pause</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a></br>
+                <center><h4>Tasks Completed</br>{{tasks_completed.count}} of {{all_tasks.count}}</h4></center>
+
+            {% elif task_instance.tracker_status == "paused" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-primary">Resume</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
+            {% elif task_instance.tracker_status == "stopped" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start Again</a>
+                <form method="POST" action="{% url "deliver-update-cycle-task" %}">
+                {% csrf_token %}
+                    <input type="hidden" name="task_id" value="{{task_instance.id}}">
+                    <input type="submit" value="{% if task_instance.status == "delivered" %}Deliver Again{% else %}Deliver Task{% endif %}">
+                </form>
+                <center><h4>Tasks Completed</br>{{tasks_completed.count}} of {{all_tasks.count}}</h4></center>
+            {% endif %}
+            </div>
+            
+        </div>
+    </div>
+    <div class="section-small">
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Cycle Duration</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Sale Range</h6>
+            <h6>{{task_instance.cycle.sale_from|date:'m/d/Y'}} - {{task_instance.cycle.sale_to|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Assigned</h6>
+            <h6>{% for user in task_instance.assigned_to.all %}{{user.username|upper}}{% if not forloop.last %}, {% endif %}{% endfor %} in {{task_instance.date_assigned|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Due In</h6>
+            <h6>{{task_instance.delivery_date|date:'m/d/Y'}}</h6>
+
+        </div>
+        <div class="onefifth">
+            <h6>Status</h6>
+            <h6>{{task_instance.get_status_display}} - {{task_instance.get_tracker_status_display}}</h6>
+
+        </div>
+    </div>
+    <form method="POST" action="{% url 'save_note' %}">
+    {% csrf_token %}
+        <input type="hidden" name="task_id" value="{{task_instance.id}}">
+        <input type="text" style="width:100%; text-align: center;" placeholder="Add Notes" name="notes" {% if task_instance.note %}value="{{task_instance.note}}"{% endif %}>
+        <input type="submit" value="Save Note" style="width:100%;">
+    </form>
+    {% if task_instance.tracker_status == "started" %}
+    <h4>Update Current Cycle | Week: {{task_instance.cycle.week}} - {{task_instance.cycle.year}}</h4>
+    <div class="table-wrapper" style="overflow-x: auto;">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 60px;">Year</th>
+                    <th style="min-width: 60px;">Week</th>
+                    <th>Task Name</th>
+                    <th>Task Group</th>
+                    <th>Status</th>
+                    <th>Delivered</th>
+                    <th>Approved</th>
+                    <th>View</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for task in all_tasks %}
+            {% if task.template.taskview.viewname != "Update Cycle" %}
+                <tr {% if task.status != "completed" %}style="border:3px solid red;"{% endif %}>
+                    <td>{{task.cycle.year}}</td>
+                    <td>{{task.cycle.week}}</td>
+                    <td>{{task.task_name}}</td>
+                    <td>{{task.get_task_group_display}}</td>
+                    <td>{{task.get_status_display}}</td>
+                    <td>{{task.delivery_date|date:'m/d/Y'}}</td>
+                    <td>{{task.reporting_date|date:'m/d/Y'}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'task_viewer' %}" target="blank">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{task.id}}" name="task">
+                            <input type="submit" value="View">
+                        </form>   
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h4 style="margin-top:30px;">Initiate Tasks for Next Cycle</h4>
+        <form method="POST" action="{% url 'project_manager' %}" target="blank">
+        {% csrf_token %}
+            <input type="hidden" value="{{task_instance.project.id}}" name="project">
+            <input type="submit" value="Go To {{task_instance.project.name}} Project Manager">
+        </form>
+    {% endif %}
+{% endif %}
+
+
+
+{% endif %}
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const startBtn = document.getElementById("start-btn");
+  const pauseBtn = document.getElementById("pause-btn");
+  const stopBtn = document.getElementById("stop-btn");
+  const resumeBtn = document.getElementById("resume-btn");
+
+  if (startBtn) {
+    startBtn.addEventListener("click", function() {
+      startBtn.style.display = "none";
+      if (pauseBtn) pauseBtn.style.display = "inline-block";
+      if (stopBtn) stopBtn.style.display = "inline-block";
+    });
+  }
+
+  if (pauseBtn) {
+    pauseBtn.addEventListener("click", function() {
+      pauseBtn.style.display = "none";
+      if (resumeBtn) resumeBtn.style.display = "inline-block";
+    });
+  }
+
+  if (resumeBtn) {
+    resumeBtn.addEventListener("click", function() {
+      resumeBtn.style.display = "none";
+      if (pauseBtn) pauseBtn.style.display = "inline-block";
+    });
+  }
+});
+</script>
+
+<script src="{% static 'js/ProjectManager.js' %}"></script>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+<script src="{% static 'js/auction_calendar.js' %}"></script>
+{% endblock content %}
