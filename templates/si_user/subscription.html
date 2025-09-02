@@ -83,6 +83,8 @@
 
 
     {% endif %}
+</div>
+</div>
 <script>
     document.getElementById("search_sub").addEventListener("input", function() {
         let filter = this.value.toLowerCase().trim();
@@ -102,7 +104,7 @@
         document.getElementById("no-result-message").style.display = anyVisible ? "none" : "block";
     });
 </script>
-</div>
+
 
 <div class="full-section" style="height:auto!important; margin-top:50px;" id="subscriptions">
     <h2 class="Hcenter">SUBSCRIPTION BASED SERVICES</h2>
@@ -110,7 +112,10 @@
         <label for="search_plan">Search Subscription Plans</label></br>
         <input type="text" name="search_plan" id="search_plan" placeholder="Search with State or full plan name (Ex: Ohio)" style="width:90%">
     </form>
-    <div class="table-wrapper" style="max-height:600px; overflow-y: auto;margin-top:20px;">
+    {% for announce in announcements %}
+    <h6 style="color:red;">Announcements: {{announce.detail}}</h6>
+    {% endfor %}
+    <div class="table-wrapper" style="max-height:600px; overflow-y: auto; margin-top:20px;">
     <div id="plan-list">
     {% for plan in Plans %}
     <div class="section-body-full plan-item" style="2px solid #d2d2d2; border-radius:10px; padding:20px; margin:10px; background-color: #f3f3f3;">
@@ -122,8 +127,10 @@
         </div>
         <div class="onefourth">
             <h3>${{plan.amount}}/Month</h3>
-            <a href="#" class="button button-large buy-button" role="button" data-price-id="{{plan.price_id}}" data-leads="0" data-amount="{{plan.amount}}">Enroll Now</a>
-            <a href={% if plan.brochure %}"{{plan.brochure}}" target="blank"{% else %}"#"{% endif %} class="button button-large">Download Brochure</a>
+            <a href="#" class="button buy-button" role="button" data-price-id="{{plan.price_id}}" data-leads="0" data-amount="{{plan.amount}}" style="width:100%; margin-bottom:10px;">Enroll Now</a>
+            {% if plan.brochure %}
+            <a href="{{plan.brochure}}" target="blank" class="button" style="width:100%; margin-bottom:10px;">Download Brochure</a>
+            {% endif %}
         </div>
     </div>
     {% endfor %}

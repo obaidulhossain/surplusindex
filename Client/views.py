@@ -19,6 +19,10 @@ from django.db.models import Count, Q
 from datetime import date
 from urllib.parse import urlencode
 from django.urls import reverse
+import datetime
+import calendar
+
+
 
 def get_client_dashboard_context(request, user):
     statuses = Status.objects.filter(client=user)
@@ -70,60 +74,157 @@ def get_client_dashboard_context(request, user):
 
 def availableLeads(request):
     user = request.user
-    if request.method == 'POST':
-        selectedState = request.POST.get('stateFilter','')
-        selectedCounty = request.POST.get('countyFilter','')
-        selectedSaletype = request.POST.get('saletypeFilter','')
-        psmin = request.POST.get('ps_min','')
-        vsmin = request.POST.get('vs_min','')
-        showHidden = request.POST.get('show_hidden','')
-        showUpcoming = request.POST.get('show_upcoming','')
-    else:
-        selectedState = request.GET.get('stateFilter','')
-        selectedCounty = request.GET.get('countyFilter','')
-        selectedSaletype = request.GET.get('saletypeFilter','')
-        psmin = request.GET.get('ps_min','')
-        vsmin = request.GET.get('vs_min','')
-        showHidden = request.GET.get('show_hidden','')
+
+    params = request.POST if request.method == "POST" else request.GET
+    selectedState = params.get('stateFilter', '')
+    selectedCounty = params.get('countyFilter', '')
+    selectedSaletype = params.get('saletypeFilter', '')
+    psmin = params.get('ps_min', '')
+    vsmin = params.get('vs_min', '')
+    showHidden = params.get('show_hidden', '')
+    saledateOrder = params.get('sale_date_order', 'sale_date')
+    surplusStatusND = params.get('status_nd', '')
+    surplusStatusPS = params.get('status_ps', '')
+    surplusStatusNPS = params.get('status_nps', '')
+    surplusStatusFA = params.get('status_fa', '')
+    surplusStatusMF = params.get('status_mf', '')
+    surplusStatusFC = params.get('status_fc', '')
+    surplusStatusNS = params.get('status_ns', '')
+    saleStatusACTIVE = params.get('sale_status_active', '')
+    saleStatusSOLD = params.get('sale_status_sold', '')
+    saleStatusCANCELED = params.get('sale_status_canceled', '')
+
+    saledateYear = params.get('sale_date_year', '')
+    if saledateYear.isdigit():
+        saledateYear = int(saledateYear)
+    
+    saledateMonth = params.get('sale_date_month', '')
+    if saledateMonth.isdigit():
+        saledateMonth = int(saledateMonth)
+
+    showUpcoming = params.get('show_upcoming', '')
     
 
-    states=Foreclosure.objects.values_list("state", flat=True).distinct()
-    leads_queryset = Foreclosure.objects.exclude(purchased_by=user).exclude(sale_status="Cancelled").exclude(sale_status="Active").exclude(surplus_status="No Surplus").exclude(surplus_status=None).exclude(published=False)
     
-    if not selectedState:
-        counties=Foreclosure.objects.values_list("county", flat=True).distinct()
-        saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
+    # -------------Base querysets----------------------------
+    leads_queryset = (
+        Foreclosure.objects
+        .exclude(purchased_by=user)
+        .exclude(sale_status__in=["Cancelled","Active"])
+        .exclude(surplus_status__in=["No Surplus", None])
+        .exclude(published=False)
+        )
+    #--------------------------------------------------------
 
-    else:
-        counties=Foreclosure.objects.filter(state=selectedState).values_list("county", flat=True).distinct()
-        saletypes=Foreclosure.objects.filter(state=selectedState).values_list("sale_type", flat=True).distinct()
-        leads_queryset = leads_queryset.filter(state__iexact=selectedState)
-
+    # -------------Filters-----------------------------------
+    filters = {}
+    if selectedState:
+        filters["state__iexact"] = selectedState
     if selectedCounty:
-        leads_queryset = leads_queryset.filter(county__iexact=selectedCounty)
-
+        filters["county__iexact"] = selectedCounty
     if selectedSaletype:
-        leads_queryset = leads_queryset.filter(sale_type__iexact=selectedSaletype)
-
+        filters["sale_type__iexact"] = selectedSaletype
     if psmin:
-        leads_queryset = leads_queryset.filter(possible_surplus__gte=psmin)
-
+        filters["possible_surplus__gte"] = psmin
     if vsmin:
-        leads_queryset = leads_queryset.filter(verified_surplus__gte=vsmin)
+        filters["verified_surplus__gte"] = vsmin
+    if saledateYear:
+        filters["sale_date__year"] = saledateYear
+    if saledateMonth:
+        filters["sale_date__month"] = saledateMonth
 
-    if not showHidden == "show":
-        leads_queryset = leads_queryset.exclude(hidden_for=user)
-    else:
+    leads_queryset = leads_queryset.filter(**filters)
+    # if surplusStatusND:
+    #     filters["surplus_status__iexact"] = surplusStatusND
+    # if surplusStatusPS:
+    #     filters["surplus_status__iexact"] = surplusStatusPS
+    # if surplusStatusNPS:
+    #     filters["surplus_status__iexact"] = surplusStatusNPS
+    # if surplusStatusFA:
+    #     filters["surplus_status__iexact"] = surplusStatusFA
+    # if surplusStatusMF:
+    #     filters["surplus_status__iexact"] = surplusStatusMF
+    # if surplusStatusFC:
+    #     filters["surplus_status__iexact"] = surplusStatusFC
+    # if surplusStatusNS:
+    #     filters["surplus_status__iexact"] = surplusStatusNS
+
+    # if saleStatusACTIVE:
+    #     filters["sale_status__iexact"] = saleStatusACTIVE
+    # if saleStatusSOLD:
+    #     filters["sale_status__iexact"] = saleStatusSOLD
+    # if saleStatusCANCELED:
+    #     filters["sale_status__iexact"] = saleStatusCANCELED
+
+    # --------------- Surplus Status --------------------------------------------------
+    surplus_filters = []
+    if surplusStatusND:
+        surplus_filters.append(surplusStatusND)
+    if surplusStatusPS:
+        surplus_filters.append(surplusStatusPS)
+    if surplusStatusNPS:
+        surplus_filters.append(surplusStatusNPS)
+    if surplusStatusFA:
+        surplus_filters.append(surplusStatusFA)
+    if surplusStatusMF:
+        surplus_filters.append(surplusStatusMF)
+    if surplusStatusFC:
+        surplus_filters.append(surplusStatusFC)
+    if surplusStatusNS:
+        surplus_filters.append(surplusStatusNS)
+
+    if surplus_filters:
+        leads_queryset = leads_queryset.filter(surplus_status__in=surplus_filters)
+    #-------------------------------------------------------------------------------
+
+    # ----------------- Sale Status -------------------------------------------------
+    sale_filters = []
+    if saleStatusACTIVE:
+        sale_filters.append(saleStatusACTIVE)
+    if saleStatusSOLD:
+        sale_filters.append(saleStatusSOLD)
+    if saleStatusCANCELED:
+        sale_filters.append(saleStatusCANCELED)
+
+    if sale_filters:
+        leads_queryset = leads_queryset.filter(sale_status__in=sale_filters)
+
+    #-------------------------------------------------------------------------------
+
+    #--------------Orders-------------------------------------
+    if saledateOrder:
+        leads_queryset = leads_queryset.order_by(saledateOrder)
+    
+    #-------------------------------------------------------------
+
+    #-------Show Hide Hidden Leads--------------------------------
+    if showHidden == "show":
         leads_queryset = leads_queryset.filter(hidden_for=user)
-
+    else:
+        leads_queryset = leads_queryset.exclude(hidden_for=user)
+    #--------------------------------------------------------------
+        
+    # -------------Dropdown Data-------------------------------------------------------------------------------------
+    states = Foreclosure.objects.values_list("state", flat=True).distinct()
+    if selectedState:
+        counties = Foreclosure.objects.filter(state=selectedState).values_list("county", flat=True).distinct()
+        saletypes = Foreclosure.objects.filter(state=selectedState).values_list("sale_type", flat=True).distinct()
+    else:
+        counties = Foreclosure.objects.values_list("county", flat=True).distinct()
+        saletypes = Foreclosure.objects.values_list("sale_type", flat=True).distinct()
+    # ---------------------------------------------------------------------------------------------------------------
 
 
     total_leads = leads_queryset.count()
     p = Paginator(leads_queryset, 25)
-    page = request.GET.get('page')
+    page = params.get('page')
     leads = p.get_page(page)
     current_page = int(leads.number)
-    second_previous = current_page + 2
+    second_previous = current_page + 2 if leads.has_next() else None
+
+    current_year = datetime.date.today().year
+    years = range(current_year - 5, current_year + 2)
+    months = [(i, calendar.month_name[i]) for i in range(1, 13)]
 
     context = {
         'current_user':user,
@@ -138,8 +239,22 @@ def availableLeads(request):
         'psmin':psmin,
         'vsmin':vsmin,
         'showHidden':showHidden,
-
-        'second_previous':second_previous
+        'second_previous':second_previous,
+        'saledateOrder':saledateOrder,
+        'years':years,
+        'months':months,
+        'saledateYear':saledateYear,
+        'saledateMonth':saledateMonth,
+        'surplusStatusND':surplusStatusND,
+        'surplusStatusPS':surplusStatusPS,
+        'surplusStatusNPS':surplusStatusNPS, 
+        'surplusStatusFA':surplusStatusFA,
+        'surplusStatusMF':surplusStatusMF,
+        'surplusStatusFC':surplusStatusFC,
+        'surplusStatusNS':surplusStatusNS,
+        'saleStatusACTIVE':saleStatusACTIVE,
+        'saleStatusSOLD':saleStatusSOLD,
+        'saleStatusCANCELED':saleStatusCANCELED,
     }
     return render(request, 'Client/available_leads.html', context)
 

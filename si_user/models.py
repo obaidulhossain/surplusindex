@@ -157,3 +157,9 @@ class StripeSubscription(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.plan.name if self.plan else 'No Plan'}"
+    
+class Announcements(Timelogger):
+    effective_date = models.DateField()
+    detail = models.CharField(max_length=255, blank=True, null=True)
+    published = models.BooleanField(default=True)
+    

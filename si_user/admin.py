@@ -34,5 +34,7 @@ class StripeSubscriptionAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "subscription_id", "customer_id")
 
 
-
+@admin.register(Announcements)
+class AnnouncementsAdmin(admin.ModelAdmin):
+    list_display = ("effective_date", "detail", "published")
 

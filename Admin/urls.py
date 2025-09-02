@@ -19,8 +19,10 @@ urlpatterns = [
     path('assignSKP/', views.assignSKP, name="assignSKP"),
     path('manage_subscription/',views.SubscriptionSettings, name='subscription_settings'),
     path('active_subscription/',views.ActiveSubscriptions, name='active_subscription'),
-    path('create_update_plan', views.CreateUpdatePlan, name="UpdatePlan")
-    
+    path('create_update_plan', views.CreateUpdatePlan, name="UpdatePlan"),
+    path('create_announcement', views.CreateAnnouncement, name="create_announcement"),
+    path('delete_announcement', views.DeleteAnnouncement, name="delete_announcement"),
+
 
 
 ]

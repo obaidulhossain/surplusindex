@@ -602,13 +602,30 @@ def SubscriptionSettings(request):
         selectedPlan = request.GET.get('selected_plan',"")
     if selectedPlan:
         PlanInstance = SubscriptionPlan.objects.get(pk=selectedPlan)
-    
+    announcements = Announcements.objects.all()
 
     context = {
         'SelectedPlan':PlanInstance,
         'Plans':AllPlans,
+        'announcements':announcements,
     }
     return render(request, 'Admin/manage_subs.html', context)
+
+def CreateAnnouncement(request):
+    if request.method == 'POST':
+        date = request.POST.get('effective_date')
+        announcement = request.POST.get('announcement')
+
+        Announcements.objects.create(effective_date=date, detail=announcement)
+        messages.success(request, 'Announcement Created')
+    return redirect('subscription_settings')
+
+def DeleteAnnouncement(request):
+    if request.method == 'POST':
+        announcement_id = request.POST.get('announcement')
+        if announcement_id:
+            Announcements.objects.filter(pk=announcement_id).delete()     
+    return redirect('subscription_settings')
 
 def ActiveSubscriptions(request):
     AvailablePlans = SubscriptionPlan.objects.all().order_by('name')

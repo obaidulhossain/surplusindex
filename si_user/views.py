@@ -22,7 +22,7 @@ import os
 from django.utils.timezone import datetime
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from collections import defaultdict
 # Configure the logger
 logging.basicConfig(level=logging.INFO)
@@ -170,13 +170,13 @@ def userSubscription(request):
         defaults={'manage_sub_show_hidden': False}
         )
     
-    Plans = SubscriptionPlan.objects.all().order_by('name').exclude(type="payperlead")
+    Plans = SubscriptionPlan.objects.filter(active=True).order_by('name').exclude(type="payperlead")
     subscriptions = StripeSubscription.objects.filter(user=user).order_by('current_period_end')
     if not UserSettings.manage_sub_show_hidden:
         subscriptions = subscriptions.exclude(hidden=True)
     # Get all transactions for this user in one query
     transactions = UserTransactions.objects.filter(user=user).order_by('-created_at')
-
+    announcements = Announcements.objects.filter(effective_date__gte=date.today(), published=True).order_by('created_at')
     # Group transactions by subscription ID
     transactions_map = defaultdict(list)
     for tx in transactions:
@@ -203,6 +203,7 @@ def userSubscription(request):
         'Plans':Plans,
         'subscriptions':subscriptions,
         'UserSettings':UserSettings,
+        'announcements':announcements,
     }
     return render(request, 'si_user/subscription.html', context)
 
