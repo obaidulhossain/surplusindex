@@ -124,6 +124,7 @@ def SkiptracingChecklist(request):
         filters["county__iexact"] = selectedCounty
     if selectedSaletype:
         filters["sale_type__iexact"] = selectedSaletype
+
     foreclosure_qs = foreclosure_qs.filter(**filters)
     #---------------------------------------------------
 
@@ -134,7 +135,7 @@ def SkiptracingChecklist(request):
 
     current_page = int(checklist.number)
     second_previous = current_page + 2 if checklist.has_next() else None
-
+    contacts_count = foreclosure_qs.count()
     # Dropdown filters
     states = foreclosure_qs.values_list("state", flat=True).distinct()
     counties = foreclosure_qs.values_list("county", flat=True).distinct()
@@ -144,6 +145,7 @@ def SkiptracingChecklist(request):
     context = {
         'current_user': current_user,
         'checklist': checklist,
+        'contacts_count':contacts_count,
         'states': states,
         'counties': counties,
         'saletypes': saletypes,

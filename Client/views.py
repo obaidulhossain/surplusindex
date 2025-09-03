@@ -206,12 +206,9 @@ def availableLeads(request):
         
     # -------------Dropdown Data-------------------------------------------------------------------------------------
     states = Foreclosure.objects.values_list("state", flat=True).distinct()
-    if selectedState:
-        counties = Foreclosure.objects.filter(state=selectedState).values_list("county", flat=True).distinct()
-        saletypes = Foreclosure.objects.filter(state=selectedState).values_list("sale_type", flat=True).distinct()
-    else:
-        counties = Foreclosure.objects.values_list("county", flat=True).distinct()
-        saletypes = Foreclosure.objects.values_list("sale_type", flat=True).distinct()
+    counties = leads_queryset.values_list("county", flat=True).distinct()
+    saletypes = leads_queryset.values_list("sale_type", flat=True).distinct()
+    
     # ---------------------------------------------------------------------------------------------------------------
 
 

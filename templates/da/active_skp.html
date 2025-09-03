@@ -70,9 +70,9 @@ Active SkipTracing
                     {% for contact in i.pending_contacts %}
 
                     <tr>
-                        <td>{{i.state|title}} - {{i.county|title}} - {{i.case_number|upper}}</td>
-                        <td>{{contact}}</td>
-                        <td>{{contact.skiptrace_comment}}</td>
+                        <td style="padding: 0px 10px;">{{i.state|title}} - {{i.county|title}} - {{i.case_number|upper}}</td>
+                        <td style="padding: 0px 10px;">{{contact}}</td>
+                        <td style="padding: 0px 10px;">{{contact.skiptrace_comment}}</td>
                         <td>
                             <form method="POST" action="{% url 'add_edit_fcl' %}" target="blank">
                                 {% csrf_token %}
@@ -92,13 +92,13 @@ Active SkipTracing
                 </tbody>
             </table>
             <div class="clearfix">
-                <div class="hint-text">Showing Page <b>{{ checklist.number }}</b> out of <b>
-                        {{ checklist.paginator.num_pages }}</b> Pages</div>
+                <div class="hint-text">Showing Page <b>{{ checklist.number }}</b> out of <b>{{ checklist.paginator.num_pages }}</b> Pages | Total Contact : {{contacts_count}}
+                </div>
                 <ul class="pagination">
                     {% if checklist.has_previous %}
-                    <li class="page-item"><a href="?page=1" class="page-link">First</a></li>
-                    <li class="page-item"><a href="?page={{ checklist.previous_page_number }}">Previous</a></li>
-                    <li class="page-item"><a href="?page={{ checklist.previous_page_number }}" class="page-link">
+                    <li class="page-item"><a href="?page=1&stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}" class="page-link">First</a></li>
+                    <li class="page-item"><a href="?page={{ checklist.previous_page_number }}&stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}">Previous</a></li>
+                    <li class="page-item"><a href="?page={{ checklist.previous_page_number }}&stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}" class="page-link">
                             {{ checklist.previous_page_number }}</a></li>
                     {% endif %}
 
@@ -108,12 +108,12 @@ Active SkipTracing
 
 
                     {% if checklist.has_next %}
-                    <li class="page-item"><a href="?page={{ checklist.next_page_number }}" class="page-link">
+                    <li class="page-item"><a href="?page={{ checklist.next_page_number }}&stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}" class="page-link">
                             {{ checklist.next_page_number }}</a></li>
-                    <li class="page-item"><a href="?page={{ second_previous }}" class="page-link">
+                    <li class="page-item"><a href="?page={{ second_previous }}&stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}" class="page-link">
                             {{ second_previous }}</a></li>
-                    <li class="page-item"><a href="?page={{checklist.next_page_number}}" class="page-link">Next</a></li>
-                    <li class="page-item"><a href="?page={{ checklist.paginator.num_pages }}">Last</a></li>
+                    <li class="page-item"><a href="?page={{checklist.next_page_number}}&stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}" class="page-link">Next</a></li>
+                    <li class="page-item"><a href="?page={{ checklist.paginator.num_pages }}&stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}">Last</a></li>
                     {% endif %}
 
                 </ul>
