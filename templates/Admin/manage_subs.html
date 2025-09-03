@@ -20,38 +20,47 @@ Manage Subscription
         <input type="hidden" name="selected_plan" value={{SelectedPlan.id}}>
         <div class="onefourth">
             <label for="sub_name">Subscription Name</label>
-            <input type="text" id="sub_name" name="sub_name" placeholder="Subscription Plan Name" {% if SelectedPlan %}value="{{SelectedPlan.name}}"{% endif %}></br></br>
-            <label for="sub_amount">Subscription Price</label>
-            <input type="number" id="sub_amount" name="sub_amount" placeholder="Price"{% if SelectedPlan %}value="{{SelectedPlan.amount}}"{% endif %}></br></br>
-            <label for="brochure_url">Brochure Url</label>
-            <input type="text" id="brochure_url" name="brochure" placeholder="Select a file" {% if SelectedPlan %}value="{{SelectedPlan.brochure}}"{% endif %}>
+            <input type="text" style="width:80%" id="sub_name" name="sub_name" placeholder="Subscription Plan Name" {% if SelectedPlan %}value="{{SelectedPlan.name}}"{% endif %}></br></br>
             
-
-        </div>
-        <div class="onefourth">
-            <label for="sub_stripe_product_id">Product ID</label>
-            <input type="text" name="sub_stripe_product_id" placeholder="Stripe Product ID" {% if SelectedPlan %}value="{{SelectedPlan.stripe_product_id}}"{% endif %}></br></br>
             <label for="sub_type">Subscription Type</label>
-            <select id="sub_type" name="sub_type">
+            <select id="sub_type" name="sub_type" style="width:80%">
                 <option value="">-Select Subscription Type-</option>
                 <option value="subscription" {% if SelectedPlan and SelectedPlan.type == "subscription" %}selected{% endif %}>Subscription</option>
                 <option value="payperlead"{% if SelectedPlan and SelectedPlan.type == "payperlead" %}selected{% endif %}>Pay Per Lead</option>
             </select></br></br>
-            <label for="up-button">Upload or Pick a File</label></br>
-            <button class="button" id="up-button"type="button" data-media-picker data-target="#brochure_url">Pick File</button>
+
+            <label for="sub_amount">Subscription Price</label>
+            <input type="number" style="width:80%" id="sub_amount" name="sub_amount" placeholder="Price"{% if SelectedPlan %}value="{{SelectedPlan.amount}}"{% endif %}></br></br>           
+
         </div>
         <div class="onefourth">
+            <label for="sub_lead_number">Number of Leads</label>
+            <input type="text" style="width:80%" id="sub_lead_number" name="sub_lead_number" placeholder="Number of Leads"{% if SelectedPlan %}value="{{SelectedPlan.lead_number}}"{% endif %}></br></br>
+
+            <label for="sub_stripe_product_id">Product ID</label>
+            <input type="text" style="width:80%" name="sub_stripe_product_id" placeholder="Stripe Product ID" {% if SelectedPlan %}value="{{SelectedPlan.stripe_product_id}}"{% endif %}></br></br>
+            
             <label for="sub_price_id">Price ID</label></br>
-            <input type="text" id="sub_price_id" name="sub_price_id" placeholder="Stripe Price ID" {% if SelectedPlan %}value="{{SelectedPlan.price_id}}"{% endif %}></br></br>
+            <input type="text" style="width:80%" id="sub_price_id" name="sub_price_id" placeholder="Stripe Price ID" {% if SelectedPlan %}value="{{SelectedPlan.price_id}}"{% endif %}></br></br>
+            
+        </div>
+        <div class="onefourth">
             <label for="sub_interval">Duration</label>
-            <select id="sub_interval" name="sub_interval">
+            <select id="sub_interval" name="sub_interval" style="width:80%">
                 <option value="">-Select Subscription Interval-</option>
                 <option value="month"{% if SelectedPlan and SelectedPlan.interval == "month" %}selected{% endif %}>Monthly</option>
                 <option value="half_yearly" {% if SelectedPlan and SelectedPlan.interval == "half_yearly" %}selected{% endif %}>Half Yearly</option>
                 <option value="year" {% if SelectedPlan and SelectedPlan.interval == "year" %}selected{% endif %}>Yearly</option>
             </select></br></br>
+            
+            <label for="brochure_url">Brochure</label></br>
+            <input type="text" style="width:40%" id="brochure_url" name="brochure" placeholder="Url" {% if SelectedPlan %}value="{{SelectedPlan.brochure}}"{% endif %}>
+            <button class="button" id="up-button"type="button" data-media-picker data-target="#brochure_url" style="width:40%">Upload</button></br></br>
+
             <label for="sub_active">Active Status</label></br>
             <input type="checkbox" name="sub_active" id="sub_active" value="True" style="width: 20px;" {% if SelectedPlan and SelectedPlan.active == True %}checked{% endif %}>
+
+            
         </div>
         
         <div class="onefourth">

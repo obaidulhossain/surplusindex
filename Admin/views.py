@@ -547,6 +547,7 @@ def CreateUpdatePlan(request):
         selectedPlan = request.POST.get('selected_plan',"")
         SubName = request.POST.get('sub_name',"")
         SubAmount = request.POST.get('sub_amount',"")
+        SubNumLeads = request.POST.get('sub_lead_number',"")
         SubProductid = request.POST.get('sub_stripe_product_id',"")
         SubType = request.POST.get('sub_type',"")
         SubPriceid= request.POST.get('sub_price_id',"")
@@ -562,6 +563,7 @@ def CreateUpdatePlan(request):
             PlanInstance.price_id = SubPriceid
             PlanInstance.stripe_product_id = SubProductid
             PlanInstance.amount = SubAmount
+            PlanInstance.lead_number = SubNumLeads
             PlanInstance.interval = SubInterval
             if SubActive == "True":
                 PlanInstance.active = True
@@ -580,6 +582,7 @@ def CreateUpdatePlan(request):
                     'description':SubDescription,
                     'stripe_product_id':SubProductid,
                     'amount':SubAmount,
+                    'lead_number':SubNumLeads,
                     'interval':SubInterval,
                     'active' : SubActive,
                     'brochure' : SubBrochure

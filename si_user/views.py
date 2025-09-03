@@ -171,6 +171,7 @@ def userSubscription(request):
         )
     
     Plans = SubscriptionPlan.objects.filter(active=True).order_by('name').exclude(type="payperlead")
+    payperlead_options = SubscriptionPlan.objects.filter(type="payperlead", active=True).order_by('amount')
     subscriptions = StripeSubscription.objects.filter(user=user).order_by('current_period_end')
     if not UserSettings.manage_sub_show_hidden:
         subscriptions = subscriptions.exclude(hidden=True)
@@ -201,6 +202,7 @@ def userSubscription(request):
             messages.error(request, "An error occured while verifying payment, Please try again.")
     context = {
         'Plans':Plans,
+        'payperlead_options':payperlead_options,
         'subscriptions':subscriptions,
         'UserSettings':UserSettings,
         'announcements':announcements,

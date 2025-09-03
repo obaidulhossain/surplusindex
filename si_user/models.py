@@ -131,6 +131,7 @@ class SubscriptionPlan(models.Model):
     stripe_product_id = models.CharField(max_length=255, blank=True, null=True)
     currency = models.CharField(max_length=10, default="usd")
     amount = models.DecimalField(max_digits=10, decimal_places=2)  # e.g., 29.99
+    lead_number = models.CharField(max_length=10, blank=True, null=True)
     interval = models.CharField(max_length=20, choices=[
         ("month", "Monthly"),
         ("half_yearly", "Half Yearly"),

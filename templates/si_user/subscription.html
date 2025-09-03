@@ -171,16 +171,20 @@
             My Leads Tab</p>
     </div>
     <div class="small-section">
-        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtTVG4c6thWCjhhzgwxpTf" data-leads="10" data-amount="10">Buy 10 Credits for $10</a>
-            {% comment %} test price id for 10 = price_1QojYpG4c6thWCjhaNxkWBYH {% endcomment %}
-        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtTxG4c6thWCjh3mJeI648" data-leads="50" data-amount="50">Buy 50 Credits for $50</a>
-            {% comment %} test price id for 50 = price_1QojZ9G4c6thWCjh9Ye4cxI9 {% endcomment %}
-        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtULG4c6thWCjh6UVGUzm4" data-leads="100" data-amount="95">Buy 100 Credits for $95</a>
-            {% comment %} test price id for 100 = price_1QoOCJG4c6thWCjhpEhUuWtH {% endcomment %}
-        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtUXG4c6thWCjhzIDvgDGt" data-leads="300" data-amount="270">Buy 300 Credits for $270</a>
-        {% comment %} test price id for 300 = price_1QojZNG4c6thWCjh4c4ljD2U {% endcomment %}
+        {% for option in payperlead_options %}
+        <a href="#" class="button button-large buy-button" role="button" data-price-id="{{option.price_id}}" data-leads="{{option.lead_number}}" data-amount="{{option.amount}}">{{option.description}}</a>
+        {% endfor %}
     </div>
-    
+    {% comment %} <div class="small-section">
+        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtTVG4c6thWCjhhzgwxpTf" data-leads="10" data-amount="10">Buy 10 Credits for $10</a>
+        
+        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtTxG4c6thWCjh3mJeI648" data-leads="50" data-amount="50">Buy 50 Credits for $50</a>
+        
+        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtULG4c6thWCjh6UVGUzm4" data-leads="100" data-amount="95">Buy 100 Credits for $95</a>
+        
+        <a href="#" class="button button-large buy-button" role="button" data-price-id="price_1RvtUXG4c6thWCjhzIDvgDGt" data-leads="300" data-amount="270">Buy 300 Credits for $270</a>
+        
+    </div> {% endcomment %}
   
 </div>
 
