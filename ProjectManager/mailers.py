@@ -53,7 +53,7 @@ def send_cycle_leads(task_instance):
         email = EmailMessage(
             subject=subject,
             body=body,
-            from_email="contact@surplusindex.com",
+            from_email=settings.EMAIL_HOST_USER,
             to=[user.email],
         )
         email.attach(
