@@ -30,7 +30,9 @@ def fclview(request):
     if request.method == 'POST':
         selected_foreclosure = request.POST.get('caseid','')
     else:
+        #selected_foreclosure = request.GET.get('caseid','')
         selected_foreclosure = request.GET.get('fcl_id','')
+        
     if selected_foreclosure:
         current_fcl_instance = get_object_or_404(Foreclosure, pk=selected_foreclosure)
         all_prop = current_fcl_instance.property.all()
@@ -432,26 +434,26 @@ def fcl_add_property(request):
 # --------------------------------------------------------------------------------
 
 # Views for Section (Skiptracing Checklist)--------------------Start
-def skiptracing_checklist(request):
-    current_user=request.user
-    p=Paginator(Contact.objects.filter(skp_assignedto=current_user, skiptraced=False), 20)
-    states=Foreclosure.objects.values_list("state", flat=True).distinct()
-    counties=Foreclosure.objects.values_list("county", flat=True).distinct()
-    saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
-    page = request.GET.get('page')
-    checklist = p.get_page(page)
-    current_page = int(checklist.number)
-    second_previous = current_page + 2
+# def skiptracing_checklist(request):
+#     current_user=request.user
+#     p=Paginator(Contact.objects.filter(skp_assignedto=current_user, skiptraced=False), 20)
+#     states=Foreclosure.objects.values_list("state", flat=True).distinct()
+#     counties=Foreclosure.objects.values_list("county", flat=True).distinct()
+#     saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
+#     page = request.GET.get('page')
+#     checklist = p.get_page(page)
+#     current_page = int(checklist.number)
+#     second_previous = current_page + 2
 
-    context = {
-        'current_user':current_user,
-        'checklist':checklist,
-        'states':states,
-        'counties':counties,
-        'saletypes':saletypes,
-        'second_previous':second_previous
-        }
-    return render(request,'da/active_skp.html',context)
+#     context = {
+#         'current_user':current_user,
+#         'checklist':checklist,
+#         'states':states,
+#         'counties':counties,
+#         'saletypes':saletypes,
+#         'second_previous':second_previous
+#         }
+#     return render(request,'da/active_skp.html',context)
 
 # --------------------------------------------------------------------------------
 

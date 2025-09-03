@@ -6,86 +6,123 @@ Active SkipTracing
 
 {% block content%}
 {% load static %}
-<link href="{% static 'css/propertydata.css' %}" rel="stylesheet">
+
+<link href="{% static 'css/da.css' %}" rel="stylesheet">
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
 <link href="{% static 'css/nouislider.min.css' %}" rel="stylesheet">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.css"> -->
 
-<div class="container">
-    <div class="container">
-        <div class="filter-section">
-            <div class="filters-header">
-                <h2>Skiptracing | Checklist for {{current_user|upper}}</h2>
-                <button id="toggle-filters" class="toogle-button"
-                    onclick="toggleFilters(this.id, 'filter-section')">Hide Filters</button>
-            </div>
-        </div>
-        <form id="add-to-myleads" method="POST">
+<div class="body-section">
+    <div class="da-sec-header" style="margin-top:0px;">
+        <h4>Skiptracing | Checklist for {{current_user|upper}}</h4>
+        <button id="toggle-filters" class="icon-button" onclick="toggleFilters(this.id, 'filters', event)" style="padding: 2px 7px;"><i class="bi bi-eye-slash"></i></button>
+    </div>
+    <div class="filter-section" id="filters" style="border:1px solid grey; padding:20px">
+        <form method="post">
             {% csrf_token %}
-            <div class="table-wrapper">
-                <table id="leads-table" class="table table-striped table-hover">
-                    <thead>
-                        <tr>
-                            <th>Action</th>
-                            <th>Mailing Address</th>
-                            <th>Contact Name</th>
-                            <th>Designation</th>
-                            <th>Business Name</th>
-                            <th>Comment</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for i in checklist %}
-
-                        <tr>
-                            <td><a href="/skiptrace/?con_id={{ i.id }}">Edit</a></td>
-                            <td>
-                                {% for p in i.mailing_address.all %}
-                                {{p.house_number}} {{p.road_name}} {{p.road_type}} {{p.direction}} {{p.apt_unit}} {{p.extention}}, {{p.city}} {{p.state}} {{p.zip_code}}<br>
-                                {% endfor %}
-                            </td>
-                            <td>{{i.name_prefix}} {{i.first_name}} {{i.middle_name}} {{i.last_name}} {{i.name_suffix}}</td>
-                            <td>{{i.designation}}</td>
-                            <td>{{i.business_name}}</td>
-                            <td>{{i.skiptrace_comment}}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                <div class="clearfix">
-                    <div class="hint-text">Showing Page <b>{{ checklist.number }}</b> out of <b>
-                            {{ checklist.paginator.num_pages }}</b> Pages</div>
-                    <ul class="pagination">
-                        {% if checklist.has_previous %}
-                        <li class="page-item"><a href="?page=1" class="page-link">First</a></li>
-                        <li class="page-item"><a href="?page={{ checklist.previous_page_number }}">Previous</a></li>
-                        <li class="page-item"><a href="?page={{ checklist.previous_page_number }}" class="page-link">
-                                {{ checklist.previous_page_number }}</a></li>
-                        {% endif %}
-
-
-                        <li class="page-item active"><a href="#" class="page-link">{{ checklist.number }}</a></li>
-
-
-
-                        {% if checklist.has_next %}
-                        <li class="page-item"><a href="?page={{ checklist.next_page_number }}" class="page-link">
-                                {{ checklist.next_page_number }}</a></li>
-                        <li class="page-item"><a href="?page={{ second_previous }}" class="page-link">
-                                {{ second_previous }}</a></li>
-                        <li class="page-item"><a href="?page={{checklist.next_page_number}}" class="page-link">Next</a></li>
-                        <li class="page-item"><a href="?page={{ checklist.paginator.num_pages }}">Last</a></li>
-                        {% endif %}
-
-                    </ul>
-                </div>
+            <div class="onethird">
+                <label for="stateFilter">Select State</label><br>
+                <select id="stateFilter" name="stateFilter" onchange="this.form.submit()" style="width:80%">
+                    <option value="" {% if selectedState == "" %}selected{% endif %}>--- Select State ---</option>
+                    {% for state in states %}
+                    <option value="{{state}}" {% if state == selectedState %}selected{% endif %}>{{state|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onethird">
+                <label for="countyFilter">Select County</label><br>
+                <select id="countyFilter" style="width:80%" name="countyFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
+                    <option value="">All</option>
+                    {% for county in counties %}
+                    <option value="{{county}}" {% if county == selectedCounty %}selected{% endif %}>{{county|upper}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="onethird">
+                <label for="saletypeFilter">Sale Type</label><br>
+                <select id="saletypeFilter" style="width:80%" name="saletypeFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
+                    <option value="">All</option>
+                    {% for saletype in saletypes %}
+                    <option value="{{saletype}}" {% if saletype == selectedSaletype %}selected{% endif %}>{{saletype|upper}}</option>
+                    {% endfor %}
+                </select>
             </div>
         </form>
     </div>
+    
+            
+        </div>
+        <div class="table-wrapper">
+            <table id="leads-table" class="table table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th style="width:35%;">State - County - Case</th>
+                        <th style="width:35%;">Name</th>
+                        <th>Comment</th>
+                        <th>View Case</th>
+                        <th>Skiptrace</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for i in checklist %}
+                    {% for contact in i.pending_contacts %}
+
+                    <tr>
+                        <td>{{i.state|title}} - {{i.county|title}} - {{i.case_number|upper}}</td>
+                        <td>{{contact}}</td>
+                        <td>{{contact.skiptrace_comment}}</td>
+                        <td>
+                            <form method="POST" action="{% url 'add_edit_fcl' %}" target="blank">
+                                {% csrf_token %}
+                                <input type="hidden" name="caseid" value="{{i.id}}">
+                                <input type="submit" class="button" value="View Case" style="color: #ffffff; padding:0px 10px;">
+                            </form>
+                        </td>
+                        <td>
+                            <form method="POST" action="{% url 'skiptrace' %}" target="blank">
+                                {% csrf_token %}
+                                <input type="hidden" name="con_id" value="{{contact.id}}">
+                                <input type="submit" class="button" value="Skiptrace" style="color: #ffffff; padding:0px 10px;">
+                            </form>
+                        </td>
+                    {% endfor %}
+                {% endfor %}
+                </tbody>
+            </table>
+            <div class="clearfix">
+                <div class="hint-text">Showing Page <b>{{ checklist.number }}</b> out of <b>
+                        {{ checklist.paginator.num_pages }}</b> Pages</div>
+                <ul class="pagination">
+                    {% if checklist.has_previous %}
+                    <li class="page-item"><a href="?page=1" class="page-link">First</a></li>
+                    <li class="page-item"><a href="?page={{ checklist.previous_page_number }}">Previous</a></li>
+                    <li class="page-item"><a href="?page={{ checklist.previous_page_number }}" class="page-link">
+                            {{ checklist.previous_page_number }}</a></li>
+                    {% endif %}
+
+
+                    <li class="page-item active"><a href="#" class="page-link">{{ checklist.number }}</a></li>
+
+
+
+                    {% if checklist.has_next %}
+                    <li class="page-item"><a href="?page={{ checklist.next_page_number }}" class="page-link">
+                            {{ checklist.next_page_number }}</a></li>
+                    <li class="page-item"><a href="?page={{ second_previous }}" class="page-link">
+                            {{ second_previous }}</a></li>
+                    <li class="page-item"><a href="?page={{checklist.next_page_number}}" class="page-link">Next</a></li>
+                    <li class="page-item"><a href="?page={{ checklist.paginator.num_pages }}">Last</a></li>
+                    {% endif %}
+
+                </ul>
+            </div>
+        </div>
+    </div>
     <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.0/nouislider.min.js"></script> -->
     <script src="{% static 'js/nouislider.min.js' %}"></script>
-    <script src="{% static 'js/leads.js' %}"></script>
+    <script src="{% static 'js/surplusindex.js' %}"></script>
 
 </div>
 

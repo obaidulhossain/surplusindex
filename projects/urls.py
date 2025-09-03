@@ -7,7 +7,7 @@ urlpatterns = [
 # Urls for Active Case Search Section
 
 # Urls for Active Skiptracing Section
-path('skiptracing_checklist', views.skiptracing_checklist, name="skiptracing_checklist"),
+# path('skiptracing_checklist', views.skiptracing_checklist, name="skiptracing_checklist"),
 
 # Urls for Foreclosure Section
 path('add_edit_foreclosure/', views.fclview, name="add_edit_fcl"),

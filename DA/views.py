@@ -10,7 +10,8 @@ from datetime import timedelta
 # -----------Forms------------------
 
 from propertydata.forms import *
-# -----------Models------------------
+# -----------Models----------------
+from django.db.models import Prefetch
 from . models import *
 from realestate_directory.models import *
 from propertydata.models import *
@@ -90,3 +91,65 @@ def caseChecklist(request):
 
 
 # Create your views here.
+
+def SkiptracingChecklist(request):
+
+    current_user = request.user
+    params = request.POST if request.method == "POST" else request.GET
+    selectedState = params.get('stateFilter', '')
+    selectedCounty = params.get('countyFilter', '')
+    selectedSaletype = params.get('saletypeFilter', '')
+
+    #--------------------Queryset---------------------------------------------------------------
+    # Get foreclosure records linked to contacts assigned to the current user and not skiptraced
+    foreclosure_qs = (
+        Foreclosure.objects
+        .filter(defendant__skp_assignedto=current_user, defendant__skiptraced=False)
+        .prefetch_related(
+            Prefetch(
+                "defendant",
+                queryset=Contact.objects.filter(skp_assignedto=current_user, skiptraced=False),
+                to_attr="pending_contacts"
+            )
+        )
+        .distinct()
+    )
+    #-------------------------------------------------------------------------------------------
+
+    #---------------Filters-----------------------------
+    filters = {}
+    if selectedState:
+        filters["state__iexact"] = selectedState
+    if selectedCounty:
+        filters["county__iexact"] = selectedCounty
+    if selectedSaletype:
+        filters["sale_type__iexact"] = selectedSaletype
+    foreclosure_qs = foreclosure_qs.filter(**filters)
+    #---------------------------------------------------
+
+    # Pagination
+    p = Paginator(foreclosure_qs, 20)
+    page = request.GET.get('page')
+    checklist = p.get_page(page)
+
+    current_page = int(checklist.number)
+    second_previous = current_page + 2 if checklist.has_next() else None
+
+    # Dropdown filters
+    states = foreclosure_qs.values_list("state", flat=True).distinct()
+    counties = foreclosure_qs.values_list("county", flat=True).distinct()
+    saletypes = foreclosure_qs.values_list("sale_type", flat=True).distinct()
+    
+
+    context = {
+        'current_user': current_user,
+        'checklist': checklist,
+        'states': states,
+        'counties': counties,
+        'saletypes': saletypes,
+        'second_previous': second_previous,
+        'selectedState':selectedState,
+        'selectedCounty':selectedCounty,
+        'selectedSaletype':selectedSaletype,
+    }
+    return render(request, 'da/active_skp.html', context)
