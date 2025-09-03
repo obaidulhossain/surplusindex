@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from propertydata.models import*
+from si_user.models import*
 # Create your models here.
 class Timelogger(models.Model):
     
@@ -12,9 +13,12 @@ class Timelogger(models.Model):
 
 class Projects(Timelogger):
     name = models.CharField(max_length=255)
+    state = models.CharField(max_length=255, null=True, blank=True)
+    sale_type = models.CharField(max_length=255, null=True, blank=True)
     description = models.CharField(max_length=255)
     post_foreclosure_update_interval = models.IntegerField(default=7)
     active = models.BooleanField(default=True)
+    plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True)
     def __str__(self):
         return self.name
 

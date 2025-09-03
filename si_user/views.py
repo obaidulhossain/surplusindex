@@ -222,159 +222,6 @@ def HideShow_HiddenSubs(request):
 
 
 
-
-
-# @login_required
-# @csrf_exempt
-# logger = logging.getLogger(__name__)
-# def checkout(request):
-#     user = request.user
-#     if request.method == 'POST':
-#         try:
-#             data = json.loads(request.body)
-#             priceID = data.get('price_id')
-#             leads = data.get('leads')
-#             amount = data.get('amount')
-#             if not priceID or leads is None or amount is None:
-#                     return JsonResponse({'error': 'price_id, leads, or amount are missing'}, status=400)
-#             if not user.credits.stripe_customer_id:
-#                 try:
-#                     customer = stripe.Customer.create(
-#                         email=user.email,
-#                         name=f"{user.first_name} {user.last_name}",
-#                     )
-#                     user.credits.stripe_customer_id = customer.id
-#                     user.credits.save()
-#                 except stripe.error.StripeError as e:
-#                     return JsonResponse({'error': 'Failed to create Stripe customer.'}, status=400)
-            
-#             try:
-#                 session = stripe.checkout.Session.create(
-#                     payment_method_types=['card'],
-#                     line_items=[{
-#                         'price': priceID,  # Use dynamic price_id here
-#                         'quantity': 1,
-#                     }],
-#                     mode='payment',
-#                     success_url=request.build_absolute_uri(reverse('subscriptions')) + '?session_id={CHECKOUT_SESSION_ID}',
-#                     cancel_url=request.build_absolute_uri(reverse('subscriptions')),
-#                     customer=user.credits.stripe_customer_id,
-#                     client_reference_id=user.id,
-#                 )
-#             except stripe.error.StripeError as e:
-#                 logger.error(f"Error creating Stripe checkout session: {e}")
-#                 return JsonResponse({'error': 'Failed to create Stripe checkout session.'}, status=400)
-#             try:
-#                 return JsonResponse({
-#                     'session_id': session.id,
-#                     'stripe_public_key': settings.STRIPE_PUBLISHABLE_KEY,
-#                 })
-#             except Exception as e:
-#                 logger.error(f"Error creating JSON response: {e}")
-#                 return JsonResponse({'error': 'Failed to create JSON response.'}, status=500)
-#         except json.JSONDecodeError as e:
-#             logger.error(f"Invalid JSON in request body: {e}")
-#             return JsonResponse({'error': 'Invalid JSON in request body.'}, status=400)
-#         except Exception as e:
-#             logger.error(f"An unexpected error occurred: {e}")
-#             return JsonResponse({'error': 'An unexpected server error occurred.'}, status=500)
-#     else:
-#         return JsonResponse({'error': 'Invalid request method.'}, status=405)
-
-
-
-# @csrf_exempt
-# def stripe_webhook(request):
-#     endpoint_secret = settings.STRIPE_WEBHOOK_ENDPOINT
-#     payload = request.body
-#     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
-#     event = None
-
-#     try:
-#         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-#     except ValueError as e:
-#         return HttpResponse("Invalid payload", status=400)
-#     except stripe.error.SignatureVerificationError as e:
-#         return HttpResponse("Invalid signature", status=400)
-
-#     if event['type'] == 'checkout.session.completed':
-#         session = event['data']['object']
-#         try:
-#             line_items = stripe.checkout.Session.list_line_items(session['id'])
-#             if not line_items['data']:
-#                 return HttpResponse("No line items found", status=400)
-
-#             price_id = line_items['data'][0]['price']['id']
-#             price_map = {
-#                 os.getenv('TEN_LEADS'): 10,
-#                 os.getenv('FIFTY_LEADS'): 50,
-#                 os.getenv('HUNDRED_LEADS'): 100,
-#                 os.getenv('THREEHUNDRED_LEADS'): 300
-#             }
-#             num_leads = price_map.get(price_id, 0)
-
-#             customer_id = session.get('customer')
-#             checkout_id = session.get('id')
-#             amount_total = session.get('amount_total')
-#             if amount_total is None:
-#                 return HttpResponse("Invalid session data", status=400)
-#             amount_paid = amount_total / 100
-#             currency = session.get('currency')
-#             user_id = session.get('client_reference_id')
-
-#             try:
-#                 user = User.objects.get(id=user_id)
-#             except User.DoesNotExist:
-#                 return HttpResponse("User not found", status=404)
-
-#             with transaction.atomic():
-#                 UserPayment.objects.create(
-#                     user=user,
-#                     stripe_customer_id=customer_id,
-#                     stripe_checkout_id=checkout_id,
-#                     amount=amount_paid,
-#                     number_of_leads=num_leads,
-#                     currency=currency,
-#                     has_paid=True,
-#                 )
-#                 user_detail = get_object_or_404(UserDetail, user=user)
-#                 user_detail.purchased_credit_balance += num_leads
-#                 user_detail.update_total_credits()
-#                 user_detail.save()
-#         except Exception as e:
-#             logger.error(f"Error processing Stripe webhook: {str(e)}")
-#             return HttpResponse("Error processing webhook", status=400)
-
-#     else:
-#         logger.info(f"Unhandled event type: {event['type']}")
-#     return HttpResponse(status=200)
-
-
-
-
-
-# @csrf_exempt
-# @login_required
-# def create_checkout_session(request, plan_id):
-#     plan = get_object_or_404(SubscriptionPlan, id=plan_id, active=True)
-
-#     session = stripe.checkout.Session.create(
-#         customer_email=request.user.email,
-#         payment_method_types=['card'],
-#         line_items=[{
-#             'price': plan.price_id,
-#             'quantity': 1,
-#         }],
-#         mode='subscription',
-#         success_url=request.build_absolute_uri('/subscription/success/'),
-#         cancel_url=request.build_absolute_uri('/subscription/cancel/'),
-#         metadata={
-#             'user_id': request.user.id,
-#             'plan_id': plan.id
-#         }
-#     )
-#     return redirect(session.url)
-
 @login_required
 @csrf_exempt
 def checkout(request):
@@ -599,14 +446,16 @@ def stripe_webhook(request):
 
         else:
             # Pay-as-you-go mapping
-            price_map = {
-                os.getenv("TEN_LEADS"): 10,
-                os.getenv("FIFTY_LEADS"): 50,
-                os.getenv("HUNDRED_LEADS"): 100,
-                os.getenv("THREEHUNDRED_LEADS"): 300
-            }
-            num_leads = price_map.get(price_id, 0)
-
+            # price_map = {
+            #     os.getenv("TEN_LEADS"): 10,
+            #     os.getenv("FIFTY_LEADS"): 50,
+            #     os.getenv("HUNDRED_LEADS"): 100,
+            #     os.getenv("THREEHUNDRED_LEADS"): 300
+            # }
+            # num_leads = price_map.get(price_id, 0)
+            sub_instance = SubscriptionPlan.objects.get(price_id=price_id)
+            num_leads = int(sub_instance.lead_number)
+            
             with transaction.atomic():
                 create_or_update_transaction(
                     user=user,

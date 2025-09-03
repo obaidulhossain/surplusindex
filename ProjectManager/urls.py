@@ -31,6 +31,7 @@ path('deliver-upload-task/', views.DeliverUploadTask, name="deliver-upload-task"
 path('deliver-casesearch-task/', views.DeliverCasesearchTask, name="deliver-casesearch-task"),
 path('deliver-skiptrace-task/', views.DeliverSkiptraceTask, name="deliver-skiptrace-task"),
 path('deliver-publish-task/', views.DeliverPublishTask, name="deliver-publish-task"),
+path('deliver-cycle/<int:task_id>/',views.deliver_cycle_leads, name="deliver_cycle_leads"),
 path('deliver-update-cycle-task/',views.DeliverUpdateCycle, name="deliver-update-cycle-task"),
 
 

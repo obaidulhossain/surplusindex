@@ -790,12 +790,114 @@ Task Viewer
     </div>
     {% endif %}
 {% elif task_instance.template.taskview.viewname == "Initiate Deliveries" %}
-    <div class="week-icon">
-        <h4>{{task_instance.cycle.week}}</h4>
-    </div>    
-    <div>
-    sdasd
+    <div class="section-small">
+        <div class="viewer-option-small">
+            <div class="week-icon" style=" border-right: 10px solid #a3c1a6;">
+                <h4>{{task_instance.cycle.week}}</h4>
+            </div>
+        </div>
+        <div class="viewer-option-large">
+            <h4>{{task_instance.task_name}}</h4>
+            <h6>{{task_instance.description}}</h6>
+        </div>
+        <div class="viewer-option-small">
+            {% if task_instance.time_captured > 0 %}
+            <h4><center>{{ task_instance.get_time_display }}</center></h4>
+            {% endif %}
+            <div id="task-controls">
+            {% if task_instance.tracker_status == 'idle' %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start</a>
+            {% elif task_instance.tracker_status == "started" %}
+                <a href="{% url 'pause_task' task_instance.id %}" class="btn btn-warning">Pause</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a></br>
+                <a href="{{ task_instance.cycle.pf_list }}" class="btn btn-success" target="blank">View List</a>
+                
+                <a href="{% url 'add_edit_fcl' %}" class="btn btn-success" target="blank">Add Foreclosure Record</a>
+                <center><h4>Uploaded: {% if task_instance.lead_volume %}{{task_instance.lead_volume}}{% else %}{{leads.count}}{% endif %}</h4></center>
+
+            {% elif task_instance.tracker_status == "paused" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-primary">Resume</a>
+                <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
+            {% elif task_instance.tracker_status == "stopped" %}
+                <a href="{% url 'start_task' task_instance.id %}" class="btn btn-success">Start Again</a>
+                <form method="post" action="{% url 'deliver_cycle_leads' task_instance.id %}">
+                {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Initiate Delivery</button>
+                </form>
+                <center><h4>Delivered: {% if task_instance.lead_volume %}{{task_instance.lead_volume}}{% else %}{{new_leads.count}}{% endif %}</h4></center>
+            {% endif %}
+            </div>
+            
+        </div>
     </div>
+    <div class="section-small">
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Cycle Duration</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Sale Range</h6>
+            <h6>{{task_instance.cycle.sale_from|date:'m/d/Y'}} - {{task_instance.cycle.sale_to|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Assigned</h6>
+            <h6>{% for user in task_instance.assigned_to.all %}{{user.username|upper}}{% if not forloop.last %}, {% endif %}{% endfor %} in {{task_instance.date_assigned|date:'m/d/Y'}}</h6>
+        </div>
+        <div class="onefifth" style="border-right:1px solid grey">
+            <h6>Due In</h6>
+            <h6>{{task_instance.delivery_date|date:'m/d/Y'}}</h6>
+
+        </div>
+        <div class="onefifth">
+            <h6>Status</h6>
+            <h6>{{task_instance.get_status_display}} - {{task_instance.get_tracker_status_display}}</h6>
+
+        </div>
+    </div>
+    <form method="POST" action="{% url 'save_note' %}">
+    {% csrf_token %}
+        <input type="hidden" name="task_id" value="{{task_instance.id}}">
+        <input type="text" style="width:100%; text-align: center;" placeholder="Add Notes" name="notes" {% if task_instance.note %}value="{{task_instance.note}}"{% endif %}>
+        <input type="submit" value="Save Note" style="width:100%;">
+    </form>
+    {% if task_instance.tracker_status == "started" %}
+    <div class="table-wrapper">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">State</th>
+                    <th style="min-width: 120px;">County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Plaintiff</th>
+                    <th>Defendant</th>
+                    <th>Address</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in leads %}
+                <tr>
+                    <td>{{lead.state}}</td>
+                    <td>{{lead.county}}</td>
+                    <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
+                    <td>{{lead.sale_date}}</td>
+                    <td>{% if lead.plaintiff.individual_name %}{{lead.plaintiff.individual_name}}{% else %}{{lead.plaintiff.business_name}}{% endif %}</td>
+                    <td>{{lead.defendant.first_name}}{% if lead.defendant.middle_name %} {{lead.defendant.middle_name}}{% endif %} {{lead.defendant.last_name}}{% if lead.defendant.name_suffix %} {{lead.defendant.name_suffix}}{% endif %}{% if lead.defendant.business_name %} {{lead.defendant.designation}} for {% endif %}{{lead.defendant.business_name}}</td>
+                    <td>{{lead.property}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'add_edit_fcl' %}">
+                        {% csrf_token %}
+                            <input type="hidden" value="{{lead.id}}" name="caseid">
+                            <input type="submit" value="Edit">
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
 {% elif task_instance.template.taskview.viewname == "Post Foreclosure Update" %}
     <div class="section-small">
         <div class="viewer-option-small">

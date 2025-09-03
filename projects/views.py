@@ -1005,6 +1005,9 @@ def skiptrace_related_contact(request):
 # --------------------------------------------------------------------------------
 
 # Views for Section (Delivered Tasks)--------------------Start
+
+
+
 def deliveredtasks(request):
     current_user=request.user
     p=Paginator(Foreclosure.objects.filter(case_search_assigned_to=current_user, case_search_status = "Completed"), 20)

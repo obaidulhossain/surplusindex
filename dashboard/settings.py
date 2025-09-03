@@ -179,6 +179,8 @@ EMAIL_HOST_PASSWORD = "Obaidul@11307"
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 
+# EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+# EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

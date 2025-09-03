@@ -9,9 +9,12 @@ from datetime import date, timedelta
 from django.views.decorators.csrf import csrf_exempt
 import json
 from propertydata.models import *
+from si_user.models import *
 from realestate_directory.models import *
 from django.utils.timezone import now
 from django.db.models import Prefetch
+from django.views.decorators.http import require_POST
+from .mailers import send_cycle_leads
 # Create your views here.
 #-----------------------Project Manager---------------------
 
@@ -450,6 +453,7 @@ def TaskViewer(request):
         tasks_completed = all_tasks.filter(status="completed")
         leads = Foreclosure.objects.filter(state__iexact=task_instance.project.name, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
         new_leads = leads.filter(created_at__range=(task_instance.cycle.cycle_start,task_instance.cycle.cycle_end))
+        published = leads.filter(published=True)
         case_searched = leads.filter(case_search_status="completed")
 
         contacts = Contact.objects.filter(
@@ -464,8 +468,8 @@ def TaskViewer(request):
             post_foreclosure_case_completed = post_foreclosure_case_search_leads.filter(changed_at__gte=task_instance.cycle.cycle_start - timedelta(days=1))
             if task_instance.post_foreclosure_case_volume:
                 post_foreclosure_searched = int(task_instance.post_foreclosure_case_volume) - post_foreclosure_case_search_leads.count()
-                
-        published = leads.filter(published=True)
+        active_subscriptions = StripeSubscription.objects.filter(plan=task_instance.project.plan, current_period_end__gte=task_instance.cycle.cycle_end)
+        users = [sub.user for sub in active_subscriptions]
         
         events = foreclosure_Events.objects.filter(state__iexact=task_instance.project.name, event_next__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
         status = task_instance.get_current_status(request.user)
@@ -490,6 +494,17 @@ def TaskViewer(request):
 
     }
     return render(request, 'ProjectManager/task-viewer.html',context)
+
+@require_POST
+def deliver_cycle_leads(request, task_id):
+    taskinstance = get_object_or_404(Tasks, id=task_id)
+    cycle = taskinstance.cycle
+
+    # run the delivery function (sends emails + xlsx attachment)
+    send_cycle_leads(task_instance=taskinstance)
+
+    messages.success(request, f"Leads for Cycle {cycle.week} sent successfully!")
+    return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
 def start_task(request, task_id):
@@ -676,3 +691,17 @@ def DeliveredTasks(request):
 
 def ProjectSettings(request):
     return render(request, 'ProjectManager/project-settings.html')
+
+
+
+
+# -----------------------------Make Delivery of Project_Cycle data to clients---------------------------
+
+
+# --------------------------------------------------------------------------------
+
+
+
+
+
+
