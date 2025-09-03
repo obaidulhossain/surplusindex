@@ -431,33 +431,8 @@ def fcl_add_property(request):
 
     return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={update}#prop")
 
-# --------------------------------------------------------------------------------
 
-# Views for Section (Skiptracing Checklist)--------------------Start
-# def skiptracing_checklist(request):
-#     current_user=request.user
-#     p=Paginator(Contact.objects.filter(skp_assignedto=current_user, skiptraced=False), 20)
-#     states=Foreclosure.objects.values_list("state", flat=True).distinct()
-#     counties=Foreclosure.objects.values_list("county", flat=True).distinct()
-#     saletypes=Foreclosure.objects.values_list("sale_type", flat=True).distinct()
-#     page = request.GET.get('page')
-#     checklist = p.get_page(page)
-#     current_page = int(checklist.number)
-#     second_previous = current_page + 2
-
-#     context = {
-#         'current_user':current_user,
-#         'checklist':checklist,
-#         'states':states,
-#         'counties':counties,
-#         'saletypes':saletypes,
-#         'second_previous':second_previous
-#         }
-#     return render(request,'da/active_skp.html',context)
-
-# --------------------------------------------------------------------------------
-
-# Views for Section (Skiptracing)--------------------Start
+# -------------------------------------------Views for Section (Skiptracing)
 def skiptrace(request):
     researcher = request.user.groups.filter(name="researcher").exists()
     all_contact = Contact.objects.all().distinct()
@@ -476,6 +451,11 @@ def skiptrace(request):
         all_wireless = current_con_instance.wireless.all()
         all_landline = current_con_instance.landline.all()
         all_related_contact = current_con_instance.related_contacts.all()
+        foreclosures = Foreclosure.objects.filter(defendant=current_con_instance)
+        for fcl in foreclosures:
+            properties = fcl.property.all()
+            for prop in properties:
+                current_con_instance.mailing_address.add(prop)
         
     else:
         current_con_instance = None
@@ -484,7 +464,8 @@ def skiptrace(request):
         all_wireless = None
         all_landline = None
         all_related_contact = None
-        
+    
+    
 
 
     context = {
