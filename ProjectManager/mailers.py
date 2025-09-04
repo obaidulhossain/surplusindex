@@ -68,9 +68,9 @@ def send_cycle_leads(task_instance):
         email = EmailMessage(
             subject=subject,
             body=body,
-            from_email=settings.EMAIL_HOST_USER,  # contact@surplusindex.com
+            from_email="contact@surplusindex.com",  # contact@surplusindex.com
             to=[user.email],
-            reply_to=[settings.EMAIL_HOST_USER]    # optional
+            reply_to="contact@surplusindex.com"   # optional
         )
 
         # Attach XLSX report
@@ -79,7 +79,7 @@ def send_cycle_leads(task_instance):
             content=xlsx_bytes,
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
-        
+
         email.send(fail_silently=False)
 
 
