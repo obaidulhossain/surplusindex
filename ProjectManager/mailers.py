@@ -79,4 +79,7 @@ def send_cycle_leads(task_instance):
             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
-        email.send(fail_silently=False)
+        try:
+            email.send(fail_silently=False)
+        except Exception as e:
+            print(f"Failed to send email to {user.email}: {e}")
