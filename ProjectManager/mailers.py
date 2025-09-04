@@ -4,9 +4,19 @@ from io import BytesIO
 from si_user.models import *
 from propertydata.models import *
 from Client.resources import ClientModelResource
+from django.conf import settings
+
+
+
+
+
 
 
 def generate_xlsx(leads):
+    """
+    Export Foreclosure leads queryset to XLSX in memory.
+    Returns a BytesIO object.
+    """
     resources = ClientModelResource()
     dataset = resources.export(leads)
 
@@ -17,6 +27,10 @@ def generate_xlsx(leads):
 
 
 def send_cycle_leads(task_instance):
+    """
+    Send foreclosure leads for a given task cycle
+    as XLSX attachment to all active subscribers.
+    """
     # 1. Active subscriptions
     active_subscriptions = StripeSubscription.objects.filter(
         plan=task_instance.project.plan,
@@ -60,8 +74,9 @@ def send_cycle_leads(task_instance):
             "leads_report.xlsx",
             xlsx_bytes,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            
         )
-        email.send()
+        email.send(fail_silently=False)
 
 
 
