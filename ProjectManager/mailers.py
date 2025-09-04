@@ -68,7 +68,7 @@ def send_cycle_leads(task_instance):
         email = EmailMessage(
             subject=subject,
             body=body,
-            from_email="contact@surplusindex.com",  # contact@surplusindex.com
+            #from_email="contact@surplusindex.com",  # contact@surplusindex.com
             to=[user.email],
             reply_to="contact@surplusindex.com"   # optional
         )
