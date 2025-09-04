@@ -178,7 +178,7 @@ EMAIL_HOST_USER = "contact@surplusindex.com"
 EMAIL_HOST_PASSWORD = "Obaidul@11307"
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
-DEFAULT_FROM_EMAIL = "contact@surplusindex.com"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 # EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 # EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
 
