@@ -7,11 +7,6 @@ from Client.resources import ClientModelResource
 from django.conf import settings
 
 
-
-
-
-
-
 def generate_xlsx(leads):
     """
     Export Foreclosure leads queryset to XLSX in memory.
@@ -36,7 +31,10 @@ def send_cycle_leads(task_instance):
         plan=task_instance.project.plan,
         current_period_end__gte=task_instance.cycle.cycle_end
     )
-
+    
+    if not active_subscriptions.exists():
+        return
+    
     # 2. Leads within cycle date range
     leads = Foreclosure.objects.filter(
         state__iexact=task_instance.project.state,
@@ -54,28 +52,34 @@ def send_cycle_leads(task_instance):
     # 4. Send per user
     for sub in active_subscriptions:
         user = sub.user
+        user_name = user.get_full_name() if hasattr(user, 'get_full_name') else user.username
 
         subject = f"Leads Report for Cycle {task_instance.cycle.week}"
         body = (
-            f"Hello {getattr(user, 'get_full_name', lambda: user.username)()},\n\n"
+            f"Hello {user_name},\n\n"
             f"Please find attached the foreclosure leads between "
             f"{task_instance.cycle.sale_from.strftime('%Y-%m-%d')} and "
             f"{task_instance.cycle.sale_to.strftime('%Y-%m-%d')}.\n\n"
-            f"Best regards,\nYour Team"
+            f"Best regards,\n"
+            f"SurplusIndex Team"
         )
 
+        # Use a verified email for sending
         email = EmailMessage(
             subject=subject,
             body=body,
-            from_email=settings.EMAIL_HOST_USER,
+            from_email=settings.EMAIL_HOST_USER,  # contact@surplusindex.com
             to=[user.email],
+            reply_to=[settings.EMAIL_HOST_USER]    # optional
         )
+
+        # Attach XLSX report
         email.attach(
-            "leads_report.xlsx",
-            xlsx_bytes,
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            
+            filename="leads_report.xlsx",
+            content=xlsx_bytes,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
+        
         email.send(fail_silently=False)
 
 
