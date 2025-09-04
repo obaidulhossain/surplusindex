@@ -73,11 +73,11 @@ def send_cycle_leads(task_instance):
         )
 
         #Attach XLSX report
-        email.attach(
-            filename="leads_report.xlsx",
-            content=xlsx_bytes,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+        # email.attach(
+        #     filename="leads_report.xlsx",
+        #     content=xlsx_bytes,
+        #     mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        # )
 
         try:
             email.send(fail_silently=False)
