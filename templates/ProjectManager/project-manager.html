@@ -11,18 +11,35 @@ Manage Projects
 <meta name="csrf-token" content="{{ csrf_token }}">
 {% if not selected_project %}
 <h1>Manage Projects</h1>
-<div class="onehalf section">
+<div class="onethird section">
     <h2>Create New Project</h2>
     <form method ="POST" action="{% url 'create_project' %}">
     {% csrf_token %}
-        <label for="pr_name" id="pr_name">Project Name</label></br>
-        <input type="text" name="pr_name" style="width:100%"></br></br>
+        <label for="pr_name" >Project Name</label></br>
+        <input type="text" id="pr_name" name="pr_name" style="width:100%"></br></br>
+        
+        <label for="pr_state">Project State</label></br>
+        <input type="text" id="pr_state" name="pr_state" placeholder="Exact State Name as Foreclosure Leads" style="width:100%"></br></br>
+        
+        <label for="pr_saletype">Project Sale Type</label></br>
+        <input type="text" id="pr_saletype" name="pr_saletype" placeholder="Exact Sale Type as Foreclosure Leads" style="width:100%"></br></br>
+
+        <label for="pr_plan">Assiciated Subscription Plan</label></br>
+        <select name="pr_plan" id="pr_plan" style="width:100%;">
+            <option value="">Select Plan for Project</option>
+            {% for plan in plans %}
+            <option value="{{plan.id}}">{{plan.name|title}}</option>
+            {% endfor %}
+        </select></br></br>
+        
+
         <label for="pr_description" >Project Description</label></br>
         <input type="text" name="pr_description" id="pr_description" style="width:100%;"></br></br>
+        
         <input type="submit" class="primary-btn"></br>
     </form>
 </div>
-<div class="onefourth section">
+<div class="onethird section">
     <h2>Select Project</h2>
     <form method="POST">
     {% csrf_token %}
@@ -35,7 +52,7 @@ Manage Projects
         </select>
     </form>
 </div>
-<div class="onefourth section">
+<div class="onethird section">
 <h2>Navigate</h2>
 </div>
 {% else %}

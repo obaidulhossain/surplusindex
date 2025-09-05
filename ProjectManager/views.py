@@ -72,7 +72,7 @@ def ProjectManager(request):
             
     load_cycles = UpdateCycle.objects.filter(project=project_instance, year=selected_year)
 
-    
+    plans = SubscriptionPlan.objects.all()
 
 
     
@@ -94,6 +94,7 @@ def ProjectManager(request):
         'contacts':contacts,
         'skiptraced':skiptraced,
         'published':published,
+        'plans':plans,
 
 
 
@@ -152,14 +153,63 @@ def CreateProject(request):
     if request.method == "POST":
         Name = request.POST.get('pr_name')
         Description = request.POST.get('pr_description')
-
+        State = request.POST.get('pr_state')
+        Saletype = request.POST.get('pr_saletype')
+        Plan = request.POST.get('pr_plan')
+        try:
+            Plan_Instance = SubscriptionPlan.objects.get(pk=Plan)
+        except SubscriptionPlan.DoesNotExist:
+            messages.error(request, "Invalid subscription plan selected.")
+            return redirect('project_manager')
+        
         if Name:  # Prevent creating empty project
-            Projects.objects.create(name=Name, description=Description)
+            Project, created = Projects.objects.get_or_create(
+                state=State,
+                sale_type=Saletype,
+                plan=Plan_Instance,
+                defaults={
+                    "name":Name,
+                    "description":Description,
+                }
+            )
+            
             messages.success(request, "Project Instance Created")
         else:
             messages.error(request, "Project name cannot be empty.")
         
     return redirect('project_manager')
+@login_required
+def UpdateProject(request):
+    if request.method == "POST":
+        project_id = request.POST.get('project_id')
+        Name = request.POST.get('pr_name')
+        Description = request.POST.get('pr_description')
+        State = request.POST.get('pr_state')
+        UpdateInterval = int(request.POST.get('pr_pfui'))
+        Saletype = request.POST.get('pr_saletype')
+        Plan = request.POST.get('pr_plan')
+        Status = request.POST.get('pr_status', False)
+        try:
+            Plan_Instance = SubscriptionPlan.objects.get(pk=Plan)
+        except SubscriptionPlan.DoesNotExist:
+            messages.error(request, "Invalid subscription plan selected.")
+            return redirect('project_settings')
+        if project_id:
+            project_instance = Projects.objects.get(pk=project_id)
+            project_instance.name = Name
+            project_instance.state = State
+            project_instance.sale_type = Saletype
+            project_instance.description = Description
+            project_instance.post_foreclosure_update_interval = UpdateInterval
+            project_instance.plan = Plan_Instance
+            project_instance.active = Status
+            project_instance.save()
+        
+            messages.success(request, "Project Instance Updated")
+        else:
+            messages.error(request, "No Project Selected")
+        
+    return redirect(f"{reverse('project_settings')}?project_id={project_instance.pk}")
 
 
 @csrf_exempt  # or use @csrf_protect if posting with CSRF
@@ -778,7 +828,23 @@ def DeliveredTasks(request):
 
 
 def ProjectSettings(request):
-    return render(request, 'ProjectManager/project-settings.html')
+    projects = Projects.objects.all()
+    plans = SubscriptionPlan.objects.all()
+    params = request.POST if request.method == "POST" else request.GET
+    selected_project = params.get('project_id', '')
+    
+    project_instance = None
+    if selected_project:
+        project_instance = Projects.objects.get(pk=selected_project)
+
+    context = {
+        "projects":projects,
+        "plans":plans,
+        "selected_project":selected_project,
+        "project_instance":project_instance,
+
+    }
+    return render(request, 'ProjectManager/project-settings.html', context)
 
 
 

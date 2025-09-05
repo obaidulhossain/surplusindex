@@ -7,9 +7,91 @@ Project Settings
 {% load static %}
 {% load custom_filters %}
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/admin.css' %}" rel="stylesheet">
 <h1>Project Settings</h1>
+{% if selected_project %}
+<div class="section">
 
+<a href="{% url 'project_settings' %}" style="float:right"><i class="bi bi-x-circle-fill" style="color:#c22323; font-size:25px; margin:0px 3px;"></i></a>
+<h1>{{project_instance.name|upper}} | {{project_instance.state|title}} - {{project_instance.sale_type|title}}</h1>
+<form method ="POST" action="{% url 'update_project' %}" style="text-align: -webkit-center;">
+    {% csrf_token %}
+    <input type="hidden" name="project_id" value="{{project_instance.id}}">
+        <div class="onethird">
+            <label for="pr_name" >Project Name</label></br>
+            <input type="text" id="pr_name" name="pr_name" style="width:100%" value="{{ project_instance.name }}"></br></br>
 
+            <label for="pr_pfui" >Post Foreclosure Update Interval</label></br>
+            <input type="number" id="pr_pfui" name="pr_pfui" style="width:100%" value="{{ project_instance.post_foreclosure_update_interval }}"></br></br>
+        </div>
+        <div class="onethird">
+            <label for="pr_state">Project State</label></br>
+            <input type="text" id="pr_state" name="pr_state" placeholder="Exact State Name as Foreclosure Leads" style="width:100%;" value="{{ project_instance.state }}"></br></br>
+
+            <label for="pr_plan">Assiciated Subscription Plan</label></br>
+            <select name="pr_plan" id="pr_plan" style="width:100%;">
+                <option value="">Select Plan for Project</option>
+                {% for plan in plans %}
+                <option value="{{plan.id}}"{% if project_instance.plan.id == plan.id %}selected{% endif %}>{{plan.name|title}}</option>
+                {% endfor %}
+            </select></br>
+        </div>
+        <div class="onethird">
+            <label for="pr_saletype">Project Sale Type</label></br>
+            <input type="text" id="pr_saletype" name="pr_saletype" placeholder="Exact Sale Type as Foreclosure Leads" style="width:100%" value="{{ project_instance.sale_type }}"></br></br>
+            
+            <label for="pr_status">Active Status</label></br>
+            <input type="checkbox" id="pr_status" name="pr_status" style="width:25px;" value="True" {% if project_instance.active == True %}checked{% endif %}></br></br>
+        </div>
+
+        <label for="pr_description" >Project Description</label></br>
+        <input type="text" name="pr_description" id="pr_description" style="width:100%; min-height:50px;" value="{{ project_instance.description }}"></br></br>
+        
+        <input type="submit" class="primary-btn" style="width:100%"></br>
+        
+        
+    </form>
+</div>
+{% else %}
+
+<div class="section">
+<h1>All Projects</h1>
+    <div class="table-wrapper">
+        <table class="table table-striped table-hover task-table">
+            <thead>
+                <tr>
+                    <th style="min-width: 120px;">Project Name</th>
+                    <th style="min-width: 120px;">State</th>
+                    <th>Sale Type</th>
+                    <th>UI</th>
+                    <th>Plan</th>
+                    <th>Status</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for project in projects %}
+                <tr>
+                    <td>{{project.name|title}}</td>
+                    <td>{{project.state|title}}</td>
+                    <td>{{project.sale_type|title}}</td>
+                    <td>{{project.post_foreclosure_update_interval}}</td>
+                    <td>{{project.plan.name|title}}</td>
+                    <td>{% if project.active == True %}<i class="bi bi-check-circle-fill" style="color: #05aa76ff"></i>{% else %}<i class="bi bi-x-circle-fill" style="color: #aa3f05ff"></i>{% endif %}</td>
+                    <td>
+                        <form method="POST">
+                        {% csrf_token %}
+                            <input type="hidden" name="project_id" value="{{ project.id }}">
+                            <input type="submit" value="Edit">
+                        </form>
+                    
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+    </div>
+</div>
+{% endif %}
 
 <script src="{% static 'js/ProjectManager.js' %}"></script>
 <script src="{% static 'js/Surplusindex.js' %}"></script>

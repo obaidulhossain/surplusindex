@@ -40,5 +40,7 @@ path('save-note/',views.SaveNote, name="save_note"),
 
 path('active-tasks/', views.ActiveTasks, name="active_tasks"),
 path('delivered-tasks/', views.DeliveredTasks, name="delivered_tasks"),
+
 path('project-settings/', views.ProjectSettings, name="project_settings"),
+path('update-project/', views.UpdateProject, name="update_project"),
 ]
