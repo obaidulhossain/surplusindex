@@ -15,6 +15,8 @@ from django.utils.timezone import now
 from django.db.models import Prefetch
 from django.views.decorators.http import require_POST
 from .mailers import send_cycle_leads
+from django.core.mail import EmailMessage,send_mail
+from django.conf import settings
 # Create your views here.
 #-----------------------Project Manager---------------------
 
@@ -497,13 +499,60 @@ def TaskViewer(request):
 
 @require_POST
 def deliver_cycle_leads(request, task_id):
-    taskinstance = get_object_or_404(Tasks, id=task_id)
-    cycle = taskinstance.cycle
+    task_instance = get_object_or_404(Tasks, id=task_id)
 
-    # run the delivery function (sends emails + xlsx attachment)
-    send_cycle_leads(task_instance=taskinstance)
+    active_subscriptions = StripeSubscription.objects.filter(
+        plan=task_instance.project.plan,
+        current_period_end__gte=task_instance.cycle.cycle_end
+    )
+    if not active_subscriptions.exists():
+        logger.info("No active subscriptions found for this project plan.")
+        return
+    else:
+        print(active_subscriptions.count())
 
-    messages.success(request, f"Leads for Cycle {cycle.week} sent successfully!")
+    # 2. Leads within cycle date range
+    leads = Foreclosure.objects.filter(
+        state__iexact=task_instance.project.state,
+        published=True,
+        sale_date__range=(task_instance.cycle.sale_from, task_instance.cycle.sale_to)
+    )
+    if not leads.exists():
+        logger.info("No leads found for the specified date range and state.")
+        return
+    else:
+        print(leads.count())
+
+    for sub in active_subscriptions:
+        user = sub.user
+        user_name = user.get_full_name() or user.username
+        
+#        email_sender = settings.DEFAULT_FROM_EMAIL
+
+        subject = f"Leads Report for Cycle {task_instance.cycle.week} Updated"
+        body = (
+            f"Hello {user_name},\n\n"
+            f"Please find the Pre-Foreclosure leads set for sale in auction between sale date range"
+            f"{task_instance.cycle.sale_from.strftime('%Y-%m-%d')} and "
+            f"{task_instance.cycle.sale_to.strftime('%Y-%m-%d')}.\n"
+            f"Leads are available in My Surplus Data section in your SurplusIndex account.\n\n"
+            f"Best regards,\n"
+            f"SurplusIndex Team"
+        )
+        for lead in leads:
+            status = Status.objects.create(lead=lead, client=user)
+            lead.purchased_by.add(user)
+        try:
+            send_mail(subject,body,'contact@surplusindex.com',[user.email], fail_silently=False)
+            messages.info(f"Successfully sent email to {user.email}")
+        except Exception as e:
+            messages.error(f"Failed to send email to {user.email}: {e}")
+    return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
+
+
+
+
+    messages.success(request, f"Leads for Cycle {task_instance.cycle.week} sent successfully!")
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
 

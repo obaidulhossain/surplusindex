@@ -84,7 +84,7 @@
 #         except Exception as e:
 #             print(f"Failed to send email to {user.email}: {e}")
 
-from django.core.mail import EmailMessage
+from django.core.mail import EmailMessage,send_mail
 from import_export.formats.base_formats import XLSX
 from io import BytesIO
 from si_user.models import StripeSubscription
@@ -92,6 +92,8 @@ from propertydata.models import Foreclosure
 from Client.resources import ClientModelResource
 from django.conf import settings
 import logging
+from django.contrib import messages
+from propertydata.models import *
 
 # Set up logging for better error tracking
 logger = logging.getLogger(__name__)
@@ -107,71 +109,121 @@ def generate_xlsx_bytes(leads):
 
 
 def send_cycle_leads(task_instance):
-    """
-    Send foreclosure leads for a given task cycle
-    as XLSX attachment to all active subscribers.
-    """
-    # 1. Active subscriptions
+    print(task_instance.id)
     active_subscriptions = StripeSubscription.objects.filter(
         plan=task_instance.project.plan,
         current_period_end__gte=task_instance.cycle.cycle_end
     )
-    
     if not active_subscriptions.exists():
         logger.info("No active subscriptions found for this project plan.")
         return
-    
+    else:
+        print(active_subscriptions.count())
+
     # 2. Leads within cycle date range
     leads = Foreclosure.objects.filter(
         state__iexact=task_instance.project.state,
         published=True,
         sale_date__range=(task_instance.cycle.sale_from, task_instance.cycle.sale_to)
     )
-
     if not leads.exists():
         logger.info("No leads found for the specified date range and state.")
         return
+    else:
+        print(leads.count())
 
-    # 3. Generate XLSX once outside the loop for efficiency
-    try:
-        xlsx_bytes = generate_xlsx_bytes(leads)
-    except Exception as e:
-        logger.error(f"Failed to generate XLSX file: {e}")
-        return
-
-    # 4. Send email to each user
-    email_sender = settings.DEFAULT_FROM_EMAIL
-    
     for sub in active_subscriptions:
         user = sub.user
         user_name = user.get_full_name() or user.username
         
-        subject = f"Leads Report for Cycle {task_instance.cycle.week}"
+        subject = f"Leads Report for Cycle {task_instance.cycle.week} Updated"
         body = (
             f"Hello {user_name},\n\n"
-            f"Please find attached the foreclosure leads between "
+            f"Please find the Pre-Foreclosure leads set for sale in auction between sale date range"
             f"{task_instance.cycle.sale_from.strftime('%Y-%m-%d')} and "
-            f"{task_instance.cycle.sale_to.strftime('%Y-%m-%d')}.\n\n"
+            f"{task_instance.cycle.sale_to.strftime('%Y-%m-%d')}.\n"
+            f"Leads are available in My Surplus Data section in your SurplusIndex account.\n\n"
             f"Best regards,\n"
             f"SurplusIndex Team"
         )
-        
-        email = EmailMessage(
-            subject=subject,
-            body=body,
-            from_email=email_sender,
-            to=[user.email],
-            reply_to=[email_sender]
-        )
-        
-        email.attach(
-            filename="leads_report.xlsx",
-            content=xlsx_bytes,
-            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
-        
+        for lead in leads:
+            status = Status.objects.create(lead=lead, client=user)
+            lead.purchased_by.add(user)
         try:
-            email.send(fail_silently=False)
-            logger.info(f"Successfully sent email to {user.email}")
+            send_mail(subject,body,'contact@surplusindex.com',[user.email], fail_silently=False)
+            messages.info(f"Successfully sent email to {user.email}")
         except Exception as e:
-            logger.error(f"Failed to send email to {user.email}: {e}")
+            messages.error(f"Failed to send email to {user.email}: {e}")
+        
+
+    
+
+# def send_cycle_leads(task_instance):
+#     """
+#     Send foreclosure leads for a given task cycle
+#     as XLSX attachment to all active subscribers.
+#     """
+#     # 1. Active subscriptions
+#     active_subscriptions = StripeSubscription.objects.filter(
+#         plan=task_instance.project.plan,
+#         current_period_end__gte=task_instance.cycle.cycle_end
+#     )
+    
+#     if not active_subscriptions.exists():
+#         logger.info("No active subscriptions found for this project plan.")
+#         return
+    
+#     # 2. Leads within cycle date range
+#     leads = Foreclosure.objects.filter(
+#         state__iexact=task_instance.project.state,
+#         published=True,
+#         sale_date__range=(task_instance.cycle.sale_from, task_instance.cycle.sale_to)
+#     )
+
+#     if not leads.exists():
+#         logger.info("No leads found for the specified date range and state.")
+#         return
+
+#     # 3. Generate XLSX once outside the loop for efficiency
+#     try:
+#         xlsx_bytes = generate_xlsx_bytes(leads)
+#     except Exception as e:
+#         logger.error(f"Failed to generate XLSX file: {e}")
+#         return
+
+#     # 4. Send email to each user
+#     email_sender = settings.DEFAULT_FROM_EMAIL
+    
+#     for sub in active_subscriptions:
+#         user = sub.user
+#         user_name = user.get_full_name() or user.username
+        
+#         subject = f"Leads Report for Cycle {task_instance.cycle.week}"
+#         body = (
+#             f"Hello {user_name},\n\n"
+#             f"Please find attached the foreclosure leads between "
+#             f"{task_instance.cycle.sale_from.strftime('%Y-%m-%d')} and "
+#             f"{task_instance.cycle.sale_to.strftime('%Y-%m-%d')}.\n\n"
+#             f"Best regards,\n"
+#             f"SurplusIndex Team"
+#         )
+        
+#         email = EmailMessage(
+#             subject=subject,
+#             body=body,
+#             from_email=email_sender,
+#             to=[user.email],
+#             reply_to=[email_sender]
+#         )
+        
+#         email.attach(
+#             filename="leads_report.xlsx",
+#             content=xlsx_bytes,
+#             mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+#         )
+        
+#         try:
+#             email.send(fail_silently=False)
+#             logger.info(f"Successfully sent email to {user.email}")
+#         except Exception as e:
+#             logger.error(f"Failed to send email to {user.email}: {e}")
