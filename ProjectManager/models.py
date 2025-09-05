@@ -120,8 +120,11 @@ class Tasks(Timelogger):
     skiptraced = models.CharField(max_length=255, blank=True, null=True)
     published = models.CharField(max_length=255, blank=True, null=True)
     post_foreclosure_case_volume = models.CharField(max_length=255, blank=True, null=True)
-    post_foreclosure_cases = models.ManyToManyField(Foreclosure,blank=True, null=True)
+    post_foreclosure_cases = models.ManyToManyField(Foreclosure)
     post_foreclosure_case_searched = models.CharField(max_length=255, blank=True, null=True)
+    active_subscribers = models.ManyToManyField(StripeSubscription)
+
+
     def __str__(self):
         return self.task_name or f"Task {self.id}"
     
@@ -138,6 +141,14 @@ class Tasks(Timelogger):
         if tracker and tracker.end_time and not tracker.is_paused:
             return "paused"
         return "stopped"
+
+class DeliveryReport(Timelogger):
+    task = models.ForeignKey(Tasks, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    delivered = models.IntegerField(default=0)
+    report = models.CharField(max_length=255, blank=True, null=True)
+
+
 
 
 class TimeTracker(models.Model):

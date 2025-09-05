@@ -17,6 +17,7 @@ from django.views.decorators.http import require_POST
 from .mailers import send_cycle_leads
 from django.core.mail import EmailMessage,send_mail
 from django.conf import settings
+from django.db.models import F
 # Create your views here.
 #-----------------------Project Manager---------------------
 
@@ -449,18 +450,21 @@ def TaskViewer(request):
     post_foreclosure_case_checklist = None
     all_tasks = None
     tasks_completed = None
+    delivery_reports = None
+    delivery_success = None
+
     if selected_task:
         task_instance = Tasks.objects.get(pk=selected_task)
         all_tasks = Tasks.objects.filter(cycle=task_instance.cycle).order_by("delivery_date")
         tasks_completed = all_tasks.filter(status="completed")
-        leads = Foreclosure.objects.filter(state__iexact=task_instance.project.name, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
+        leads = Foreclosure.objects.filter(state__iexact=task_instance.project.state, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
         new_leads = leads.filter(created_at__range=(task_instance.cycle.cycle_start,task_instance.cycle.cycle_end))
         published = leads.filter(published=True)
         case_searched = leads.filter(case_search_status="completed")
 
         contacts = Contact.objects.filter(
             defendant_for_foreclosure__sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to),
-            defendant_for_foreclosure__state__iexact=task_instance.project.name,
+            defendant_for_foreclosure__state__iexact=task_instance.project.state,
             ).distinct()
         skiptraced = contacts.filter(skiptraced=True)
         if task_instance.template.taskview.viewname == "Post Foreclosure Update":
@@ -473,8 +477,10 @@ def TaskViewer(request):
         active_subscriptions = StripeSubscription.objects.filter(plan=task_instance.project.plan, current_period_end__gte=task_instance.cycle.cycle_end)
         users = [sub.user for sub in active_subscriptions]
         
-        events = foreclosure_Events.objects.filter(state__iexact=task_instance.project.name, event_next__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
+        events = foreclosure_Events.objects.filter(state__iexact=task_instance.project.state, event_next__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
         status = task_instance.get_current_status(request.user)
+        delivery_reports = DeliveryReport.objects.filter(task=task_instance).order_by("created_at")
+        delivery_success = delivery_reports.filter(report="Successful")
     context = {
         'active_tasks':active_tasks,
         'selected_task':selected_task,
@@ -493,6 +499,8 @@ def TaskViewer(request):
         'post_foreclosure_case_completed':post_foreclosure_case_completed,
         'post_foreclosure_case_checklist':post_foreclosure_case_checklist,
         'post_foreclosure_searched':post_foreclosure_searched,
+        'delivery_reports':delivery_reports,
+        'delivery_success':delivery_success,
 
     }
     return render(request, 'ProjectManager/task-viewer.html',context)
@@ -500,16 +508,15 @@ def TaskViewer(request):
 @require_POST
 def deliver_cycle_leads(request, task_id):
     task_instance = get_object_or_404(Tasks, id=task_id)
+    
 
     active_subscriptions = StripeSubscription.objects.filter(
         plan=task_instance.project.plan,
         current_period_end__gte=task_instance.cycle.cycle_end
     )
     if not active_subscriptions.exists():
-        logger.info("No active subscriptions found for this project plan.")
-        return
-    else:
-        print(active_subscriptions.count())
+        messages.info(request, f"No Active Subscription found for {task_instance.project.plan.name}")
+        return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
 
     # 2. Leads within cycle date range
     leads = Foreclosure.objects.filter(
@@ -518,17 +525,16 @@ def deliver_cycle_leads(request, task_id):
         sale_date__range=(task_instance.cycle.sale_from, task_instance.cycle.sale_to)
     )
     if not leads.exists():
-        logger.info("No leads found for the specified date range and state.")
-        return
-    else:
-        print(leads.count())
+        messages.info(request, f"No  leads found in {task_instance.project.state} for sale date range {task_instance.cycle.sale_from} - {task_instance.cycle.sale_to}")
+        return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
+    
+    email_sender = settings.DEFAULT_FROM_EMAIL
+    users = [sub.user for sub in active_subscriptions]
 
     for sub in active_subscriptions:
         user = sub.user
         user_name = user.get_full_name() or user.username
         
-#        email_sender = settings.DEFAULT_FROM_EMAIL
-
         subject = f"Leads Report for Cycle {task_instance.cycle.week} Updated"
         body = (
             f"Hello {user_name},\n\n"
@@ -539,21 +545,48 @@ def deliver_cycle_leads(request, task_id):
             f"Best regards,\n"
             f"SurplusIndex Team"
         )
-        for lead in leads:
-            status = Status.objects.create(lead=lead, client=user)
-            lead.purchased_by.add(user)
-        try:
-            send_mail(subject,body,'contact@surplusindex.com',[user.email], fail_silently=False)
-            messages.info(request, f"Successfully sent email to {user.email}")
-        except Exception as e:
-            messages.error(request, f"Failed to send email to {user.email}: {e}")
+
+        # 1. Prepare bulk Status inserts
+        existing_statuses = set(
+            Status.objects.filter(lead__in=leads, client=user)
+            .values_list("lead_id", flat=True)
+        )
+        new_statuses = [
+            Status(lead=lead, client=user)
+            for lead in leads
+            if lead.id not in existing_statuses
+        ]
+        if new_statuses:
+            Status.objects.bulk_create(new_statuses, ignore_conflicts=True)
+
+            report, created = DeliveryReport.objects.get_or_create(
+            task=task_instance,
+            user=user,
+            defaults={"delivered": len(new_statuses)}
+            )
+
+            if not created:
+                DeliveryReport.objects.filter(pk=report.pk).update(
+                    delivered=F("delivered") + len(new_statuses)
+                    )
+            report.refresh_from_db()
+            # Send mail to this user    
+            try:
+                send_mail(subject, body, email_sender, [user.email], fail_silently=False)
+                messages.info(request, f"Successfully sent email to {user.email}")
+                report.report = "Successful"
+            except Exception as e:
+                messages.error(request, f"Failed to send email to {user.email}: {e}")
+                report.report = f"Failed to send email to {user.email}: {e}"
+            report.save()
+        else:
+            messages.info(request, f"All the leads are already delivered")
+    # Bulk add users to purchased_by for all leads
+    for lead in leads:
+        lead.purchased_by.add(*users)
+
     return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
 
-
-
-
-    messages.success(request, f"Leads for Cycle {task_instance.cycle.week} sent successfully!")
-    return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
 def start_task(request, task_id):
@@ -565,7 +598,13 @@ def start_task(request, task_id):
             task.post_foreclosure_cases.add(*leads_queryset)
             if task.post_foreclosure_case_volume == "" or task.post_foreclosure_case_volume == None:
                 task.post_foreclosure_case_volume = leads_queryset.count()
+    if task.template.taskview.viewname == "Initiate Deliveries":
+        active_subscriptions = StripeSubscription.objects.filter(plan=task.project.plan,current_period_end__gte=task.cycle.cycle_end)
+        task.active_subscribers.add(*active_subscriptions)
+        task.save()
         
+
+       
 
     # Resume = just create a new tracker
     TimeTracker.objects.create(task=task, user=request.user, start_time=now())
@@ -625,7 +664,7 @@ def DeliverUploadTask(request):
         task = request.POST.get('task_id')
         if task:
             task_instance = Tasks.objects.get(id=task)
-            leads = Foreclosure.objects.filter(state__iexact=task_instance.project.name, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
+            leads = Foreclosure.objects.filter(state__iexact=task_instance.project.state, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
             task_instance.lead_volume = leads.count()
             task_instance.status = "delivered"
             task_instance.save()
@@ -637,7 +676,7 @@ def DeliverCasesearchTask(request):
         task = request.POST.get('task_id')
         if task:
             task_instance = Tasks.objects.get(id=task)
-            leads = Foreclosure.objects.filter(state__iexact=task_instance.project.name, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to), case_search_status="completed")
+            leads = Foreclosure.objects.filter(state__iexact=task_instance.project.state, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to), case_search_status="completed")
             contacts = Contact.objects.filter(defendant_for_foreclosure__sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to)).distinct()
             if task_instance.contact_volume != "" or task_instance.contact_volume != None:
                 task_instance.contact_volume = contacts.count()
@@ -667,7 +706,7 @@ def DeliverPublishTask(request):
         task = request.POST.get('task_id')
         if task:
             task_instance = Tasks.objects.get(id=task)
-            leads = Foreclosure.objects.filter(state__iexact=task_instance.project.name, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
+            leads = Foreclosure.objects.filter(state__iexact=task_instance.project.state, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
             published = leads.filter(published=True)
             task_instance.published = published.count()
             task_instance.status = "delivered"
