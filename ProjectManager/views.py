@@ -544,9 +544,9 @@ def deliver_cycle_leads(request, task_id):
             lead.purchased_by.add(user)
         try:
             send_mail(subject,body,'contact@surplusindex.com',[user.email], fail_silently=False)
-            messages.info(f"Successfully sent email to {user.email}")
+            messages.info(request, f"Successfully sent email to {user.email}")
         except Exception as e:
-            messages.error(f"Failed to send email to {user.email}: {e}")
+            messages.error(request, f"Failed to send email to {user.email}: {e}")
     return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
 
 
