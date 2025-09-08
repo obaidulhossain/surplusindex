@@ -1013,6 +1013,57 @@ Task Viewer
         <input type="submit" value="Save Note" style="width:100%;">
     </form>
     {% if task_instance.tracker_status == "started" %}
+    <h4>Auction Calendar Update Checklist</h4>
+    <div class="table-wrapper" style="background-color: #146d9d; padding: 7px;"> 
+        <table class="table table-striped table-hover task-table" style="margin-bottom: 0;">
+            <thead>
+                <tr>
+                    <th style="background-color:#3b9dc2!important; min-width: 120px;">State</th>
+                    <th style="background-color:#3b9dc2!important; min-width: 120px;">County</th>
+                    <th style="background-color:#3b9dc2!important;">Sale Type</th>
+                    <th style="background-color:#3b9dc2!important;">Next Sale Date</th>
+                    <th style="background-color:#3b9dc2!important;">Updated From</th>
+                    <th style="background-color:#3b9dc2!important;">Updated To</th>
+                    <th style="background-color:#3b9dc2!important;">Website</th>
+                    <th style="background-color:#3b9dc2!important;">Save</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for event in post_events %}
+                <tr data-id="{{ event.id }}">
+                    <td>{{event.state}}</td>
+                    <td>{{event.county}}</td>
+                    <td>{{event.sale_type}}</td>
+                    <td>
+                        <input type="date" class="form-control post_event_next"
+                            value="{{ event.post_event_next|date:'Y-m-d' }}">
+                    </td>
+                    <td>
+                        <input type="date" class="form-control post_event_updated_from"
+                            value="{{ event.post_event_updated_from|date:'Y-m-d' }}">
+                    </td>
+                    <td>
+                        <input type="date" class="form-control post_event_updated_to"
+                            value="{{ event.post_event_updated_to|date:'Y-m-d' }}">
+                    </td>
+                    <td>
+                        <input type="button" class="copyButton" value="Copy" data-url="{{ event.event_site }}"
+                            onclick="copyToClipboard(this);">
+
+
+                        <input TYPE="button" class="small-button" VALUE="Visit"
+                            onclick="window.open('{{ event.event_site }}');">
+                    </td>
+                    <td>
+                        <button class="save-button" onclick="saveRowPostEvent(this)">Save</button>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    </br>
+    </br>
     <h4>Case Search Checklist</h4>
     <div class="table-wrapper" style="overflow-x: auto;">
         <table class="table table-striped table-hover task-table">
@@ -1054,7 +1105,9 @@ Task Viewer
             </tbody>
         </table>
     </div>
-    <h4 style="margin-top:30px;">Case Search Completed</h4>
+    </br>
+    </br>
+    <h4>Case Search Completed</h4>
     <div class="table-wrapper" style="overflow-x: auto;">
         <table class="table table-striped table-hover task-table">
             <thead>

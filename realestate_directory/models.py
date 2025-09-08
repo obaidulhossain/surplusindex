@@ -31,6 +31,9 @@ class foreclosure_Events(models.Model):
     event_status = models.CharField(max_length=255, blank=True)
     event_case_search = models.URLField(blank=True)
     event_next = models.DateField(blank=True, null=True)
+    post_event_updated_from = models.DateField(blank=True, null=True)
+    post_event_updated_to = models.DateField(blank=True, null=True)
+    post_event_next = models.DateField(blank=True, null=True)
     assigned_to = models.ForeignKey(User, on_delete=models.CASCADE, blank=True, null=True)
     directory = models.ForeignKey(directoryData, on_delete=models.CASCADE, blank=True, null=True)
 
