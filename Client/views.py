@@ -21,6 +21,7 @@ from urllib.parse import urlencode
 from django.urls import reverse
 import datetime
 import calendar
+from AllSettings.models import*
 
 
 
@@ -110,8 +111,8 @@ def availableLeads(request):
     leads_queryset = (
         Foreclosure.objects
         .exclude(purchased_by=user)
-        .exclude(sale_status__in=["Cancelled","Active"])
-        .exclude(surplus_status__in=["No Surplus", None])
+        #.exclude(sale_status__in=["Cancelled","Active"])
+        #.exclude(surplus_status__in=["No Surplus", None])
         .exclude(published=False)
         )
     #--------------------------------------------------------
@@ -134,28 +135,7 @@ def availableLeads(request):
         filters["sale_date__month"] = saledateMonth
 
     leads_queryset = leads_queryset.filter(**filters)
-    # if surplusStatusND:
-    #     filters["surplus_status__iexact"] = surplusStatusND
-    # if surplusStatusPS:
-    #     filters["surplus_status__iexact"] = surplusStatusPS
-    # if surplusStatusNPS:
-    #     filters["surplus_status__iexact"] = surplusStatusNPS
-    # if surplusStatusFA:
-    #     filters["surplus_status__iexact"] = surplusStatusFA
-    # if surplusStatusMF:
-    #     filters["surplus_status__iexact"] = surplusStatusMF
-    # if surplusStatusFC:
-    #     filters["surplus_status__iexact"] = surplusStatusFC
-    # if surplusStatusNS:
-    #     filters["surplus_status__iexact"] = surplusStatusNS
-
-    # if saleStatusACTIVE:
-    #     filters["sale_status__iexact"] = saleStatusACTIVE
-    # if saleStatusSOLD:
-    #     filters["sale_status__iexact"] = saleStatusSOLD
-    # if saleStatusCANCELED:
-    #     filters["sale_status__iexact"] = saleStatusCANCELED
-
+    
     # --------------- Surplus Status --------------------------------------------------
     surplus_filters = []
     if surplusStatusND:
@@ -213,7 +193,7 @@ def availableLeads(request):
 
 
     total_leads = leads_queryset.count()
-    p = Paginator(leads_queryset, 25)
+    p = Paginator(leads_queryset, 50)
     page = params.get('page')
     leads = p.get_page(page)
     current_page = int(leads.number)
@@ -222,8 +202,11 @@ def availableLeads(request):
     current_year = datetime.date.today().year
     years = range(current_year - 5, current_year + 2)
     months = [(i, calendar.month_name[i]) for i in range(1, 13)]
-
+# -------------Settings-------------------------------------------------------------------------------------
+    client_settings, created = ClientSettings.objects.get_or_create(user=user)
+    
     context = {
+        'client_settings':client_settings,
         'current_user':user,
         'leads':leads,
         'total_leads':total_leads,
@@ -342,70 +325,117 @@ def hidefromallLeads(request):
 
 def myLeads(request):
     user = request.user
-    if request.method == 'POST':
-        selectedState = request.POST.get('stateFilter','')
-        selectedCounty = request.POST.get('countyFilter','')
-        selectedSaletype = request.POST.get('saletypeFilter','')
-        psmin = request.POST.get('ps_min','')
-        vsmin = request.POST.get('vs_min','')
-        showArchived = request.POST.get('show_archived','')
+    params = request.POST if request.method == "POST" else request.GET
+    selectedState = params.get('stateFilter', '')
+    selectedCounty = params.get('countyFilter', '')
+    selectedSaletype = params.get('saletypeFilter', '')
+    psmin = params.get('ps_min', '')
+    vsmin = params.get('vs_min', '')
+    showArchived = params.get('show_archived', '')
+    saledateOrder = params.get('sale_date_order', 'lead__sale_date')
+    surplusStatusND = params.get('status_nd', '')
+    surplusStatusPS = params.get('status_ps', '')
+    surplusStatusNPS = params.get('status_nps', '')
+    surplusStatusFA = params.get('status_fa', '')
+    surplusStatusMF = params.get('status_mf', '')
+    surplusStatusFC = params.get('status_fc', '')
+    surplusStatusNS = params.get('status_ns', '')
+    saleStatusACTIVE = params.get('sale_status_active', '')
+    saleStatusSOLD = params.get('sale_status_sold', '')
+    saleStatusCANCELED = params.get('sale_status_canceled', '')
+    saledateYear = params.get('sale_date_year', '')
+    if saledateYear.isdigit():
+        saledateYear = int(saledateYear)
+    saledateMonth = params.get('sale_date_month', '')
+    if saledateMonth.isdigit():
+        saledateMonth = int(saledateMonth)
 
-        FAssignment = request.POST.get('assnFilter','')
-        SkpStatus = request.POST.get('skpFilter','')
-        CallStatus = request.POST.get('callFilter','')
-        NegStatus = request.POST.get('negFilter','')
-        ClStatus = request.POST.get('clFilter','')
-        PdStatus = request.POST.get('pdFilter','')
-        AdStatus = request.POST.get('adFilter','')
-        LpStatus = request.POST.get('lpFilter','')
-    else:
-        selectedState = request.GET.get('stateFilter','')
-        selectedCounty = request.GET.get('countyFilter','')
-        selectedSaletype = request.GET.get('saletypeFilter','')
-        psmin = request.GET.get('ps_min','')
-        vsmin = request.GET.get('vs_min','')
-        showArchived = request.GET.get('show_Archived','')
-
-        FAssignment = request.GET.get('assnFilter','')
-        SkpStatus = request.GET.get('skpFilter','')
-        CallStatus = request.GET.get('callFilter','')
-        NegStatus = request.GET.get('negFilter','')
-        ClStatus = request.GET.get('clFilter','')
-        PdStatus = request.GET.get('pdFilter','')
-        AdStatus = request.GET.get('adFilter','')
-        LpStatus = request.GET.get('lpFilter','')
-
-
-    leads_queryset = Status.objects.filter(client=user)    #.prefetch_related('foreclosure_as_lead')
-
-    states=leads_queryset.values_list("lead__state", flat=True).distinct()
-
-    if not selectedState:
-        counties = leads_queryset.values_list("lead__county", flat=True).distinct()
-        saletypes = leads_queryset.values_list("lead__sale_type", flat=True).distinct()
-    else:
-        counties = leads_queryset.filter(lead__state__iexact=selectedState).values_list("lead__county", flat=True).distinct()
-        saletypes = leads_queryset.filter(lead__state__iexact=selectedState).values_list("lead__sale_type", flat=True).distinct()
-        leads_queryset = leads_queryset.filter(lead__state__iexact=selectedState)
+    FAssignment = params.get('assnFilter','')
+    SkpStatus = params.get('skpFilter','')
+    CallStatus = params.get('callFilter','')
+    NegStatus = params.get('negFilter','')
+    ClStatus = params.get('clFilter','')
+    PdStatus = params.get('pdFilter','')
+    AdStatus = params.get('adFilter','')
+    LpStatus = params.get('lpFilter','')
     
-    if not showArchived == "show":
-        leads_queryset = leads_queryset.filter(archived=False)
-    else:
-        leads_queryset = leads_queryset.filter(archived=True)
-
+    # -------------Base querysets----------------------------    
+    leads_queryset = Status.objects.filter(client=user)    #.prefetch_related('foreclosure_as_lead')
+    #--------------------------------------------------------
+    
+    # -------------Filters-----------------------------------
+    filters = {}
+    if selectedState:
+        filters["lead__state__iexact"] = selectedState
     if selectedCounty:
-        leads_queryset = leads_queryset.filter(lead__county__iexact=selectedCounty)
-
+        filters["lead__county__iexact"] = selectedCounty
     if selectedSaletype:
-        leads_queryset = leads_queryset.filter(lead__sale_type__iexact=selectedSaletype)
-
+        filters["lead__sale_type__iexact"] = selectedSaletype
     if psmin:
-        leads_queryset = leads_queryset.filter(lead__possible_surplus__gte=psmin)
-
+        filters["lead__possible_surplus__gte"] = psmin
     if vsmin:
-        leads_queryset = leads_queryset.filter(lead__verified_surplus__gte=vsmin)
+        filters["lead__verified_surplus__gte"] = vsmin
+    if saledateYear:
+        filters["lead__sale_date__year"] = saledateYear
+    if saledateMonth:
+        filters["lead__sale_date__month"] = saledateMonth
 
+    leads_queryset = leads_queryset.filter(**filters)
 
+    # --------------- Surplus Status --------------------------------------------------
+    surplus_filters = []
+    if surplusStatusND:
+        surplus_filters.append(surplusStatusND)
+    if surplusStatusPS:
+        surplus_filters.append(surplusStatusPS)
+    if surplusStatusNPS:
+        surplus_filters.append(surplusStatusNPS)
+    if surplusStatusFA:
+        surplus_filters.append(surplusStatusFA)
+    if surplusStatusMF:
+        surplus_filters.append(surplusStatusMF)
+    if surplusStatusFC:
+        surplus_filters.append(surplusStatusFC)
+    if surplusStatusNS:
+        surplus_filters.append(surplusStatusNS)
+
+    if surplus_filters:
+        leads_queryset = leads_queryset.filter(lead__surplus_status__in=surplus_filters)
+
+    # ----------------- Sale Status -------------------------------------------------
+    sale_filters = []
+    if saleStatusACTIVE:
+        sale_filters.append(saleStatusACTIVE)
+    if saleStatusSOLD:
+        sale_filters.append(saleStatusSOLD)
+    if saleStatusCANCELED:
+        sale_filters.append(saleStatusCANCELED)
+
+    if sale_filters:
+        leads_queryset = leads_queryset.filter(lead__sale_status__in=sale_filters)
+    
+    #--------------Orders-------------------------------------
+    if saledateOrder:
+        leads_queryset = leads_queryset.order_by(saledateOrder)
+    
+    #-------Show Hide Hidden Leads--------------------------------
+    if showArchived == "show":
+        leads_queryset = leads_queryset.filter(archived=True)
+    else:
+        leads_queryset = leads_queryset.filter(archived=False)
+    #-------------------------------------------------------------
+
+    # -------------Dropdown Data-------------------------------------------------------------------------------------
+    states = Status.objects.filter(client=user).values_list("lead__state", flat=True).distinct()
+    
+    foreclosure_ids = leads_queryset.values_list("lead_id", flat=True).distinct()
+    counties = Foreclosure.objects.filter(id__in=foreclosure_ids).values_list("county", flat=True).distinct()
+    saletypes = Foreclosure.objects.filter(id__in=foreclosure_ids).values_list("sale_type", flat=True).distinct()
+
+    # counties = leads_queryset.values_list("lead__county", flat=True).distinct()
+    # saletypes = leads_queryset.values_list("lead__sale_type", flat=True).distinct()
+        
+    # ---------------------------------------------------------------------------------------------------------------
 
     # Prospecting filter goes here -------------------
     if FAssignment == 'not_assigned':
@@ -441,13 +471,20 @@ def myLeads(request):
 
     
     total_leads = leads_queryset.count()
-    p = Paginator(leads_queryset, 25)
+    p = Paginator(leads_queryset, 50)
     page = request.GET.get('page')
     leads = p.get_page(page)
     current_page = int(leads.number)
     second_previous = current_page + 2
 
+    current_year = datetime.date.today().year
+    years = range(current_year - 5, current_year + 2)
+    months = [(i, calendar.month_name[i]) for i in range(1, 13)]
+
+# -------------Settings-------------------------------------------------------------------------------------
+    client_settings, created = ClientSettings.objects.get_or_create(user=user)
     context = {
+        'client_settings':client_settings,
         'current_user':user,
         'leads':leads,
         'total_leads':total_leads,
@@ -460,6 +497,24 @@ def myLeads(request):
         'psmin':psmin,
         'vsmin':vsmin,
         'showArchived':showArchived,
+        'second_previous':second_previous,
+
+        'saledateOrder':saledateOrder,
+        'years':years,
+        'months':months,
+        'saledateYear':saledateYear,
+        'saledateMonth':saledateMonth,
+        'surplusStatusND':surplusStatusND,
+        'surplusStatusPS':surplusStatusPS,
+        'surplusStatusNPS':surplusStatusNPS, 
+        'surplusStatusFA':surplusStatusFA,
+        'surplusStatusMF':surplusStatusMF,
+        'surplusStatusFC':surplusStatusFC,
+        'surplusStatusNS':surplusStatusNS,
+        'saleStatusACTIVE':saleStatusACTIVE,
+        'saleStatusSOLD':saleStatusSOLD,
+        'saleStatusCANCELED':saleStatusCANCELED,
+
         'FAssignment':FAssignment,
         'SkpStatus':SkpStatus,
         'CallStatus':CallStatus,
@@ -467,9 +522,7 @@ def myLeads(request):
         'ClStatus':ClStatus,
         'PdStatus':PdStatus,
         'AdStatus':AdStatus,
-        'LpStatus':LpStatus,
-
-        'second_previous':second_previous
+        'LpStatus':LpStatus,       
     }
     return render(request, 'Client/my_leads.html', context)
 

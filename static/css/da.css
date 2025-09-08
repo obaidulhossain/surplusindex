@@ -1,0 +1,17 @@
+.da-sec-header {
+    border-radius: 7px 7px 0px 0px;
+    background-color: #066066;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 15px;
+    margin-top: 20px;
+}
+
+.da-sec-header h4 {
+    margin: 5px;
+    font-size: 22px;
+    text-transform: uppercase;
+    font-weight: bold;
+}

@@ -20,3 +20,21 @@ def save_sidebar_setting(request):
         setting.save()
         return JsonResponse({'status': 'saved'})
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@csrf_exempt  # (better: use CSRF token properly, see above)
+def update_client_filter_display_setting(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        field = data.get("field")
+        value = data.get("value")
+        
+        client_settings, created = ClientSettings.objects.get_or_create(user=request.user)
+
+        if hasattr(client_settings, field):
+            setattr(client_settings, field, value)
+            client_settings.save()
+            return JsonResponse({"success": True, "field": field, "value": value})
+        else:
+            return JsonResponse({"success": False, "error": "Invalid field"}, status=400)
+    
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=400)

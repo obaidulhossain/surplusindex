@@ -14,6 +14,59 @@ function toggleFilters(togglebtn, hide_id, event) {
         button.innerHTML = '<i class="bi bi-eye-slash"></i>';
     }
 }
+// -------------------------Toggle_and_Save filters button-----(start)-----------------------------
+//Example Usage: <button id="toggle-filters" class="icon-button" data-url="{% url 'update-show-hide-setting' %}" onclick="Toggle_and_Save(this.id, 'filters', 'alldata_show_filter', event)" style="padding: 2px 7px;"><i class="bi bi-eye-slash"></i></button>
+
+function Toggle_and_Save(togglebtn, hide_id, fieldName, event) {
+    event.preventDefault(); // Prevent form submission
+
+    const section = document.getElementById(hide_id);
+    const button = document.getElementById(togglebtn);
+    const url = button.dataset.url; // get URL from data attribute
+    let newValue;
+
+    if (section.style.display === "block" || section.style.display === "") {
+        section.style.display = "none";
+        button.innerHTML = '<i class="bi bi-eye"></i>';
+        newValue = false;
+    } else {
+        section.style.display = "block";
+        button.innerHTML = '<i class="bi bi-eye-slash"></i>';
+        newValue = true;
+    }
+    // Send AJAX to Django to update the field
+    fetch(url, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"), // helper below
+        },
+        body: JSON.stringify({
+            field: fieldName,
+            value: newValue
+        })
+    })
+        .then(res => res.json())
+        .then(data => console.log("Saved:", data))
+        .catch(err => console.error("Error:", err));
+}
+
+// CSRF helper for fetch()
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
 
 
 // -------------------------toggle filters button-----(end)-----------------------------
@@ -128,9 +181,19 @@ function updateButtonStates() {
 // Attach event listeners and initialize states
 document.addEventListener('DOMContentLoaded', () => {
     const checkboxes = document.querySelectorAll('.checkbox');
+    const selectAllCheckbox = document.getElementById('selectAll');
+
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', updateButtonStates);
     });
+
+    // Attach listener to "Select All"
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function () {
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateButtonStates();
+        });
+    }
 
     // Initialize button states on page load
     updateButtonStates();

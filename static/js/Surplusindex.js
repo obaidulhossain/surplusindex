@@ -15,6 +15,55 @@ function toggleFilters(togglebtn, hide_id, event) {
     }
 }
 
+function Toggle_and_Save(togglebtn, hide_id, fieldName, event) {
+    event.preventDefault(); // Prevent form submission
+    const section = document.getElementById(hide_id);
+    const button = document.getElementById(togglebtn);
+    let newValue;
+
+    if (section.style.display === "block" || section.style.display === "") {
+        section.style.display = "none";
+        button.innerHTML = '<i class="bi bi-eye"></i>';
+        newValue = false;
+    } else {
+        section.style.display = "block";
+        button.innerHTML = '<i class="bi bi-eye-slash"></i>';
+        newValue = true;
+    }
+    // Send AJAX to Django to update the field
+    fetch("{% url 'update-show-hide-setting' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"), // helper below
+        },
+        body: JSON.stringify({
+            field: fieldName,
+            value: newValue
+        })
+    })
+        .then(res => res.json())
+        .then(data => console.log("Saved:", data))
+        .catch(err => console.error("Error:", err));
+}
+
+// CSRF helper for fetch()
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
 
 // -------------------------toggle filters button-----(end)-----------------------------
 
@@ -128,9 +177,19 @@ function updateButtonStates() {
 // Attach event listeners and initialize states
 document.addEventListener('DOMContentLoaded', () => {
     const checkboxes = document.querySelectorAll('.checkbox');
+    const selectAllCheckbox = document.getElementById('selectAll');
+
     checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', updateButtonStates);
     });
+
+    // Attach listener to "Select All"
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', function () {
+            checkboxes.forEach(cb => cb.checked = this.checked);
+            updateButtonStates();
+        });
+    }
 
     // Initialize button states on page load
     updateButtonStates();
@@ -319,6 +378,70 @@ function saveData(button) {
             alert("An error occurred while saving the row. Please try again.");
         });
 }
+
+function VerifyPublishStatus(button) {
+    const row = button.closest('tr');
+    const rowId = row.getAttribute('data-id');
+    const publishStatus = row.querySelector('.VerifyPublishStatus').value;
+
+
+    // Prepare data for updating
+    const updatedData = {
+        id: rowId,
+        publish_Status: publishStatus,
+    };
+
+    // Send data to the server using fetch
+    fetch('/publish/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (publishStatus === 'False') {
+                    // Change button style to indicate success
+                    button.innerHTML = "Published";
+                    button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    button.style.backgroundColor = "#4CAF50"; // Green background
+                    button.style.color = "#fff"; // White text
+
+                    // Reset the button after a short delay
+                    setTimeout(() => {
+                        button.innerHTML = "Unpublish";
+                        button.style.backgroundColor = ""; // Reset to original background
+                        button.style.color = ""; // Reset to original text color
+                    }, 1500); // Reset after 1.5 seconds
+                } else {
+                    // Change button style to indicate success
+                    button.innerHTML = "Unpublished";
+                    button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                    button.style.backgroundColor = "#4CAF50"; // Green background
+                    button.style.color = "#fff"; // White text
+
+                    // Reset the button after a short delay
+                    setTimeout(() => {
+                        button.innerHTML = "Publish";
+                        button.style.backgroundColor = ""; // Reset to original background
+                        button.style.color = ""; // Reset to original text color
+                    }, 1500); // Reset after 1.5 seconds
+                }
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
+}
+
 
 function AssignSKP(select) {
     const row = select.closest('tr');

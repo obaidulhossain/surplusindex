@@ -18,9 +18,10 @@ class GeneralSettings(Timelogger):
 
 class ClientSettings(Timelogger):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="clients")
-#------------Basic Settings
+    alldata_show_filter = models.BooleanField(default=True)
+    purchased_show_filter = models.BooleanField(default=True)
+    purchased_show_prospecting_filter = models.BooleanField(default=True)
 
-#------------Subscription Section
     manage_sub_show_hidden = models.BooleanField(default=False)
     def __str__(self):
         return f"Client: {self.user.username}'s Settings"

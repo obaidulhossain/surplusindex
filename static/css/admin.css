@@ -1,0 +1,241 @@
+.section {
+    border: 2px solid #02bb7f59;
+    border-radius: 10px;
+    margin: 30px 5px;
+    padding: 25px;
+    background-color: #c6c6c640;
+    height: auto;
+    min-height: 300px;
+
+}
+
+.section h2 {
+    font-size: 18px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: bold;
+}
+
+/* .section input {
+    width: 70%;
+    margin: 10px 15px;
+} */
+
+.task-section {
+    border: 2px solid #5f5f5f59;
+    border-radius: 10px;
+    margin: 30px 5px;
+    padding: 25px;
+    background-color: #c6c6c640;
+    height: auto;
+    min-height: 200px;
+}
+
+.section-small {
+    border: 2px solid #5f5f5f59;
+    border-radius: 10px;
+    margin: 5px;
+    padding: 15px;
+    background-color: #c6c6c640;
+    height: auto;
+    min-height: 100px;
+}
+
+
+.created {
+    box-shadow: 0 0 6px 1px #ea6b1c9c;
+    border: 2px solid #fba15d !important;
+}
+
+.assigned {
+    box-shadow: 0 0 6px 1px #1cd9ea9c;
+    border: 2px solid #00b1cc !important;
+}
+
+.delivered {
+    box-shadow: 0 0 6px 1px #009255b6;
+    border: 2px solid #009255 !important;
+}
+
+.delivery-due {
+    box-shadow: 0 0 6px 1px #d900008c;
+    border: 2px solid #cc0000 !important;
+}
+
+
+.task-completed {
+    box-shadow: 0 0 6px 1px #1cea759c;
+    border: 2px solid #168a59 !important;
+    background-color: #5dc97a6e;
+}
+
+.primary-btn {
+    padding: 2px 20px;
+    cursor: pointer;
+    background-color: #51ddd4 !important;
+    color: #222222 !important;
+    border: 2px solid #9a9a9a !important;
+    border-radius: 4px;
+    transition: ease-in-out 400ms;
+}
+
+.primary-btn:hover {
+    transition: 400ms;
+    background-color: #37aba3 !important;
+    color: #fff !important;
+
+}
+
+.cycle {
+    display: inline-block;
+    width: 60px;
+    height: 60px;
+    border: 2px solid #011f27;
+    border-radius: 5px;
+    margin: 5px;
+    align-content: center;
+    cursor: pointer;
+}
+
+.cycle:hover {
+    background-color: #37aba3;
+}
+
+.running {
+    border: 10px inset #ff8a3f !important;
+    border-right: 10px solid #d3e632 !important;
+}
+
+.active {
+    border: 10px inset #1aabbe !important;
+    border-right: 10px solid #09465a !important;
+
+}
+
+.active:hover {
+    border: 10px inset #1aabbe !important;
+
+
+}
+
+.completed {
+    border: 10px inset #029d41 !important;
+    border-right: 10px solid #5f6761 !important;
+    background-color: #ffffff;
+
+}
+
+completed:hover {
+    color: #ffffff !important;
+}
+
+.cycle-icon {
+    width: 65px;
+    height: 65px;
+    display: inline-block;
+    border: 10px inset #65a3abba;
+    border-radius: 50px;
+    text-align: center;
+    align-content: center;
+    cursor: pointer;
+    justify-self: center;
+    margin: 10px;
+    color: #313131;
+    transition: ease-in-out .3s;
+
+}
+
+.cycle-icon:hover {
+    box-shadow: 0px 0px 3px 1px #014b7cee;
+    background-color: #4a4a4a;
+    color: #ffffff;
+    border: 10px inset #14b0cc;
+
+}
+
+.week-icon {
+    width: 75px;
+    height: 75px;
+    border: 10px inset #23ac72;
+    border-radius: 50px;
+    text-align: center;
+    align-content: center;
+    justify-self: center;
+    box-shadow: 0px 0px 5px 2px #fff57a9c;
+}
+
+.task-blurb {
+    border: 1px solid #727272ff;
+    background-color: #b0dece;
+    border-radius: 5px;
+    margin: 10px !important;
+    padding: 5px;
+    width: 22%;
+    display: inline-block;
+    transition: ease-in-out 400ms;
+
+}
+
+.task-blurb:hover {
+    background-color: #4a8872;
+    color: #ffffff !important;
+}
+
+.task-blurb-info {
+    background-color: #135f4a;
+    color: #ffffff;
+    font-weight: bold;
+    font-size: 14px;
+    border: 2px solid #2c2c2c;
+    margin: 5px !important;
+    border-radius: 5px;
+    min-height: 100px;
+    padding: 10px;
+    letter-spacing: 0.6px;
+}
+
+.task-blurb-info i {
+    margin: 5px !important;
+}
+
+.task-table tbody,
+td,
+thead,
+tr {
+    text-align: center;
+}
+
+
+.viewer-option-large {
+    width: 58%;
+    display: inline-block;
+    vertical-align: top;
+    margin: 0px !important;
+    font-weight: bold;
+    text-align: left;
+
+}
+
+.viewer-option-large h4 {
+    text-align: left;
+    font-size: 18px;
+}
+
+.viewer-option-large h6 {
+    text-align: left;
+    font-size: 14px;
+}
+
+.viewer-option-small {
+    width: 19%;
+    display: inline-block;
+    vertical-align: top;
+    margin: 0px !important;
+
+}
+
+.viewer-option-small a {
+    width: 100%;
+    margin-bottom: 10px;
+}

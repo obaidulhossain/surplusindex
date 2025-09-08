@@ -12,10 +12,10 @@ Available Leads
 <div class="body-section">
     <div class="client-sec-header" style="margin-top:0px;">
         <h4>Filter Surplus Data</h4>
-        <button id="toggle-filters" class="icon-button" onclick="toggleFilters(this.id, 'filters', event)" style="padding: 2px 7px;"><i class="bi bi-eye-slash"></i></button>
+        <button id="toggle-filters" class="icon-button" data-url="{% url 'update-show-hide-setting' %}" onclick="Toggle_and_Save(this.id, 'filters', 'alldata_show_filter', event)" style="padding: 2px 7px;"><i class="bi bi-eye-slash"></i></button>
     </div>
 
-    <div class="filter-section" id="filters">
+    <div class="filter-section" id="filters" style="display:{% if client_settings.alldata_show_filter %}block{% else %}none{% endif %};">
         <form method="post">
         {% csrf_token %}
             <div style="width: 99%;">
@@ -92,7 +92,7 @@ Available Leads
                     <div class="filter-item-section" style="text-align-last: left;">
                         <h5>Sale Status</h5></br></br>
 
-                        <input type="checkbox" name="sale_status_active" value="pending" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusACTIVE == "pending" %}checked{% endif %}>
+                        <input type="checkbox" name="sale_status_active" value="Active" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusACTIVE == "Active" %}checked{% endif %}>
                         <label style="vertical-align: middle;">Active</label></br>
 
                         <input type="checkbox" name="sale_status_sold" value="Sold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusSOLD == "Sold" %}checked{% endif %}>
@@ -170,8 +170,8 @@ Available Leads
                     <thead>
                         <tr>
                             <th>
-                                <span class="custom-checkbox">
-                                    <input type="hidden" id="selectAll">
+                                <span>
+                                <input type="checkbox" id="selectAll" style="width:20px;">
                                 </span>
                             </th>
                             <th>State</th>
