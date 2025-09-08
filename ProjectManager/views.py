@@ -526,7 +526,7 @@ def TaskViewer(request):
                 post_foreclosure_searched = int(task_instance.post_foreclosure_case_volume) - post_foreclosure_case_search_leads.count()
         active_subscriptions = StripeSubscription.objects.filter(plan=task_instance.project.plan, current_period_end__gte=task_instance.cycle.cycle_end)
         users = [sub.user for sub in active_subscriptions]
-        
+        all_events = foreclosure_Events.objects.filter(state__iexact=task_instance.project.state).order_by('event_next')
         events = foreclosure_Events.objects.filter(state__iexact=task_instance.project.state, event_next__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
         status = task_instance.get_current_status(request.user)
         delivery_reports = DeliveryReport.objects.filter(task=task_instance).order_by("created_at")
@@ -543,6 +543,7 @@ def TaskViewer(request):
         'contacts':contacts,
         'skiptraced':skiptraced,
         'published':published,
+        'all_events':all_events,
         'events':events,
         'status':status,
         'post_foreclosure_case_search_leads':post_foreclosure_case_search_leads,
