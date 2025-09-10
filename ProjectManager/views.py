@@ -647,7 +647,7 @@ def start_task(request, task_id):
     if task.template.taskview.viewname == "Post Foreclosure Update":
         if task.post_foreclosure_cases.count() < 1:
             interval = task.project.post_foreclosure_update_interval
-            leads_queryset = Foreclosure.objects.filter(sale_status='Sold', changed_at__lt=now().date() - timedelta(days=interval)).exclude(surplus_status='fund claimed').exclude(surplus_status='no surplus')
+            leads_queryset = Foreclosure.objects.filter(state__iexact=task.project.state, sale_status='Sold', changed_at__lt=now().date() - timedelta(days=interval)).exclude(surplus_status='fund claimed').exclude(surplus_status='no surplus')
             task.post_foreclosure_cases.add(*leads_queryset)
             if task.post_foreclosure_case_volume == "" or task.post_foreclosure_case_volume == None:
                 task.post_foreclosure_case_volume = leads_queryset.count()
@@ -776,7 +776,7 @@ def DeliverPostForeclosureCasesearchTask(request):
         if task:
             task_instance = Tasks.objects.get(id=task)
             interval = task_instance.project.post_foreclosure_update_interval
-            leads_queryset = Foreclosure.objects.filter(sale_status='Sold', changed_at__lt=now().date() - timedelta(days=interval)).exclude(surplus_status='fund claimed').exclude(surplus_status='no surplus')
+            leads_queryset = Foreclosure.objects.filter(state__iexact=task_instance.project.state, sale_status='Sold', changed_at__lt=now().date() - timedelta(days=interval)).exclude(surplus_status='fund claimed').exclude(surplus_status='no surplus')
             task_instance.post_foreclosure_cases.remove(*leads_queryset)
             task_instance.post_foreclosure_case_searched = task_instance.post_foreclosure_cases.count()
             task_instance.status = "delivered"
