@@ -95,10 +95,10 @@ class Tasks(Timelogger):
         ("datask","Data Entry"),
         ("admintask","Admin Task")
     ])
-    date_assigned = models.DateField()
+    date_assigned = models.DateField(blank=True, null=True)
     assigned_to = models.ManyToManyField(User, related_name="assigned_tasks", blank=True)
-    delivery_date = models.DateField()
-    reporting_date = models.DateField()
+    delivery_date = models.DateField(blank=True, null=True)
+    reporting_date = models.DateField(blank=True, null=True)
     description = models.TextField(null=True,blank=True)
     note = models.CharField(max_length=255, blank=True, null=True)
     status = models.CharField(max_length=255, choices=[
@@ -120,9 +120,9 @@ class Tasks(Timelogger):
     skiptraced = models.CharField(max_length=255, blank=True, null=True)
     published = models.CharField(max_length=255, blank=True, null=True)
     post_foreclosure_case_volume = models.CharField(max_length=255, blank=True, null=True)
-    post_foreclosure_cases = models.ManyToManyField(Foreclosure)
+    post_foreclosure_cases = models.ManyToManyField(Foreclosure, blank=True, null=True)
     post_foreclosure_case_searched = models.CharField(max_length=255, blank=True, null=True)
-    active_subscribers = models.ManyToManyField(StripeSubscription)
+    active_subscribers = models.ManyToManyField(StripeSubscription, blank=True, null=True)
 
 
     def __str__(self):
