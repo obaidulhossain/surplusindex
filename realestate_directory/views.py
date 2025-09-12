@@ -1,5 +1,6 @@
 from django.template import loader
 from django.shortcuts import redirect, render, get_object_or_404, HttpResponse, HttpResponseRedirect
+from django.urls import reverse
 from . models import *
 from django.utils.timezone import now
 from django.core.paginator import Paginator
@@ -185,59 +186,13 @@ def update_row_post(request):
 
 
 def calendarSettings(request):
-    EventInstance = ""
-    if request.method == 'POST':
-        SelectedEvent = request.POST.get('selectedevent', '')
-        
-        State = request.POST.get('state','')
-        County = request.POST.get('county','')
-        Population = request.POST.get('population','')
-        SaleType = request.POST.get('saletype','')
-        EventStatus = request.POST.get('status','')
-        EventLink = request.POST.get('eventlink','')
-        CaseLink = request.POST.get('caselink','')
-        UpdatedFrom = request.POST.get('updatedfrom','')
-        UpdatedTo = request.POST.get('updatedto','')
-        EventNext = request.POST.get('eventnext','')
-        Assignedto = request.POST.get('assignedto','')
+    params = request.POST if request.method == "POST" else request.GET
+    SelectedEvent = params.get('selectedevent', '')
+    EventInstance = None
 
-        if not SelectedEvent == "":
-            EventInstance = foreclosure_Events.objects.get(pk=SelectedEvent)
-            if State:
-                EventInstance.state = State
-            if County:
-                EventInstance.county = County
-            if Population:
-                EventInstance.population = Population
-            if SaleType:
-                EventInstance.sale_type = SaleType
-            if EventStatus:
-                EventInstance.event_status = EventStatus
-            if EventLink:
-                EventInstance.event_site = EventLink
-            if CaseLink:
-                EventInstance.event_case_search = CaseLink
-            if UpdatedFrom:
-                EventInstance.event_updated_from = UpdatedFrom
-            if UpdatedTo:
-                EventInstance.event_updated_to = UpdatedTo
-            if EventNext:
-                EventInstance.event_next = EventNext
-            if Assignedto:
-                EventInstance.assigned_to = User.objects.get(pk=Assignedto)
-            EventInstance.save()
-            EventInstance.refresh_from_db()
-            messages.success(request, "Event Updated!")
-        else:
-            EventInstance=foreclosure_Events.objects.create(
-                state = State,
-                county = County,
-                population = Population,
-                sale_type = SaleType,
-                event_status = EventStatus
-                )
-            EventInstance.save()
-            messages.success(request, "Event Created!")
+    if SelectedEvent:
+        EventInstance = foreclosure_Events.objects.get(pk=SelectedEvent)
+
     Users = User.objects.filter(groups__name='researcher')
     
     context = {
@@ -246,6 +201,111 @@ def calendarSettings(request):
     }
     
     return render(request, 'auction_calendar/calendar_settings.html', context)
+
+def CreateUpdateEvents(request):
+    params = request.POST if request.method == "POST" else request.GET
+    SelectedEvent = params.get('selectedevent', '')
+
+    State = params.get('state', '')
+    County = params.get('county','')
+    Population = params.get('population','')
+    SaleType = params.get('saletype','')
+    EventStatus = params.get('status','')
+    EventLink = params.get('eventlink','')
+    CaseLink = params.get('caselink','')
+    UpdatedFrom = params.get('updatedfrom','')
+    UpdatedTo = params.get('updatedto','')
+    EventNext = params.get('eventnext','')
+    PostUpdatedFrom = params.get('post_updatedfrom','')
+    PostUpdatedTo = params.get('post_updatedto','')
+    PostEventNext = params.get('post_eventnext','')
+    Assignedto = params.get('assignedto','')
+    Recorder = params.get('recorder','')
+    Assessor = params.get('assessor','')
+    TaxCollector = params.get('tax_collector','')
+    GIS = params.get('gis','')
+    District = params.get('district','')
+    Civil = params.get('civil','')
+    Municipal = params.get('municipal','')
+    Probate = params.get('probate','')
+    Superior = params.get('superior','')
+    Supreme = params.get('supreme','')
+    Surrogate = params.get('surrogate','')
+    PublicNotice = params.get('public_notice','')
+    
+    EventInstance = None
+    if SelectedEvent:
+        EventInstance = foreclosure_Events.objects.get(pk=SelectedEvent)
+        if State:
+            EventInstance.state = State
+        if County:
+            EventInstance.county = County
+        if Population:
+            EventInstance.population = Population
+        if SaleType:
+            EventInstance.sale_type = SaleType
+        if EventStatus:
+            EventInstance.event_status = EventStatus
+        if EventLink:
+            EventInstance.event_site = EventLink
+        if CaseLink:
+            EventInstance.event_case_search = CaseLink
+        if UpdatedFrom:
+            EventInstance.event_updated_from = UpdatedFrom
+        if UpdatedTo:
+            EventInstance.event_updated_to = UpdatedTo
+        if EventNext:
+            EventInstance.event_next = EventNext
+        if PostUpdatedFrom:
+            EventInstance.post_event_updated_from = PostUpdatedFrom
+        if PostUpdatedTo:
+            EventInstance.post_event_updated_to = PostUpdatedTo
+        if PostEventNext:
+            EventInstance.post_event_next = PostEventNext
+        if Recorder:
+            EventInstance.recorder = Recorder
+        if Assessor:
+            EventInstance.assessor = Assessor
+        if TaxCollector:
+            EventInstance.tax_collector = TaxCollector
+        if GIS:
+            EventInstance.gis = GIS
+        if District:
+            EventInstance.district = District
+        if Civil:
+            EventInstance.civil = Civil
+        if Municipal:
+            EventInstance.municipal = Municipal
+        if Probate:
+            EventInstance.probate = Probate
+        if Superior:
+            EventInstance.superior = Superior
+        if Supreme:
+            EventInstance.supreme = Supreme
+        if Surrogate:
+            EventInstance.surrogate = Surrogate
+        if PublicNotice:
+            EventInstance.public_notice = PublicNotice
+        if Assignedto:
+            EventInstance.assigned_to = User.objects.get(pk=Assignedto)
+        EventInstance.save()
+        EventInstance.refresh_from_db()
+        messages.success(request, "Event Updated!")
+    else:
+        EventInstance, created = foreclosure_Events.objects.get_or_create(
+            state = State,
+            county = County,
+            sale_type = SaleType,
+            defaults={
+                "population" : Population,
+                "event_status" : EventStatus,
+            }
+        )
+        if created:
+            messages.success(request, "Event Created!")
+        else:
+            messages.info(request, "Event already exist and selected")
+    return redirect(f"{reverse('calendar_settings')}?selectedevent={EventInstance.id}")
 
 def FilterEvents(request):
 

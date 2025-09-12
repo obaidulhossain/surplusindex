@@ -11,10 +11,46 @@ Checklists
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-
+<style>
+/* Transition effect */
+.copied {
+  background-color: #c8f7c5;   /* light green highlight */
+  transition: background-color 0.5s ease; 
+}
+</style>
 <!--Foreclosure Section               End -->
-<div style="margin-top: 20px;" class="body-section">
-    <div id="fcl" class="section-header">
+<div class="body-section">
+    <div class="section-header">
+        <h4>Useful Links</h4>
+        <div>
+            <span id="msg1" style="color:yellow; opacity:0; transition:opacity 0.5s;"></span>
+            <select onchange="copyToClipboard(this, 'msg1')">
+                <option value="">Foreclosure</option>
+                {% if event.event_site %}<option value="{{event.event_site}}">Auction</option>{% endif %}
+                {% if event.event_case_search %}<option value="{{event.event_case_search}}">Case Search</option>{% endif %}
+                {% if event.public_notice %}<option value="{{event.public_notice}}">Public Notice</option>{% endif %}
+            </select>
+            <select onchange="copyToClipboard(this, 'msg1')">
+                <option value="">Property Records</option>
+                {% if event.recorder %}<option value="{{event.recorder}}">Recorder</option>{% endif %}
+                {% if event.assessor %}<option value="{{event.assessor}}">Assessor</option>{% endif %}
+                {% if event.tax_collector %}<option value="{{event.tax_collector}}">Tax Collector</option>{% endif %}
+                {% if event.gis %}<option value="{{event.gis}}">GIS Map</option>{% endif %}
+            </select>
+            <select onchange="copyToClipboard(this, 'msg1')">
+                <option value="">Court Records</option>
+                {% if event.district %}<option value="{{event.district}}">District Court</option>{% endif %}
+                {% if event.civil %}<option value="{{event.civil}}">Civil Court</option>{% endif %}
+                {% if event.municipal %}<option value="{{event.municipal}}">Municipal Court</option>{% endif %}
+                {% if event.probate %}<option value="{{event.probate}}">Probate Court</option>{% endif %}
+                {% if event.superior %}<option value="{{event.superior}}">Superior Court</option>{% endif %}
+                {% if event.supreme %}<option value="{{event.supreme}}">Supreme Court</option>{% endif %}
+                {% if event.surrogate %}<option value="{{event.surrogate}}">Surrogate Court</option>{% endif %}
+            </select>
+        </div>
+    </div>
+
+    <div id="fcl" class="section-header" style="margin-top:20px;">
         {% if selected_foreclosure == "" %}
         <h4 name="updatefcl">Create Foreclosure</h4>
         {% else %}
@@ -613,7 +649,71 @@ Checklists
 
 <!--defendants section-end-->
 <script src="{% static 'js/Surplusindex.js' %}"></script>
+<script>
+function copyToClipboard(element, messageId) {
+  let value = element.value;
+  if (value) {
+    navigator.clipboard.writeText(value).then(() => {
+      console.log("Copied: " + value);
 
+      // Highlight effect
+      element.style.transition = "background-color 0.5s ease";
+      element.style.backgroundColor = "#c8f7c5";
+      setTimeout(() => {
+        element.style.backgroundColor = "";
+      }, 2000);
+
+      // Show "Copied!" in the target element
+      let msg = document.getElementById(messageId);
+      if (msg) {
+        msg.innerText = `Copied!`;
+        msg.style.opacity = 1;
+
+        // Hide after 2 seconds
+        setTimeout(() => {
+          msg.style.opacity = 0;
+        }, 2000);
+      }
+    }).catch(err => {
+      console.error("Failed to copy: ", err);
+    });
+  }
+}
+{% comment %} function copyToClipboard(element) {
+  let value = element.value;
+  if (value) {
+    navigator.clipboard.writeText(value).then(() => {
+      console.log("Copied: " + value);
+
+      // Save old background color
+      let oldBg = element.style.backgroundColor;
+
+      // Apply highlight directly
+      element.style.transition = "background-color 0.5s ease";
+      element.style.backgroundColor = "#c8f7c5"; // light green
+
+      // Reset after 2 seconds
+      setTimeout(() => {
+        element.style.backgroundColor = oldBg || "";
+      }, 2000);
+    }).catch(err => {
+      console.error("Failed to copy: ", err);
+    });
+  }
+} {% endcomment %}
+{% comment %} function copyToClipboard(element) {
+  let value = element.value;
+  if (value) {
+    navigator.clipboard.writeText(value).then(() => {
+      console.log("Copied: " + value);
+      // Optional: show a notification
+      // alert("Copied: " + value);
+    }).catch(err => {
+      console.error("Failed to copy: ", err);
+    });
+  }
+} {% endcomment %}
+</script>
 
 
 {% endblock content %}

@@ -35,6 +35,7 @@ def fclview(request):
         
     if selected_foreclosure:
         current_fcl_instance = get_object_or_404(Foreclosure, pk=selected_foreclosure)
+        event, created = foreclosure_Events.objects.get_or_create(state=current_fcl_instance.state, county=current_fcl_instance.county)
         all_prop = current_fcl_instance.property.all()
         all_plt = current_fcl_instance.plaintiff.all()
         all_def = current_fcl_instance.defendant.all()
@@ -42,7 +43,8 @@ def fclview(request):
         current_fcl_instance = None
         all_prop = None
         all_plt = None
-        all_def = None    
+        all_def = None
+        event = None
 
     context = {
         'all_foreclosure':all_foreclosure,
@@ -52,6 +54,7 @@ def fclview(request):
         'all_plt':all_plt,
         'all_def':all_def,
         'researcher':researcher,
+        'event':event,
     }
     return render(request, 'projects/add_edit_foreclosure.html', context)
 

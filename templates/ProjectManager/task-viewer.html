@@ -964,7 +964,7 @@ Task Viewer
             {% elif task_instance.tracker_status == "started" %}
                 <a href="{% url 'pause_task' task_instance.id %}" class="btn btn-warning">Pause</a>
                 <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a></br>
-                <center><h4>Case Searched</br>{% if task_instance.post_foreclosure_case_searched %}{{task_instance.post_foreclosure_case_searched}}{% else %}{{post_foreclosure_searched}}{% endif %}of {{task_instance.post_foreclosure_case_volume}}</h4></center>
+                <center><h4>Case Searched</br>{% if task_instance.post_foreclosure_case_searched %}{{task_instance.post_foreclosure_case_searched}}{% else %}{{post_foreclosure_searched}}{% endif %} of {{task_instance.post_foreclosure_case_volume}}</h4></center>
 
             {% elif task_instance.tracker_status == "paused" %}
                 <a href="{% url 'start_task' task_instance.id %}" class="btn btn-primary">Resume</a>
