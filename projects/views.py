@@ -35,7 +35,17 @@ def fclview(request):
         
     if selected_foreclosure:
         current_fcl_instance = get_object_or_404(Foreclosure, pk=selected_foreclosure)
-        event, created = foreclosure_Events.objects.get_or_create(state=current_fcl_instance.state, county=current_fcl_instance.county, sale_type=current_fcl_instance.sale_type)
+        qs = foreclosure_Events.objects.filter(
+            state=current_fcl_instance.state,
+            county=current_fcl_instance.county,
+        )
+        event = qs.first()
+        if not event:
+            event = foreclosure_Events.objects.create(
+                state=current_fcl_instance.state,
+                county=current_fcl_instance.county,
+            )
+        
         all_prop = current_fcl_instance.property.all()
         all_plt = current_fcl_instance.plaintiff.all()
         all_def = current_fcl_instance.defendant.all()

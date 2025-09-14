@@ -120,9 +120,9 @@ class Tasks(Timelogger):
     skiptraced = models.CharField(max_length=255, blank=True, null=True)
     published = models.CharField(max_length=255, blank=True, null=True)
     post_foreclosure_case_volume = models.CharField(max_length=255, blank=True, null=True)
-    post_foreclosure_cases = models.ManyToManyField(Foreclosure, blank=True, null=True)
+    post_foreclosure_cases = models.ManyToManyField(Foreclosure, blank=True)
     post_foreclosure_case_searched = models.CharField(max_length=255, blank=True, null=True)
-    active_subscribers = models.ManyToManyField(StripeSubscription, blank=True, null=True)
+    active_subscribers = models.ManyToManyField(StripeSubscription, blank=True)
 
 
     def __str__(self):
