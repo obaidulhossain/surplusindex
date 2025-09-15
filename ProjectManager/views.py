@@ -16,6 +16,7 @@ from django.db.models import Prefetch
 from django.views.decorators.http import require_POST
 from .mailers import send_cycle_leads
 from django.core.mail import EmailMessage,send_mail
+from email.utils import formataddr
 from django.conf import settings
 from django.db.models import F
 # Create your views here.
@@ -581,7 +582,9 @@ def deliver_cycle_leads(request, task_id):
         messages.info(request, f"No  leads found in {task_instance.project.state} for sale date range {task_instance.cycle.sale_from} - {task_instance.cycle.sale_to}")
         return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
     
-    email_sender = settings.DEFAULT_FROM_EMAIL
+    # email_sender = settings.DEFAULT_FROM_EMAIL
+    email_sender = formataddr(("SurplusIndex", settings.DEFAULT_FROM_EMAIL))
+
     users = [sub.user for sub in active_subscriptions]
 
     for sub in active_subscriptions:
@@ -625,7 +628,14 @@ def deliver_cycle_leads(request, task_id):
             report.refresh_from_db()
             # Send mail to this user    
             try:
-                send_mail(subject, body, email_sender, [user.email], fail_silently=False)
+                # send_mail(subject, body, email_sender, [user.email], fail_silently=False)
+                email = EmailMessage(
+                    subject=subject,
+                    body=body,
+                    from_email=email_sender,
+                    to=[user.email],
+                )
+                email.send(fail_silently=False)
                 messages.info(request, f"Successfully sent email to {user.email}")
                 report.report = "Successful"
             except Exception as e:
