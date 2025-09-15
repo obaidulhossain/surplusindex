@@ -24,3 +24,7 @@ class TaskViewsAdmin(admin.ModelAdmin):
 @admin.register(TimeTracker)
 class TimeTrackerAdmin(admin.ModelAdmin):
     list_display = ('task','user','start_time','end_time','is_paused')
+
+@admin.register(DeliveryReport)
+class DeliveryReportAdmin(admin.ModelAdmin):
+    list_display = ('task','user','delivered','report')
