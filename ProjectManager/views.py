@@ -628,14 +628,14 @@ def deliver_cycle_leads(request, task_id):
             report.refresh_from_db()
             # Send mail to this user    
             try:
-                # send_mail(subject, body, email_sender, [user.email], fail_silently=False)
-                email = EmailMessage(
-                    subject=subject,
-                    body=body,
-                    from_email=email_sender,
-                    to=[user.email],
-                )
-                email.send(fail_silently=False)
+                send_mail(subject, body, email_sender, [user.email], fail_silently=False)
+                # email = EmailMessage(
+                #     subject=subject,
+                #     body=body,
+                #     from_email=email_sender,
+                #     to=[user.email],
+                # )
+                # email.send(fail_silently=False)
                 messages.info(request, f"Successfully sent email to {user.email}")
                 report.report = "Successful"
             except Exception as e:
