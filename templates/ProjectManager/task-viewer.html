@@ -66,6 +66,7 @@ Task Viewer
             {% elif task_instance.tracker_status == "started" %}
                 <a href="{% url 'pause_task' task_instance.id %}" class="btn btn-warning">Pause</a>
                 <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
+                <a href="https://drive.google.com/drive/folders/1t7fjlvk727Uu1li09WftQIhW2F9shbSu?usp=drive_link" class="btn btn-success">Drive Location</a>
             {% elif task_instance.tracker_status == "paused" %}
                 <a href="{% url 'start_task' task_instance.id %}" class="btn btn-primary">Resume</a>
                 <a href="{% url 'stop_task' task_instance.id %}" class="btn btn-danger">Stop</a>
@@ -85,7 +86,7 @@ Task Viewer
     <div class="section-small">
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Cycle Duration</h6>
-            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_end|date:'m/d/Y'}}</h6>
         </div>
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Sale Range</h6>
@@ -258,7 +259,7 @@ Task Viewer
     <div class="section-small">
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Cycle Duration</h6>
-            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_end|date:'m/d/Y'}}</h6>
         </div>
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Sale Range</h6>
@@ -366,7 +367,7 @@ Task Viewer
     <div class="section-small">
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Cycle Duration</h6>
-            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_end|date:'m/d/Y'}}</h6>
         </div>
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Sale Range</h6>
@@ -516,7 +517,7 @@ Task Viewer
     <div class="section-small">
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Cycle Duration</h6>
-            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_end|date:'m/d/Y'}}</h6>
         </div>
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Sale Range</h6>
@@ -678,7 +679,7 @@ Task Viewer
     <div class="section-small">
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Cycle Duration</h6>
-            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_end|date:'m/d/Y'}}</h6>
         </div>
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Sale Range</h6>
@@ -883,7 +884,7 @@ Task Viewer
     <div class="section-small">
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Cycle Duration</h6>
-            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_end|date:'m/d/Y'}}</h6>
         </div>
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Sale Range</h6>
@@ -985,7 +986,7 @@ Task Viewer
     <div class="section-small">
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Cycle Duration</h6>
-            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_end|date:'m/d/Y'}}</h6>
         </div>
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Sale Range</h6>
@@ -1205,7 +1206,7 @@ Task Viewer
     <div class="section-small">
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Cycle Duration</h6>
-            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_start|date:'m/d/Y'}}</h6>
+            <h6>{{task_instance.cycle.cycle_start|date:'m/d/Y'}} - {{task_instance.cycle.cycle_end|date:'m/d/Y'}}</h6>
         </div>
         <div class="onefifth" style="border-right:1px solid grey">
             <h6>Sale Range</h6>
