@@ -126,6 +126,7 @@
                         <th>Purchased Credit</th>
                         <th>Total Used</th>
                         <th>Number of Leads</th>
+                        <th>Export</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -146,6 +147,15 @@
                         {% endif %}
                         <td>{{usage.credits_used}}</td>
                         <td>{{usage.leads.count}}</td>
+                        <td>
+                            {% if usage.leads.count > 0 %}
+                                <a href="{% url 'export_usage_leads' usage.id %}" class="btn btn-sm btn-primary">
+                                    Export
+                                </a>
+                            {% else %}
+                                <span class="text-muted">No Leads</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 {% else %}

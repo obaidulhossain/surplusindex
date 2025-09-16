@@ -100,9 +100,11 @@ Available Leads
                         <input type="checkbox" name="sale_status_canceled" value="Cancelled" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusCANCELED == "Cancelled" %}checked{% endif %}>
                         <label style="vertical-align: middle;">Cancelled</label></br>
                     </div></br></br>
-                    
-                    <label for="show_archived">Show Archived Leads</label></br>
-                    <input type="checkbox" name="show_archived" id="show_archived" value="show" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if showArchived == "show" %}checked{% endif %} {% if selectedState == "" %}disabled{% endif %}>
+                    <div class="filter-item-section" style="text-align-last: left;">
+                        <h5>User Specific Filters</h5></br></br>
+                        <label for="show_archived">Show Archived Leads</label></br>
+                        <input type="checkbox" name="show_archived" id="show_archived" value="show" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if showArchived == "show" %}checked{% endif %} {% if selectedState == "" %}disabled{% endif %}>
+                    </div>        
                 </div>
                 <div class="onethird" style="margin: 0px 10px;">
                     <div class="filter-item-section" style="text-align-last: left;">

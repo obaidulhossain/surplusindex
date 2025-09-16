@@ -35,6 +35,7 @@ urlpatterns = [
     path('', include('si_user.urls')),
     path('', include('realestate_directory.urls')),
     path('', include('projects.urls')),
+    path('', include('Communication.urls')),
 
     ]
 if settings.DEBUG:

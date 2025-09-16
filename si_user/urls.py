@@ -8,6 +8,8 @@ urlpatterns = [
     path('updateuserDetail/', views.updateUserCredentials, name='updateuserDetail'),
 #--------------url for settings page--------------------
     path('profile/', views.userProfile, name='profile'),
+    path('export-usage/<int:usage_id>/', views.export_leads_from_usage, name='export_usage_leads'),
+
     path('subscriptions/',views.userSubscription, name='subscriptions'),
     path('checkout/', views.checkout, name='checkout'),
     path('stripe_webhook/', views.stripe_webhook, name='stripe_webhook'),

@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'Assistance',
     'media_manager',
     'ProjectManager',
+    'Communication',
     
 ]
 
@@ -172,15 +173,19 @@ MESSAGE_TAGS = {
     messages.ERROR:'danger'
 }
 
-EMAIL_HOST = "surplusindex.com"
+CELERY_BROKER_URL = "redis://localhost:6379/0"
+CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = os.getenv("EMAIL_HOST")
 EMAIL_PORT = 465
-EMAIL_HOST_USER = "contact@surplusindex.com"
-EMAIL_HOST_PASSWORD = "Obaidul@11307"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+
+
 # EMAIL_FILE_PATH = BASE_DIR / "sent_emails"
 
 MEDIA_URL = '/media/'

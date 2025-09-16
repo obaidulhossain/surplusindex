@@ -24,6 +24,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import datetime, timedelta, date
 from collections import defaultdict
+from Client.resources import *
 # Configure the logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -149,6 +150,33 @@ def userProfile(request):
         'credit_usage':credit_usage,
     }
     return render(request, 'si_user/user_profile.html', context)
+
+
+@login_required(login_url="login")
+def export_leads_from_usage(request, usage_id):
+    usage = get_object_or_404(CreditUsage, id=usage_id)
+    if usage.user == request.user:
+        # collect related leads
+        data = set()
+        for status_instance in usage.leads.all():
+            data.add(status_instance.lead)   # same way you were adding before
+        
+        # use your resource
+        resources = ClientModelResource()
+        dataset = resources.export(data)
+
+        # build response
+        response = HttpResponse(dataset.csv, content_type="text/csv")
+        response['Content-Disposition'] = f'attachment; filename="credit_usage_{usage.id}_leads.csv"'
+        return response
+    else:
+        messages.error(request,"Unauthorized access detected! Please try again from your profile > Credit Usage Section")
+        return redirect('profile')
+
+
+
+
+
 
 
 @receiver(post_save, sender=User)
