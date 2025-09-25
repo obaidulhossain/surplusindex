@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+{% block title %}
+Conversation
+{% endblock title %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+
+<div class="section-body-full">
+    <div class="onehalf">
+        <h3 style="float:left">{{first_message.subject}}</h3></br></br>
+        <input style="float:left; width:auto; padding: 0px 10px;" type="button" class="copyButton" value="{{first_message.sender}}" data-url="{{first_message.sender}}" onclick="copyToClipboard_value(this);"></br>
+    </div>
+    <div class="onehalf">
+        <a href="/com_inbox/?selectedemail={{ account.id }}"><h3 style="float:right">{{ account.name }}</h3></a></br></br>
+        <span style="float:right">{{first_message.created_at}}</span>
+    </div></br></br>
+    
+    <div class="conversation"> <!-- class="chat-window border rounded p-3 mb-3 position-relative" -->
+    
+    <!--Messages -->
+    {% for msg in mails %}
+        <div class="d-flex mb-3 {% if msg.sender == account.email_address %}justify-content-end{% else %}justify-content-start{% endif %}">
+            
+            <div class="p-3 rounded-3 shadow-sm" style="min-width:40%; max-width:70%; border: 1px solid #d6d6d6; background:{% if msg.sender == account.email_address %} #e3ffdb;{% else %} #e9ecef;{% endif %}">
+                <div class="mt-1 message-body" id="body-{{ msg.id }}">
+                    {% if msg.body_html %}{{ msg.body_html|safe }}{% else %}<pre class="mb-0" style="text-wrap: auto;">{{ msg.body_plain }}</pre>{% endif %}
+                </div></br>
+                <div style="display:inline-block; float:left; font-size:0.8em; font-weight:bold; color: #b55411">
+                    {% if msg.sender == account.email_address %}{{ msg.sent_at|date:"M d, Y H:i" }}{% else %}{{ msg.received_at|date:"M d, Y H:i" }}{% endif %}
+                </div>
+                <div style="display:inline-block; float:right;">
+                <!-- Toggle Read -->
+                <a href="javascript:void(0);" onclick="toggleRead({{ msg.id }})" id="toggle-{{ msg.id }}">
+                    {% if msg.is_read %}
+                        <i class="bi bi-check-square" style="font-size:24px; color: #11b566ff"></i>
+                    {% else %}
+                        <i class="bi bi-square" style="font-size:24px; color: #b55411"></i>
+                    {% endif %}
+                </a>
+                <!-- Edit Button -->
+                <a href="javascript:void(0);" onclick="editMessage({{ msg.id }})">
+                    <i class="bi bi-pencil-square" style="font-size:24px; color:#007bff;"></i>
+                </a>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-center text-muted">No messages in this conversation.</p>
+    {% endfor %}      
+    </div>
+
+    <!-- Fixed Reply Box  -->
+    <div class="section-body-full" style="margin-top:20px">
+        <form id="replyForm" method="post" action="{% url 'send_reply' account.id first_message.id %}">
+            {% csrf_token %}
+            <textarea name="body" class="form-control mb-2" rows="3" placeholder="Type your reply..."></textarea>
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary">Send Reply</button>
+            </div>
+        </form>
+    </div>    
+</div>
+<script>
+function toggleRead(msgId) {
+    fetch(`/toggle-read/${msgId}/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            let el = document.getElementById(`toggle-${msgId}`);
+            if (data.is_read) {
+                el.innerHTML = '<i class="bi bi-check-square" style="font-size:24px; color: #11b566ff"></i>';
+            } else {
+                el.innerHTML = '<i class="bi bi-square" style="font-size:24px; color: #b55411"></i>';
+            }
+        }
+    });
+}
+
+function editMessage(msgId) {
+    let bodyDiv = document.getElementById(`body-${msgId}`);
+    let current = bodyDiv.innerText.trim();
+
+    // Replace with textarea
+    bodyDiv.innerHTML = `
+        <textarea id="edit-${msgId}" class="form-control" style="width:700px" rows="7">${current}</textarea>
+        <button class="btn btn-sm btn-success mt-1" onclick="saveEdit(${msgId})">Save</button>
+        <button class="btn btn-sm btn-secondary mt-1" onclick="cancelEdit(${msgId}, '${current.replace(/'/g, "\\'")}')">Cancel</button>
+    `;
+}
+
+function saveEdit(msgId) {
+    let newBody = document.getElementById(`edit-${msgId}`).value;
+    fetch(`/edit-message/${msgId}/`, {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: "body=" + encodeURIComponent(newBody)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`body-${msgId}`).innerHTML = `<pre class="mb-0" style="text-wrap: auto;">${data.body}</pre>`;
+        }
+    });
+}
+
+function cancelEdit(msgId, oldBody) {
+    document.getElementById(`body-${msgId}`).innerHTML = `<pre class="mb-0" style="text-wrap: auto;">${oldBody}</pre>`;
+}
+</script>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+{% endblock content %}

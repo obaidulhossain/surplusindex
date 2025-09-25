@@ -986,3 +986,49 @@ table.table .avatar {
 
 /* ------------------------------- CSS Properties for ALL USER GROUP ----------------------------------------------*/
 /* ------------------------------- CSS Properties for ALL USER GROUP ----------------------------------------------*/
+.email-group {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.email-group-item {
+    max-height: 120px;
+    position: relative;
+    display: block;
+    padding: .5rem 1rem;
+    color: #212529;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, .125);
+}
+
+.email-group-item:first-child {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.email-group-item:last-child {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.email-group-item:hover {
+    background-color: #f9f9f9;
+}
+
+.mail-section {
+    border: 1px solid #dadada;
+    margin: 2px 35px;
+    padding: 5px;
+    min-height: 100px;
+    border-radius: 5px;
+    background-color: #f6f6f6;
+}
+
+.conversation {
+    max-height: 400px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border: 1px solid #c8c8c8;
+    padding: 20px
+}

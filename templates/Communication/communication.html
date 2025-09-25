@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% block title %}
+Communication Dashboard
+{% endblock title %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<h1>Communication Dashboard</h1>
+<a href="{% url 'schedule_email' %}" class="button">Send / Schedule Email</a>
+<div class="body-section">
+    <div class="section-header">
+        <h4>Send Schedule Email</h4>
+    </div>
+    <div class="section-body-full">
+        <form method="post" action="{% url 'schedule_email' %}">
+        {% csrf_token %}
+            <!-- Select Mail Account -->
+            <label for="sender">From:</label>
+            <select name="sender" required>
+                {% for account in mail_accounts %}
+                <option value="{{ account.id }}">{{ account.email_address }}</option>
+                {% endfor %}
+            </select><br><br>
+            
+            <!-- Recipient Scope -->
+            <label for="scope">Recipient Type:</label>
+            <select name="scope" id="scope" onchange="toggleScope()">
+                <option value="single">Single</option>
+                <option value="multiple">Multiple</option>
+            </select>
+            <br><br>
+            
+            <!-- Single Recipient -->
+            <div id="singleRecipient">
+                <label>Email:</label>
+                <input type="email" name="recipient">
+            </div>
+
+            <!-- Multiple Recipients -->
+            <div id="multipleRecipients" style="display:none;">
+                <label>From Contact List:</label>
+                <select name="contact_list">
+                    <option value="">--None--</option>
+                    <option value="all-clients">All Clients</option>
+                    {% for cl in contact_lists %}
+                    <option value="{{ cl.id }}">{{ cl.name }}</option>
+                    {% endfor %}
+                </select>
+                <br><br>
+
+                <label>Or Enter Emails (comma separated):</label>
+                <textarea name="recipients_list" rows="3"></textarea>
+            </div>
+            <br>
+            <!-- Template -->
+            <label for="template">Choose Template:</label>
+            <select name="template" id="template" onchange="loadTemplate()">
+                <option value="">--None--</option>
+                {% for t in templates %}
+                <option value="{{ t.id }}" data-subject="{{ t.subject }}" data-body="{{ t.body }} {{ t.signature|default:'' }}">{{ t.name }}</option>
+                {% endfor %}
+            </select>
+            <br><br>
+            <!-- Subject + Body -->
+            <label>Custom Subject:</label>
+            <input type="text" name="custom_subject" id="subject"><br><br>
+            <label>Custom Body:</label>
+            <textarea name="custom_body" id="body" rows="5"></textarea><br><br>
+            <!-- Send Mode -->
+            <label for="send_mode">Send Mode:</label>
+            <select name="send_mode" id="send_mode" onchange="toggleSchedule()">
+                <option value="now">Send Now</option>
+                <option value="later">Schedule</option>
+            </select><br><br>
+            <!-- Schedule Time Picker -->
+            <div id="scheduleTime" style="display:none;">
+                <label for="send_time">Schedule Time:</label>
+                <input type="datetime-local" name="send_time">
+            </div>
+            <br>
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleScope() {
+    const scope = document.getElementById("scope").value;
+    document.getElementById("singleRecipient").style.display = scope === "single" ? "block" : "none";
+    document.getElementById("multipleRecipients").style.display = scope === "multiple" ? "block" : "none";
+    }
+
+function toggleSchedule() {
+    const mode = document.getElementById("send_mode").value;
+    document.getElementById("scheduleTime").style.display = mode === "later" ? "block" : "none";
+    }
+
+function loadTemplate() {
+    const select = document.getElementById("template");
+    const selected = select.options[select.selectedIndex];
+    const subject = selected.getAttribute("data-subject");
+    const body = selected.getAttribute("data-body");
+
+    if (subject) document.getElementById("subject").value = subject;
+    if (body) document.getElementById("body").value = body;
+    }
+</script>
+
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+{% endblock content %}

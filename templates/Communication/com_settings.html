@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block title %}
+Communication Settings
+{% endblock title %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+
+<h1>Communication Settings</h1>
+<div class="section-header" style="margin-top:20px;">
+    <h4>Gear Up Email Accounts</h4>
+    <a class="button button-small" href="{% url 'com_settings' %}">Clear</a>
+</div>
+
+<div class="section-body-full">
+    <div class="onehalf header-text">
+        <h4>{% if EmailInstance %}Update{% else %}Create{% endif %} Email Account</h4>
+        <form method="post" action="{% url 'create_update_email_ac' %}">
+        {% csrf_token %}
+            {% if EmailInstance %}
+            <input type="hidden" name="selectedemail" value="{{EmailInstance.id}}">
+            {% endif %}
+            <div class="form-row">
+                <label for="name">Name</label>
+                <input type="text" name="name" id="name" value="{% if EmailInstance %}{{EmailInstance.name}}{% endif %}">
+            </div>
+            <div class="form-row">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" value="{% if EmailInstance %}{{EmailInstance.email_address}}{% endif %}">
+            </div>
+            <div class="form-row">
+                <label for="smtp_host">SMTP Host</label>
+                <input type="text" name="smtp_host" id="smtp_host" value="{% if EmailInstance %}{{EmailInstance.smtp_host}}{% endif %}">
+            </div>
+            <div class="form-row">
+                <label for="smtp_port">SMTP Port</label>
+                <input type="number" name="smtp_port" id="smtp_port" value="{% if EmailInstance %}{{EmailInstance.smtp_port}}{% endif %}">
+            </div>
+            <div class="form-row">
+                <label for="username">Username</label>
+                <input type="text" name="username" id="username"value="{% if EmailInstance %}{{EmailInstance.username}}{% endif %}">
+            </div>
+            <div class="form-row">
+                <label for="password">Password</label>
+                <input type="text" name="password" id="password" value="{% if EmailInstance %}{{EmailInstance.password}}{% endif %}">
+            </div>
+            <div class="form-row">
+                <label for="use_tls">Use TLS</label>
+                <input type="checkbox" name="use_tls" id="use_tls" {% if EmailInstance and EmailInstance.use_tls %}checked{% endif %}>
+            </div>
+            <div class="form-row">
+                <label for="use_ssl">Use SSL</label>
+                <input type="checkbox" name="use_ssl" id="use_ssl" {% if EmailInstance and EmailInstance.use_ssl %}checked{% endif %}>
+            </div>
+            <div class="form-row">
+                <label for="imap_host">IMAP Host</label>
+                <input type="text" name="imap_host" id="imap_host" value="{% if EmailInstance %}{{EmailInstance.imap_host}}{% endif %}">
+            </div>
+            <div class="form-row">
+                <label for="imap_port">IMAP Port</label>
+                <input type="number" name="imap_port" id="imap_port" value="{% if EmailInstance %}{{EmailInstance.imap_port}}{% endif %}">
+            </div>
+            <input type="submit" value="{% if EmailInstance %}Update{% else %}Create{% endif %} Email Account">
+        </form>
+    </div>
+    <div class="onehalf">
+        <table class="table table-striped table-hover" style="margin-top:30px;">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email Address</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                    <th>Test</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if Emails.count > 0 %}
+                {% for Email in Emails %}
+                <tr>
+                    <td>{{Email.name}}</td>
+                    <td>{{Email.email_address}}</td>
+                    <td>
+                        <form method="POST" action="{% url 'com_settings' %}">
+                        {% csrf_token %}
+                            <input type="hidden" name="selectedemail" value="{{Email.id}}">
+                            <input type="submit" value="Edit">
+                        </form>
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url 'delete_email_account' %}">
+                        {% csrf_token %}
+                            <input type="hidden" name="selectedemail" value="{{Email.id}}">
+                            <input type="submit" value="Delete">
+                        </form>
+                    </td>
+                    <td>
+                        <form method="POST" action="{% url 'test_email_ac' Email.id %}">
+                            {% csrf_token %}
+                            <input type="submit" value="Test">
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                {% else %}
+                <tr>
+                    <td colspan="4">No Email Address Found</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    
+    </div>
+</div>
+
+
+
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+{% endblock content %}

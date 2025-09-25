@@ -186,8 +186,19 @@ def availableLeads(request):
         
     # -------------Dropdown Data-------------------------------------------------------------------------------------
     states = Foreclosure.objects.values_list("state", flat=True).distinct()
-    counties = leads_queryset.values_list("county", flat=True).distinct()
-    saletypes = leads_queryset.values_list("sale_type", flat=True).distinct()
+    #counties = leads_queryset.values_list("county", flat=True).distinct()
+    counties = (
+        leads_queryset.values("county")
+        .order_by("county")   # required by distinct()
+        .distinct()
+        .values_list("county", flat=True)
+    )
+    saletypes = (
+        leads_queryset.values("sale_type")
+        .order_by("sale_type")
+        .distinct()
+        .values_list("sale_type", flat=True)
+    )
     
     # ---------------------------------------------------------------------------------------------------------------
 

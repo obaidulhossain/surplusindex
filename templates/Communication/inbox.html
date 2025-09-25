@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% block title %}
+Inbox
+{% endblock title %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+
+<div class="section-header" style="margin-top:20px;">
+    <h4>Inbox</h4>
+    <div>
+        <form method="POST" style="float:left; margin-right:10px;">
+        {% csrf_token %}
+            <select name="selectedemail" onchange="this.form.submit()">
+                <option value="">Select Email Account</option>
+                {% for Account in EmailAccounts %}
+                <option value="{{Account.id}}"{% if EmailInstance and EmailInstance.id == Account.id %}selected{% endif %} >{{Account.name}} | {{Account.email_address}}</option>
+                {% endfor %}
+            </select>
+        </form>
+        {% if EmailInstance %}
+        <form method="post" action="{% url 'fetch_inbox_full' %}" style="float:right;">
+        {% csrf_token %}
+            <input type="hidden" name="account_id" value="{{ EmailInstance.id }}">
+            <button type="submit" class="button">Fetch Full Inbox</button>
+        </form>
+
+        <form method="post" action="{% url 'refresh_emails' %}" style="float:right; margin-right:5px;">
+        {% csrf_token %}
+            <input type="hidden" name="account_id" value="{{ EmailInstance.id }}">
+            <button type="submit" class="button">Refresh Inbox</button>
+        </form>
+        {% endif %}
+        
+    </div>
+</div>
+
+<div class="section-body-full">
+    {% if thread_messages %}
+    <div class="email-group">
+        {% for msg in thread_messages %}              
+            <div class="email-group-item" {% if msg.is_read == False %}style="background-color: #f3f0ccff;"{% endif %}>
+                <div class="onefourth">
+                    <small class="text-muted"></small>
+                    <input style="width:100%" type="button" class="copyButton" value="{{ msg.sender }}" data-url="{{ msg.sender }}" onclick="copyToClipboard_value(this);"></br></br>
+                    <div class="onehalf">
+                        <form method="post" action="{% url 'archive_email' msg.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="account_id" value="{{ EmailInstance.id }}">
+                            <button type="submit" class="btn btn-sm btn-warning" style="width:100%">Archive</button>
+                        </form>
+                    </div>
+                    <!-- Delete -->
+                    <div class="onehalf">
+                        <form method="post" action="{% url 'delete_email' msg.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="account_id" value="{{ EmailInstance.id }}">
+                            <button type="submit" class="btn btn-sm btn-danger" style="width:100%">Delete</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="onehalf mail-section">
+                    <span class="fw-bold">{{ msg.subject|default:"(No Subject)" }}</span>
+                </div>
+                <div class="onefifth">
+                    <small class="text-muted">{% if msg.in_reply_to %}Replied{% else %}Mailed{% endif %} in {{ msg.received_at|date:"M d, Y H:i" }}</small>
+                    <a href="{% url 'conversation_view' msg.thread_key EmailInstance.id %}" class="button" style="width:100%; margin-top:5px">Open Conversation</a>
+                </div>                
+            </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <p>No emails found.</p>
+    {% endif %} 
+</div>
+
+
+
+
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+{% endblock %}

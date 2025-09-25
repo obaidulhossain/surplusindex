@@ -3,6 +3,51 @@ from django.core.mail import EmailMessage
 from imap_tools import MailBox
 from django.utils import timezone
 from .models import *
+from django.conf import settings
+
+@shared_task
+def send_scheduled_email(email_id):
+    email_obj = ScheduledEmail.objects.get(id=email_id)
+    recipients = email_obj.get_recipients()
+
+    if email_obj.template:
+        subject = email_obj.template.subject
+        body = f"{email_obj.template.body}\n\n{email_obj.template.signature or ''}"
+    else:
+        subject = email_obj.custom_subject or ""
+        body = email_obj.custom_body or ""
+
+    success_count, fail_count = 0, 0
+
+    for recipient in recipients:
+        try:
+            msg = EmailMessage(
+                subject=subject,
+                body=body,
+                from_email=email_obj.sender.email,
+                to=[recipient]
+            )
+            msg.send()
+            success_count += 1
+        except Exception:
+            fail_count += 1
+
+    if fail_count == 0:
+        email_obj.status = "sent"
+    elif success_count > 0:
+        email_obj.status = "partial"
+    else:
+        email_obj.status = "failed"
+    email_obj.save()
+
+
+
+
+
+
+
+
+
 
 @shared_task
 def send_mail_task(mail_id):

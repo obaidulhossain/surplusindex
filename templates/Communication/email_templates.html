@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}
+Email Templates
+{% endblock title %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<h1>Email Templates</h1>
+
+<div class="section-header">
+    <h4>{% if templateInstance %}Update Template: {{ templateInstance.name }}{% else %}Create New Template{% endif %}</h4>
+</div>
+<div class="section-body-full">
+    <form method="POST" action="{% url "create_update_template" %}">
+    {% csrf_token %}
+    <div class="onehalf">
+        <input type="hidden" name="selected_template" value="{{templateInstance.id}}">
+        <label for="name">Name</label></br>
+        <input type="text" name="name" id="name" style="width:90%" value="{% if templateInstance %}{{templateInstance.name}}{% endif %}"></br>
+    
+        <label for="subject">Subject</label></br>
+        <input type="text" name="subject" id="subject" style="width:90%" value="{% if templateInstance %}{{templateInstance.subject}}{% endif %}"></br>
+        
+        <label for="signature">Signature</label></br>
+        <textarea name="signature" id="signature" row="3" style="width:90%">{% if templateInstance %}{{templateInstance.signature}}{% endif %}</textarea></br></br>
+    
+        <input type="submit"  style="width:90%" value="{% if templateInstance %}Update Template{% else %}Create Template{% endif %}">
+    </div>
+    <div class="onehalf">
+        <label for="body">Body</label></br>
+        <textarea name="body" id="body" rows="10" style="width:90%">{% if templateInstance %}{{templateInstance.body}}{% endif %}</textarea>
+    </div>
+</div>
+
+</br>
+<div class="body-section" >
+    <div class="section-header">
+        <h4>All Templates</h4>
+    </div>
+    <div class="section-body-full">
+        <div class="card-container">
+            {% for t in templates %}
+            <a href="/com_templates/?selected_template={{t.id}}">
+            <div class="card">
+                <h3>{{ t.name }}</h3>
+                <p><strong>Subject:</strong> {{ t.subject }}</p>
+                
+                <div class="body-preview">
+                    {{ t.body|truncatewords:25|safe }}
+                </div>
+
+                {% if t.signature %}
+                <p class="signature"><em>{{ t.signature|safe }}</em></p>
+                {% endif %}
+
+            </div>
+            </a>
+            {% empty %}
+            <p>No templates found</p>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+<style>
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.card {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 15px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    text-align-last:left;
+}
+
+.card h3 {
+    margin-top: 0;
+    font-size: 18px;
+    color: #333;
+    text-align-last:center;
+}
+
+.card p {
+    margin: 8px 0;
+}
+
+.body-preview {
+    border: 1px dashed #ddd;
+    padding: 10px;
+    margin: 10px 0;
+    height: 100px;
+    overflow: hidden;
+    background: #fafafa;
+}
+
+.signature {
+    font-size: 14px;
+    color: #666;
+
+}
+
+</style>
+
+
+
+
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+{% endblock content %}
