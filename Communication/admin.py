@@ -35,6 +35,6 @@ class MailMessageAdmin(admin.ModelAdmin):
 
 @admin.register(Campaign)
 class CampaignAdmin(admin.ModelAdmin):
-    list_display = ('name','subject','custom_subject','scheduled_time','status')
+    list_display = ('name','subject','scheduled_time','status')
 
 
