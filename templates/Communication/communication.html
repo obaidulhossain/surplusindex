@@ -7,39 +7,42 @@ Communication Dashboard
 {% load static %}
 {% load custom_filters %}
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
-<h1>Communication Dashboard</h1>
-<a href="{% url 'schedule_email' %}" class="button">Send / Schedule Email</a>
-<div class="body-section">
-    <div class="section-header">
-        <h4>Send Schedule Email</h4>
-    </div>
-    <div class="section-body-full">
-        <form method="post" action="{% url 'schedule_email' %}">
-        {% csrf_token %}
+
+<div class="section-header">
+    <h4>Send Schedule Email</h4>
+</div>
+<div class="section-body-full">
+    <form method="post" action="{% url 'schedule_email' %}">
+    {% csrf_token %}
+    <div class="onehalf">
+        <div class="form-row">
             <!-- Select Mail Account -->
             <label for="sender">From:</label>
             <select name="sender" required>
                 {% for account in mail_accounts %}
                 <option value="{{ account.id }}">{{ account.email_address }}</option>
                 {% endfor %}
-            </select><br><br>
-            
+            </select>
+        </div>
+        <div class="form-row">
             <!-- Recipient Scope -->
             <label for="scope">Recipient Type:</label>
             <select name="scope" id="scope" onchange="toggleScope()">
                 <option value="single">Single</option>
                 <option value="multiple">Multiple</option>
             </select>
-            <br><br>
-            
-            <!-- Single Recipient -->
-            <div id="singleRecipient">
-                <label>Email:</label>
-                <input type="email" name="recipient">
-            </div>
+        </div>
 
-            <!-- Multiple Recipients -->
-            <div id="multipleRecipients" style="display:none;">
+        <!-- Single Recipient -->
+        <div id="singleRecipient" class="form-row">
+            <label>Email:</label>
+            <input type="email" name="recipient">
+        </div>
+
+        
+        <!-- Multiple Recipients -->
+        <div id="multipleRecipients" style="display:none;">
+            <div class="form-row">
                 <label>From Contact List:</label>
                 <select name="contact_list">
                     <option value="">--None--</option>
@@ -48,12 +51,13 @@ Communication Dashboard
                     <option value="{{ cl.id }}">{{ cl.name }}</option>
                     {% endfor %}
                 </select>
-                <br><br>
-
-                <label>Or Enter Emails (comma separated):</label>
-                <textarea name="recipients_list" rows="3"></textarea>
             </div>
-            <br>
+            <div class="form-row">
+                <label>Or Enter Emails:</label>
+                <textarea name="recipients_list" rows="3" placeholder=" Comma Separated "></textarea>
+            </div>
+        </div>
+        <div class="form-row">
             <!-- Template -->
             <label for="template">Choose Template:</label>
             <select name="template" id="template" onchange="loadTemplate()">
@@ -62,29 +66,38 @@ Communication Dashboard
                 <option value="{{ t.id }}" data-subject="{{ t.subject }}" data-body="{{ t.body }} {{ t.signature|default:'' }}">{{ t.name }}</option>
                 {% endfor %}
             </select>
-            <br><br>
-            <!-- Subject + Body -->
-            <label>Custom Subject:</label>
-            <input type="text" name="custom_subject" id="subject"><br><br>
-            <label>Custom Body:</label>
-            <textarea name="custom_body" id="body" rows="5"></textarea><br><br>
+        </div>
+        <div class="form-row">
             <!-- Send Mode -->
             <label for="send_mode">Send Mode:</label>
             <select name="send_mode" id="send_mode" onchange="toggleSchedule()">
                 <option value="now">Send Now</option>
                 <option value="later">Schedule</option>
-            </select><br><br>
-            <!-- Schedule Time Picker -->
-            <div id="scheduleTime" style="display:none;">
+            </select>
+        </div>
+        <!-- Schedule Time Picker -->
+        <div id="scheduleTime" style="display:none;">
+            <div class="form-row">
                 <label for="send_time">Schedule Time:</label>
                 <input type="datetime-local" name="send_time">
             </div>
-            <br>
-
-            <button type="submit">Submit</button>
-        </form>
+        </div>
+        <button type="submit" class="button" style="width:95%">Submit</button>
     </div>
+    <div class="onehalf table-wrapper">
+        <div style="text-align-last:left;">
+        <!-- Subject + Body -->
+        <label style="text-align:left">Subject:</label></br>
+        <input type="text" name="custom_subject" id="subject" style="width:100%"></br></br>
+    
+        <label style="text-align:left">Mail Body:</label></br>
+        <textarea name="custom_body" id="body" rows="10" style="width:100%"></textarea>
+        </div>
+    </div>
+        
+    </form>
 </div>
+
 
 <script>
 function toggleScope() {
