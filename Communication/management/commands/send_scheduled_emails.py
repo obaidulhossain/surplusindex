@@ -1,5 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
+import pytz
 from django.core.mail import EmailMessage
 from Communication.models import *
 
@@ -7,7 +8,9 @@ class Command(BaseCommand):
     help = "Send scheduled emails that are due"
 
     def handle(self, *args, **options):
-        now = timezone.now()
+        dhaka_tz = pytz.timezone("Asia/Dhaka")
+        now = timezone.localtime(timezone.now(), dhaka_tz)  # UTC converted to +06
+        #now = timezone.now()
         emails = ScheduledEmail.objects.filter(status="pending", send_time__lte=now)
 
         if not emails.exists():

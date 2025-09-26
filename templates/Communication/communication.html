@@ -9,7 +9,7 @@ Communication Dashboard
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
 
 <div class="section-header">
-    <h4>Send Schedule Email</h4>
+    <h4>Send or Schedule Email</h4>
 </div>
 <div class="section-body-full">
     <form method="post" action="{% url 'schedule_email' %}">
@@ -91,7 +91,7 @@ Communication Dashboard
         <input type="text" name="custom_subject" id="subject" style="width:100%"></br></br>
     
         <label style="text-align:left">Mail Body:</label></br>
-        <textarea name="custom_body" id="body" rows="10" style="width:100%"></textarea>
+        <textarea name="custom_body" id="body" rows="10" style="width:100%; padding:3px;"></textarea>
         </div>
     </div>
         
