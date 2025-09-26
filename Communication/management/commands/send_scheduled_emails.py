@@ -11,7 +11,7 @@ class Command(BaseCommand):
         emails = ScheduledEmail.objects.filter(status="pending", send_time__lte=now)
 
         if not emails.exists():
-            self.stdout.write("No scheduled emails to send.")
+            self.stdout.write(f"No scheduled emails to send. (Server time: {now})")
             return
 
         for email in emails:
@@ -29,7 +29,8 @@ class Command(BaseCommand):
                 email.save()
 
                 self.stdout.write(self.style.SUCCESS(
-                    f"Sent email to {email.get_recipients()} (Scheduled at {email.send_time})"
+                    f"Sent email to {email.get_recipients()}"
+                    f"(Scheduled at {email.send_time}, Sent at {now})"
                 ))
 
             except Exception as e:
@@ -37,4 +38,5 @@ class Command(BaseCommand):
                 email.save()
                 self.stdout.write(self.style.ERROR(
                     f"Failed to send email {email.id}: {str(e)}"
+                    f"(Server time: {now})"
                 ))
