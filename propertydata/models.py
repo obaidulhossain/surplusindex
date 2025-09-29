@@ -245,10 +245,12 @@ class Foreclosure(OperationStat):
     ACTIVE = 'pending'
     SOLD = 'sold'
     CANCELLED = 'cancelled'
+    SOLD_TO_PLAINTIFF = 'sold_to_plaintiff'
     SALE_STATUS = (
         (ACTIVE, 'Active'),
         (SOLD, 'Sold'),
         (CANCELLED, 'Cancelled'),
+        (SOLD_TO_PLAINTIFF, 'Sold To Plaintiff'),
     )
 
     TAX = 'tax'

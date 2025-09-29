@@ -16,6 +16,7 @@ from .utils import *
 from .forms import *
 from .models import *
 from .tasks import *
+from email.utils import formataddr
 
 def ComDashboard(request):
     context = {
@@ -67,11 +68,23 @@ def schedule_email_view(request):
                 send_time=timezone.now(),
                 status="pending"
             )
+            sent_folder = "INBOX.Sent"
+            imap = imaplib.IMAP4_SSL(sender.imap_host, sender.imap_port) if sender.use_ssl else imaplib.IMAP4(sender.imap_host, sender.imap_port)
+            imap.login(sender.username, sender.password)
+
+            # Format sender with display name
+            from_email = formataddr((sender.name, sender.email_address))
             for r in scheduled_email.get_recipients():
-                msg = EmailMessage(subject, body, from_email=sender.email_address, to=[r])
+                msg = EmailMessage(subject, body, from_email=from_email, to=[r], reply_to=[sender.email_address])
                 msg.send(fail_silently=False)
+                
+                # Format message like RFC822 raw email
+                raw_message = msg.message().as_bytes()
+                imap.append(sent_folder, "\\Seen", None, raw_message)
+
             scheduled_email.status = "sent"
             scheduled_email.save()
+            imap.logout()
         else:
             # Schedule later
             ScheduledEmail.objects.create(

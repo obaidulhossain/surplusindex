@@ -3,7 +3,8 @@ from django.utils import timezone
 import pytz
 from django.core.mail import EmailMessage
 from Communication.models import *
-
+from email.utils import formataddr
+import imaplib
 class Command(BaseCommand):
     help = "Send scheduled emails that are due"
 
@@ -19,18 +20,27 @@ class Command(BaseCommand):
 
         for email in emails:
             try:
+                sent_folder = "INBOX.Sent"
+                imap = imaplib.IMAP4_SSL(email.sender.imap_host, email.sender.imap_port) if email.sender.use_ssl else imaplib.IMAP4(email.sender.imap_host, email.sender.imap_port)
+                imap.login(email.sender.username, email.sender.password)
+                # Format sender with display name
+                from_email = formataddr((email.sender.name, email.sender.email_address))
                 for r in email.get_recipients():
                     msg = EmailMessage(
                         subject=email.custom_subject,
                         body=email.custom_body,
-                        from_email=email.sender.email_address,
+                        from_email=from_email,
                         to=[r],
+                        reply_to=[email.sender.email_address],
                     )
                     msg.send(fail_silently=False)
+                    raw_message = msg.message().as_bytes()
+                    imap.append(sent_folder, "\\Seen", None, raw_message)
 
                 email.status = "sent"
                 email.save()
-
+                imap.logout()
+                
                 self.stdout.write(self.style.SUCCESS(
                     f"Sent email to {email.get_recipients()}"
                     f"(Scheduled at {email.send_time}, Sent at {now})"
