@@ -5,6 +5,8 @@ from django.core.mail import EmailMessage
 from Communication.models import *
 from email.utils import formataddr
 import imaplib
+from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
 class Command(BaseCommand):
     help = "Send scheduled emails that are due"
 
@@ -25,14 +27,26 @@ class Command(BaseCommand):
                 imap.login(email.sender.username, email.sender.password)
                 # Format sender with display name
                 from_email = formataddr((email.sender.name, email.sender.email_address))
+                html_body = email.custom_body
+                plain_body = strip_tags(html_body)
                 for r in email.get_recipients():
-                    msg = EmailMessage(
+                    # msg = EmailMessage(
+                    #     subject=email.custom_subject,
+                    #     body=email.custom_body,
+                    #     from_email=from_email,
+                    #     to=[r],
+                    #     reply_to=[email.sender.email_address],
+                    # )
+                    msg = EmailMultiAlternatives(
                         subject=email.custom_subject,
-                        body=email.custom_body,
+                        body=plain_body,  # fallback plain text
                         from_email=from_email,
                         to=[r],
                         reply_to=[email.sender.email_address],
                     )
+
+                    # Attach HTML version
+                    msg.attach_alternative(html_body, "text/html")
                     msg.send(fail_silently=False)
                     raw_message = msg.message().as_bytes()
                     imap.append(sent_folder, "\\Seen", None, raw_message)
