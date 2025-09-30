@@ -27,7 +27,7 @@ Campaign Manager
             <tbody>
                 {% for c in campaigns %}
                 <tr>
-                    <td>{{c.send_time}}</td>
+                    <td>{{c.send_time|add_hours:6 }}</td>
                     <td>{{c.sender.email_address}}</td>
                     <td>{{c.get_scope_display}}</td>
                     <td>{% if c.send_to_clients %}All Clients{% elif c.contact_list %}{{c.contact_list.name}}{% elif c.recipients_list %}Custom Email List{% elif c.recipient %}{{c.recipient}}{% endif %}</td>

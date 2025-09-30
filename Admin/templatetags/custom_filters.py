@@ -1,7 +1,15 @@
 from django import template
 import locale
-
+from datetime import timedelta
 register = template.Library()
+
+@register.filter
+def add_hours(value, hours):
+    """Add hours to a datetime"""
+    if not value:
+        return value
+    return value + timedelta(hours=int(hours))
+
 
 @register.filter
 def currency(value):
