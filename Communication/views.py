@@ -511,7 +511,7 @@ def delete_sent(request, msg_id):
 
 def ComCampaign(request):
     context = {
-
+        "campaigns": ScheduledEmail.objects.all().order_by("send_time"),
     }
     return render(request, "Communication/campaign.html", context)
 
