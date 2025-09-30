@@ -10,6 +10,11 @@ urlpatterns = [
     path("com_dashboard/", views.ComDashboard, name="com_dashboard"),
     path("schedule/", views.schedule_email_view, name="schedule_email"),
 
+    path("client_contacts", views.ComContacts, name="client_contacts"),
+    path("update_client_contacts", views.CreateUpdateClientContact, name="update_client_contacts"),
+    path("client_contacts/<int:contact_id>/update_preferred_states/", views.manage_preferred_states, name="manage_preferred_states"),
+
+
     path("com_inbox/", views.ComInbox, name="com_inbox"),
     path("refresh_emails/", views.RefreshEmails, name="refresh_emails"),
     path("fetch_inbox_full/", views.RefreshInboxFull, name="fetch_inbox_full"),

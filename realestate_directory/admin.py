@@ -9,3 +9,7 @@ class ForeclosureEventsAdmin(ImportExportModelAdmin):
     # list_display = ('state','county','population')
     resource_class = ForeclosureEventsResource
     list_display = ('state', 'county', 'population','sale_type','event_next','event_updated_from','event_updated_to')
+
+@admin.register(States)
+class StatesAdmin(admin.ModelAdmin):
+    list_display = ('name','short_name')

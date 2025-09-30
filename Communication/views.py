@@ -4,11 +4,13 @@ from django.urls import reverse
 
 from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
+from django.utils.html import strip_tags
 import smtplib, imaplib, time, email
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from django.utils import timezone
-
+from django.views.decorators.csrf import csrf_exempt
+import json
 from django.http import JsonResponse
 from django.db.models import F
 from django.db.models.functions import Coalesce
@@ -17,7 +19,7 @@ from .forms import *
 from .models import *
 from .tasks import *
 from email.utils import formataddr
-
+from realestate_directory.models import States
 def ComDashboard(request):
     context = {
         "mail_accounts": MailAccount.objects.all(),
@@ -52,6 +54,8 @@ def schedule_email_view(request):
         template = MailTemplate.objects.filter(id=template_id).first() if template_id else None
         subject = custom_subject or (template.subject if template else "")
         body = custom_body or (f"{template.body}\n\n{template.signature}" if template else "")
+        html_body = body
+        plain_body = strip_tags(html_body)
 
         if send_mode == "now":
             # Send immediately
@@ -75,7 +79,17 @@ def schedule_email_view(request):
             # Format sender with display name
             from_email = formataddr((sender.name, sender.email_address))
             for r in scheduled_email.get_recipients():
-                msg = EmailMessage(subject, body, from_email=from_email, to=[r], reply_to=[sender.email_address])
+                msg = EmailMultiAlternatives(
+                    subject=subject,
+                    body=plain_body,  # fallback plain text
+                    from_email=from_email,
+                    to=[r],
+                    reply_to=[sender.email_address],
+                )
+
+                # Attach HTML version
+                msg.attach_alternative(html_body, "text/html")
+                # msg = EmailMessage(subject, body, from_email=from_email, to=[r], reply_to=[sender.email_address])
                 msg.send(fail_silently=False)
                 
                 # Format message like RFC822 raw email
@@ -117,8 +131,77 @@ def schedule_email_view(request):
     #     form = ScheduledEmailForm()
     # return render(request, "Communication/schedule_email.html", {"form": form})
 
+def ComContacts(request):
+    params = request.POST if request.method == "POST" else request.GET
+    selected_contact = params.get('contact_id')
+    if selected_contact:
+        contact_instance = ClientContact.objects.get(pk=selected_contact)
+    else:
+        contact_instance = None
+    context = {
+        "contacts": ClientContact.objects.all(),
+        "contact_instance": contact_instance,
+        "contact_lists": ContactList.objects.all(),
+        "all_states": States.objects.all(),
+    }
+    return render(request, "Communication/contacts_lists.html", context)
+
+def CreateUpdateClientContact(request):
+    params = request.POST if request.method == "POST" else request.GET
+    selected_contact = params.get('contact_id')
+    name = params.get('name')
+    email = params.get('email')
+    phone = params.get('phone')
+    business_name = params.get('business_name')
+    address = params.get('address')
+    if selected_contact:
+        contact_instance = ClientContact.objects.get(pk=selected_contact)
+        contact_instance.name = name
+        contact_instance.email = email
+        contact_instance.phone = phone
+        contact_instance.business_name = business_name
+        contact_instance.address = address
+        contact_instance.save()
+        messages.info(request, f"Contact Instance Updated ({contact_instance.name})")
+    else:
+        contact_instance = ClientContact.objects.update_or_create(
+            name=name,
+            email=email,
+            defaults={
+                "phone":phone,
+                "business_name":business_name,
+                "address":address,
+            }
+        )
+        messages.success(request, f"Contact Instance Created ({contact_instance.name})")
+    return redirect(f"{reverse('client_contacts')}?contact_id={contact_instance.id}")
 
 
+@csrf_exempt
+def manage_preferred_states(request, contact_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        state_ids = data.get("state_ids", [])
+        action = data.get("action")
+
+        try:
+            contact = ClientContact.objects.get(id=contact_id)
+        except ClientContact.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Contact not found"}, status=404)
+
+        if action == "add":
+            contact.preferred_states.add(*state_ids)
+        elif action == "remove":
+            contact.preferred_states.remove(*state_ids)
+
+        return JsonResponse({
+            "status": "success",
+            "contact_id": contact_id,
+            "action": action,
+            "state_ids": state_ids
+        })
+
+    return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 
 def ComInbox(request):
     params = request.POST if request.method == "POST" else request.GET

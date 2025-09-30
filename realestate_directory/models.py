@@ -52,4 +52,8 @@ class foreclosure_Events(models.Model):
     #     unique_together = ("state", "county", "sale_type")
 
     
+class States(models.Model):
+    name = models.CharField(max_length=100)
+    short_name = models.CharField(max_length=2)
+
 
