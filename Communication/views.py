@@ -8,7 +8,9 @@ from django.utils.html import strip_tags
 import smtplib, imaplib, time, email
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from django.utils.dateparse import parse_datetime
 from django.utils import timezone
+import pytz
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
@@ -44,6 +46,18 @@ def schedule_email_view(request):
         send_mode = request.POST.get("send_mode")
         send_time = request.POST.get("send_time")
 
+        if send_time:
+            parsed_time = parse_datetime(send_time)  # parse string → datetime
+            if parsed_time is None:
+                raise ValueError("Invalid datetime format for send_time")
+            # Localize to Dhaka timezone
+            dhaka_tz = pytz.timezone("Asia/Dhaka")
+            localized_time = dhaka_tz.localize(parsed_time)
+
+            # Convert to UTC for storage
+            utc_time = localized_time.astimezone(pytz.UTC)
+        else:
+            utc_time = timezone.now()
         sender = MailAccount.objects.get(id=sender_id)
         if contact_list_id == "all-clients":
             send_to_clients = True
@@ -111,7 +125,8 @@ def schedule_email_view(request):
                 template=template,
                 custom_subject=subject,
                 custom_body=body,
-                send_time=send_time,
+                #send_time=send_time,
+                send_time=utc_time,
                 status="pending"
             )
 

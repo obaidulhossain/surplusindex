@@ -12,12 +12,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         dhaka_tz = pytz.timezone("Asia/Dhaka")
-        now = timezone.localtime(timezone.now(), dhaka_tz)  # UTC converted to +06
-        #now = timezone.now()
+        local = timezone.localtime(timezone.now(), dhaka_tz)  # UTC converted to +06
+        now = timezone.now()
         emails = ScheduledEmail.objects.filter(status="pending", send_time__lte=now)
 
         if not emails.exists():
-            self.stdout.write(f"No scheduled emails to send. (Server time: {now})")
+            self.stdout.write(f"No scheduled emails to send. (Server time: {now}) | (Local Time: {local})")
             return
 
         for email in emails:
@@ -57,7 +57,7 @@ class Command(BaseCommand):
                 
                 self.stdout.write(self.style.SUCCESS(
                     f"Sent email to {email.get_recipients()}"
-                    f"(Scheduled at {email.send_time}, Sent at {now})"
+                    f"(Scheduled at {email.send_time}, Sent at {now} | Local Time: {local})"
                 ))
 
             except Exception as e:
@@ -65,5 +65,5 @@ class Command(BaseCommand):
                 email.save()
                 self.stdout.write(self.style.ERROR(
                     f"Failed to send email {email.id}: {str(e)}"
-                    f"(Server time: {now})"
+                    f"(Server time: {now} | Local Time: {local}) "
                 ))
