@@ -549,7 +549,7 @@ def clear_email_logs(request):
         messages.success(request, "Email logs cleared successfully.")
     except Exception as e:
         messages.error(request, f"Error clearing logs: {e}")
-    return redirect("email_logs_view")
+    return redirect("com_campaign")
 
 def ComTemplates(request):
     params = request.POST if request.method == "POST" else request.GET
