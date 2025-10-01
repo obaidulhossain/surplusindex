@@ -527,7 +527,7 @@ def delete_sent(request, msg_id):
 def ComCampaign(request):
     log_path = "/home/priddxvk/logs/scheduled_emails.log"
     try:
-        with open(log_path, "r") as f:
+        with open(log_path, "r", encoding="utf-8", errors="ignore") as f:
             lines = f.readlines()[-200:]  # last 200 lines
     except FileNotFoundError:
         lines = ["Log file not found."]
