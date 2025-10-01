@@ -39,8 +39,22 @@ Campaign Manager
         </table>
     </div>
 </div>
-
-
-
+<div class="section-header">
+    <h4>Scheduled Email Campaign Logs</h4>
+    <div>
+        <a href="{% url 'download_scheduled_email_logs' %}" target="_blank" class="button">Download Log</a>
+        <form method="post" action="{% url 'clear_email_logs' %}">
+        {% csrf_token %}
+            <button type="submit">Clear Logs</button>
+        </form>
+    </div>
+</div>
+<div class="section-body-full">
+    <pre style="background:#111;color:#0f0;padding:10px;max-height:500px;overflow:auto;">
+    {% for line in logs %}
+    {{ line }}
+    {% endfor %}
+    </pre>
+</div>
 <script src="{% static 'js/Surplusindex.js' %}"></script>
 {% endblock content %}

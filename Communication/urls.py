@@ -33,6 +33,8 @@ urlpatterns = [
     path("delete_sent/<int:msg_id>/", views.delete_sent, name="delete_sent"),
 
     path("com_campaign/", views.ComCampaign, name="com_campaign"),
+    path("download_scheduled_email_logs/", views.download_email_logs, name="download_scheduled_email_logs"),
+    path("clear_email_logs/", views.clear_email_logs, name="clear_email_logs"),
     
     path("com_templates/", views.ComTemplates, name="com_templates"),
     path("create_update_template/", views.createUpdateTemplate, name="create_update_template"),

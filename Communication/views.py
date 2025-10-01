@@ -525,10 +525,31 @@ def delete_sent(request, msg_id):
 
 
 def ComCampaign(request):
+    log_path = "/home/priddxvk/logs/scheduled_emails.log"
+    try:
+        with open(log_path, "r") as f:
+            lines = f.readlines()[-200:]  # last 200 lines
+    except FileNotFoundError:
+        lines = ["Log file not found."]
     context = {
-        "campaigns": ScheduledEmail.objects.all().order_by("send_time"),
+        "campaigns": ScheduledEmail.objects.all().order_by("-send_time"),
+        "logs": lines,
     }
     return render(request, "Communication/campaign.html", context)
+
+from django.http import FileResponse
+def download_email_logs(request):
+    log_path = "/home/priddxvk/logs/scheduled_emails.log"
+    return FileResponse(open(log_path, "rb"), as_attachment=True, filename="scheduled_emails.log")
+
+def clear_email_logs(request):
+    log_path = "/home/priddxvk/logs/scheduled_emails.log"
+    try:
+        open(log_path, "w").close()
+        messages.success(request, "Email logs cleared successfully.")
+    except Exception as e:
+        messages.error(request, f"Error clearing logs: {e}")
+    return redirect("email_logs_view")
 
 def ComTemplates(request):
     params = request.POST if request.method == "POST" else request.GET
