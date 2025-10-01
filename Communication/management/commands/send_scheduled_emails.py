@@ -21,6 +21,8 @@ class Command(BaseCommand):
             return
 
         for email in emails:
+            successes = email.success_emails.split(",") if email.success_emails else []
+            failures = email.failed_emails.split(",") if email.failed_emails else []
             try:
                 sent_folder = "INBOX.Sent"
                 imap = imaplib.IMAP4_SSL(email.sender.imap_host, email.sender.imap_port) if email.sender.use_ssl else imaplib.IMAP4(email.sender.imap_host, email.sender.imap_port)
@@ -29,41 +31,65 @@ class Command(BaseCommand):
                 from_email = formataddr((email.sender.name, email.sender.email_address))
                 html_body = email.custom_body
                 plain_body = strip_tags(html_body)
-                for r in email.get_recipients():
-                    # msg = EmailMessage(
-                    #     subject=email.custom_subject,
-                    #     body=email.custom_body,
-                    #     from_email=from_email,
-                    #     to=[r],
-                    #     reply_to=[email.sender.email_address],
-                    # )
-                    msg = EmailMultiAlternatives(
-                        subject=email.custom_subject,
-                        body=plain_body,  # fallback plain text
-                        from_email=from_email,
-                        to=[r],
-                        reply_to=[email.sender.email_address],
-                    )
+                recipients = email.get_recipients()
 
-                    # Attach HTML version
-                    msg.attach_alternative(html_body, "text/html")
-                    msg.send(fail_silently=False)
-                    raw_message = msg.message().as_bytes()
-                    imap.append(sent_folder, "\\Seen", None, raw_message)
+                for r in recipients:
+                    if r in successes:
+                        continue  # already sent before
+                    try:
+                        msg = EmailMultiAlternatives(
+                            subject=email.custom_subject,
+                            body=plain_body,  # fallback plain text
+                            from_email=from_email,
+                            to=[r],
+                            reply_to=[email.sender.email_address],
+                        )
 
-                email.status = "sent"
-                email.save()
-                imap.logout()
+                        # Attach HTML version
+                        msg.attach_alternative(html_body, "text/html")
+                        msg.send(fail_silently=False)
+                        raw_message = msg.message().as_bytes()
+                        imap.append(sent_folder, "\\Seen", None, raw_message)
+                        successes.append(r)
+                        if r in failures:
+                            failures.remove(r)
+                        self.stdout.write(self.style.SUCCESS(f"✓ Sent to {r}"))
+                    except Exception as e:
+                        if r not in failures:
+                            failures.append(r)
+                        # failures.append((r, str(e)))
+                        self.stdout.write(self.style.ERROR(f"✗ Failed to {r}: {str(e)}"))
                 
+                imap.logout()
+                # Update tracking fields
+                email.success_emails = ",".join(set(successes))
+                email.failed_emails = ",".join(set(failures))
+                email.attempts += 1
+
+                # Final status decision
+                if not failures:
+                    email.status = "sent"
+                elif email.attempts >= 3:
+                    email.status = "sent"  # give up after 3 tries
+                else:
+                    email.status = "pending"  # try again next cron
+                email.save()
+                
+                # Summary log
                 self.stdout.write(self.style.SUCCESS(
-                    f"Sent email to {email.get_recipients()}"
+                    f"\nSummary for email {email.id}: "
+                    f"{len(successes)} sent, {len(failures)} failed "
                     f"(Scheduled at {email.send_time}, Sent at {now} | Local Time: {local})"
                 ))
+                if failures:
+                    for addr in failures:
+                        self.stdout.write(self.style.ERROR(f"   - Still failing: {addr}"))
 
             except Exception as e:
                 email.status = "failed"
+                email.attempts += 1
                 email.save()
                 self.stdout.write(self.style.ERROR(
-                    f"Failed to send email {email.id}: {str(e)}"
+                    f"Critical failure for email {email.id}: {str(e)}"
                     f"(Server time: {now} | Local Time: {local}) "
                 ))

@@ -57,6 +57,7 @@ class ScheduledEmail(models.Model):
     ]
     STATUS_CHOICES = [
         ("pending", "Pending"),
+        ("partial", "Partial"),
         ("sent", "Sent"),
         ("failed", "Failed"),
     ]
@@ -72,6 +73,9 @@ class ScheduledEmail(models.Model):
     custom_body = models.TextField(blank=True, null=True)
     send_time = models.DateTimeField(default=timezone.now)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pending")
+    attempts = models.IntegerField(default=0)
+    success_emails = models.TextField(blank=True, default="")  # store CSV list
+    failed_emails = models.TextField(blank=True, default="")   # store CSV list
 
     def get_recipients(self):
         if self.scope == "single" and self.recipient:
