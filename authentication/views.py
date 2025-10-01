@@ -133,10 +133,18 @@ class LoginView(View):
         return render(request,'authentication/login.html')
      
     def post(self, request):
-        username = request.POST['username']
+        username_or_email = request.POST['username']
         password = request.POST['password']
     
-        if username and password:
+        if username_or_email and password:
+            if "@" in username_or_email:
+                user_ins = User.objects.filter(email=username_or_email).first()
+                if user_ins:
+                    username = user_ins.username
+                else:
+                    username = username_or_email
+            else:
+                username = username_or_email
             user=auth.authenticate(username=username,password=password)
 
             if user: 

@@ -1,5 +1,4 @@
 body {
-    color: #e9ecef;
     background: url("/static/images/main-background.webp") no-repeat fixed;
 }
 
@@ -10,23 +9,42 @@ h1 {
 
 }
 
-h5 {
+h2 {
     font-family: sans-serif;
-    font-size: 20px;
+    font-size: 30px;
+    color: #1a1a1a;
+
+}
+
+h5 {
     font-weight: normal;
     margin-bottom: 30px;
     color: antiquewhite;
+    line-height: 31px;
+    letter-spacing: 2px;
+    font-family: monospace;
+    font-size: 25px;
 }
 
 .card {
-    background-color: #0f0f0fbf;
-    border: 2px solid #deedb273;
+    background-color: #ffffffdb;
+    border: 3px solid #6f6f6f;
     border-radius: 10px;
 }
 
 .card-large {
     width: 500px;
     padding: 20px;
+}
+
+.card-large input,
+.card-large label {
+    width: 90%;
+    margin: 15px;
+    padding: 10px;
+    font-size: 18px;
+    border: 2px solid #078456;
+    border-radius: 5px;
 }
 
 .card-medium {
@@ -37,6 +55,18 @@ h5 {
 .card-small {
     width: 226px;
     padding: 20px;
+}
+
+.pw-toggle {
+    cursor: pointer;
+    justify-self: self-end;
+    margin: 0px 60px;
+    color: #000000;
+}
+
+.card a {
+    color: #000000;
+    font-size: 20px;
 }
 
 /*

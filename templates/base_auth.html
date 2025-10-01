@@ -6,20 +6,22 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>SurplusIndex | {% block title %} {% endblock %}</title>
-    <!-- Bootstrap core CSS -->
-    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
-    <link href="{% static 'css/main.css' %}" rel="stylesheet">
-    <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+    
+    <link href="{% static 'css/front.css' %}" rel="stylesheet">
 
 </head>
 
 <body>
     <main role="main">
-
+        <center>
+            <h1>SurplusIndex</h1>
+            <h5>The Largest Surplus Funds Database</br>Tailored for Recovery Agents</h5></br>
+        
         {% block content %}
 
 
         {% endblock %}
+        </center>
     </main>
 
 

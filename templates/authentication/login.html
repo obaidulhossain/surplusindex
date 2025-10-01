@@ -1,41 +1,24 @@
 {% extends 'base_auth.html' %}
+{% block title %}Login{% endblock %}
 {% load static %}
 {% block content %}
+<div class="card card-large">
+    <form action="{% url 'login' %}" method="post">
+        <h2>Sign In</h2>
+        {% csrf_token %}
+        {% include 'partials/_messages.html' %}
 
-<div class="row">
-    <div class="col-md-4"></div>
-    <div class="col-md-4">
-        <div class="card mt-5">
-            <div class="card-body">
-                <div class="card-title">
-                    <h4>Login to your account</h4>
-                </div>
-                <form action="{% url 'login' %}" method="post">
-
-                    {% csrf_token %}
-                    {% include 'partials/_messages.html' %}
-
-                    <div class="form-group">
-                        <input type="text" name="username" id="usernameField" class="form-control form-control-sm mt-3"
-                            placeholder="User Name" value="{{fieldValues.username}}">
-
-                        <input type="password" name="password" id="passwordField"
-                            class="form-control form-control-sm mt-3" placeholder="Password">
-                    </div>
-                    <div class="d-grid">
-                        <div class="float-end">
-                            <small class="float-end py-3 showPasswordToggle">SHOW</small>
-                        </div>
-                        <input type="submit" value="Login" class="btn btn-primary d-grid submit-btn">
-                    </div>
-                </form>
-            </div>
+        <input type="text" name="username" id="usernameField" placeholder="User Name or Email " value="{{fieldValues.username}}">
+        <input type="password" name="password" id="passwordField" placeholder="Password">
+        <div class="pw-toggle">
+            <small class="float-end py-3 showPasswordToggle">SHOW</small>
         </div>
-    </div>
+        <input type="submit" value="Login" class="button submit-btn">
+    </form>
+    <p>
+        <a href="{% url 'password_reset' %}">Forgot your password?</a>
+    </p>
 </div>
-<div class="col-md-4"></div>
-</div>
-
 <script src="{% static 'js/register.js' %}"></script>
 
 
