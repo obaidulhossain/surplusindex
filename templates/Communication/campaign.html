@@ -41,9 +41,9 @@ Campaign Manager
 </div>
 <div class="section-header">
     <h4>Scheduled Email Campaign Logs</h4>
-    <div>
-        <a href="{% url 'download_scheduled_email_logs' %}" target="_blank" class="button">Download Log</a>
-        <form method="post" action="{% url 'clear_email_logs' %}">
+    <div style="display:block;">
+        <a href="{% url 'download_scheduled_email_logs' %}" target="_blank" class="button" style="display: inline-block;">Download Log</a>
+        <form method="post" action="{% url 'clear_email_logs' %}" style="display: inline-block;">
         {% csrf_token %}
             <button type="submit" class="button">Clear Logs</button>
         </form>
