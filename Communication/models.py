@@ -79,7 +79,7 @@ class ScheduledEmail(models.Model):
         elif self.scope == "multiple":
             emails = []
             if self.send_to_clients:
-                emails += list(User.objects.filter(groups__name="client").exclude(email="").values_list("email", flat=True))
+                emails += list(User.objects.filter(groups__name="clients").exclude(email="").values_list("email", flat=True))
             if self.contact_list:
                 emails += list(self.contact_list.contacts.values_list("email", flat=True))
             if self.recipients_list:
