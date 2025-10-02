@@ -17,6 +17,7 @@ urlpatterns = [
 
     path("com_inbox/", views.ComInbox, name="com_inbox"),
     path("refresh_emails/", views.RefreshEmails, name="refresh_emails"),
+    path("update_emails/", views.UpdateEmails, name="update_emails"),
     path("fetch_inbox_full/", views.RefreshInboxFull, name="fetch_inbox_full"),
     path("archive/<int:msg_id>/", views.archive_email, name="archive_email"),
     path("delete/<int:msg_id>/", views.delete_email, name="delete_email"),

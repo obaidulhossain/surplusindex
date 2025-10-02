@@ -265,6 +265,17 @@ def RefreshEmails(request):
     return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
 
 @require_POST
+def UpdateEmails(request):
+    account_id = request.POST.get("account_id")
+    account = get_object_or_404(MailAccount, pk=account_id)
+    success, msg = fetch_folder(account, folder="INBOX")
+    if success:
+        messages.success(request, msg)
+    else:
+        messages.error(request, msg)
+    return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
+
+@require_POST
 def RefreshInboxFull(request):
     account_id = request.POST.get("account_id")
     account = get_object_or_404(MailAccount, pk=account_id)
