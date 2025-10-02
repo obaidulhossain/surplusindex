@@ -7,6 +7,7 @@ from email.utils import formataddr
 import imaplib
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
+from Communication.utils import fetch_folder
 class Command(BaseCommand):
     help = "Send scheduled emails that are due"
 
@@ -91,5 +92,26 @@ class Command(BaseCommand):
                 email.save()
                 self.stdout.write(self.style.ERROR(
                     f"Critical failure for email {email.id}: {str(e)}"
+                    f"(Server time: {now} | Local Time: {local}) "
+                ))
+        accounts = MailAccount.objects.all()
+        if not accounts.exists():
+            self.stdout.write("No mail accounts found.")
+            return
+
+        for account in accounts:
+            try:
+                success, msg = fetch_folder(account, folder="INBOX.Sent")
+                if success:
+                    self.stdout.write(self.style.SUCCESS(
+                        f"[{account.email_address}] (Server time: {now} | Local Time: {local})"
+                    ))
+                else:
+                    self.stdout.write(self.style.ERROR(
+                        f"[{account.email_address}] (Server time: {now} | Local Time: {local})"
+                    ))
+            except Exception as e:
+                self.stdout.write(self.style.ERROR(
+                    f"[{account.email_address}] Failed: {str(e)}"
                     f"(Server time: {now} | Local Time: {local}) "
                 ))

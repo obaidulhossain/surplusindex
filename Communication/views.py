@@ -113,6 +113,20 @@ def schedule_email_view(request):
             scheduled_email.status = "sent"
             scheduled_email.save()
             imap.logout()
+            accounts = MailAccount.objects.all()
+            if not accounts.exists():
+                messages.info(request,"No mail accounts found.")
+                return
+
+            for account in accounts:
+                try:
+                    success, msg = fetch_folder(account, folder="INBOX.Sent")
+                    if success:
+                        messages.success(request,f"Inbox Fetched for ({account.email_address})")
+                    else:
+                        messages.error(request,f"Update Inbox Unsuccessful for ({account.email_address})")
+                except Exception as e:
+                    messages.error(request,f"Update Inbox Unsuccessful for ({account.email_address})")
         else:
             # Schedule later
             ScheduledEmail.objects.create(
