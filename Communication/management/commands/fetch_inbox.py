@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from Communication.models import MailAccount
-from Communication.utils import fetch_folder
+from Communication.utils import *
 from django.utils import timezone
 
 
@@ -17,7 +17,7 @@ class Command(BaseCommand):
 
         for account in accounts:
             try:
-                success, msg = fetch_folder(account, folder="INBOX")
+                success, msg = fetch_folder_crosscheck(account, folder="INBOX")
                 if success:
                     self.stdout.write(self.style.SUCCESS(
                         f"[{account.email_address}] {msg}"

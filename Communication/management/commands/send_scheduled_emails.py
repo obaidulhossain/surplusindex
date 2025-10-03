@@ -7,7 +7,7 @@ from email.utils import formataddr
 import imaplib
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
-from Communication.utils import fetch_folder
+from Communication.utils import *
 class Command(BaseCommand):
     help = "Send scheduled emails that are due"
 
@@ -26,7 +26,7 @@ class Command(BaseCommand):
 
             for account in accounts:
                 try:
-                    success, msg = fetch_folder(account, folder="INBOX.Sent")
+                    success, msg = fetch_folder_crosscheck(account, folder="INBOX.Sent")
                     if success:
                         self.stdout.write(self.style.SUCCESS(
                             f"Sent Folder Updated [{account.email_address}] (Server time: {now} | Local Time: {local})"
@@ -123,17 +123,17 @@ class Command(BaseCommand):
 
         for account in accounts:
             try:
-                success, msg = fetch_folder(account, folder="INBOX.Sent")
+                success, msg = fetch_folder_crosscheck(account, folder="INBOX.Sent")
                 if success:
                     self.stdout.write(self.style.SUCCESS(
-                        f"[{account.email_address}] (Server time: {now} | Local Time: {local})"
+                        f"Successfully fetched Sent Messages for [{account.email_address}] (Server time: {now} | Local Time: {local})"
                     ))
                 else:
                     self.stdout.write(self.style.ERROR(
-                        f"[{account.email_address}] (Server time: {now} | Local Time: {local})"
+                        f"Error fetching Sent Messages for [{account.email_address}] (Server time: {now} | Local Time: {local})"
                     ))
             except Exception as e:
                 self.stdout.write(self.style.ERROR(
-                    f"[{account.email_address}] Failed: {str(e)}"
+                    f"Critical Error fetching Sent Messages for [{account.email_address}] Failed: {str(e)}"
                     f"(Server time: {now} | Local Time: {local}) "
                 ))

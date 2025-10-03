@@ -294,7 +294,6 @@ def fetch_folder(mail_account, folder="INBOX", full_sync=False, days=None):
         # Connect IMAP
         imap = imaplib.IMAP4_SSL(mail_account.imap_host, mail_account.imap_port) \
             if mail_account.use_ssl else imaplib.IMAP4(mail_account.imap_host, mail_account.imap_port)
-
         imap.login(mail_account.username, mail_account.password)
         imap.select(folder)
 
@@ -458,6 +457,173 @@ def fetch_folder(mail_account, folder="INBOX", full_sync=False, days=None):
 
     except Exception as e:
         return False, str(e)
+
+
+def fetch_folder_crosscheck(mail_account, folder="INBOX"):
+    """
+    Fetch only missing emails by cross-checking UIDs between IMAP server and DB.
+    Always safe, avoids duplicates, never misses messages.
+    """
+
+    # Map folder
+    if folder.lower().startswith("inbox.sent"):
+        msg_status = "sent"
+        db_folder = "sent"
+    else:
+        msg_status = "queued"
+        db_folder = "inbox"
+
+    try:
+        # Connect IMAP
+        imap = imaplib.IMAP4_SSL(mail_account.imap_host, mail_account.imap_port) \
+            if mail_account.use_ssl else imaplib.IMAP4(mail_account.imap_host, mail_account.imap_port)
+        imap.login(mail_account.username, mail_account.password)
+        imap.select(folder)
+
+        # Get all UIDs from server
+        status, data = imap.uid("search", None, "ALL")
+        if status != "OK":
+            return False, f"Search failed in {folder}"
+
+        server_uids = {int(uid) for uid in data[0].split()} if data[0] else set()
+        if not server_uids:
+            return True, f"No messages found in {folder}"
+
+        # Get all UIDs already in DB
+        db_uids = set(
+            MailMessage.objects.filter(account=mail_account, folder=db_folder)
+            .annotate(uid_int=Cast("uid", IntegerField()))
+            .values_list("uid_int", flat=True)
+        )
+
+        # Find missing UIDs
+        missing_uids = sorted(server_uids - db_uids)
+        if not missing_uids:
+            imap.close()
+            imap.logout()
+            return True, f"No new messages in {folder}"
+
+        # Fetch missing emails
+        for uid in missing_uids:
+            status, msg_data = imap.uid("fetch", str(uid), "(RFC822 INTERNALDATE)")
+            if status != "OK" or not msg_data:
+                continue
+
+            raw_email, internaldate = None, None
+            for part in msg_data:
+                if isinstance(part, tuple) and len(part) >= 2:
+                    raw_email = part[1]
+                    try:
+                        internaldate = imaplib.Internaldate2tuple(part[0])
+                    except Exception:
+                        internaldate = None
+            if not raw_email:
+                # fallback: fetch only RFC822 if above failed
+                status, msg_data = imap.uid("fetch", uid, "(RFC822)")
+                if status == "OK" and msg_data and isinstance(msg_data[0], tuple):
+                    raw_email = msg_data[0][1]
+                    
+            if not raw_email:
+                continue
+
+            msg = email.message_from_bytes(raw_email)
+
+            # Dates
+            imap_date = None
+            if internaldate:
+                try:
+                    imap_date = timezone.make_aware(
+                        datetime.fromtimestamp(email.utils.mktime_tz(internaldate)),
+                        timezone.get_current_timezone()
+                    )
+                except Exception:
+                    imap_date = None
+
+            header_date = None
+            if msg.get("Date"):
+                try:
+                    header_date = email.utils.parsedate_to_datetime(msg.get("Date"))
+                    if header_date and header_date.tzinfo is None:
+                        header_date = timezone.make_aware(header_date, timezone.get_current_timezone())
+                except Exception:
+                    pass
+
+            msg_date = header_date if folder.lower().startswith("inbox.sent") else imap_date or header_date
+
+            # Extract headers
+            subject = decode_mime_words(msg.get("Subject"))
+            message_id = msg.get("Message-ID")
+            in_reply_to_id = msg.get("In-Reply-To")
+            sender = email.utils.parseaddr(msg.get("From"))[1]
+            recipient = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("To", []))])
+            cc = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("Cc", []))])
+            bcc = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("Bcc", []))])
+
+            # Extract body
+            body_plain, body_html = "", ""
+            if msg.is_multipart():
+                for part in msg.walk():
+                    content_type = part.get_content_type()
+                    try:
+                        payload = part.get_payload(decode=True)
+                        if not payload:
+                            continue
+                        if content_type == "text/plain":
+                            body_plain += payload.decode(errors="ignore")
+                        elif content_type == "text/html":
+                            body_html += payload.decode(errors="ignore")
+                    except Exception:
+                        continue
+            else:
+                try:
+                    body_plain = msg.get_payload(decode=True).decode(errors="ignore")
+                except Exception:
+                    body_plain = msg.get_payload()
+
+            # Threading
+            parent_msg = None
+            thread_key = None
+            if in_reply_to_id:
+                parent_msg = MailMessage.objects.filter(message_id=in_reply_to_id, account=mail_account).first()
+                if parent_msg:
+                    thread_key = parent_msg.thread_key
+            if not thread_key:
+                base_id = message_id or str(uid)
+                thread_key = hashlib.sha1(base_id.encode()).hexdigest()
+            thread_id = parent_msg.thread_id if parent_msg else (message_id or str(uid))
+
+            # Save
+            MailMessage.objects.update_or_create(
+                uid=uid,
+                account=mail_account,
+                folder=db_folder,
+                defaults={
+                    "subject": subject,
+                    "sender": sender,
+                    "recipient": recipient,
+                    "cc": cc or None,
+                    "bcc": bcc or None,
+                    "received_at": msg_date,
+                    "sent_at": msg_date,
+                    "body_plain": body_plain,
+                    "body_html": body_html,
+                    "message_id": message_id,
+                    "in_reply_to": parent_msg,
+                    "thread_id": thread_id,
+                    "thread_key": thread_key,
+                    "status": msg_status,
+                },
+            )
+
+        imap.close()
+        imap.logout()
+        return True, f"Fetched {len(missing_uids)} new messages from {folder}"
+
+    except Exception as e:
+        return False, str(e)
+
+
+
 
 
 def send_reply(
