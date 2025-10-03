@@ -8,6 +8,7 @@ from datetime import timedelta
 from datetime import datetime
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
+from django.template.loader import render_to_string
 def test_email_connection(email_account):
     """
     Test SMTP connection for a given EmailAccount instance.
@@ -229,9 +230,21 @@ def send_reply(
     if cc_addresses:
         msg["Cc"] = ", ".join(cc_addresses)
 
-    part1 = MIMEText(body, "plain")
-    msg.attach(part1)
+    # ---- Build email body with template ----
+    # Plain fallback
+    text_body = body
 
+    # ---- Render HTML template ----
+    html_body = render_to_string("Communication/reply_template.html", {
+        "body": body.replace("\n", "<br>"),
+    })
+
+    # ---- Attach parts ----
+    part1 = MIMEText(text_body, "plain")
+    part2 = MIMEText(html_body, "html")
+    msg.attach(part1)
+    msg.attach(part2)
+    
     raw_message = msg.as_string()
     all_recipients = [parent_msg.sender] + (cc_addresses or []) + (bcc_addresses or [])
 
