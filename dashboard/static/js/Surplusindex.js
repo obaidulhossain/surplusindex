@@ -156,6 +156,7 @@ function copyToClipboard(button) {
 
 function copyToClipboard_value(button) {
     const url = button.getAttribute('data-url'); // Get the URL from the data attribute
+    const btnvalue = button.value;
     navigator.clipboard.writeText(url).then(() => {
         // Change text and color with transition
         button.value = "Copied!";
@@ -165,7 +166,7 @@ function copyToClipboard_value(button) {
 
         // Reset after 5 seconds with transition
         setTimeout(() => {
-            button.value = url;
+            button.value = btnvalue;
             button.style.transition = "background-color 0.3s ease, color 0.3s ease"; // Ensure transition when resetting
             button.style.backgroundColor = ""; // Reset to original color
             button.style.color = ""; // Reset to original color

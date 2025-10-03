@@ -4,9 +4,6 @@ from . import views
 urlpatterns = [
 
 #--------------url for settings page--------------------
-    #path('communication/',views.Communication, name='communication'),
-    path("send/", views.send_mail_view, name="send_mail"),
-    
     path("com_dashboard/", views.ComDashboard, name="com_dashboard"),
     path("schedule/", views.schedule_email_view, name="schedule_email"),
 

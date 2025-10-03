@@ -202,7 +202,7 @@ def CreateUpdateClientContact(request):
                 "address":address,
             }
         )
-        messages.success(request, f"Contact Instance Created ({contact_instance.name})")
+        messages.success(request, f"Contact Instance Created")
     return redirect(f"{reverse('client_contacts')}?contact_id={contact_instance.id}")
 
 
@@ -307,10 +307,16 @@ def conversation_view(request, thread_key, account_id ):
         msg.is_read = True
         msg.save()
     first_message = messages_qs.first()
+    
+    client = None
+    if first_message:
+        client = ClientContact.objects.filter(email=first_message.sender).first()
+
     context = {
         "account": account,
         "mails": messages_qs,
         "first_message": first_message,  # 👈 used for reply form
+        "client":client,
         "thread_key": thread_key,
     }
     return render(request, "Communication/conversation.html", context)
@@ -698,29 +704,4 @@ def TestEmailAccount(request, pk):
     return redirect('com_settings')
 
 
-def send_mail_view(request):
-    if request.method == "POST":
-        subject = request.POST.get("subject")
-        body = request.POST.get("body")
-        recipient = request.POST.get("recipient")
-        account_id = request.POST.get("account_id")
 
-        account = MailAccount.objects.get(id=account_id)
-
-        # Save in DB as queued
-        mail = MailMessage.objects.create(
-            account=account,
-            subject=subject,
-            body=body,
-            sender=account.email_address,
-            recipient=recipient,
-            status="queued"
-        )
-
-        # Push to Celery
-        send_mail_task.delay(mail.id)
-
-        return redirect("mail_outbox")  # define your outbox view
-
-    accounts = MailAccount.objects.all()
-    return render(request, "Communication/send_mail.html", {"accounts": accounts})
