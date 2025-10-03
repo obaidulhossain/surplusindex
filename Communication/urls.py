@@ -13,9 +13,6 @@ urlpatterns = [
 
 
     path("com_inbox/", views.ComInbox, name="com_inbox"),
-    path("refresh_emails/", views.RefreshEmails, name="refresh_emails"),
-    path("update_emails/", views.UpdateEmails, name="update_emails"),
-    path("fetch_inbox_full/", views.RefreshInboxFull, name="fetch_inbox_full"),
     path("archive/<int:msg_id>/", views.archive_email, name="archive_email"),
     path("delete/<int:msg_id>/", views.delete_email, name="delete_email"),
 
@@ -25,8 +22,6 @@ urlpatterns = [
     path("edit-message/<int:msg_id>/", views.edit_message_body, name="edit_message"),
 
     path("com_sent/", views.ComSent, name="com_sent"),
-    path("refresh_sent/", views.RefreshSent, name="refresh_sent"),
-    path("fetch_sent_full/", views.RefreshSentFull, name="fetch_sent_full"),
     path("archive_sent/<int:msg_id>/", views.archive_sent, name="archive_sent"),
     path("delete_sent/<int:msg_id>/", views.delete_sent, name="delete_sent"),
 

@@ -20,19 +20,6 @@ Sent
                 {% endfor %}
             </select>
         </form>
-        {% if EmailInstance %}
-        <form method="post" action="{% url 'fetch_sent_full' %}" style="float:right;">
-        {% csrf_token %}
-            <input type="hidden" name="account_id" value="{{ EmailInstance.id }}">
-            <button type="submit" class="button">Fetch Full Sent</button>
-        </form>
-
-        <form method="post" action="{% url 'refresh_sent' %}" style="float:right; margin-right:5px;">
-        {% csrf_token %}
-            <input type="hidden" name="account_id" value="{{ EmailInstance.id }}">
-            <button type="submit" class="button">Refresh Sent</button>
-        </form>
-        {% endif %}
     </div>
 </div>
 

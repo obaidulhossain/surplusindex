@@ -19,21 +19,7 @@ Inbox
                 <option value="{{Account.id}}"{% if EmailInstance and EmailInstance.id == Account.id %}selected{% endif %} >{{Account.name}} | {{Account.email_address}}</option>
                 {% endfor %}
             </select>
-        </form>
-        {% if EmailInstance %}
-        <form method="post" action="{% url 'fetch_inbox_full' %}" style="float:right;">
-        {% csrf_token %}
-            <input type="hidden" name="account_id" value="{{ EmailInstance.id }}">
-            <button type="submit" class="button">Fetch Full Inbox</button>
-        </form>
-
-        <form method="post" action="{% url 'refresh_emails' %}" style="float:right; margin-right:5px;">
-        {% csrf_token %}
-            <input type="hidden" name="account_id" value="{{ EmailInstance.id }}">
-            <button type="submit" class="button">Refresh Inbox</button>
-        </form>
-        {% endif %}
-        
+        </form>       
     </div>
 </div>
 

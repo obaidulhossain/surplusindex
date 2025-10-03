@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.urls import reverse
-
+from django.http import FileResponse
 from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
 from django.utils.html import strip_tags
@@ -22,6 +22,7 @@ from .models import *
 from .tasks import *
 from email.utils import formataddr
 from realestate_directory.models import States
+#----------------------------------- Communication Dashboard Views ---------------------------
 def ComDashboard(request):
     context = {
         "mail_accounts": MailAccount.objects.all(),
@@ -29,9 +30,6 @@ def ComDashboard(request):
         "contact_lists": ContactList.objects.all(),
     }
     return render(request, "Communication/communication.html", context)
-
-
-
 
 def schedule_email_view(request):
     if request.method == "POST":
@@ -113,20 +111,15 @@ def schedule_email_view(request):
             scheduled_email.status = "sent"
             scheduled_email.save()
             imap.logout()
-            accounts = MailAccount.objects.all()
-            if not accounts.exists():
-                messages.info(request,"No mail accounts found.")
-                return
-
-            for account in accounts:
-                try:
-                    success, msg = fetch_folder(account, folder="INBOX.Sent")
-                    if success:
-                        messages.success(request,f"Inbox Fetched for ({account.email_address})")
-                    else:
-                        messages.error(request,f"Update Inbox Unsuccessful for ({account.email_address})")
-                except Exception as e:
-                    messages.error(request,f"Update Inbox Unsuccessful for ({account.email_address})")
+            
+            try:
+                success, msg = fetch_folder_crosscheck(sender, folder="INBOX.Sent")
+                if success:
+                    messages.success(request, msg)
+                else:
+                    messages.error(request,f"Error: {msg}")
+            except Exception as e:
+                messages.error(request, msg)
         else:
             # Schedule later
             ScheduledEmail.objects.create(
@@ -145,20 +138,8 @@ def schedule_email_view(request):
             )
 
         return redirect("com_dashboard")
-    
 
-
-    #     form = ScheduledEmailForm(request.POST)
-    #     if form.is_valid():
-    #         email_obj = form.save()
-    #         if email_obj.send_time <= timezone.now():
-    #             send_scheduled_email.delay(email_obj.id)  # immediate send
-    #         else:
-    #             send_scheduled_email.apply_async((email_obj.id,), eta=email_obj.send_time)  # schedule
-    #         return redirect("email_list")  # Change to your dashboard/list view
-    # else:
-    #     form = ScheduledEmailForm()
-    # return render(request, "Communication/schedule_email.html", {"form": form})
+#----------------------------------- Contacts Views ---------------------------
 
 def ComContacts(request):
     params = request.POST if request.method == "POST" else request.GET
@@ -205,7 +186,6 @@ def CreateUpdateClientContact(request):
         messages.success(request, f"Contact Instance Created")
     return redirect(f"{reverse('client_contacts')}?contact_id={contact_instance.id}")
 
-
 @csrf_exempt
 def manage_preferred_states(request, contact_id):
     if request.method == "POST":
@@ -232,6 +212,8 @@ def manage_preferred_states(request, contact_id):
 
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 
+#----------------------------------- Inbox Views ---------------------------
+
 def ComInbox(request):
     params = request.POST if request.method == "POST" else request.GET
     selected_email_id = params.get('selectedemail', '')
@@ -251,6 +233,15 @@ def ComInbox(request):
             .first()
             for t in threads
         ]
+        if EmailInstance:
+            try:
+                success, msg = fetch_folder_crosscheck(EmailInstance, folder="INBOX")
+                if success:
+                    messages.info(request, msg)
+                else:
+                    messages.error(request, f"Fetch failed: {msg}")
+            except Exception as e:
+                messages.error(request, f"Something Went Wrong Fetching Inbox: {msg}")
     else:
         EmailInstance = None
         thread_messages = None
@@ -267,38 +258,71 @@ def ComInbox(request):
     }
     return render(request, "Communication/inbox.html", context)
 
-@require_POST
-def RefreshEmails(request):
-    account_id = request.POST.get("account_id")
-    account = get_object_or_404(MailAccount, pk=account_id)
-    success, msg = fetch_emails(account)
-    if success:
-        messages.success(request, msg)
-    else:
-        messages.error(request, msg)
+def archive_email(request, msg_id):
+    if request.method == "POST":
+        account_id = request.POST.get("account_id")
+        account = get_object_or_404(MailAccount, id=account_id)
+        msg = get_object_or_404(MailMessage, id=msg_id, account=account)
+
+        try:
+            # Connect IMAP
+            if account.use_ssl:
+                imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
+            else:
+                imap = imaplib.IMAP4(account.imap_host, account.imap_port)
+            imap.login(account.username, account.password)
+            imap.select("INBOX")
+            
+            result, _ = imap.uid("COPY", msg.uid, "INBOX.Archive")
+            if result != "OK":
+                raise Exception(f"Failed to copy to Archive")
+            # Move to Archive
+            # imap.uid("COPY", msg.uid, "Archived")
+            imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
+            imap.expunge()
+            imap.logout()
+
+            # Update DB
+            msg.folder = "archive"
+            msg.save()
+            messages.success(request, f"Message archived: {msg.subject}")
+        except Exception as e:
+            messages.error(request, f"Failed to archive: {e}")
+
     return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
 
-@require_POST
-def UpdateEmails(request):
-    account_id = request.POST.get("account_id")
-    account = get_object_or_404(MailAccount, pk=account_id)
-    success, msg = fetch_folder(account, folder="INBOX")
-    if success:
-        messages.success(request, msg)
-    else:
-        messages.error(request, msg)
+def delete_email(request, msg_id):
+    if request.method == "POST":
+        account_id = request.POST.get("account_id")
+        account = get_object_or_404(MailAccount, id=account_id)
+        msg = get_object_or_404(MailMessage, id=msg_id, account=account)
+
+        try:
+            # Connect IMAP
+            if account.use_ssl:
+                imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
+            else:
+                imap = imaplib.IMAP4(account.imap_host, account.imap_port)
+            imap.login(account.username, account.password)
+            imap.select(msg.folder.capitalize())  # select the folder where the mail currently is
+
+            # Mark as deleted + expunge
+            result, _ = imap.uid("COPY", msg.uid, "INBOX.Trash")
+            if result != "OK":
+                raise Exception(f"Failed to Delete")
+            imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
+            imap.expunge()
+            imap.logout()
+
+            # Remove from DB
+            msg.delete()
+            messages.success(request, "Message deleted from server & DB.")
+        except Exception as e:
+            messages.error(request, f"Failed to delete: {e}")
+
     return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
 
-@require_POST
-def RefreshInboxFull(request):
-    account_id = request.POST.get("account_id")
-    account = get_object_or_404(MailAccount, pk=account_id)
-    success, msg = fetch_folder(account, folder="INBOX", full_sync=True)
-    if success:
-        messages.success(request, msg)
-    else:
-        messages.error(request, msg)
-    return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
+#----------------------------------- Conversation Views ---------------------------
 
 def conversation_view(request, thread_key, account_id ):
     account = get_object_or_404(MailAccount, pk=account_id)
@@ -365,72 +389,8 @@ def send_reply_view(request, account_id, message_id):
 
     return redirect("conversation_view", account_id=account.id, thread_key=parent_msg.thread_key)
 
-    
-def archive_email(request, msg_id):
-    if request.method == "POST":
-        account_id = request.POST.get("account_id")
-        account = get_object_or_404(MailAccount, id=account_id)
-        msg = get_object_or_404(MailMessage, id=msg_id, account=account)
 
-        try:
-            # Connect IMAP
-            if account.use_ssl:
-                imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
-            else:
-                imap = imaplib.IMAP4(account.imap_host, account.imap_port)
-            imap.login(account.username, account.password)
-            imap.select("INBOX")
-            
-            result, _ = imap.uid("COPY", msg.uid, "INBOX.Archive")
-            if result != "OK":
-                raise Exception(f"Failed to copy to Archive")
-            # Move to Archive
-            # imap.uid("COPY", msg.uid, "Archived")
-            imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
-            imap.expunge()
-            imap.logout()
-
-            # Update DB
-            msg.folder = "archive"
-            msg.save()
-            messages.success(request, f"Message archived: {msg.subject}")
-        except Exception as e:
-            messages.error(request, f"Failed to archive: {e}")
-
-    return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
-
-def delete_email(request, msg_id):
-    if request.method == "POST":
-        account_id = request.POST.get("account_id")
-        account = get_object_or_404(MailAccount, id=account_id)
-        msg = get_object_or_404(MailMessage, id=msg_id, account=account)
-
-        try:
-            # Connect IMAP
-            if account.use_ssl:
-                imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
-            else:
-                imap = imaplib.IMAP4(account.imap_host, account.imap_port)
-            imap.login(account.username, account.password)
-            imap.select(msg.folder.capitalize())  # select the folder where the mail currently is
-
-            # Mark as deleted + expunge
-            result, _ = imap.uid("COPY", msg.uid, "INBOX.Trash")
-            if result != "OK":
-                raise Exception(f"Failed to Delete")
-            imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
-            imap.expunge()
-            imap.logout()
-
-            # Remove from DB
-            msg.delete()
-            messages.success(request, "Message deleted from server & DB.")
-        except Exception as e:
-            messages.error(request, f"Failed to delete: {e}")
-
-    return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
-
-
+#----------------------------------- Sent Views ---------------------------
 
 def ComSent(request):
     params = request.POST if request.method == "POST" else request.GET
@@ -451,6 +411,15 @@ def ComSent(request):
             .first()
             for t in threads
         ]
+        if EmailInstance:
+            try:
+                success, msg = fetch_folder_crosscheck(EmailInstance, folder="INBOX.Sent")
+                if success:
+                    messages.info(request, msg)
+                else:
+                    messages.error(request, f"Fetch failed: {msg}")
+            except Exception as e:
+                messages.error(request, f"Something Went Wrong Fetching Sent: {msg}")
     else:
         EmailInstance = None
         thread_messages = None
@@ -466,29 +435,6 @@ def ComSent(request):
         
     }
     return render(request, "Communication/sent.html", context)
-
-@require_POST
-def RefreshSentFull(request):
-    account_id = request.POST.get("account_id")
-    account = get_object_or_404(MailAccount, pk=account_id)
-    success, msg = fetch_folder(account, folder="INBOX.Sent", full_sync=True)
-    if success:
-        messages.success(request, msg)
-    else:
-        messages.error(request, msg)
-    return redirect(f"{reverse('com_sent')}?selectedemail={account.id}")
-
-@require_POST
-def RefreshSent(request):
-    account_id = request.POST.get("account_id")
-    account = get_object_or_404(MailAccount, pk=account_id)
-    success, msg = fetch_folder(account, folder="INBOX.Sent")
-    if success:
-        messages.success(request, msg)
-    else:
-        messages.error(request, msg)
-    return redirect(f"{reverse('com_sent')}?selectedemail={account.id}")
-
 
 def archive_sent(request, msg_id):
     if request.method == "POST":
@@ -554,6 +500,7 @@ def delete_sent(request, msg_id):
 
     return redirect(f"{reverse('com_sent')}?selectedemail={account.id}")
 
+#-----------------------------------Campaign Manager ---------------------------
 
 def ComCampaign(request):
     log_path = "/home/priddxvk/logs/scheduled_emails.log"
@@ -568,7 +515,6 @@ def ComCampaign(request):
     }
     return render(request, "Communication/campaign.html", context)
 
-from django.http import FileResponse
 def download_email_logs(request):
     log_path = "/home/priddxvk/logs/scheduled_emails.log"
     return FileResponse(open(log_path, "rb"), as_attachment=True, filename="scheduled_emails.log")
@@ -581,6 +527,8 @@ def clear_email_logs(request):
     except Exception as e:
         messages.error(request, f"Error clearing logs: {e}")
     return redirect("com_campaign")
+
+#----------------------------------- Template Views ---------------------------
 
 def ComTemplates(request):
     params = request.POST if request.method == "POST" else request.GET
@@ -597,6 +545,7 @@ def ComTemplates(request):
         "templateInstance" : templateInstance,
     }
     return render(request, "Communication/email_templates.html", context)
+
 def createUpdateTemplate(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -630,7 +579,9 @@ def createUpdateTemplate(request):
     else:
         messages.error(request, "Post Method Required")
     return redirect('com_templates')
+
 #-----------------------------------Communication Settings ---------------------------
+
 def ComSettings(request):
     params = request.POST if request.method == "POST" else request.GET
     SelectedEmail = params.get('selectedemail', '')
@@ -682,7 +633,6 @@ def CreateUpdateEmailAc(request):
             messages.info(request, f"Email {email_instance.email_address} already exists and was selected.")
 
     return redirect(f"{reverse('com_settings')}?selectedemail={email_instance.id}")
-    
 
 def DeleteEmailAccount(request):
     if request.method == "POST":
@@ -693,7 +643,7 @@ def DeleteEmailAccount(request):
             EmailAccountInstance.delete()
             messages.success(request, f"Email Account: {email_address} Deleted!")
     return redirect('com_settings')
-    
+
 def TestEmailAccount(request, pk):
     email_account = get_object_or_404(MailAccount, pk=pk)
     success, message = test_email_connection(email_account)

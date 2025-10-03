@@ -29,8 +29,6 @@ def test_email_connection(email_account):
     
     except Exception as e:
         return False, f"❌ Connection failed for {email_account.email_address}: {str(e)}"
-    
-
 
 def decode_mime_words(s):
     """Helper to decode MIME encoded words like =?UTF-8?..."""
@@ -41,423 +39,6 @@ def decode_mime_words(s):
         part.decode(enc or "utf-8", errors="ignore") if isinstance(part, bytes) else str(part)
         for part, enc in decoded
     )
-
-def fetch_emails(mail_account, folder="INBOX"):
-    try:
-        # Connect IMAP
-        if mail_account.use_ssl:
-            imap = imaplib.IMAP4_SSL(mail_account.imap_host, mail_account.imap_port)
-        else:
-            imap = imaplib.IMAP4(mail_account.imap_host, mail_account.imap_port)
-        
-        imap.login(mail_account.username, mail_account.password)
-        imap.select(folder)
-        # Find last UID stored
-        last_uid = (
-            MailMessage.objects.filter(account=mail_account, folder=folder.lower())
-            .order_by("-uid")
-            .values_list("uid", flat=True)
-            .first()
-        )
-        search_criteria = f"UID {int(last_uid)+1}:*" if last_uid else "ALL"
-
-        # status, data = imap.search(None, "ALL")
-        status, data = imap.uid("search", None, search_criteria)
-        if status != "OK":
-            return False, "No new messages."
-        new_uids = data[0].split()
-        if not new_uids:
-            return True, "No new messages found."
-        
-        for uid in new_uids:
-            uid = uid.decode()
-
-            # status, msg_data = imap.fetch(num, "(RFC822 UID)")
-            status, msg_data = imap.uid("fetch", uid, "(RFC822)")
-            if status != "OK":
-                continue
-
-            raw_email = msg_data[0][1]
-            msg = email.message_from_bytes(raw_email)
-
-            # Headers
-            subject = decode_mime_words(msg.get("Subject"))
-            message_id = msg.get("Message-ID")
-            in_reply_to_id = msg.get("In-Reply-To")
-            sender = email.utils.parseaddr(msg.get("From"))[1]
-            recipient = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("To", []))])
-            cc = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("Cc", []))])
-            bcc = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("Bcc", []))])
-
-            received_at = email.utils.parsedate_to_datetime(msg.get("Date")) if msg.get("Date") else timezone.now()
-
-
-            # Extract body
-            body_plain, body_html = "", ""
-            if msg.is_multipart():
-                for part in msg.walk():
-                    content_type = part.get_content_type()
-                    try:
-                        payload = part.get_payload(decode=True)
-                        if not payload:
-                            continue
-                        if content_type == "text/plain":
-                            body_plain += payload.decode(errors="ignore")
-                        elif content_type == "text/html":
-                            body_html += payload.decode(errors="ignore")
-                    except Exception:
-                        continue
-            else:
-                try:
-                    body_plain = msg.get_payload(decode=True).decode(errors="ignore")
-                except Exception:
-                    body_plain = msg.get_payload()
-
-            # Find parent for threading
-            parent_msg = None
-            thread_key = None
-
-            if in_reply_to_id:
-                parent_msg = MailMessage.objects.filter(message_id=in_reply_to_id, account=mail_account).first()
-                if parent_msg:
-                    thread_key = parent_msg.thread_key # inherit parent's thread_key
-            if not thread_key:
-                # new root message → create URL-safe thread_key
-                base_id = message_id or uid
-                thread_key = hashlib.sha1(base_id.encode()).hexdigest()
-            # Decide thread_id
-            thread_id = parent_msg.thread_id if parent_msg else (message_id or uid)
-
-            # Save / update in DB
-            MailMessage.objects.update_or_create(
-                uid=uid,
-                account=mail_account,
-                folder="inbox",
-                defaults={
-                    "subject": subject,
-                    "sender": sender,
-                    "recipient": recipient,
-                    "cc": cc or None,
-                    "bcc": bcc or None,
-                    "received_at": received_at,
-                    "body_plain": body_plain,
-                    "body_html": body_html,
-                    "message_id": message_id,
-                    "in_reply_to": parent_msg,
-                    "thread_id": thread_id,
-                    "thread_key": thread_key,
-                    "status": "queued",  # mark as queued until processed
-                    # "is_read": False,
-                },
-            )
-
-        imap.close()
-        imap.logout()
-        return True, f"Fetched {len(new_uids)} new messages."
-
-    except Exception as e:
-        return False, str(e)
-
-
-def fetch_sent(mail_account, folder="INBOX.Sent"):
-    try:
-        # Connect IMAP
-        if mail_account.use_ssl:
-            imap = imaplib.IMAP4_SSL(mail_account.imap_host, mail_account.imap_port)
-        else:
-            imap = imaplib.IMAP4(mail_account.imap_host, mail_account.imap_port)
-        
-        imap.login(mail_account.username, mail_account.password)
-        imap.select(folder)
-        # Find last UID stored
-        last_uid = (
-            MailMessage.objects.filter(account=mail_account, folder="sent")
-            .order_by("-uid")
-            .values_list("uid", flat=True)
-            .first()
-        )
-        search_criteria = f"UID {int(last_uid)+1}:*" if last_uid else "ALL"
-
-        # status, data = imap.search(None, "ALL")
-        status, data = imap.uid("search", None, search_criteria)
-        if status != "OK":
-            return False, "No new messages."
-        new_uids = data[0].split()
-        if not new_uids:
-            return True, "No new messages found."
-        
-        for uid in new_uids:
-            uid = uid.decode()
-
-            # status, msg_data = imap.fetch(num, "(RFC822 UID)")
-            status, msg_data = imap.uid("fetch", uid, "(RFC822)")
-            if status != "OK":
-                continue
-
-            raw_email = msg_data[0][1]
-            msg = email.message_from_bytes(raw_email)
-
-            # Headers
-            subject = decode_mime_words(msg.get("Subject"))
-            message_id = msg.get("Message-ID")
-            in_reply_to_id = msg.get("In-Reply-To")
-            sender = email.utils.parseaddr(msg.get("From"))[1]
-            recipient = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("To", []))])
-            cc = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("Cc", []))])
-            bcc = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("Bcc", []))])
-
-            sent_at = email.utils.parsedate_to_datetime(msg.get("Date")) if msg.get("Date") else timezone.now()
-
-
-            # Extract body
-            body_plain, body_html = "", ""
-            if msg.is_multipart():
-                for part in msg.walk():
-                    content_type = part.get_content_type()
-                    try:
-                        payload = part.get_payload(decode=True)
-                        if not payload:
-                            continue
-                        if content_type == "text/plain":
-                            body_plain += payload.decode(errors="ignore")
-                        elif content_type == "text/html":
-                            body_html += payload.decode(errors="ignore")
-                    except Exception:
-                        continue
-            else:
-                try:
-                    body_plain = msg.get_payload(decode=True).decode(errors="ignore")
-                except Exception:
-                    body_plain = msg.get_payload()
-
-            # Find parent for threading
-            parent_msg = None
-            thread_key = None
-
-            if in_reply_to_id:
-                parent_msg = MailMessage.objects.filter(message_id=in_reply_to_id, account=mail_account).first()
-                if parent_msg:
-                    thread_key = parent_msg.thread_key # inherit parent's thread_key
-            if not thread_key:
-                # new root message → create URL-safe thread_key
-                base_id = message_id or uid
-                thread_key = hashlib.sha1(base_id.encode()).hexdigest()
-            # Decide thread_id
-            thread_id = parent_msg.thread_id if parent_msg else (message_id or uid)
-
-            # Save / update in DB
-            MailMessage.objects.update_or_create(
-                uid=uid,
-                account=mail_account,
-                folder="sent",
-                defaults={
-                    "subject": subject,
-                    "sender": sender,
-                    "recipient": recipient,
-                    "cc": cc or None,
-                    "bcc": bcc or None,
-                    "sent_at": sent_at,
-                    "body_plain": body_plain,
-                    "body_html": body_html,
-                    "message_id": message_id,
-                    "in_reply_to": parent_msg,
-                    "thread_id": thread_id,
-                    "thread_key": thread_key,
-                    "status": "sent",  # mark as queued until processed
-                    # "is_read": False,
-                },
-            )
-
-        imap.close()
-        imap.logout()
-        return True, f"Fetched {len(new_uids)} new sent messages."
-
-    except Exception as e:
-        return False, str(e)
-
-
-def fetch_folder(mail_account, folder="INBOX", full_sync=False, days=None):
-    """
-    use  = fetch_folder(account, folder="INBOX.Sent", full_sync=True, days=30)
-    Fetch emails for any folder (INBOX, Sent, etc.)
-    - full_sync=True → fetch ALL or last `days` messages
-    - full_sync=False → fetch only new messages since last UID
-    """
-    # Decide which field to use
-    if folder.lower().startswith("inbox.sent"):  
-        msg_status = "sent"
-        db_folder = "sent"
-    else:
-        msg_status = "queued"
-        db_folder = "inbox"
-    try:
-        # Connect IMAP
-        imap = imaplib.IMAP4_SSL(mail_account.imap_host, mail_account.imap_port) \
-            if mail_account.use_ssl else imaplib.IMAP4(mail_account.imap_host, mail_account.imap_port)
-        imap.login(mail_account.username, mail_account.password)
-        imap.select(folder)
-
-        # Decide search criteria
-        if full_sync:
-            if days:  # backfill only recent days
-                since_date = (timezone.now() - timedelta(days=days)).strftime("%d-%b-%Y")
-                search_criteria = f'(SINCE {since_date})'
-            else:  # full ALL fetch
-                search_criteria = "ALL"
-        else:
-            last_uid = (
-                MailMessage.objects.filter(account=mail_account, folder=db_folder)
-                .annotate(uid_int=Cast("uid", IntegerField()))   # force int
-                .order_by("-uid_int")
-                .values_list("uid_int", flat=True)
-                .first()
-            )
-            search_criteria = f"UID {int(last_uid)+1}:*" if last_uid else "ALL"
-
-        # Fetch UIDs
-        status, data = imap.uid("search", None, search_criteria)
-        if status != "OK":
-            return False, f"Search failed in {folder}"
-        new_uids = data[0].split()
-        if not new_uids:
-            return True, f"No new messages in {folder}"
-
-        for uid in new_uids:
-            uid = uid.decode()
-
-            # Fetch full message
-            status, msg_data = imap.uid("fetch", uid, "(RFC822 INTERNALDATE)")
-            if status != "OK" or not msg_data:
-                continue
-            
-            raw_email = None
-            internaldate = None
-
-            for part in msg_data:
-                if isinstance(part, tuple) and len(part) >= 2:
-                    raw_email = part[1]  # the actual RFC822 message
-                    try:
-                        internaldate = imaplib.Internaldate2tuple(part[0])
-                    except Exception:
-                        internaldate = None
-
-            if not raw_email:
-                # fallback: fetch only RFC822 if above failed
-                status, msg_data = imap.uid("fetch", uid, "(RFC822)")
-                if status == "OK" and msg_data and isinstance(msg_data[0], tuple):
-                    raw_email = msg_data[0][1]
-            
-            if not raw_email:
-                continue  # skip this UID if we still don’t have a message
-
-            msg = email.message_from_bytes(raw_email)
-            
-            imap_date = None
-            if internaldate:
-                try:
-                    imap_date = timezone.make_aware(
-                        datetime.fromtimestamp(email.utils.mktime_tz(internaldate)),
-                        timezone.get_current_timezone()
-                    )
-                except Exception:
-                    imap_date = None
-            
-            # Fallback to header Date
-            header_date = None
-            if msg.get("Date"):
-                try:
-                    header_date = email.utils.parsedate_to_datetime(msg.get("Date"))
-                    if header_date and header_date.tzinfo is None:
-                        header_date = timezone.make_aware(header_date, timezone.get_current_timezone())
-                except Exception:
-                    pass
-
-
-            # Extract headers
-            subject = decode_mime_words(msg.get("Subject"))
-            message_id = msg.get("Message-ID")
-            in_reply_to_id = msg.get("In-Reply-To")
-            sender = email.utils.parseaddr(msg.get("From"))[1]
-            recipient = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("To", []))])
-            cc = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("Cc", []))])
-            bcc = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("Bcc", []))])
-            
-            # Parse message date
-            # Decide which to use
-            if folder.lower().startswith("inbox.sent"):
-                msg_date = header_date or imap_date  # Prefer "Date" for Sent
-            else:
-                msg_date = imap_date or header_date  # Prefer server date for Inbox
-                
-            #msg_date = email.utils.parsedate_to_datetime(msg.get("Date")) if msg.get("Date") else timezone.now()
-
-            
-            
-
-            # Extract body
-            body_plain, body_html = "", ""
-            if msg.is_multipart():
-                for part in msg.walk():
-                    content_type = part.get_content_type()
-                    try:
-                        payload = part.get_payload(decode=True)
-                        if not payload:
-                            continue
-                        if content_type == "text/plain":
-                            body_plain += payload.decode(errors="ignore")
-                        elif content_type == "text/html":
-                            body_html += payload.decode(errors="ignore")
-                    except Exception:
-                        continue
-            else:
-                try:
-                    body_plain = msg.get_payload(decode=True).decode(errors="ignore")
-                except Exception:
-                    body_plain = msg.get_payload()
-
-            # Threading
-            parent_msg = None
-            thread_key = None
-            if in_reply_to_id:
-                parent_msg = MailMessage.objects.filter(message_id=in_reply_to_id, account=mail_account).first()
-                if parent_msg:
-                    thread_key = parent_msg.thread_key
-            if not thread_key:
-                base_id = message_id or uid
-                thread_key = hashlib.sha1(base_id.encode()).hexdigest()
-            thread_id = parent_msg.thread_id if parent_msg else (message_id or uid)
-
-            # Save
-            MailMessage.objects.update_or_create(
-                uid=uid,
-                account=mail_account,
-                folder=db_folder,
-                defaults={
-                    "subject": subject,
-                    "sender": sender,
-                    "recipient": recipient,
-                    "cc": cc or None,
-                    "bcc": bcc or None,
-                    "received_at": msg_date,
-                    "sent_at": msg_date,
-                    "body_plain": body_plain,
-                    "body_html": body_html,
-                    "message_id": message_id,
-                    "in_reply_to": parent_msg,
-                    "thread_id": thread_id,
-                    "thread_key": thread_key,
-                    "status": msg_status,
-                    # "is_read": False,
-                },
-            )
-
-        imap.close()
-        imap.logout()
-        return True, f"Fetched {len(new_uids)} messages from {folder}"
-
-    except Exception as e:
-        return False, str(e)
-
 
 def fetch_folder_crosscheck(mail_account, folder="INBOX"):
     """
@@ -522,7 +103,7 @@ def fetch_folder_crosscheck(mail_account, folder="INBOX"):
                 status, msg_data = imap.uid("fetch", uid, "(RFC822)")
                 if status == "OK" and msg_data and isinstance(msg_data[0], tuple):
                     raw_email = msg_data[0][1]
-                    
+
             if not raw_email:
                 continue
 
@@ -622,10 +203,6 @@ def fetch_folder_crosscheck(mail_account, folder="INBOX"):
     except Exception as e:
         return False, str(e)
 
-
-
-
-
 def send_reply(
     account: MailAccount,
     parent_msg: MailMessage,
@@ -719,3 +296,186 @@ def send_reply(
         return reply_instance
 
     return None
+
+
+# def fetch_folder(mail_account, folder="INBOX", full_sync=False, days=None):
+#     """
+#     use  = fetch_folder(account, folder="INBOX.Sent", full_sync=True, days=30)
+#     Fetch emails for any folder (INBOX, Sent, etc.)
+#     - full_sync=True → fetch ALL or last `days` messages
+#     - full_sync=False → fetch only new messages since last UID
+#     """
+#     # Decide which field to use
+#     if folder.lower().startswith("inbox.sent"):  
+#         msg_status = "sent"
+#         db_folder = "sent"
+#     else:
+#         msg_status = "queued"
+#         db_folder = "inbox"
+#     try:
+#         # Connect IMAP
+#         imap = imaplib.IMAP4_SSL(mail_account.imap_host, mail_account.imap_port) \
+#             if mail_account.use_ssl else imaplib.IMAP4(mail_account.imap_host, mail_account.imap_port)
+#         imap.login(mail_account.username, mail_account.password)
+#         imap.select(folder)
+
+#         # Decide search criteria
+#         if full_sync:
+#             if days:  # backfill only recent days
+#                 since_date = (timezone.now() - timedelta(days=days)).strftime("%d-%b-%Y")
+#                 search_criteria = f'(SINCE {since_date})'
+#             else:  # full ALL fetch
+#                 search_criteria = "ALL"
+#         else:
+#             last_uid = (
+#                 MailMessage.objects.filter(account=mail_account, folder=db_folder)
+#                 .annotate(uid_int=Cast("uid", IntegerField()))   # force int
+#                 .order_by("-uid_int")
+#                 .values_list("uid_int", flat=True)
+#                 .first()
+#             )
+#             search_criteria = f"UID {int(last_uid)+1}:*" if last_uid else "ALL"
+
+#         # Fetch UIDs
+#         status, data = imap.uid("search", None, search_criteria)
+#         if status != "OK":
+#             return False, f"Search failed in {folder}"
+#         new_uids = data[0].split()
+#         if not new_uids:
+#             return True, f"No new messages in {folder}"
+
+#         for uid in new_uids:
+#             uid = uid.decode()
+
+#             # Fetch full message
+#             status, msg_data = imap.uid("fetch", uid, "(RFC822 INTERNALDATE)")
+#             if status != "OK" or not msg_data:
+#                 continue
+            
+#             raw_email = None
+#             internaldate = None
+
+#             for part in msg_data:
+#                 if isinstance(part, tuple) and len(part) >= 2:
+#                     raw_email = part[1]  # the actual RFC822 message
+#                     try:
+#                         internaldate = imaplib.Internaldate2tuple(part[0])
+#                     except Exception:
+#                         internaldate = None
+
+#             if not raw_email:
+#                 # fallback: fetch only RFC822 if above failed
+#                 status, msg_data = imap.uid("fetch", uid, "(RFC822)")
+#                 if status == "OK" and msg_data and isinstance(msg_data[0], tuple):
+#                     raw_email = msg_data[0][1]
+            
+#             if not raw_email:
+#                 continue  # skip this UID if we still don’t have a message
+
+#             msg = email.message_from_bytes(raw_email)
+            
+#             imap_date = None
+#             if internaldate:
+#                 try:
+#                     imap_date = timezone.make_aware(
+#                         datetime.fromtimestamp(email.utils.mktime_tz(internaldate)),
+#                         timezone.get_current_timezone()
+#                     )
+#                 except Exception:
+#                     imap_date = None
+            
+#             # Fallback to header Date
+#             header_date = None
+#             if msg.get("Date"):
+#                 try:
+#                     header_date = email.utils.parsedate_to_datetime(msg.get("Date"))
+#                     if header_date and header_date.tzinfo is None:
+#                         header_date = timezone.make_aware(header_date, timezone.get_current_timezone())
+#                 except Exception:
+#                     pass
+
+
+#             # Extract headers
+#             subject = decode_mime_words(msg.get("Subject"))
+#             message_id = msg.get("Message-ID")
+#             in_reply_to_id = msg.get("In-Reply-To")
+#             sender = email.utils.parseaddr(msg.get("From"))[1]
+#             recipient = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("To", []))])
+#             cc = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("Cc", []))])
+#             bcc = ", ".join([addr[1] for addr in email.utils.getaddresses(msg.get_all("Bcc", []))])
+            
+#             # Parse message date
+#             # Decide which to use
+#             if folder.lower().startswith("inbox.sent"):
+#                 msg_date = header_date or imap_date  # Prefer "Date" for Sent
+#             else:
+#                 msg_date = imap_date or header_date  # Prefer server date for Inbox
+                
+#             #msg_date = email.utils.parsedate_to_datetime(msg.get("Date")) if msg.get("Date") else timezone.now()
+
+            
+            
+
+#             # Extract body
+#             body_plain, body_html = "", ""
+#             if msg.is_multipart():
+#                 for part in msg.walk():
+#                     content_type = part.get_content_type()
+#                     try:
+#                         payload = part.get_payload(decode=True)
+#                         if not payload:
+#                             continue
+#                         if content_type == "text/plain":
+#                             body_plain += payload.decode(errors="ignore")
+#                         elif content_type == "text/html":
+#                             body_html += payload.decode(errors="ignore")
+#                     except Exception:
+#                         continue
+#             else:
+#                 try:
+#                     body_plain = msg.get_payload(decode=True).decode(errors="ignore")
+#                 except Exception:
+#                     body_plain = msg.get_payload()
+
+#             # Threading
+#             parent_msg = None
+#             thread_key = None
+#             if in_reply_to_id:
+#                 parent_msg = MailMessage.objects.filter(message_id=in_reply_to_id, account=mail_account).first()
+#                 if parent_msg:
+#                     thread_key = parent_msg.thread_key
+#             if not thread_key:
+#                 base_id = message_id or uid
+#                 thread_key = hashlib.sha1(base_id.encode()).hexdigest()
+#             thread_id = parent_msg.thread_id if parent_msg else (message_id or uid)
+
+#             # Save
+#             MailMessage.objects.update_or_create(
+#                 uid=uid,
+#                 account=mail_account,
+#                 folder=db_folder,
+#                 defaults={
+#                     "subject": subject,
+#                     "sender": sender,
+#                     "recipient": recipient,
+#                     "cc": cc or None,
+#                     "bcc": bcc or None,
+#                     "received_at": msg_date,
+#                     "sent_at": msg_date,
+#                     "body_plain": body_plain,
+#                     "body_html": body_html,
+#                     "message_id": message_id,
+#                     "in_reply_to": parent_msg,
+#                     "thread_id": thread_id,
+#                     "thread_key": thread_key,
+#                     "status": msg_status,
+#                     # "is_read": False,
+#                 },
+#             )
+
+#         imap.close()
+#         imap.logout()
+#         return True, f"Fetched {len(new_uids)} messages from {folder}"
+
+#     except Exception as e:
+#         return False, str(e)
