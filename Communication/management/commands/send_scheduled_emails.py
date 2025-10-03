@@ -19,6 +19,28 @@ class Command(BaseCommand):
 
         if not emails.exists():
             self.stdout.write(f"No scheduled emails to send. (Server time: {now}) | (Local Time: {local})")
+            accounts = MailAccount.objects.all()
+            if not accounts.exists():
+                self.stdout.write("No mail accounts found.")
+                return
+
+            for account in accounts:
+                try:
+                    success, msg = fetch_folder(account, folder="INBOX.Sent")
+                    if success:
+                        self.stdout.write(self.style.SUCCESS(
+                            f"Sent Folder Updated [{account.email_address}] (Server time: {now} | Local Time: {local})"
+                            
+                        ))
+                    else:
+                        self.stdout.write(self.style.ERROR(
+                            f"Error Updating Sent Folder [{account.email_address}] (Server time: {now} | Local Time: {local})"
+                        ))
+                except Exception as e:
+                    self.stdout.write(self.style.ERROR(
+                        f"Critical Error Updating Sent Folder [{account.email_address}] Failed: {str(e)}"
+                        f"(Server time: {now} | Local Time: {local}) "
+                    ))
             return
 
         for email in emails:

@@ -6,7 +6,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import timedelta
 from datetime import datetime
-
+from django.db.models import IntegerField
+from django.db.models.functions import Cast
 def test_email_connection(email_account):
     """
     Test SMTP connection for a given EmailAccount instance.
@@ -307,8 +308,9 @@ def fetch_folder(mail_account, folder="INBOX", full_sync=False, days=None):
         else:
             last_uid = (
                 MailMessage.objects.filter(account=mail_account, folder=db_folder)
-                .order_by("-uid")
-                .values_list("uid", flat=True)
+                .annotate(uid_int=Cast("uid", IntegerField()))   # force int
+                .order_by("-uid_int")
+                .values_list("uid_int", flat=True)
                 .first()
             )
             search_criteria = f"UID {int(last_uid)+1}:*" if last_uid else "ALL"
