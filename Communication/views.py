@@ -172,9 +172,9 @@ def CreateUpdateClientContact(request):
         contact_instance.business_name = business_name
         contact_instance.address = address
         contact_instance.save()
-        messages.info(request, f"Contact Instance Updated ({name})")
+        messages.info(request, f"Contact Instance Updated")
     else:
-        contact_instance = ClientContact.objects.update_or_create(
+        contact_instance, created = ClientContact.objects.update_or_create(
             name=name,
             email=email,
             defaults={
@@ -183,7 +183,10 @@ def CreateUpdateClientContact(request):
                 "address":address,
             }
         )
-        messages.success(request, f"Contact Instance Created")
+        if created:
+            messages.success(request, "Contact created successfully.")
+        else:
+            messages.info(request, "Contact already existed and was updated.")
     return redirect(f"{reverse('client_contacts')}?contact_id={contact_instance.id}")
 
 @csrf_exempt
