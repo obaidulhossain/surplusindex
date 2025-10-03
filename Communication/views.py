@@ -172,7 +172,7 @@ def CreateUpdateClientContact(request):
         contact_instance.business_name = business_name
         contact_instance.address = address
         contact_instance.save()
-        messages.info(request, f"Contact Instance Updated ({contact_instance.name})")
+        messages.info(request, f"Contact Instance Updated ({name})")
     else:
         contact_instance = ClientContact.objects.update_or_create(
             name=name,
