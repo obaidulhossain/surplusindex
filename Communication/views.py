@@ -263,7 +263,9 @@ def ComInbox(request):
 
 def archive_email(request, email_id):
     if request.method == "POST":
-        account_id = request.POST.get("account_id")
+        data = json.loads(request.body)
+        account_id = data.get("account_id")
+        #account_id = request.POST.get("account_id")
         account = get_object_or_404(MailAccount, id=account_id)
         msg = get_object_or_404(MailMessage, id=email_id, account=account)
 
@@ -288,13 +290,17 @@ def archive_email(request, email_id):
             # Update DB
             msg.folder = "archive"
             msg.save()
-            return JsonResponse({"success": True})
+            return JsonResponse({"success": True, "id": email_id})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)
 
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
+
 def delete_email(request, email_id):
     if request.method == "POST":
-        account_id = request.POST.get("account_id")
+        data = json.loads(request.body)
+        account_id = data.get("account_id")
+        #account_id = request.POST.get("account_id")
         account = get_object_or_404(MailAccount, id=account_id)
         msg = get_object_or_404(MailMessage, id=email_id, account=account)
 
@@ -317,9 +323,11 @@ def delete_email(request, email_id):
 
             # Remove from DB
             msg.delete()
-            return JsonResponse({"success": True})
+            return JsonResponse({"success": True, "id": email_id})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
 
 # def archive_email(request, msg_id):
 #     if request.method == "POST":
@@ -501,7 +509,9 @@ def ComSent(request):
 
 def archive_sent(request, email_id):
     if request.method == "POST":
-        account_id = request.POST.get("account_id")
+        data = json.loads(request.body)
+        account_id = data.get("account_id")
+        #account_id = request.POST.get("account_id")
         account = get_object_or_404(MailAccount, id=account_id)
         msg = get_object_or_404(MailMessage, id=email_id, account=account)
 
@@ -526,13 +536,17 @@ def archive_sent(request, email_id):
             # Update DB
             msg.folder = "archive"
             msg.save()
-            return JsonResponse({"success": True})
+            return JsonResponse({"success": True, "id": email_id})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)
 
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
+
 def delete_sent(request, email_id):
     if request.method == "POST":
-        account_id = request.POST.get("account_id")
+        data = json.loads(request.body)
+        account_id = data.get("account_id")
+        #account_id = request.POST.get("account_id")
         account = get_object_or_404(MailAccount, id=account_id)
         msg = get_object_or_404(MailMessage, id=email_id, account=account)
 
@@ -555,9 +569,11 @@ def delete_sent(request, email_id):
 
             # Remove from DB
             msg.delete()
-            return JsonResponse({"success": True})
+            return JsonResponse({"success": True, "id": email_id})
         except Exception as e:
             return JsonResponse({"success": False, "error": str(e)}, status=400)
+
+    return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
 #-----------------------------------Campaign Manager ---------------------------
 
 def ComCampaign(request):
