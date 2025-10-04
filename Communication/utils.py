@@ -244,7 +244,7 @@ def send_reply(
     part2 = MIMEText(html_body, "html")
     msg.attach(part1)
     msg.attach(part2)
-    
+
     raw_message = msg.as_string()
     all_recipients = [parent_msg.sender] + (cc_addresses or []) + (bcc_addresses or [])
 
@@ -265,50 +265,73 @@ def send_reply(
         imap = imaplib.IMAP4(account.imap_host, account.imap_port)
     imap.login(account.username, account.password)
     imap.append(folder, "\\Seen", imaplib.Time2Internaldate(time.time()), raw_message.encode("utf-8"))
-
-    # ---- Fetch latest UID from Sent folder ----
-    imap.select(folder)
-    status, data = imap.search(None, "ALL")
-    latest_uid = data[0].split()[-1]
-    status, msg_data = imap.uid("fetch", latest_uid, "(RFC822)")
     imap.logout()
 
-    if status != "OK":
-        return None
-
-    raw_email = msg_data[0][1]
-    sent_msg = email.message_from_bytes(raw_email)
-
-    # ---- Keep same thread_key ----
-    thread_key = parent_msg.thread_key
-
-    # ---- Save to DB ----
+    # ---- Update DB via cross-check ----
+    reply_instance = None
     if save_to_db:
-        reply_instance, _ = MailMessage.objects.update_or_create(
-            uid=latest_uid.decode(),
+        success, message = fetch_folder_crosscheck(account, folder=folder)
+        if not success:
+            raise Exception(f"IMAP sync failed after sending reply: {message}")
+
+        # Look up the message we just sent by Message-ID
+        reply_instance = MailMessage.objects.filter(
             account=account,
             folder="sent",
-            defaults={
-                "subject": sent_msg.get("Subject"),
-                "sender": account.email_address,
-                "recipient": parent_msg.sender,
-                "cc": ", ".join(cc_addresses) if cc_addresses else None,
-                "bcc": ", ".join(bcc_addresses) if bcc_addresses else None,
-                "received_at": timezone.now(),
-                "body_plain": body,
-                "body_html": None,
-                "message_id": sent_msg.get("Message-ID"),
-                "in_reply_to": parent_msg,
-                "thread_id": parent_msg.thread_id,
-                "thread_key": thread_key,
-                "sent_at": timezone.now(),
-                "status": "sent",
-                "is_read": True,
-            }
-        )
-        return reply_instance
+            message_id=msg["Message-ID"]
+        ).first()
 
-    return None
+        # Ensure it’s linked to parent thread
+        if reply_instance:
+            reply_instance.in_reply_to = parent_msg
+            reply_instance.thread_id = parent_msg.thread_id
+            reply_instance.thread_key = parent_msg.thread_key
+            reply_instance.save(update_fields=["in_reply_to", "thread_id", "thread_key"])
+
+    return reply_instance
+    # # ---- Fetch latest UID from Sent folder ----
+    # imap.select(folder)
+    # status, data = imap.search(None, "ALL")
+    # latest_uid = data[0].split()[-1]
+    # status, msg_data = imap.uid("fetch", latest_uid, "(RFC822)")
+    # imap.logout()
+
+    # if status != "OK":
+    #     return None
+
+    # raw_email = msg_data[0][1]
+    # sent_msg = email.message_from_bytes(raw_email)
+
+    # # ---- Keep same thread_key ----
+    # thread_key = parent_msg.thread_key
+
+    # # ---- Save to DB ----
+    # if save_to_db:
+    #     reply_instance, _ = MailMessage.objects.update_or_create(
+    #         uid=latest_uid.decode(),
+    #         account=account,
+    #         folder="sent",
+    #         defaults={
+    #             "subject": sent_msg.get("Subject"),
+    #             "sender": account.email_address,
+    #             "recipient": parent_msg.sender,
+    #             "cc": ", ".join(cc_addresses) if cc_addresses else None,
+    #             "bcc": ", ".join(bcc_addresses) if bcc_addresses else None,
+    #             "received_at": timezone.now(),
+    #             "body_plain": body,
+    #             "body_html": None,
+    #             "message_id": sent_msg.get("Message-ID"),
+    #             "in_reply_to": parent_msg,
+    #             "thread_id": parent_msg.thread_id,
+    #             "thread_key": thread_key,
+    #             "sent_at": timezone.now(),
+    #             "status": "sent",
+    #             "is_read": True,
+    #         }
+    #     )
+    #     return reply_instance
+
+    # return None
 
 
 # def fetch_folder(mail_account, folder="INBOX", full_sync=False, days=None):
