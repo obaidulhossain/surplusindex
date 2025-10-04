@@ -284,7 +284,7 @@ def archive_email(request, email_id):
                 raise Exception(f"Failed to copy to Archive")
             # Move to Archive
             # imap.uid("COPY", msg.uid, "Archived")
-            imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
+            imap.uid("STORE", str(msg.uid), "+FLAGS", "(\Deleted)")
             imap.expunge()
             imap.logout()
 
@@ -509,13 +509,14 @@ def ComSent(request):
 
 def archive_sent(request, email_id):
     if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        account_id = data.get("account_id")
-        #account_id = request.POST.get("account_id")
-        account = get_object_or_404(MailAccount, id=account_id)
-        msg = get_object_or_404(MailMessage, id=email_id, account=account)
-
         try:
+            data = json.loads(request.body.decode("utf-8"))
+            account_id = data.get("account_id")
+            #account_id = request.POST.get("account_id")
+            account = get_object_or_404(MailAccount, id=account_id)
+            msg = get_object_or_404(MailMessage, id=email_id, account=account)
+
+        
             # Connect IMAP
             if account.use_ssl:
                 imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
@@ -529,7 +530,7 @@ def archive_sent(request, email_id):
                 raise Exception(f"Failed to copy to Archive")
             # Move to Archive
             # imap.uid("COPY", msg.uid, "Archived")
-            imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
+            imap.uid("STORE", str(msg.uid), "+FLAGS", "(\Deleted)")
             imap.expunge()
             imap.logout()
 
@@ -544,13 +545,14 @@ def archive_sent(request, email_id):
 
 def delete_sent(request, email_id):
     if request.method == "POST":
-        data = json.loads(request.body.decode("utf-8"))
-        account_id = data.get("account_id")
-        #account_id = request.POST.get("account_id")
-        account = get_object_or_404(MailAccount, id=account_id)
-        msg = get_object_or_404(MailMessage, id=email_id, account=account)
-
         try:
+            data = json.loads(request.body.decode("utf-8"))
+            account_id = data.get("account_id")
+            #account_id = request.POST.get("account_id")
+            account = get_object_or_404(MailAccount, id=account_id)
+            msg = get_object_or_404(MailMessage, id=email_id, account=account)
+
+        
             # Connect IMAP
             if account.use_ssl:
                 imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
@@ -563,7 +565,7 @@ def delete_sent(request, email_id):
             result, _ = imap.uid("COPY", msg.uid, "INBOX.Trash")
             if result != "OK":
                 raise Exception(f"Failed to Delete Sent Message")
-            imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
+            imap.uid("STORE", str(msg.uid), "+FLAGS", "(\Deleted)")
             imap.expunge()
             imap.logout()
 
