@@ -263,13 +263,14 @@ def ComInbox(request):
 
 def archive_email(request, email_id):
     if request.method == "POST":
-        data = json.loads(request.body)
-        account_id = data.get("account_id")
-        #account_id = request.POST.get("account_id")
-        account = get_object_or_404(MailAccount, id=account_id)
-        msg = get_object_or_404(MailMessage, id=email_id, account=account)
-
         try:
+            data = json.loads(request.body.decode("utf-8"))
+            account_id = data.get("account_id")
+            #account_id = request.POST.get("account_id")
+            account = get_object_or_404(MailAccount, id=account_id)
+            msg = get_object_or_404(MailMessage, id=email_id, account=account)
+
+        
             # Connect IMAP
             if account.use_ssl:
                 imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
@@ -298,29 +299,28 @@ def archive_email(request, email_id):
 
 def delete_email(request, email_id):
     if request.method == "POST":
-        data = json.loads(request.body)
-        account_id = data.get("account_id")
-        #account_id = request.POST.get("account_id")
-        account = get_object_or_404(MailAccount, id=account_id)
-        msg = get_object_or_404(MailMessage, id=email_id, account=account)
-
         try:
-            # Connect IMAP
+            data = json.loads(request.body.decode("utf-8"))
+            account_id = data.get("account_id")
+            #account_id = request.POST.get("account_id")
+            account = get_object_or_404(MailAccount, id=account_id)
+            msg = get_object_or_404(MailMessage, id=email_id, account=account)
             if account.use_ssl:
-                imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
+                    imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
             else:
                 imap = imaplib.IMAP4(account.imap_host, account.imap_port)
             imap.login(account.username, account.password)
-            imap.select(msg.folder.capitalize())  # select the folder where the mail currently is
-
+            imap.select("INBOX")  # select the folder where the mail currently is
+            
             # Mark as deleted + expunge
             result, _ = imap.uid("COPY", msg.uid, "INBOX.Trash")
             if result != "OK":
-                raise Exception(f"Failed to Delete")
-            imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
+                raise Exception(f"Failed to move to Trash")
+            # Mark as deleted in INBOX + expunge
+            imap.uid("STORE", str(msg.uid), "+FLAGS", "(\Deleted)")
             imap.expunge()
             imap.logout()
-
+        
             # Remove from DB
             msg.delete()
             return JsonResponse({"success": True, "id": email_id})
@@ -509,7 +509,7 @@ def ComSent(request):
 
 def archive_sent(request, email_id):
     if request.method == "POST":
-        data = json.loads(request.body)
+        data = json.loads(request.body.decode("utf-8"))
         account_id = data.get("account_id")
         #account_id = request.POST.get("account_id")
         account = get_object_or_404(MailAccount, id=account_id)
@@ -544,7 +544,7 @@ def archive_sent(request, email_id):
 
 def delete_sent(request, email_id):
     if request.method == "POST":
-        data = json.loads(request.body)
+        data = json.loads(request.body.decode("utf-8"))
         account_id = data.get("account_id")
         #account_id = request.POST.get("account_id")
         account = get_object_or_404(MailAccount, id=account_id)
