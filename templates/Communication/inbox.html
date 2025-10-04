@@ -32,19 +32,33 @@ Inbox
                     <small class="text-muted"></small>
                     <input style="width:100%" type="button" class="copyButton" value="{{ msg.sender }}" data-url="{{ msg.sender }}" onclick="copyToClipboard_value(this);"></br></br>
                     <div class="onehalf">
-                        <form method="post" action="{% url 'archive_email' msg.id %}">
+                        {% comment %} <form method="post" action="{% url 'archive_email' msg.id %}">
                             {% csrf_token %}
                             <input type="hidden" name="account_id" value="{{ EmailInstance.id }}">
-                            <button type="submit" class="btn btn-sm btn-warning" style="width:100%">Archive</button>
-                        </form>
+                            <button type="submit" class="btn btn-sm btn-warning archive-btn" style="width:100%">Archive</button>
+                        </form> {% endcomment %}
+                        <button 
+                            class="btn btn-sm btn-warning archive-btn" 
+                            data-id="{{ msg.id }}" 
+                            data-account="{{ EmailInstance.id }}"
+                            style="width:100%">
+                            Archive
+                        </button>
                     </div>
                     <!-- Delete -->
                     <div class="onehalf">
-                        <form method="post" action="{% url 'delete_email' msg.id %}">
+                        {% comment %} <form method="post" action="{% url 'delete_email' msg.id %}">
                             {% csrf_token %}
                             <input type="hidden" name="account_id" value="{{ EmailInstance.id }}">
                             <button type="submit" class="btn btn-sm btn-danger" style="width:100%">Delete</button>
-                        </form>
+                        </form> {% endcomment %}
+                        <button 
+                            class="btn btn-sm btn-danger delete-btn" 
+                            data-id="{{ msg.id }}" 
+                            data-account="{{ EmailInstance.id }}"
+                            style="width:100%">
+                            Delete
+                        </button>
                     </div>
                 </div>
                 <div class="onehalf mail-section">
@@ -62,6 +76,59 @@ Inbox
     {% endif %} 
 </div>
 
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Archive handler
+    document.querySelectorAll(".archive-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const emailId = this.dataset.id;
+            const accountId = this.dataset.account;
+
+            fetch(`/archive-email/${emailId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ account_id: accountId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    this.closest(".email-group-item").remove(); // remove from DOM
+                } else {
+                    alert("Error archiving email!");
+                }
+            });
+        });
+    });
+
+    // Delete handler
+    document.querySelectorAll(".delete-btn").forEach(btn => {
+        btn.addEventListener("click", function() {
+            const emailId = this.dataset.id;
+            const accountId = this.dataset.account;
+
+            fetch(`/delete-email/${emailId}/`, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ account_id: accountId })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    this.closest(".email-group-item").remove(); // remove from DOM
+                } else {
+                    alert("Error deleting email!");
+                }
+            });
+        });
+    });
+});
+</script>
 
 
 

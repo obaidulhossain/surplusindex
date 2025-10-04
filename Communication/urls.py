@@ -13,8 +13,8 @@ urlpatterns = [
 
 
     path("com_inbox/", views.ComInbox, name="com_inbox"),
-    path("archive/<int:msg_id>/", views.archive_email, name="archive_email"),
-    path("delete/<int:msg_id>/", views.delete_email, name="delete_email"),
+    path("archive-email/<int:email_id>/", views.archive_email, name="archive_email"),
+    path("delete-email/<int:email_id>/", views.delete_email, name="delete_email"),
 
     path("conversation/<str:thread_key>/<int:account_id>/", views.conversation_view, name="conversation_view"),
     path("conversation/<str:account_id>/<int:message_id>/reply/", views.send_reply_view, name="send_reply"),
@@ -22,8 +22,8 @@ urlpatterns = [
     path("edit-message/<int:msg_id>/", views.edit_message_body, name="edit_message"),
 
     path("com_sent/", views.ComSent, name="com_sent"),
-    path("archive_sent/<int:msg_id>/", views.archive_sent, name="archive_sent"),
-    path("delete_sent/<int:msg_id>/", views.delete_sent, name="delete_sent"),
+    path("archive-sent/<int:email_id>/", views.archive_sent, name="archive_sent"),
+    path("delete-sent/<int:email_id>/", views.delete_sent, name="delete_sent"),
 
     path("com_campaign/", views.ComCampaign, name="com_campaign"),
     path("download_scheduled_email_logs/", views.download_email_logs, name="download_scheduled_email_logs"),

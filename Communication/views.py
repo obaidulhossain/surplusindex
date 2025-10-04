@@ -261,11 +261,11 @@ def ComInbox(request):
     }
     return render(request, "Communication/inbox.html", context)
 
-def archive_email(request, msg_id):
+def archive_email(request, email_id):
     if request.method == "POST":
         account_id = request.POST.get("account_id")
         account = get_object_or_404(MailAccount, id=account_id)
-        msg = get_object_or_404(MailMessage, id=msg_id, account=account)
+        msg = get_object_or_404(MailMessage, id=email_id, account=account)
 
         try:
             # Connect IMAP
@@ -288,17 +288,15 @@ def archive_email(request, msg_id):
             # Update DB
             msg.folder = "archive"
             msg.save()
-            messages.success(request, f"Message archived: {msg.subject}")
+            return JsonResponse({"success": True})
         except Exception as e:
-            messages.error(request, f"Failed to archive: {e}")
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
 
-    return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
-
-def delete_email(request, msg_id):
+def delete_email(request, email_id):
     if request.method == "POST":
         account_id = request.POST.get("account_id")
         account = get_object_or_404(MailAccount, id=account_id)
-        msg = get_object_or_404(MailMessage, id=msg_id, account=account)
+        msg = get_object_or_404(MailMessage, id=email_id, account=account)
 
         try:
             # Connect IMAP
@@ -319,11 +317,73 @@ def delete_email(request, msg_id):
 
             # Remove from DB
             msg.delete()
-            messages.success(request, "Message deleted from server & DB.")
+            return JsonResponse({"success": True})
         except Exception as e:
-            messages.error(request, f"Failed to delete: {e}")
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
 
-    return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
+# def archive_email(request, msg_id):
+#     if request.method == "POST":
+#         account_id = request.POST.get("account_id")
+#         account = get_object_or_404(MailAccount, id=account_id)
+#         msg = get_object_or_404(MailMessage, id=msg_id, account=account)
+
+#         try:
+#             # Connect IMAP
+#             if account.use_ssl:
+#                 imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
+#             else:
+#                 imap = imaplib.IMAP4(account.imap_host, account.imap_port)
+#             imap.login(account.username, account.password)
+#             imap.select("INBOX")
+            
+#             result, _ = imap.uid("COPY", msg.uid, "INBOX.Archive")
+#             if result != "OK":
+#                 raise Exception(f"Failed to copy to Archive")
+#             # Move to Archive
+#             # imap.uid("COPY", msg.uid, "Archived")
+#             imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
+#             imap.expunge()
+#             imap.logout()
+
+#             # Update DB
+#             msg.folder = "archive"
+#             msg.save()
+#             messages.success(request, f"Message archived: {msg.subject}")
+#         except Exception as e:
+#             messages.error(request, f"Failed to archive: {e}")
+
+#     return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
+
+# def delete_email(request, msg_id):
+#     if request.method == "POST":
+#         account_id = request.POST.get("account_id")
+#         account = get_object_or_404(MailAccount, id=account_id)
+#         msg = get_object_or_404(MailMessage, id=msg_id, account=account)
+
+#         try:
+#             # Connect IMAP
+#             if account.use_ssl:
+#                 imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
+#             else:
+#                 imap = imaplib.IMAP4(account.imap_host, account.imap_port)
+#             imap.login(account.username, account.password)
+#             imap.select(msg.folder.capitalize())  # select the folder where the mail currently is
+
+#             # Mark as deleted + expunge
+#             result, _ = imap.uid("COPY", msg.uid, "INBOX.Trash")
+#             if result != "OK":
+#                 raise Exception(f"Failed to Delete")
+#             imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
+#             imap.expunge()
+#             imap.logout()
+
+#             # Remove from DB
+#             msg.delete()
+#             messages.success(request, "Message deleted from server & DB.")
+#         except Exception as e:
+#             messages.error(request, f"Failed to delete: {e}")
+
+#     return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
 
 #----------------------------------- Conversation Views ---------------------------
 
@@ -439,11 +499,11 @@ def ComSent(request):
     }
     return render(request, "Communication/sent.html", context)
 
-def archive_sent(request, msg_id):
+def archive_sent(request, email_id):
     if request.method == "POST":
         account_id = request.POST.get("account_id")
         account = get_object_or_404(MailAccount, id=account_id)
-        msg = get_object_or_404(MailMessage, id=msg_id, account=account)
+        msg = get_object_or_404(MailMessage, id=email_id, account=account)
 
         try:
             # Connect IMAP
@@ -466,17 +526,15 @@ def archive_sent(request, msg_id):
             # Update DB
             msg.folder = "archive"
             msg.save()
-            messages.success(request, f"Sent Message archived: {msg.subject}")
+            return JsonResponse({"success": True})
         except Exception as e:
-            messages.error(request, f"Failed to archive sent message: {e}")
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
 
-    return redirect(f"{reverse('com_sent')}?selectedemail={account.id}")
-
-def delete_sent(request, msg_id):
+def delete_sent(request, email_id):
     if request.method == "POST":
         account_id = request.POST.get("account_id")
         account = get_object_or_404(MailAccount, id=account_id)
-        msg = get_object_or_404(MailMessage, id=msg_id, account=account)
+        msg = get_object_or_404(MailMessage, id=email_id, account=account)
 
         try:
             # Connect IMAP
@@ -497,12 +555,9 @@ def delete_sent(request, msg_id):
 
             # Remove from DB
             msg.delete()
-            messages.success(request, "Sent Message deleted from server & DB.")
+            return JsonResponse({"success": True})
         except Exception as e:
-            messages.error(request, f"Failed to delete sent message: {e}")
-
-    return redirect(f"{reverse('com_sent')}?selectedemail={account.id}")
-
+            return JsonResponse({"success": False, "error": str(e)}, status=400)
 #-----------------------------------Campaign Manager ---------------------------
 
 def ComCampaign(request):
