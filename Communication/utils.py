@@ -87,21 +87,33 @@ def fetch_folder_crosscheck(mail_account, folder="INBOX"):
             imap.close()
             imap.logout()
             return True, f"No new messages in {folder}"
-        #send notification
-        
-        from_email = formataddr((f"{len(missing_uids)} New Emails", mail_account.email_address))
-        notification_sub = f"{len(missing_uids)} new messages updated"
-        notification_body = f"Fetched {len(missing_uids)} new messages from {folder}"
-        notification_msg = EmailMultiAlternatives(
-            subject=notification_sub,
-            body=notification_body,  # fallback plain text
-            from_email=from_email,
-            to=["obaidulbiplob.bd@gmail.com", "sanjidatarinbd@gmail.com"],
-            reply_to=["contact@surplusindex.com"],
-        )
-
-        # Attach HTML version
-        notification_msg.send(fail_silently=False)
+        try:
+            #send notification
+            from_email = formataddr((f"New Emails", mail_account.email_address))
+            notification_sub = f"{len(missing_uids)} new emails updated"
+            notification_body = f"Fetched {len(missing_uids)} new messages from {folder}"
+            notification_msg = EmailMultiAlternatives(
+                subject=notification_sub,
+                body=notification_body,  # fallback plain text
+                from_email=from_email,
+                to=["obaidulbiplob.bd@gmail.com", "sanjidatarinbd@gmail.com"],
+                reply_to=["contact@surplusindex.com"],
+            )
+            # Optional HTML version
+            html_Notification_body = f"""
+                <html>
+                    <body style='font-family:Arial, sans-serif;'>
+                        <p><strong>{len(missing_uids)} new emails</strong> were fetched from <b>{folder}</b>.</p>
+                        <p>This update was triggered by the automatic sync process for
+                        <b>{mail_account.email_address}</b>.</p>
+                    </body>
+                </html>
+            """
+            msg.attach_alternative(html_Notification_body, "text/html")
+            # Attach HTML version
+            notification_msg.send(fail_silently=False)
+        except Exception as e:
+            print(f"Notification email failed: {e}")
         # Fetch missing emails
         for uid in missing_uids:
             status, msg_data = imap.uid("fetch", str(uid), "(RFC822 INTERNALDATE)")
