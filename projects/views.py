@@ -115,6 +115,7 @@ def update_foreclosure(request):
     case_type = request.POST.get('case_type','')
     case_status = request.POST.get('case_status','')
     case_search_status = request.POST.get('case_search_status','')
+    notes = request.POST.get('notes','')
     
     if sel_fcl:
         fcl_instance = Foreclosure.objects.get(pk=sel_fcl)
@@ -141,6 +142,9 @@ def update_foreclosure(request):
         fcl_instance.court_name = court_name
         fcl_instance.case_type = case_type
         fcl_instance.case_status = case_status
+        if not notes == fcl_instance.notes:
+            print("note saved")
+            fcl_instance.notes = notes
         if current_user.groups.filter(name="researcher").exists() and case_search_status == "Verified":
             fcl_instance.case_search_status = "Completed"
         else:
@@ -166,6 +170,21 @@ def update_foreclosure(request):
     sel_fcl = fcl_instance.pk
 
     return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={sel_fcl}")
+
+@csrf_exempt
+def save_notes_ajax(request, fcl_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body)
+            notes = data.get("notes", "")
+            instance = Foreclosure.objects.get(pk=fcl_id)
+            instance.notes = notes
+            instance.save()
+            return JsonResponse({"success": True})
+        except Exception as e:
+            return JsonResponse({"success": False, "error": str(e)})
+    return JsonResponse({"success": False, "error": "Invalid request"})
+
 
 ##-------------------------------------Defendant Section
 def add_defendant(request):

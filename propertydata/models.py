@@ -276,6 +276,7 @@ class Foreclosure(OperationStat):
     verified_surplus = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
     surplus_status = models.CharField(max_length=100, choices=SURPLUS_STATUS, default="Not Determined", null=True, blank=True)
     comment = models.CharField(max_length=225, blank=True)
+    notes = models.TextField(blank=True, null=True)
     hidden_for = models.ManyToManyField(User, related_name='hidden_leads', blank=True)
     purchased_by = models.ManyToManyField(User, related_name='purchased_leads', blank=True)
     archived_by = models.ManyToManyField(User, related_name='archived_leads', blank=True)

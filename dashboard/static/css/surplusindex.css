@@ -1033,3 +1033,10 @@ table.table .avatar {
     border: 1px solid #c8c8c8;
     padding: 20px
 }
+
+.custom-textarea {
+    text-align-last: left;
+    border: 2px solid #ababab;
+    border-radius: 5px;
+    padding: 10px;
+}

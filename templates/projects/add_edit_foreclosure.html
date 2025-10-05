@@ -173,6 +173,30 @@ Checklists
                     </select>
                 </div>
             </div>
+
+            <div class="subsection-header">
+                <h6>Notes</h6>
+            </div>
+            <div class="subsection-body">
+                <div class="onehalf">
+                    <div class="onehalf">
+                        <label for="court-record">Court record</label><br>
+                        <input type="text" name="court-record" id="court-record" placeholder="Court Record" style="width:100%">
+                    </div>
+                    <div class="onehalf">
+                        <label for="record-date">Record Date</label><br>
+                        <input type="date" name="record-date" id="record-date" style="width:100%">
+                    </div></br></br>
+                    <label for="comments">Comments</label><br>
+                    <textarea type="text" name="comments" id="comments" placeholder="Write Note Here" class="custom-textarea" style="width:100%"></textarea>
+                    <button id="add-note" class="button" style="width:100%">Add Note</button>
+                </div>
+                <div class="onehalf">
+                    <label for="notes">Notes</label><br>
+                    <textarea name="notes" id="notes" rows="7" placeholder="Write Note Here" class="custom-textarea" style="width:90%;">{% if current_fcl_instance.notes %}{{current_fcl_instance.notes}}{% endif %}</textarea>
+                </div>
+            </div>
+
             {% endif %}
 
             <input type="submit" style="margin-top:20px;" value="{% if selected_foreclosure == "" %}Create Foreclosure Instance{% else %}Update Foreclosure{% endif %}">
@@ -252,6 +276,91 @@ Checklists
         // Trigger AJAX call on input change
         $('#f_state, #f_county, #case_num, #sale_type, #sale_status').on('input', fclResults);
     });
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const addBtn = document.getElementById("add-note");
+  const comments = document.getElementById("comments");
+  const courtRecord = document.getElementById("court-record");
+  const recordDate = document.getElementById("record-date");
+  const notes = document.getElementById("notes");
+
+  addBtn.addEventListener("click", function(e) {
+    e.preventDefault();
+
+    const now = new Date();
+    const dateStr = now.toLocaleDateString("en-GB"); // e.g. 05/10/2025
+    let newLine = "";
+      // Format record date (if provided) to DD/MM/YYYY
+    let recordDateFormatted = "";
+    if (recordDate.value) {
+        const rd = new Date(recordDate.value);
+        recordDateFormatted = rd.toLocaleDateString("en-GB"); // standard format
+    }
+
+
+    // If court record and record date are filled
+    if (courtRecord.value.trim() !== "" && recordDate.value.trim() !== "") {
+      newLine += `REC - ${recordDateFormatted} - ${courtRecord.value.trim()}\n`;
+      courtRecord.value = "";
+      recordDate.value = "";
+    }
+    // If comment is filled
+    if (comments.value.trim() !== "") {
+      newLine += `CMT - ${dateStr} - ${comments.value.trim()}\n`;
+      comments.value = "";
+    }
+
+    
+
+    if (newLine === "") return;
+
+    // Append to notes
+    notes.value = notes.value.trim() + (notes.value ? "\n" : "") + newLine.trim();
+
+    // Save via AJAX
+    fetch("{% url 'save_notes_ajax' current_fcl_instance.id %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": getCookie("csrftoken"),
+      },
+      body: JSON.stringify({ notes: notes.value })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const originalText = addBtn.textContent;
+        addBtn.textContent = "Note Added!";
+        addBtn.style.backgroundColor = "#d4bb00ff"; // green color feedback
+
+        setTimeout(() => {
+          addBtn.textContent = originalText;
+          addBtn.style.backgroundColor = ""; // reset to default
+        }, 2000);
+      } else {
+        alert("Failed to save notes.");
+      }
+    })
+    .catch(err => console.error("Error:", err));
+  });
+
+  // Helper for CSRF
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(name + "=")) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+});
 </script>
 
 <!--Foreclosure Section               End -->
