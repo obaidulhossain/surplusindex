@@ -277,6 +277,7 @@ Checklists
         $('#f_state, #f_county, #case_num, #sale_type, #sale_status').on('input', fclResults);
     });
 </script>
+{% if current_fcl_instance %}
 <script>
 document.addEventListener("DOMContentLoaded", function() {
   const addBtn = document.getElementById("add-note");
@@ -362,7 +363,7 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 </script>
-
+{% endif %}
 <!--Foreclosure Section               End -->
 
 <!--Property Section               Start -->
