@@ -141,3 +141,4 @@ class CampaignEvent(models.Model):
     event_type = models.CharField(choices=[("open","Open"), ("click","Click")], max_length=20)
     url_clicked = models.TextField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
+

@@ -20,6 +20,7 @@ from django.urls import reverse
 from .utils import token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from si_user.models import UserDetail
+from Communication.utils import notify
 
 
 
@@ -91,10 +92,14 @@ class RegistrationView(View):
                 email_body='Hi '+user.username+' Please use this link to verify your email and activate your account.\n'+activate_url
                 email_subject = 'Verify Email and Activate SurplusIndex Account'
                 send_mail(email_subject,email_body,'contact@surplusindex.com',[email], fail_silently=False)
-
+                
+                notify(
+                    n_subject="New Registration",
+                    n_body=f"A new user registered with username {username} and email {email} (Not Activated)",
+                    n_source="Registration")
                 messages.success(request,'Account Successfully Created')
                 messages.info(request, 'Account Inactive! Please Check your email to activate account')
-                return render(request, 'authentication/login.html')
+                return redirect('login')
 
         return render(request, 'authentication/registration.html')
     
@@ -117,6 +122,10 @@ class VerificationView(View):
             user.save()
             update_detail = UserDetail.objects.get(user=user)
             update_detail.update_total_credits()
+            notify(
+                    n_subject="New Activation",
+                    n_body=f"A new user registered with username {user.username} and email {user.email} activated his/her account successfully!",
+                    n_source="Activation")
             messages.success(request,'Account Successfully Activated')
             messages.info(request,'You have recieved 20 Free credits. Log in and access thousands of active prospects now.')
             return redirect ('login')

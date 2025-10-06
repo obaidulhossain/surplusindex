@@ -12,6 +12,7 @@ from datetime import datetime
 from django.db.models import IntegerField
 from django.db.models.functions import Cast
 from django.template.loader import render_to_string
+import traceback
 def test_email_connection(email_account):
     """
     Test SMTP connection for a given EmailAccount instance.
@@ -326,6 +327,45 @@ def send_reply(
             reply_instance.save(update_fields=["in_reply_to", "thread_id", "thread_key"])
 
     return reply_instance
+
+def notify(n_subject: str, n_body: str, n_source: str, recipients=None):
+    """
+    Send a formatted notification email for any source event.
+    - n_subject: Email subject line
+    - n_body: Plaintext message body
+    - n_source: Event source label (e.g., 'Sync Update', 'System Alert')
+    - recipients: Optional list of extra recipients
+    """
+    try:
+        default_recipients = ["obaidulbiplob.bd@gmail.com", "sanjidatarinbd@gmail.com"]
+        to_recipients = recipients or default_recipients
+        from_email = formataddr(("SurplusIndex Notification", "contact@surplusindex.com"))
+        notification_msg = EmailMultiAlternatives(
+            subject= n_subject,
+            body= n_body,  # fallback plain text
+            from_email= from_email,
+            to= to_recipients,
+            reply_to= ["contact@surplusindex.com"],
+        )
+                # Optional HTML version
+        html_Notification_body = f"""
+            <html>
+                <body style='font-family:Arial, sans-serif; color:#333;'>
+                    <h2 style='color:#005bbb;'>New {n_source}</h2>
+                    <p style='line-height:1.6;'>{n_body}</p>
+                    <p style='font-size:12px; color:#777;'>Received at: {timezone.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
+                </body>
+            </html>
+        """
+        notification_msg.attach_alternative(html_Notification_body, "text/html")
+                # Attach HTML version
+        notification_msg.send(fail_silently=False)
+        print(f"✅ Notification sent for {n_source}: {n_subject}")
+
+    except Exception as e:
+        print(f"❌ Notification failed: {e}")
+        traceback.print_exc()
+
     # # ---- Fetch latest UID from Sent folder ----
     # imap.select(folder)
     # status, data = imap.search(None, "ALL")

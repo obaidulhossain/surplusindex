@@ -25,6 +25,7 @@ from django.dispatch import receiver
 from datetime import datetime, timedelta, date
 from collections import defaultdict
 from Client.resources import *
+from Communication.utils import notify
 # Configure the logger
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -365,9 +366,21 @@ def stripe_webhook(request):
                     payment.transaction_source = source_type
                     payment.has_paid = (status == "active")
                     payment.save()
+                    payment.refresh_from_db()
                     logger.info(f"Subscription transaction updated for {user.username}")
+                    notify(
+                        n_subject="Subscription Updated",
+                        n_body=f"""
+                        Subscription plan updated
+                        User: {payment.user.username}
+                        Stripe Customer ID: {payment.stripe_customer_id}
+                        Invoice ID: {payment.stripe_invoice_id}
+                        Amount: {payment.amount}
+                        """,
+                        n_source="Subscription Plan Update")
                 except UserTransactions.DoesNotExist:
                     payment = UserTransactions.objects.create(
+
                         user=user,
                         stripe_customer_id=stripe_ids.get("customer"),
                         stripe_checkout_id=stripe_ids.get("checkout_id"),
@@ -381,6 +394,18 @@ def stripe_webhook(request):
                         has_paid=(status == "active")
                     )
                     logger.info(f"Subscription transaction created for {user.username}")
+                    notify(
+                        n_subject="New Subscription",
+                        n_body=f"""
+                        Started a Subscription plan
+                        User: {user.username}
+                        Stripe Customer ID: {stripe_ids.get("customer")}
+                        Checkout ID: {stripe_ids.get("checkout_id")}
+                        Subscription ID: {stripe_ids.get("subscription_id")}
+                        Invoice ID: {stripe_ids.get("invoice_id")}
+                        Amount: {amount}
+                        """,
+                        n_source="Subscription Plan Enrollment")
                 return payment
             else:
                 # PAYG or normal create
@@ -398,6 +423,17 @@ def stripe_webhook(request):
                     has_paid=(status == "active")
                 )
                 logger.info(f"PAYG transaction created for {user.username}")
+                notify(
+                        n_subject="Credit Purchased",
+                        n_body=f"""
+                        {user.username} Purchased {num_leads} Credits in PAYG Plan
+                        Stripe Customer ID: {stripe_ids.get("customer")}
+                        Checkout ID: {stripe_ids.get("checkout_id")}
+                        Subscription ID: {stripe_ids.get("subscription_id")}
+                        Invoice ID: {stripe_ids.get("invoice_id")}
+                        Amount: {amount}
+                        """,
+                        n_source="Credit Purchase")
                 return payment
             
             
@@ -575,6 +611,10 @@ def cancel_subscription(request, subscription_id):
     # )
     stripe.Subscription.delete(subscription_id)  # Immediate cancel
     messages.success(request, f"Subscription {subscription_id} has been canceled.")
+    notify(
+        n_subject="Subscription Cancelled",
+        n_body=f"An user ({request.user}) cancelled his/her subscription. Subscription id: {subscription_id}",
+        n_source="Cancellation of Subscription")
     return redirect("subscriptions")
 # def cancel_subscription(request):
 #     sub = get_object_or_404(StripeSubscription, user=request.user, status="active")
