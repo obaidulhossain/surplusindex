@@ -89,7 +89,7 @@ def fetch_folder_crosscheck(mail_account, folder="INBOX"):
             return True, f"No new messages in {folder}"
         try:
             #send notification
-            from_email = formataddr((f"New Emails", mail_account.email_address))
+            from_email = formataddr(("New Emails", mail_account.email_address))
             notification_sub = f"{len(missing_uids)} new emails updated"
             notification_body = f"Fetched {len(missing_uids)} new messages from {folder}"
             notification_msg = EmailMultiAlternatives(
@@ -109,7 +109,7 @@ def fetch_folder_crosscheck(mail_account, folder="INBOX"):
                     </body>
                 </html>
             """
-            msg.attach_alternative(html_Notification_body, "text/html")
+            notification_msg.attach_alternative(html_Notification_body, "text/html")
             # Attach HTML version
             notification_msg.send(fail_silently=False)
         except Exception as e:
