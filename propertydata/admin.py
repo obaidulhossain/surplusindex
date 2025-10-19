@@ -37,6 +37,8 @@ class TransactionAdmin(admin.ModelAdmin):
 
 class ForeclosureAdmin(admin.ModelAdmin):
     list_display = ('id', 'published', 'state', 'county', 'case_number', 'case_search_assigned_to', 'sale_date', 'sale_type', 'sale_status','surplus_status', 'sale_price', 'possible_surplus','verified_surplus')
+    list_filter = ('state', 'county', 'sale_type', 'sale_status','surplus_status','published', 'case_search_status')
+    #search_fields = ()
 
 class StatusAdmin(admin.ModelAdmin):
     list_display = ('client_id', 'lead_id','find_contact_status', 'skiptracing_status', 'call_status','negotiation_status','closing_status')
