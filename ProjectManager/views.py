@@ -567,9 +567,10 @@ def VerifyAll(request):
         saved, problem = 0, 0
         for lead in leads:
             try:
-                lead.case_search_status = "Verified"
-                lead.save(update_fields=["case_search_status"])
-                saved += 1
+                if lead.case_search_status == "Completed":
+                    lead.case_search_status = "Verified"
+                    lead.save(update_fields=["case_search_status"])
+                    saved += 1
             except:
                 problem += 1
         messages.info(request, f"{saved} marked as verified and problem verifying {problem}")
@@ -586,9 +587,10 @@ def PublishAll(request):
         saved, problem = 0, 0
         for lead in leads:
             try:
-                lead.published = True
-                lead.save(update_fields=["published"])
-                saved += 1
+                if lead.published == False:
+                    lead.published = True
+                    lead.save(update_fields=["published"])
+                    saved += 1
             except:
                 problem += 1
         messages.info(request, f"{saved} Published and Error Publishing {problem}")
