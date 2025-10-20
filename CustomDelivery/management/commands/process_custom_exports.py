@@ -33,8 +33,8 @@ class Command(BaseCommand):
                 email = EmailMessage(
                     subject=f"Your Export Delivery - {export_option.client_name}",
                     body=f"Hello {export_option.client_name},\n\nYour latest export is attached.\n\nRegards,\nSurplusIndex",
-                    from_email="no-reply@surplusindex.com",
-                    from_email=settings.DEFAULT_FROM_EMAIL
+                    # from_email="no-reply@surplusindex.com",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
                     to=[export_option.client_email],
                 )
                 email.attach(filename, buffer.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
