@@ -748,6 +748,7 @@ Task Viewer
     </div>
     <h4 style="margin-top:30px;">Completed Cases</h4>
     <form method="POST" action="{% url "verify_all" %}">
+    {% csrf_token %}
         <input type="hidden" name="task_id" value="{{task_instance.id}}">
         <input type="submit"class="button" value="Mark all as verified">
     </form>
@@ -804,6 +805,7 @@ Task Viewer
     </div>
     <h4 style="margin-top:30px;">Verified Cases</h4>
     <form method="POST" action="{% url "publish_all" %}">
+    {% csrf_token %}
         <input type="hidden" name="task_id" value="{{task_instance.id}}">
         <input type="submit"class="button" value="Publish All">
     </form>
