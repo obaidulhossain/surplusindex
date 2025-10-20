@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'media_manager',
     'ProjectManager',
     'Communication',
+    'CustomDelivery',
     
 ]
 

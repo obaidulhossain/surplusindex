@@ -33,7 +33,8 @@ path('deliver-skiptrace-task/', views.DeliverSkiptraceTask, name="deliver-skiptr
 path('deliver-publish-task/', views.DeliverPublishTask, name="deliver-publish-task"),
 path('deliver-cycle/<int:task_id>/',views.deliver_cycle_leads, name="deliver_cycle_leads"),
 path('deliver-update-cycle-task/',views.DeliverUpdateCycle, name="deliver-update-cycle-task"),
-
+path('verify_all', views.VerifyAll, name="verify_all"),
+path('publish_all', views.PublishAll, name="publish_all"),
 
 path('deliver-post-foreclosure-case-task/', views.DeliverPostForeclosureCasesearchTask, name="deliver-post-foreclosure-case-task"),
 path('save-note/',views.SaveNote, name="save_note"),
