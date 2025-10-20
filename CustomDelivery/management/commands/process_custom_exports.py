@@ -6,7 +6,7 @@ import calendar
 from CustomDelivery.models import *
 from CustomDelivery.resources import CustomExportResource
 from django.core.mail import EmailMessage
-
+from django.conf import settings
 class Command(BaseCommand):
     help = "Processes CustomExportOptions and updates next delivery dates if due."
 
@@ -34,6 +34,7 @@ class Command(BaseCommand):
                     subject=f"Your Export Delivery - {export_option.client_name}",
                     body=f"Hello {export_option.client_name},\n\nYour latest export is attached.\n\nRegards,\nSurplusIndex",
                     from_email="no-reply@surplusindex.com",
+                    from_email=settings.DEFAULT_FROM_EMAIL
                     to=[export_option.client_email],
                 )
                 email.attach(filename, buffer.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
