@@ -4,6 +4,8 @@ from django.utils import timezone
 from datetime import timedelta, date
 import calendar
 from CustomDelivery.models import *
+from CustomDelivery.resources import CustomExportResource
+from django.core.mail import EmailMessage
 
 class Command(BaseCommand):
     help = "Processes CustomExportOptions and updates next delivery dates if due."
@@ -23,17 +25,38 @@ class Command(BaseCommand):
             self.stdout.write(f"Processing export for: {export_option.client_name} ({export_option.client_email})")
 
             try:
-                # STEP 1 — (Later) Generate and email Excel file
-                # We'll add this logic after we finish the scheduling foundation.
+                # STEP 1 — Generate Excel dynamically
+                resource = CustomExportResource(export_option)
+                filename, buffer = resource.export_to_excel()
+                
+                # STEP 2 — (Optional) Send via email
+                email = EmailMessage(
+                    subject=f"Your Export Delivery - {export_option.client_name}",
+                    body=f"Hello {export_option.client_name},\n\nYour latest export is attached.\n\nRegards,\nSurplusIndex",
+                    from_email="no-reply@surplusindex.com",
+                    to=[export_option.client_email],
+                )
+                email.attach(filename, buffer.getvalue(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                email.send(fail_silently=False)
 
-                # STEP 2 — Calculate next delivery date
+                # STEP 3 — Calculate next delivery date
                 next_date = self.calculate_next_delivery_date(export_option)
-
                 export_option.next_delivery_date = next_date
                 export_option.save(update_fields=["next_delivery_date"])
 
+                # STEP 4 — Add exported leads into the corresponding M2M field
+                new_leads = resource.get_queryset()
+
+                if export_option.delivery_type == "pre-foreclosure":
+                    export_option.pre_foreclosure.add(*new_leads)
+                elif export_option.delivery_type == "post-foreclosure":
+                    export_option.post_foreclosure.add(*new_leads)
+                elif export_option.delivery_type == "verified":
+                    export_option.verified_surplus.add(*new_leads)
+
                 self.stdout.write(self.style.SUCCESS(
                     f"✅ Updated next delivery date for {export_option.client_name} → {next_date}"
+                    f"✅ Added {new_leads.count()} new leads to {export_option.delivery_type} history"
                 ))
 
             except Exception as e:
