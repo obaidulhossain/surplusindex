@@ -696,12 +696,14 @@ def deliver_cycle_leads(request, task_id):
 def start_task(request, task_id):
     task = get_object_or_404(Tasks, id=task_id)
     if task.template.taskview.viewname == "Post Foreclosure Update":
-        if task.post_foreclosure_cases.count() < 1:
-            interval = task.project.post_foreclosure_update_interval
-            leads_queryset = Foreclosure.objects.filter(state__iexact=task.project.state, sale_status='Sold', changed_at__lt=now().date() - timedelta(days=interval)).exclude(surplus_status='fund claimed').exclude(surplus_status='no surplus')
-            task.post_foreclosure_cases.add(*leads_queryset)
-            if task.post_foreclosure_case_volume == "" or task.post_foreclosure_case_volume == None:
-                task.post_foreclosure_case_volume = leads_queryset.count()
+        interval = task.project.post_foreclosure_update_interval
+        leads_queryset = Foreclosure.objects.filter(state__iexact=task.project.state, sale_status='Sold', changed_at__lt=now().date() - timedelta(days=interval)).exclude(surplus_status='Fund Claimed').exclude(surplus_status='No Surplus')
+        task.post_foreclosure_cases.add(*leads_queryset)
+        if not task.post_foreclosure_case_volume:
+            task.post_foreclosure_case_volume = leads_queryset.count()
+        else:
+            task.post_foreclosure_case_volume = int(task.post_foreclosure_case_volume) + leads_queryset.count()
+
     if task.template.taskview.viewname == "Initiate Deliveries":
         active_subscriptions = StripeSubscription.objects.filter(plan=task.project.plan,current_period_end__gte=task.cycle.cycle_end)
         task.active_subscribers.add(*active_subscriptions)
@@ -827,7 +829,7 @@ def DeliverPostForeclosureCasesearchTask(request):
         if task:
             task_instance = Tasks.objects.get(id=task)
             interval = task_instance.project.post_foreclosure_update_interval
-            leads_queryset = Foreclosure.objects.filter(state__iexact=task_instance.project.state, sale_status='Sold', changed_at__lt=now().date() - timedelta(days=interval)).exclude(surplus_status='fund claimed').exclude(surplus_status='no surplus')
+            leads_queryset = Foreclosure.objects.filter(state__iexact=task_instance.project.state, sale_status='Sold', changed_at__lt=now().date() - timedelta(days=interval)).exclude(surplus_status='Fund Claimed').exclude(surplus_status='No Surplus')
             task_instance.post_foreclosure_cases.remove(*leads_queryset)
             task_instance.post_foreclosure_case_searched = task_instance.post_foreclosure_cases.count()
             task_instance.status = "delivered"
