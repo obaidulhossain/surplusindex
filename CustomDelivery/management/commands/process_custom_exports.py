@@ -27,7 +27,7 @@ class Command(BaseCommand):
             try:
                 # STEP 1 — Generate Excel dynamically
                 resource = CustomExportResource(export_option)
-                filename, buffer = resource.export_to_excel()
+                filename, buffer, df = resource.export_to_excel()
                 
                 # STEP 2 — (Optional) Send via email
                 email = EmailMessage(
