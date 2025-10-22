@@ -131,7 +131,7 @@ Manage Projects
                     <option value="delivered" {% if task.status == "delivered" %}selected{% endif %}>Delivered</option>
                     <option value="completed" {% if task.status == "completed" %}selected{% endif %}>Completed</option>
                 </select>
-                <form method="POST" action="{% url 'task_viewer' %}">
+                <form method="POST" action="{% url 'task_viewer' %}" target="_blank">
                 {% csrf_token %}
                     <input type="hidden" value="{{task.id}}" name="task">
                     <input type="submit" value="View Task">

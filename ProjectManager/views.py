@@ -698,11 +698,10 @@ def start_task(request, task_id):
     if task.template.taskview.viewname == "Post Foreclosure Update":
         interval = task.project.post_foreclosure_update_interval
         leads_queryset = Foreclosure.objects.filter(state__iexact=task.project.state, sale_status='Sold', changed_at__lt=now().date() - timedelta(days=interval)).exclude(surplus_status='Fund Claimed').exclude(surplus_status='No Surplus')
-        task.post_foreclosure_cases.add(*leads_queryset)
-        if not task.post_foreclosure_case_volume:
-            task.post_foreclosure_case_volume = leads_queryset.count()
-        else:
-            task.post_foreclosure_case_volume = int(task.post_foreclosure_case_volume) + leads_queryset.count()
+        if task.post_foreclosure_cases.count() < 1:
+            task.post_foreclosure_cases.add(*leads_queryset)
+            task.post_foreclosure_case_volume = task.post_foreclosure_cases.count()
+        
 
     if task.template.taskview.viewname == "Initiate Deliveries":
         active_subscriptions = StripeSubscription.objects.filter(plan=task.project.plan,current_period_end__gte=task.cycle.cycle_end)
