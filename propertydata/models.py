@@ -69,6 +69,18 @@ class Property(OperationStat):
         verbose_name = 'Property'
         verbose_name_plural = 'Properties'
 
+    def street_address (self):
+        street_parts = [
+                self.house_number,
+                self.road_name,
+                self.road_type,
+                self.direction,
+                self.apt_unit,
+                self.extention,
+            ]
+        full_street = " ".join(filter(None, [part.strip() for part in street_parts if part]))
+        return full_street
+    
     @property
     def fulladdress (self):
         return f"{self.house_number} {self.road_name} {self.road_type} {self.direction} {self.apt_unit} {self.extention} | {self.city}, {self.zip_code}"
@@ -123,9 +135,12 @@ class ForeclosingEntity(models.Model):
     dba = models.CharField(max_length=255, blank=True)
 
     def __str__(self):
-        return f"{self.business_name} | {self.individual_name}"
-
-
+        if self.individual_name and self.business_name:
+            return f"{self.business_name} | {self.individual_name}"
+        elif self.individual_name:
+            return self.individual_name
+        else:
+            return self.business_name
 # ------------------------------------------------------------- #
 
 class Contact(OperationStat):

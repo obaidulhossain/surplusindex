@@ -73,19 +73,41 @@ class CustomExportResource:
             "surplus_status": obj.surplus_status or "-",
             "case_number": obj.case_number or "-",
             "sale_date": obj.sale_date or "-",
-            "plaintiff": obj.plaintiff or "-",
-            "defendant": obj.defendant or "-",
+            # "plaintiff": obj.plaintiff or "-",
+            # "defendant": obj.defendant or "-",
             "fcl_final_judgment": obj.fcl_final_judgment or "-",
             "sale_price": obj.sale_price or "-",
             "possible_surplus": obj.possible_surplus or "-",
             "verified_surplus": obj.verified_surplus or "-",
-            "street_address": obj.street_address or "-",
-            "city": obj.city or "-",
-            "zip_code": obj.zip_code or "-",
-            "parcel_id": obj.parcel_id or "-",
-            
             
         }
+        # --- Handle Plaintiff (ManyToMany) -
+        plaintiffs = obj.plaintiff.all() if hasattr(obj, "plaintiff") else []
+        if plaintiffs:
+            base["plaintiff"] = ", ".join([p for p in plaintiffs if p]) or "-"
+        else:
+            base["plaintiff"] = "-"
+        # --- Handle Defendant (ManyToMany) -
+        defendants = obj.defendant.all() if hasattr(obj, "defendant") else []
+        if defendants:
+            base["defendant"] = ", ".join([d for d in defendants if d]) or "-"
+        else:
+            base["defendant"] = "-"
+
+        # --- Handle related property (ManyToMany) -
+        first_property = obj.property.first() if hasattr(obj, "property") else None
+        if first_property:
+            base["street_address"] = first_property.street_address or "-"
+            base["city"] = first_property.city or "-"
+            base["state"] = first_property.state or "-"
+            base["zip_code"] = first_property.zip_code or "-"
+            base["parcel"] = first_property.parcel or "-"
+        else:
+            base["street_address"] = "-"
+            base["city"] = "-"
+            base["state"] = "-"
+            base["zip_code"] = "-"
+            base["parcel"] = "-"
 
         # --- Add up to 4 related contacts ---
         related_contacts = list(obj.related_contacts.all()[:4])
@@ -128,7 +150,7 @@ class CustomExportResource:
                 "id", "state", "county", "sale_type", "sale_status",
                 "surplus_status", "case_number", "sale_date", "plaintiff",
                 "defendant", "street_address", "city", "zip_code",
-                "parcel_id", "possible_surplus", "verified_surplus"
+                "parcel", "possible_surplus", "verified_surplus"
             ]
             contact_cols = []
             for i in range(1, 5):
