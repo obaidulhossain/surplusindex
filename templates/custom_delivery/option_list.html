@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Custom Export Options</h2>
+<a href="{% url 'export_option_create' %}" class="btn btn-primary mb-3">➕ Add Option</a>
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Client</th><th>Email</th><th>Delivery Type</th><th>Filters</th><th>Active</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for o in options %}
+      <tr>
+        <td>{{ o.client_name }}</td>
+        <td>{{ o.client_email }}</td>
+        <td>{{ o.delivery_type }}</td>
+        <td>{{ o.filter_option.count }}</td>
+        <td>{{ o.active|yesno:"✅,❌" }}</td>
+        <td>
+          <a href="{% url 'export_option_update' o.id %}" class="btn btn-sm btn-warning">Edit</a>
+          <a href="{% url 'export_option_delete' o.id %}" class="btn btn-sm btn-danger">Delete</a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="text-center">No export options yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{{ title }}</h2>
+<form method="post">{% csrf_token %}
+  {{ form.as_p }}
+  <button class="btn btn-success">💾 Save</button>
+  <a href="{% url 'export_option_list' %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

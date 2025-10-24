@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Export Lead Filters</h2>
+<a href="{% url 'filter_create' %}" class="btn btn-primary mb-3">➕ Add Filter</a>
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>Name</th><th>State</th><th>Sale Type</th><th>Status</th><th>Surplus</th><th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for f in filters %}
+      <tr>
+        <td>{{ f.filter_name }}</td><td>{{ f.state }}</td><td>{{ f.sale_type }}</td>
+        <td>{{ f.sale_status }}</td><td>{{ f.surplus_status }}</td>
+        <td>
+          <a href="{% url 'filter_update' f.id %}" class="btn btn-sm btn-warning">Edit</a>
+          <a href="{% url 'filter_delete' f.id %}" class="btn btn-sm btn-danger">Delete</a>
+        </td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="6" class="text-center">No filters yet.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
