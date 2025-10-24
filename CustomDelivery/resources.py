@@ -109,20 +109,36 @@ class CustomExportResource:
             base["zip_code"] = "-"
             base["parcel"] = "-"
 
-        # --- Add up to 4 related contacts ---
-        related_contacts = list(obj.related_contacts.all()[:4])
-        for i in range(4):
+        # --- Add up to 5 contacts (defendants + related contacts) ---
+        contacts = list(obj.defendant.all())
+
+        # include related contacts of each defendant
+        for d in obj.defendant.all():
+            for rc in d.related_contacts.all():
+                if rc not in contacts:
+                    contacts.append(rc)
+
+        # limit total to 5
+        contacts = contacts[:5]
+
+        for i in range(5):
             cnum = i + 1
-            if i < len(related_contacts):
-                contact = related_contacts[i]
-                base[f"Contact Name {cnum}"] = contact.full_name or "-"
-                base[f"Email {cnum}"] = contact.email or "-"
+            if i < len(contacts):
+                contact = contacts[i]
+                
+                base[f"Contact Name {cnum}"] = str(contact) or "-"
+                # pick up to 1 primary email or first 4 if you want more
+                email_list = list(contact.emails.values_list("email_address", flat=True)[:4])
+                base[f"Email {cnum}"] = ", ".join(email_list) if email_list else "-"
 
-                wireless_list = list(contact.wireless.values_list("number", flat=True)[:4])
-                landline_list = list(contact.landline.values_list("number", flat=True)[:4])
-
+                # wireless numbers (up to 4)
+                wireless_list = list(contact.wireless.values_list("w_number", flat=True)[:4])
                 for j in range(4):
                     base[f"Wireless {cnum}.{j+1}"] = wireless_list[j] if j < len(wireless_list) else "-"
+
+                # landline numbers (up to 4)
+                landline_list = list(contact.landline.values_list("l_number", flat=True)[:4])
+                for j in range(4):
                     base[f"Landline {cnum}.{j+1}"] = landline_list[j] if j < len(landline_list) else "-"
             else:
                 # fill empty contact slots with "-"
@@ -133,6 +149,30 @@ class CustomExportResource:
                     base[f"Landline {cnum}.{j+1}"] = "-"
 
         return base
+        # # --- Add up to 4 related contacts ---
+        # related_contacts = list(obj.related_contacts.all()[:4])
+        # for i in range(4):
+        #     cnum = i + 1
+        #     if i < len(related_contacts):
+        #         contact = related_contacts[i]
+        #         base[f"Contact Name {cnum}"] = contact.full_name or "-"
+        #         base[f"Email {cnum}"] = contact.email or "-"
+
+        #         wireless_list = list(contact.wireless.values_list("number", flat=True)[:4])
+        #         landline_list = list(contact.landline.values_list("number", flat=True)[:4])
+
+        #         for j in range(4):
+        #             base[f"Wireless {cnum}.{j+1}"] = wireless_list[j] if j < len(wireless_list) else "-"
+        #             base[f"Landline {cnum}.{j+1}"] = landline_list[j] if j < len(landline_list) else "-"
+        #     else:
+        #         # fill empty contact slots with "-"
+        #         base[f"Contact Name {cnum}"] = "-"
+        #         base[f"Email {cnum}"] = "-"
+        #         for j in range(4):
+        #             base[f"Wireless {cnum}.{j+1}"] = "-"
+        #             base[f"Landline {cnum}.{j+1}"] = "-"
+
+        # return base
 
     def to_dataframe(self):
         queryset = self.get_queryset()
