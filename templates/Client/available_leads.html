@@ -26,7 +26,9 @@ Available Leads
                         <select id="stateFilter" name="stateFilter" onchange="this.form.submit()">
                             <option value="" {% if selectedState == "" %}selected{% endif %}>--- Select State ---</option>
                             {% for state in states %}
+                            {% if not state == "" or "new" %}
                             <option value="{{state}}" {% if state == selectedState %}selected{% endif %}>{{state|upper}}</option>
+                            {% endif %}
                             {% endfor %}
                         </select>
                     </div>
