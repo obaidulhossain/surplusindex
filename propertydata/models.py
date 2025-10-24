@@ -68,7 +68,8 @@ class Property(OperationStat):
     class Meta:
         verbose_name = 'Property'
         verbose_name_plural = 'Properties'
-
+        
+    @property
     def street_address (self):
         street_parts = [
                 self.house_number,

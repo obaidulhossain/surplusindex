@@ -4,10 +4,9 @@ from django.utils import timezone
 from propertydata.models import *
 from django.db.models import Q
 from openpyxl import Workbook
-from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
-from openpyxl.utils import get_column_letter
 from datetime import datetime
-
+from openpyxl.styles import PatternFill, Font, Alignment
+from openpyxl.utils import get_column_letter
 class CustomExportResource:
     """
     Dynamically generates Excel data for a given CustomExportOptions instance.
@@ -211,6 +210,29 @@ class CustomExportResource:
 
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, sheet_name="Leads")
+
+            # --- Style header after writing ---
+            workbook = writer.book
+            worksheet = writer.sheets["Leads"]
+
+            # Header styling
+            header_fill = PatternFill(start_color="516699", end_color="516699", fill_type="solid")  # blue background
+            header_font = Font(color="FFFFFF", bold=True, size=12)  # white bold text
+            header_align = Alignment(horizontal="center", vertical="center")
+
+            # Apply style to all header cells
+            for col_num, column_title in enumerate(df.columns, 1):
+                cell = worksheet.cell(row=1, column=col_num)
+                cell.fill = header_fill
+                cell.font = header_font
+                cell.alignment = header_align
+            # Optional: Auto-fit column width based on content
+            max_length = max(
+                (len(str(cell_value)) for cell_value in [column_title] + df[column_title].astype(str).tolist()),
+                default=0
+            )
+            worksheet.column_dimensions[get_column_letter(col_num)].width = min(max_length + 2, 50)  # cap width
+
 
         buffer.seek(0)
         return filename, buffer, df
