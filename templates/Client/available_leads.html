@@ -42,7 +42,7 @@ Available Leads
                         </select>
                     </div>
                     <div class="onefifth">
-                        <label for="saletypeFilter">Sale Type</label>
+                        <label for="saletypeFilter">Sale Type</label><br>
                         <select id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
                             <option value="">All</option>
                             {% for saletype in saletypes %}
@@ -51,11 +51,11 @@ Available Leads
                         </select>
                     </div>
                     <div class="onefifth">
-                        <label for="possiblesurplusFilter">Possible Surplus</label>
+                        <label for="possiblesurplusFilter">Possible Surplus</label><br>
                         <input type="number" placeholder="Set Minimum" name="ps_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if psmin %}{{psmin}}{% endif %}"><br>
                     </div>
                     <div class="onefifth">
-                        <label for="verifiedsurplusFilter">Verified Surplus</label>
+                        <label for="verifiedsurplusFilter">Verified Surplus</label><br>
                         <input type="number" placeholder="Set Minimum" name="vs_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if vsmin %}{{vsmin}}{% endif %}"><br>
                     </div>
                 </div>
