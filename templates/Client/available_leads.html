@@ -23,7 +23,7 @@ Available Leads
                 <div class="filter-item-section">
                     <div class="onefifth">
                         <label for="stateFilter">Select State</label><br>
-                        <select id="stateFilter" name="stateFilter" onchange="this.form.submit()">
+                        <select id="stateFilter" name="stateFilter" onchange="this.form.submit()" style="width:100%;">
                             <option value="" {% if selectedState == "" %}selected{% endif %}>--- Select State ---</option>
                             {% for state in states %}
                             {% if not state == "" %}
@@ -34,7 +34,7 @@ Available Leads
                     </div>
                     <div class="onefifth">
                         <label for="countyFilter">Select County</label><br>
-                        <select id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
+                        <select id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} style="width:100%;">
                             <option value="">All</option>
                             {% for county in counties %}
                             <option value="{{county}}" {% if county == selectedCounty %}selected{% endif %}>{{county|upper}}</option>
@@ -43,7 +43,7 @@ Available Leads
                     </div>
                     <div class="onefifth">
                         <label for="saletypeFilter">Sale Type</label><br>
-                        <select id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %}>
+                        <select id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} style="width:100%;">
                             <option value="">All</option>
                             {% for saletype in saletypes %}
                             <option value="{{saletype}}" {% if saletype == selectedSaletype %}selected{% endif %}>{{saletype|upper}}</option>
@@ -52,11 +52,11 @@ Available Leads
                     </div>
                     <div class="onefifth">
                         <label for="possiblesurplusFilter">Possible Surplus</label><br>
-                        <input type="number" placeholder="Set Minimum" name="ps_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if psmin %}{{psmin}}{% endif %}"><br>
+                        <input type="number" placeholder="Set Minimum" name="ps_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if psmin %}{{psmin}}{% endif %}" style="width:100%;"><br>
                     </div>
                     <div class="onefifth">
                         <label for="verifiedsurplusFilter">Verified Surplus</label><br>
-                        <input type="number" placeholder="Set Minimum" name="vs_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if vsmin %}{{vsmin}}{% endif %}"><br>
+                        <input type="number" placeholder="Set Minimum" name="vs_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if vsmin %}{{vsmin}}{% endif %}" style="width:100%;"><br>
                     </div>
                 </div>
             </div>
