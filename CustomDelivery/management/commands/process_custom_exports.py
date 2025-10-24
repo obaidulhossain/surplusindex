@@ -27,6 +27,19 @@ class Command(BaseCommand):
             try:
                 # STEP 1 — Generate Excel dynamically
                 resource = CustomExportResource(export_option)
+                queryset = resource.get_queryset()
+
+                # ✅ Skip if there are no new leads
+                if not queryset.exists():
+                    self.stdout.write(self.style.WARNING(
+                        f"⚠️ No new leads found for {export_option.client_name} — skipping delivery."
+                    ))
+                    # Optionally push next delivery date slightly ahead to retry next cycle
+                    # next_date = self.calculate_next_delivery_date(export_option)
+                    # export_option.next_delivery_date = next_date
+                    # export_option.save(update_fields=["next_delivery_date"])
+                    continue
+                # Continue only if new data exists
                 filename, buffer, df = resource.export_to_excel()
                 
                 # STEP 2 — (Optional) Send via email
