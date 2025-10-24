@@ -84,13 +84,13 @@ class CustomExportResource:
         # --- Handle Plaintiff (ManyToMany) -
         plaintiffs = obj.plaintiff.all() if hasattr(obj, "plaintiff") else []
         if plaintiffs:
-            base["plaintiff"] = ", ".join([p for p in plaintiffs if p]) or "-"
+            base["plaintiff"] = ", ".join([str(p) for p in plaintiffs if p]) or "-"
         else:
             base["plaintiff"] = "-"
         # --- Handle Defendant (ManyToMany) -
         defendants = obj.defendant.all() if hasattr(obj, "defendant") else []
         if defendants:
-            base["defendant"] = ", ".join([d for d in defendants if d]) or "-"
+            base["defendant"] = ", ".join([str(d) for d in defendants if d]) or "-"
         else:
             base["defendant"] = "-"
 
