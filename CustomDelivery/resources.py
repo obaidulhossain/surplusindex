@@ -176,7 +176,7 @@ class CustomExportResource:
         first_property = obj.property.first() if hasattr(obj, "property") else None
         if first_property:
             state_name = first_property.state or "-"
-            state_short = STATE_ABBREVIATIONS.get(state_name.strip(), "-")
+            state_short = STATE_ABBREVIATIONS.get(state_name.strip().title(), "-")
             base["street_address"] = first_property.street_address or "-"
             base["city"] = first_property.city or "-"
             base["ST"] = state_short
@@ -350,7 +350,7 @@ class CustomExportResource:
         first_property = obj.property.first() if hasattr(obj, "property") else None
         if first_property:
             state_name = first_property.state or "-"
-            state_short = STATE_ABBREVIATIONS.get(state_name.strip(), "-")
+            state_short = STATE_ABBREVIATIONS.get(state_name.strip().title(), "-")
             base_info.update({
                 "street_address": first_property.street_address or "-",
                 "city": first_property.city or "-",
