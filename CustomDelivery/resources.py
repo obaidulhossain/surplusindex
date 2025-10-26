@@ -76,6 +76,7 @@ class CustomExportResource:
             "sale_price": obj.sale_price or "-",
             "possible_surplus": obj.possible_surplus or "-",
             "verified_surplus": obj.verified_surplus or "-",
+            "changed_at":obj.changed_at or "-",
             "lead_id":"",
             "confirmation_date":"",
             "foreclosure_deed":"-",
@@ -247,6 +248,7 @@ class CustomExportResource:
             "verified_surplus": obj.verified_surplus or "-",
             "fcl_final_judgment": obj.fcl_final_judgment or "-",
             "sale_price": obj.sale_price or "-",
+            "changed_at":obj.changed_at or "-",
             "lead_id":"",
             "confirmation_date":"",
             "foreclosure_deed":"-",
@@ -381,8 +383,14 @@ class CustomExportResource:
             base_copy.update({
                 "Contact Name": "-",
                 "Email": "-",
-                "Wireless": "-",
-                "Landline": "-"
+                "Wireless 1": "-",
+                "Wireless 2": "-",
+                "Wireless 3": "-",
+                "Wireless 4": "-",
+                "Landline 1": "-",
+                "Landline 2": "-",
+                "Landline 3": "-",
+                "Landline 4": "-",
             })
             rows.append(base_copy)
         else:
@@ -396,11 +404,16 @@ class CustomExportResource:
 
                 # Wireless
                 wireless_list = list(contact.wireless.values_list("w_number", flat=True)[:4])
-                contact_data["Wireless"] = ", ".join(wireless_list) if wireless_list else "-"
+                #contact_data["Wireless"] = ", ".join(wireless_list) if wireless_list else "-"
+                for j in range(4):
+                    contact_data[f"Wireless {j+1}"] = wireless_list[j] if j < len(wireless_list) else "-"
+
 
                 # Landline
                 landline_list = list(contact.landline.values_list("l_number", flat=True)[:4])
-                contact_data["Landline"] = ", ".join(landline_list) if landline_list else "-"
+                #contact_data["Landline"] = ", ".join(landline_list) if landline_list else "-"
+                for j in range(4):
+                    contact_data[f"Landline {j+1}"] = landline_list[j] if j < len(landline_list) else "-"
 
                 rows.append(contact_data)
 
