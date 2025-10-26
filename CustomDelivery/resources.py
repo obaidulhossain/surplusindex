@@ -34,7 +34,7 @@ class CustomExportResource:
             q_objects |= q  # OR between filters, but AND inside each
 
         queryset = Foreclosure.objects.filter(q_objects).distinct()
-
+        queryset = queryset.filter(published=True)
         # Omit already delivered or old leads
         queryset = self.exclude_delivered_and_old(queryset)
 
@@ -65,19 +65,23 @@ class CustomExportResource:
         """
         base = {
             "id": obj.id,
-            "state": obj.state or "-",
+            "State": obj.state or "-",
             "county": obj.county or "-",
             "sale_type": obj.sale_type or "-",
             "sale_status": obj.sale_status or "-",
             "surplus_status": obj.surplus_status or "-",
             "case_number": obj.case_number or "-",
-            "sale_date": obj.sale_date or "-",
-            # "plaintiff": obj.plaintiff or "-",
-            # "defendant": obj.defendant or "-",
+            "Sale Date": obj.sale_date or "-",
             "fcl_final_judgment": obj.fcl_final_judgment or "-",
             "sale_price": obj.sale_price or "-",
             "possible_surplus": obj.possible_surplus or "-",
             "verified_surplus": obj.verified_surplus or "-",
+            "lead_id":"",
+            "confirmation_date":"",
+            "foreclosure_deed":"-",
+            "prior_deed":"-",
+            "mailing_address_1":"-",
+
             
         }
         # --- Handle Plaintiff (ManyToMany) -
@@ -94,17 +98,72 @@ class CustomExportResource:
             base["defendant"] = "-"
 
         # --- Handle related property (ManyToMany) -
+        STATE_ABBREVIATIONS = {
+            "Alabama": "AL",
+            "Alaska": "AK",
+            "Arizona": "AZ",
+            "Arkansas": "AR",
+            "California": "CA",
+            "Colorado": "CO",
+            "Connecticut": "CT",
+            "Delaware": "DE",
+            "Florida": "FL",
+            "Georgia": "GA",
+            "Hawaii": "HI",
+            "Idaho": "ID",
+            "Illinois": "IL",
+            "Indiana": "IN",
+            "Iowa": "IA",
+            "Kansas": "KS",
+            "Kentucky": "KY",
+            "Louisiana": "LA",
+            "Maine": "ME",
+            "Maryland": "MD",
+            "Massachusetts": "MA",
+            "Michigan": "MI",
+            "Minnesota": "MN",
+            "Mississippi": "MS",
+            "Missouri": "MO",
+            "Montana": "MT",
+            "Nebraska": "NE",
+            "Nevada": "NV",
+            "New Hampshire": "NH",
+            "New Jersey": "NJ",
+            "New Mexico": "NM",
+            "New York": "NY",
+            "North Carolina": "NC",
+            "North Dakota": "ND",
+            "Ohio": "OH",
+            "Oklahoma": "OK",
+            "Oregon": "OR",
+            "Pennsylvania": "PA",
+            "Rhode Island": "RI",
+            "South Carolina": "SC",
+            "South Dakota": "SD",
+            "Tennessee": "TN",
+            "Texas": "TX",
+            "Utah": "UT",
+            "Vermont": "VT",
+            "Virginia": "VA",
+            "Washington": "WA",
+            "West Virginia": "WV",
+            "Wisconsin": "WI",
+            "Wyoming": "WY",
+            "District of Columbia": "DC",
+        }
         first_property = obj.property.first() if hasattr(obj, "property") else None
         if first_property:
+            state_name = first_property.state or "-"
+            state_short = STATE_ABBREVIATIONS.get(state_name.strip(), "-")
             base["street_address"] = first_property.street_address or "-"
             base["city"] = first_property.city or "-"
-            base["state"] = first_property.state or "-"
+            base["ST"] = state_short
             base["zip_code"] = first_property.zip_code or "-"
             base["parcel"] = first_property.parcel or "-"
         else:
             base["street_address"] = "-"
             base["city"] = "-"
-            base["state"] = "-"
+            base["ST"] = "-"
             base["zip_code"] = "-"
             base["parcel"] = "-"
 
@@ -186,8 +245,8 @@ class CustomExportResource:
         else:
             # Default full fixed layout
             base_cols = [
-                "id", "state", "county", "sale_type", "sale_status",
-                "surplus_status", "case_number", "sale_date", "plaintiff",
+                "id", "State", "county", "sale_type", "sale_status",
+                "surplus_status", "case_number", "Sale Date", "plaintiff",
                 "defendant", "street_address", "city", "zip_code",
                 "parcel", "possible_surplus", "verified_surplus"
             ]
