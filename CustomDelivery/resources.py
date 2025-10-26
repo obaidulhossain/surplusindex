@@ -438,6 +438,9 @@ class CustomExportResource:
         if self.export_option.columns:
             cols = [c for c in self.export_option.columns if c in df.columns]
             df = df[cols]
+        # ✅ FIX: Convert timezone-aware datetimes to naive (Excel-safe)
+        for col in df.select_dtypes(include=["datetimetz"]).columns:
+            df[col] = df[col].dt.tz_localize(None)
 
         return df
 
