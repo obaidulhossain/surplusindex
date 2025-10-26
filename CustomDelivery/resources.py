@@ -420,9 +420,10 @@ class CustomExportResource:
         return rows
 
     def to_dataframe(self):
-        queryset = self.get_queryset()[20]
+        queryset = self.get_queryset()
 
         if getattr(self.export_option, "contact_align", "horizontal") == "vertical":
+            queryset = queryset[:20]
             # Vertical mode: each contact gets its own row
             data = []
             for obj in queryset:
