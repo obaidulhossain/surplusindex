@@ -13,4 +13,10 @@ urlpatterns = [
     path("options/new/", views.export_option_create, name="export_option_create"),
     path("options/<int:pk>/edit/", views.export_option_update, name="export_option_update"),
     path("options/<int:pk>/delete/", views.export_option_delete, name="export_option_delete"),
+
+    path("delivery_settings/", views.DeliverySettings, name="delivery_settings"),
+    path("create_custom_client/", views.CreateCC, name="create-custom-client"),
+    path("custom_delivery_clients", views.CDClients, name="custom_delivery_clients"),
+    path("update-custom-client", views.UpdateCC, name="update-custom-client"),
+    path("remove-client-m2m/", views.remove_client_m2m, name="remove-client-m2m"),
 ]

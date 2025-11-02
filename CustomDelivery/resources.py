@@ -47,15 +47,19 @@ class CustomExportResource:
         export = self.export_option
 
         # Exclude old leads (always)
-        queryset = queryset.exclude(pk__in=export.old_leads.values_list("pk", flat=True))
+        #queryset = queryset.exclude(pk__in=export.old_leads.values_list("pk", flat=True))
+        queryset = queryset.exclude(pk__in=export.client.old_leads.values_list("pk", flat=True))
 
         # Exclude previously delivered ones of the same type
         if export.delivery_type == "pre-foreclosure":
-            queryset = queryset.exclude(pk__in=export.pre_foreclosure.values_list("pk", flat=True))
+            #queryset = queryset.exclude(pk__in=export.pre_foreclosure.values_list("pk", flat=True))
+            queryset = queryset.exclude(pk__in=export.client.pre_foreclosure.values_list("pk", flat=True))
         elif export.delivery_type == "post-foreclosure":
-            queryset = queryset.exclude(pk__in=export.post_foreclosure.values_list("pk", flat=True))
+            #queryset = queryset.exclude(pk__in=export.post_foreclosure.values_list("pk", flat=True))
+            queryset = queryset.exclude(pk__in=export.client.post_foreclosure.values_list("pk", flat=True))
         elif export.delivery_type == "verified":
-            queryset = queryset.exclude(pk__in=export.verified_surplus.values_list("pk", flat=True))
+            #queryset = queryset.exclude(pk__in=export.verified_surplus.values_list("pk", flat=True))
+            queryset = queryset.exclude(pk__in=export.client.verified_surplus.values_list("pk", flat=True))
 
         return queryset
 
@@ -64,32 +68,32 @@ class CustomExportResource:
         Convert a Foreclosure instance into a dict with up to 4 contact groups.
         """
         base = {
-            "id": obj.id,
+            "ID": obj.id,
             "State": obj.state or "-",
-            "county": obj.county or "-",
-            "sale_type": obj.sale_type or "-",
-            "sale_status": obj.sale_status or "-",
-            "surplus_status": obj.surplus_status or "-",
-            "case_number": obj.case_number or "-",
+            "County": obj.county or "-",
+            "Sale Type": obj.sale_type or "-",
+            "Sale Status": obj.sale_status or "-",
+            "Surplus Status": obj.surplus_status or "-",
+            "Case Number": obj.case_number or "-",
             "Sale Date": obj.sale_date or "-",
-            "fcl_final_judgment": obj.fcl_final_judgment or "-",
-            "sale_price": obj.sale_price or "-",
-            "possible_surplus": obj.possible_surplus or "-",
-            "verified_surplus": obj.verified_surplus or "-",
-            "changed_at":obj.changed_at or "-",
-            "lead_id":"",
-            "confirmation_date":"",
-            "foreclosure_deed":"-",
-            "prior_deed":"-",
-            "mailing_address_1":"-",          
+            "Judgment Amount": obj.fcl_final_judgment or "-",
+            "Sale Price": obj.sale_price or "-",
+            "Possible Surplus": obj.possible_surplus or "-",
+            "Verified Surplus": obj.verified_surplus or "-",
+            "Changed At":obj.changed_at or "-",
+            "Lead ID":"",
+            "Confirmation Date":"",
+            "Foreclosure Deed":"-",
+            "Prior Deed":"-",
+            "Mailing Address":"-",          
         }
 
         # --- Handle Plaintiff (ManyToMany) -
         plaintiffs = obj.plaintiff.all() if hasattr(obj, "plaintiff") else []
         if plaintiffs:
-            base["plaintiff"] = ", ".join([str(p) for p in plaintiffs if p]) or "-"
+            base["Plaintiff"] = ", ".join([str(p) for p in plaintiffs if p]) or "-"
         else:
-            base["plaintiff"] = "-"
+            base["Plaintiff"] = "-"
 
         # --- Handle Defendant (ManyToMany) -
         defendants = obj.defendant.all() if hasattr(obj, "defendant") else []
@@ -97,27 +101,27 @@ class CustomExportResource:
             first_defendant = defendants[0]
             other_defendants = defendants[1:]
             # Default placeholders
-            base["defendant_first_name"] = "-"
-            base["defendant_middle_name"] = "-"
-            base["defendant_last_name"] = "-"
-            base["additional_defendants"] = "-"
+            base["First Name"] = "-"
+            base["Middle Name"] = "-"
+            base["Last Name"] = "-"
+            base["Additional Defendants"] = "-"
             # Check for business name first
             if first_defendant.business_name:
-                base["defendant_first_name"] = str(first_defendant).strip()
+                base["First Name"] = str(first_defendant).strip()
             else:
-                base["defendant_first_name"] = first_defendant.first_name.strip() if first_defendant.first_name else "-"
-                base["defendant_middle_name"] = first_defendant.middle_name.strip() if first_defendant.middle_name else "-"
-                base["defendant_last_name"] = first_defendant.last_name.strip() if first_defendant.last_name else "-"
+                base["First Name"] = first_defendant.first_name.strip() if first_defendant.first_name else "-"
+                base["Middle Name"] = first_defendant.middle_name.strip() if first_defendant.middle_name else "-"
+                base["Last Name"] = first_defendant.last_name.strip() if first_defendant.last_name else "-"
             # Combine remaining defendants into one string
             if other_defendants:
-                base["additional_defendants"] = ", ".join([str(d) for d in other_defendants if d]) or "-"
-            base["defendant"] = ", ".join([str(d) for d in defendants if d]) or "-"
+                base["Additional Defendants"] = ", ".join([str(d) for d in other_defendants if d]) or "-"
+            base["Defendant"] = ", ".join([str(d) for d in defendants if d]) or "-"
         else:
-            base["defendant_first_name"] = "-"
-            base["defendant_middle_name"] = "-"
-            base["defendant_last_name"] = "-"
-            base["additional_defendants"] = "-"
-            base["defendant"] = "-"
+            base["First Name"] = "-"
+            base["Middle Name"] = "-"
+            base["Last Name"] = "-"
+            base["Additional Defendants"] = "-"
+            base["Defendant"] = "-"
 
         # --- Handle related property (ManyToMany) -
         STATE_ABBREVIATIONS = {
@@ -177,17 +181,17 @@ class CustomExportResource:
         if first_property:
             state_name = first_property.state or "-"
             state_short = STATE_ABBREVIATIONS.get(state_name.strip().title(), "-")
-            base["street_address"] = first_property.street_address or "-"
-            base["city"] = first_property.city or "-"
+            base["Street Address"] = first_property.street_address or "-"
+            base["City"] = first_property.city or "-"
             base["ST"] = state_short
-            base["zip_code"] = first_property.zip_code or "-"
-            base["parcel"] = first_property.parcel or "-"
+            base["Zip"] = first_property.zip_code or "-"
+            base["Parcel"] = first_property.parcel or "-"
         else:
-            base["street_address"] = "-"
-            base["city"] = "-"
+            base["Street Address"] = "-"
+            base["City"] = "-"
             base["ST"] = "-"
-            base["zip_code"] = "-"
-            base["parcel"] = "-"
+            base["Zip"] = "-"
+            base["Parcel"] = "-"
 
         # --- Add up to 5 contacts (defendants + related contacts) ---
         contacts = list(obj.defendant.all())
@@ -236,32 +240,32 @@ class CustomExportResource:
         each row containing foreclosure info + single contact info.
         """
         base_info = {
-            "id": obj.id,
+            "ID": obj.id,
             "State": obj.state or "-",
-            "county": obj.county or "-",
-            "sale_type": obj.sale_type or "-",
-            "sale_status": obj.sale_status or "-",
-            "surplus_status": obj.surplus_status or "-",
-            "case_number": obj.case_number or "-",
+            "County": obj.county or "-",
+            "Sale Type": obj.sale_type or "-",
+            "Sale Status": obj.sale_status or "-",
+            "Surplus Status": obj.surplus_status or "-",
+            "Case Number": obj.case_number or "-",
             "Sale Date": obj.sale_date or "-",
-            "possible_surplus": obj.possible_surplus or "-",
-            "verified_surplus": obj.verified_surplus or "-",
-            "fcl_final_judgment": obj.fcl_final_judgment or "-",
-            "sale_price": obj.sale_price or "-",
-            "changed_at":obj.changed_at or "-",
-            "lead_id":"",
-            "confirmation_date":"",
-            "foreclosure_deed":"-",
-            "prior_deed":"-",
-            "mailing_address_1":"-",
+            "Possible Surplus": obj.possible_surplus or "-",
+            "Verified Surplus": obj.verified_surplus or "-",
+            "Judgment Amount": obj.fcl_final_judgment or "-",
+            "Sale Price": obj.sale_price or "-",
+            "Changed At":obj.changed_at or "-",
+            "Lead ID":"",
+            "Confirmation Date":"",
+            "Foreclosure Deed":"-",
+            "Prior Deed":"-",
+            "Mailing Address":"-",
         }
 
         # --- Handle Plaintiff (ManyToMany) -
         plaintiffs = obj.plaintiff.all() if hasattr(obj, "plaintiff") else []
         if plaintiffs:
-            base_info["plaintiff"] = ", ".join([str(p) for p in plaintiffs if p]) or "-"
+            base_info["Plaintiff"] = ", ".join([str(p) for p in plaintiffs if p]) or "-"
         else:
-            base_info["plaintiff"] = "-"
+            base_info["Plaintiff"] = "-"
 
         # --- Handle Defendant (ManyToMany) -
         defendants = obj.defendant.all() if hasattr(obj, "defendant") else []
@@ -269,27 +273,27 @@ class CustomExportResource:
             first_defendant = defendants[0]
             other_defendants = defendants[1:]
             # Default placeholders
-            base_info["defendant_first_name"] = "-"
-            base_info["defendant_middle_name"] = "-"
-            base_info["defendant_last_name"] = "-"
-            base_info["additional_defendants"] = "-"
+            base_info["First Name"] = "-"
+            base_info["Middle Name"] = "-"
+            base_info["Last Name"] = "-"
+            base_info["Additional Defendants"] = "-"
             # Check for business name first
             if first_defendant.business_name:
-                base_info["defendant_first_name"] = str(first_defendant).strip()
+                base_info["First Name"] = str(first_defendant).strip()
             else:
-                base_info["defendant_first_name"] = first_defendant.first_name.strip() if first_defendant.first_name else "-"
-                base_info["defendant_middle_name"] = first_defendant.middle_name.strip() if first_defendant.middle_name else "-"
-                base_info["defendant_last_name"] = first_defendant.last_name.strip() if first_defendant.last_name else "-"
+                base_info["First Name"] = first_defendant.first_name.strip() if first_defendant.first_name else "-"
+                base_info["Middle Name"] = first_defendant.middle_name.strip() if first_defendant.middle_name else "-"
+                base_info["Last Name"] = first_defendant.last_name.strip() if first_defendant.last_name else "-"
             # Combine remaining defendants into one string
             if other_defendants:
-                base_info["additional_defendants"] = ", ".join([str(d) for d in other_defendants if d]) or "-"
-            base_info["defendant"] = ", ".join([str(d) for d in defendants if d]) or "-"
+                base_info["Additional Defendants"] = ", ".join([str(d) for d in other_defendants if d]) or "-"
+            base_info["Defendant"] = ", ".join([str(d) for d in defendants if d]) or "-"
         else:
-            base_info["defendant_first_name"] = "-"
-            base_info["defendant_middle_name"] = "-"
-            base_info["defendant_last_name"] = "-"
-            base_info["additional_defendants"] = "-"
-            base_info["defendant"] = "-"
+            base_info["First Name"] = "-"
+            base_info["Middle Name"] = "-"
+            base_info["Last Name"] = "-"
+            base_info["Additional Defendants"] = "-"
+            base_info["Defendant"] = "-"
 
         # --- Handle related property (ManyToMany) -
         STATE_ABBREVIATIONS = {
@@ -352,19 +356,19 @@ class CustomExportResource:
             state_name = first_property.state or "-"
             state_short = STATE_ABBREVIATIONS.get(state_name.strip().title(), "-")
             base_info.update({
-                "street_address": first_property.street_address or "-",
-                "city": first_property.city or "-",
+                "Street Address": first_property.street_address or "-",
+                "City": first_property.city or "-",
                 "ST": state_short,
-                "zip_code": first_property.zip_code or "-",
-                "parcel": first_property.parcel or "-"
+                "Zip": first_property.zip_code or "-",
+                "Parcel": first_property.parcel or "-"
             })
         else:
             base_info.update({
-                "street_address": "-",
-                "city": "-",
+                "Street Address": "-",
+                "City": "-",
                 "ST": "-",
-                "zip_code": "-",
-                "parcel": "-"
+                "Zip": "-",
+                "Parcel": "-"
             })
 
         # Combine all contacts (defendants + related)
@@ -422,8 +426,9 @@ class CustomExportResource:
     def to_dataframe(self):
         queryset = self.get_queryset()
 
-        if getattr(self.export_option, "contact_align", "horizontal") == "vertical":
-            queryset = queryset[:20]
+        #if getattr(self.export_option, "contact_align", "horizontal") == "vertical":
+        if getattr(self.export_option.client, "contact_align", "horizontal") == "vertical":
+            #queryset = queryset[:20]
             # Vertical mode: each contact gets its own row
             data = []
             for obj in queryset:
@@ -435,8 +440,10 @@ class CustomExportResource:
             df = pd.DataFrame(data)
 
         # Use selected columns if specified
-        if self.export_option.columns:
-            cols = [c for c in self.export_option.columns if c in df.columns]
+        #if self.export_option.columns:
+        if self.export_option.client.columns:
+            #cols = [c for c in self.export_option.columns if c in df.columns]
+            cols = [c for c in self.export_option.client.columns if c in df.columns]
             df = df[cols]
         # ✅ FIX: Convert timezone-aware datetimes to naive (Excel-safe)
         for col in df.select_dtypes(include=["datetimetz"]).columns:
@@ -478,14 +485,14 @@ class CustomExportResource:
     def export_to_excel(self):
         df = self.to_dataframe()
         buffer = BytesIO()
-        filename = f"{self.export_option.client_name}_{timezone.now().date()}.xlsx"
+        filename = f"{timezone.now().date()} {self.export_option.get_delivery_type_display} List.xlsx"
 
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, sheet_name="Leads")
 
             # --- Style header after writing ---
             workbook = writer.book
-            worksheet = writer.sheets["Leads"]
+            worksheet = writer.sheets[f"{self.export_option.get_delivery_type_display} Leads"]
 
             # Header styling
             header_fill = PatternFill(start_color="516699", end_color="516699", fill_type="solid")  # blue background

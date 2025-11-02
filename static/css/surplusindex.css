@@ -955,6 +955,88 @@ table.table .avatar {
     border-right-style: dotted;
 }
 
+.form-row {
+    display: flex;
+    align-items: center;
+    /* vertically align label & input */
+    margin: 8px 15px;
+}
+
+.form-row label {
+    flex: 0 0 200px;
+    font-weight: bold;
+    text-align: left;
+}
+
+.form-row input,
+.form-row select,
+.form-row textarea,
+.form-row button {
+    flex: 1;
+    padding: 2px 10px;
+    width: 100%;
+}
+
+.header-text h4 {
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-bottom-style: double;
+    margin: 20px;
+}
 
 /* ------------------------------- CSS Properties for ALL USER GROUP ----------------------------------------------*/
 /* ------------------------------- CSS Properties for ALL USER GROUP ----------------------------------------------*/
+.email-group {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.email-group-item {
+    max-height: 120px;
+    position: relative;
+    display: block;
+    padding: .5rem 1rem;
+    color: #212529;
+    text-decoration: none;
+    background-color: #fff;
+    border: 1px solid rgba(0, 0, 0, .125);
+}
+
+.email-group-item:first-child {
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+.email-group-item:last-child {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.email-group-item:hover {
+    background-color: #f9f9f9;
+}
+
+.mail-section {
+    border: 1px solid #dadada;
+    margin: 2px 35px;
+    padding: 5px;
+    min-height: 100px;
+    border-radius: 5px;
+    background-color: #f6f6f6;
+}
+
+.conversation {
+    max-height: 400px;
+    overflow-y: auto;
+    background: #f8f9fa;
+    border: 1px solid #c8c8c8;
+    padding: 20px
+}
+
+.custom-textarea {
+    text-align-last: left;
+    border: 2px solid #ababab;
+    border-radius: 5px;
+    padding: 10px;
+}

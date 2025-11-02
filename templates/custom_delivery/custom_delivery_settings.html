@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}
+Delivery Settings
+{% endblock title %}
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<h2>Custom Delivery Settings</h2>
+<div class="section-header">
+    <h4>Clients</h4>
+</div>
+<div class="section-body-full">
+    <form method="post" action="{% url 'create-custom-client' %}">
+    {% csrf_token %}
+        <div class="onethird">
+            <input type="text" name="client-name" placeholder="Client Name" style="width:100%">
+        </div>
+        <div class="onethird">
+            <input type="email" name="client-email" placeholder="Client Email" style="width:100%">
+        </div>
+        <div class="onethird">
+            <select name="contact-align" style="width:100%">
+                <option value="">Select Contact Alignment</option>
+                <option value="horizontal">Horizontal</option>
+                <option value="vertical">Vertical</option>
+            </select>
+        </div></br></br>
+        <textarea name="columns" style="width:94%;" placeholder="Columns separated by comma">[]</textarea>
+        </br>
+        <input type="submit" class="button" value="Create Client Instance" style="width:94%;">
+    </form></br>
+    <div class="table-wrapper">
+        <table class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Contact Align</th>
+                    <th>Status</th>
+                    <th>Edit</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for client in all_clients %}
+                <tr>
+                    <td>{{client.id}}</td>
+                    <td>{{client.name}}</td>
+                    <td>{{client.email}}</td>
+                    <td>{{client.get_contact_align_display}}</td>
+                    <td>{% if client.active %}<i class="bi bi-check-circle-fill" style="color:green;"></i>{% else %}<i class="bi bi-exclamation-circle-fill" style="color:red;"></i>{% endif %}</td>
+                    <td>
+                    <form method="post" action="{% url 'custom_delivery_clients' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="client-id" value="{{client.id}}">
+                    <input type="submit" value="Edit" class="button">
+                    </form>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>    
+    </div>
+</div>
+{% endblock %}

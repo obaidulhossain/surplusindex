@@ -14,11 +14,15 @@ function toggleFilters(togglebtn, hide_id, event) {
         button.innerHTML = '<i class="bi bi-eye-slash"></i>';
     }
 }
+// -------------------------Toggle_and_Save filters button-----(start)-----------------------------
+//Example Usage: <button id="toggle-filters" class="icon-button" data-url="{% url 'update-show-hide-setting' %}" onclick="Toggle_and_Save(this.id, 'filters', 'alldata_show_filter', event)" style="padding: 2px 7px;"><i class="bi bi-eye-slash"></i></button>
 
 function Toggle_and_Save(togglebtn, hide_id, fieldName, event) {
     event.preventDefault(); // Prevent form submission
+
     const section = document.getElementById(hide_id);
     const button = document.getElementById(togglebtn);
+    const url = button.dataset.url; // get URL from data attribute
     let newValue;
 
     if (section.style.display === "block" || section.style.display === "") {
@@ -31,7 +35,7 @@ function Toggle_and_Save(togglebtn, hide_id, fieldName, event) {
         newValue = true;
     }
     // Send AJAX to Django to update the field
-    fetch("{% url 'update-show-hide-setting' %}", {
+    fetch(url, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -150,6 +154,28 @@ function copyToClipboard(button) {
     });
 }
 
+function copyToClipboard_value(button) {
+    const url = button.getAttribute('data-url'); // Get the URL from the data attribute
+    const btnvalue = button.value;
+    navigator.clipboard.writeText(url).then(() => {
+        // Change text and color with transition
+        button.value = "Copied!";
+        button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+        button.style.backgroundColor = "#0b9056"; // Change to green
+        button.style.color = "#fff"; // Change text color to white
+
+        // Reset after 5 seconds with transition
+        setTimeout(() => {
+            button.value = btnvalue;
+            button.style.transition = "background-color 0.3s ease, color 0.3s ease"; // Ensure transition when resetting
+            button.style.backgroundColor = ""; // Reset to original color
+            button.style.color = ""; // Reset to original color
+        }, 1500); // 5000 milliseconds = 5 seconds
+    }).catch(err => {
+        alert("Failed to copy URL: " + err);
+    });
+
+}
 
 // Reuseable function
 // -------------------------count checkbox checked-----(start)-----------------------------

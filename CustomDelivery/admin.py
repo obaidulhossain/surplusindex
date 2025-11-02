@@ -8,3 +8,9 @@ class CustomExportOptionsAdmin(admin.ModelAdmin):
 @admin.register(ExportLeadFilter)
 class ExportLeadFilterAdmin(admin.ModelAdmin):
     list_display = ('filter_name','state', 'sale_type', 'sale_status', 'surplus_status')
+
+
+@admin.register(CustomDeliveryClients)
+class CustomDeliveryClientsAdmin(admin.ModelAdmin):
+    list_display = ('name','email', 'contact_align', 'active')
+

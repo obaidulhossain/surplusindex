@@ -23,12 +23,27 @@ Clients
     </div>
 
     <div class="section-filter-full" id="filters">
+    <div class="onefourth">
     <form method="post" action="{% url 'update_credits' %}">
     {% csrf_token %}
         <input type="hidden" value="{{selectedClientType}}" name="clientType">
         <button class="button" type="submit">Update Client Credit Usage</button>
     </form>
-
+    </div>
+    <div class="onefourth">
+    <form method="post">
+    {% csrf_token %}
+        <select name="active_status" onchange="this.form.submit()" style="width:100%">
+            <option value="all" {% if active_status == "all" %}selected{% endif %}>Select Active Status</option>
+            <option value="active" {% if active_status == "active" %}selected{% endif %}>Active</option>
+            <option value="inactive" {% if active_status == "inactive" %}selected{% endif %}>Inactive</option>
+        </select>
+    </form>
+    </div>
+    <div class="onefourth">
+    </div>
+    <div class="onefourth">
+    </div>
     {% if selectedClientType == "manual_client" %}
     
     {% else %}
@@ -58,6 +73,7 @@ Clients
                         <th>Order Status</th>
                         <th>Payment Status</th> {% endcomment %}
                         <th>Updated</th>
+                        <th>Active</th>
                         <th>View</th>
                     </tr>
                 </thead>
@@ -89,6 +105,7 @@ Clients
                         <td>{{order.order_status|title}}</td>
                         <td>{{order.payment_status|title}}</td> {% endcomment %}
                         <td>{{client.changed_at|date:"m/d/Y"}}</td>
+                        <td>{% if client.user.is_active %}<i class="bi bi-check-circle-fill" style="color:green;"></i>{% else %}<i class="bi bi-exclamation-circle-fill" style="color:red;"></i>{% endif %}</td>
                         <td><a class="button" href="/client_detail/?client={{client.id}}">View</a></td>
                     </tr>
                     {% comment %} {% endfor %}  {% endcomment %}
@@ -118,6 +135,7 @@ Clients
                         <th>Purchased $</th>
                         <th>Total $</th>
                         <th>Updated</th>
+                        <th>Active</th>
                         <th>View</th>
                     </tr>
                 </thead>
@@ -135,6 +153,7 @@ Clients
                         <td>{{client.purchased_credit_balance}}</td>
                         <td>{{client.Total_credits}}</td>
                         <td>{{client.changed_at|date:"m/d/Y"}}</td>
+                            <td>{% if client.user.is_active %}<i class="bi bi-check-circle-fill" style="color:green;"></i>{% else %}<i class="bi bi-exclamation-circle-fill" style="color:red;"></i>{% endif %}</td>
                         <td><a class="button" href="/client_detail/?client={{client.id}}">View</a></td>
                         
                     </tr>

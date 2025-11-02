@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% block title %}
+Delivery Settings
+{% endblock title %}
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+{% if not client_instance %}
+<div class="section-header">
+    <h4>No Client Selected</h4>
+    <form method="post">
+    {% csrf_token %}
+    <select name="client-id" onchange="this.form.submit()">
+        <option value="">Select Client</option>
+        {% for client in all_clients %}
+        <option value="{{client.id}}">{{client.id}} - {{client.name}}</option>
+        {% endfor %}
+    </select>
+    </form>
+</div>
+{% else %}
+
+<div class="section-header">
+    <h4>{{client_instance.name|upper}}</h4>
+    <form method="post">
+    {% csrf_token %}
+    <select name="client-id" onchange="this.form.submit()">
+        <option value="">Select Client</option>
+        {% for client in all_clients %}
+        <option value="{{client.id}}" {% if client_instance.id == client.id %}selected{% endif %}>{{client.id}} - {{client.name}}</option>
+        {% endfor %}
+    </select>
+    </form>
+</div>
+<div class="section-body-full">
+    <form method="post" action="{% url 'update-custom-client' %}">
+    {% csrf_token %}
+        <input type="hidden" name="client-id" value="{{client_instance.id}}">
+        <div class="onethird">
+            <input type="text" name="client-name" placeholder="Client Name" style="width:100%" value="{{client_instance.name}}">
+        </div>
+        <div class="onethird">
+            <input type="email" name="client-email" placeholder="Client Email" style="width:100%" value="{{client_instance.email}}">
+        </div>
+        <div class="onethird">
+            <select name="contact-align" style="width:100%">
+                <option value="">Select Contact Alignment</option>
+                <option value="horizontal" {% if client_instance.contact_align == "horizontal" %}selected{% endif %}>Horizontal</option>
+                <option value="vertical" {% if client_instance.contact_align == "vertical" %}selected{% endif %}>Vertical</option>
+            </select>
+        </div></br></br>
+        <textarea name="columns" style="width:94%;" placeholder="Columns separated by comma">{{client_instance.columns}}</textarea>
+        </br>
+        <input type="submit" class="button" value="Update Client Instance" style="width:94%;">
+    </form></br>
+</div>
+</br></br>
+<div class="section-header">
+    <h4>Pre-Foreclosure Leads</h4>
+    <input type="text" id="pref_leadSearch" placeholder="Search leads..." style="padding:5px; width:200px; border:1px solid #ccc; border-radius:4px;">
+</div>
+<div class="section-body-full">
+    <div class="table-wrapper" style="margin:0; padding: 3px; min-height:300px; max-height:400px;">
+        <table class="table table-striped table-hover" id="pref_leadsTable">
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Sale Status</th>
+                    <th>Surplus Status</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in client_instance.pre_foreclosure.all %}
+                <tr>
+                    <td>{{lead.state|title}}</td>
+                    <td>{{lead.county|title}}</td>
+                    <td>{{lead.case_number|upper}}</td>
+                    <td>{{lead.sale_date|date:'m/d/Y'}}</td>
+                    <td>{{lead.sale_status|title}}</td>
+                    <td>{{lead.surplus_status|title}}</td>
+                    <td>
+                        <button 
+                            data-remove-client
+                            data-client-id="{{ client_instance.id }}"
+                            data-field="pre_foreclosure"
+                            data-related-id="{{ lead.id }}"
+                            class="button">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}    
+            </tbody>
+        </table>
+    </div>
+</div>
+</br></br>
+<div class="section-header">
+    <h4>Post-Foreclosure Leads</h4>
+    <input type="text" id="postf_leadSearch" placeholder="Search leads..." style="padding:5px; width:200px; border:1px solid #ccc; border-radius:4px;">
+</div>
+<div class="section-body-full">
+    <div class="table-wrapper" style="margin:0; padding: 3px; min-height:300px; max-height:400px;">
+        <table class="table table-striped table-hover" id="postf_leadsTable">
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Sale Status</th>
+                    <th>Surplus Status</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in client_instance.post_foreclosure.all %}
+                <tr>
+                    <td>{{lead.state|title}}</td>
+                    <td>{{lead.county|title}}</td>
+                    <td>{{lead.case_number|upper}}</td>
+                    <td>{{lead.sale_date|date:'m/d/Y'}}</td>
+                    <td>{{lead.sale_status|title}}</td>
+                    <td>{{lead.surplus_status|title}}</td>
+                    <td>
+                        <button 
+                            data-remove-client
+                            data-client-id="{{ client_instance.id }}"
+                            data-field="post_foreclosure"
+                            data-related-id="{{ lead.id }}"
+                            class="button">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}    
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</br></br>
+<div class="section-header">
+    <h4>Verified Leads</h4>
+    <input type="text" id="verf_leadSearch" placeholder="Search leads..." style="padding:5px; width:200px; border:1px solid #ccc; border-radius:4px;">
+</div>
+<div class="section-body-full">
+    <div class="table-wrapper" style="margin:0; padding: 3px; min-height:300px; max-height:400px;">
+        <table class="table table-striped table-hover" id="verf_leadsTable">
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Sale Status</th>
+                    <th>Surplus Status</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in client_instance.verified_surplus.all %}
+                <tr>
+                    <td>{{lead.state|title}}</td>
+                    <td>{{lead.county|title}}</td>
+                    <td>{{lead.case_number|upper}}</td>
+                    <td>{{lead.sale_date|date:'m/d/Y'}}</td>
+                    <td>{{lead.sale_status|title}}</td>
+                    <td>{{lead.surplus_status|title}}</td>
+                    <td>
+                        <button 
+                            data-remove-client
+                            data-client-id="{{ client_instance.id }}"
+                            data-field="verified_surplus"
+                            data-related-id="{{ lead.id }}"
+                            class="button">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}    
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</br></br>
+<div class="section-header">
+    <h4>Old Leads</h4>
+    <input type="text" id="oldf_leadSearch" placeholder="Search leads..." style="padding:5px; width:200px; border:1px solid #ccc; border-radius:4px;">
+</div>
+<div class="section-body-full">
+    <div class="table-wrapper" style="margin:0; padding: 3px; min-height:300px; max-height:400px;">
+        <table class="table table-striped table-hover" id="oldf_leadsTable">
+            <thead>
+                <tr>
+                    <th>State</th>
+                    <th>County</th>
+                    <th>Case Number</th>
+                    <th>Sale Date</th>
+                    <th>Sale Status</th>
+                    <th>Surplus Status</th>
+                    <th>Remove</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for lead in client_instance.old_leads.all %}
+                <tr>
+                    <td>{{lead.state|title}}</td>
+                    <td>{{lead.county|title}}</td>
+                    <td>{{lead.case_number|upper}}</td>
+                    <td>{{lead.sale_date|date:'m/d/Y'}}</td>
+                    <td>{{lead.sale_status|title}}</td>
+                    <td>{{lead.surplus_status|title}}</td>
+                    <td>
+                        <button 
+                            data-remove-client
+                            data-client-id="{{ client_instance.id }}"
+                            data-field="old_leads"
+                            data-related-id="{{ lead.id }}"
+                            class="button">
+                            Remove
+                        </button>
+                    </td>
+                </tr>
+            {% endfor %}    
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    enableTableSearch("pref_leadSearch", "pref_leadsTable");
+    enableTableSearch("postf_leadSearch", "postf_leadsTable");
+    enableTableSearch("verf_leadSearch", "verf_leadsTable");
+    enableTableSearch("oldf_leadSearch", "oldf_leadsTable");
+    
+});
+</script>
+{% endif %}
+{% endblock content %}

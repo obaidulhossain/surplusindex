@@ -19,8 +19,10 @@ def allClients(request):
     today_date = date.today()
     if request.method == 'POST':
         selectedClientType = request.POST.get('clientType','')
+        active_status = request.POST.get('active_status','')
     else:
         selectedClientType = request.GET.get('clientType','')
+        active_status = request.GET.get('active_status','')
 
 
     client_queryset = UserDetail.objects.all().order_by('-created_at').prefetch_related('orders', 'orders__deliveries')
@@ -28,6 +30,11 @@ def allClients(request):
         client_queryset = client_queryset.filter(user_type='manual_client')
     else:
         client_queryset = client_queryset.filter(user_type='si_client')
+
+    if active_status and active_status =="active":
+        client_queryset = client_queryset.filter(user__is_active=True)
+    elif active_status and active_status =="inactive":
+        client_queryset = client_queryset.filter(user__is_active=False)
 
     for client in client_queryset:
         client.total_orders = client.orders.all().count
@@ -54,6 +61,7 @@ def allClients(request):
         'today_date':today_date,
         'second_previous':second_previous,
         'total_client':total_client,
+        'active_status':active_status,
     }
     return render(request, 'Admin_Client/all_clients.html', context)
 

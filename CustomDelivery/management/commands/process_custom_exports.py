@@ -22,7 +22,8 @@ class Command(BaseCommand):
             return
 
         for export_option in due_exports:
-            self.stdout.write(f"Processing export for: {export_option.client_name} ({export_option.client_email})")
+            #self.stdout.write(f"Processing export for: {export_option.client_name} ({export_option.client_email})")
+            self.stdout.write(f"Processing export for: {export_option.client.name} ({export_option.client.email})")
 
             try:
                 # STEP 1 — Generate Excel dynamically
@@ -62,14 +63,17 @@ class Command(BaseCommand):
                 new_leads = resource.get_queryset()
 
                 if export_option.delivery_type == "pre-foreclosure":
-                    export_option.pre_foreclosure.add(*new_leads)
+                    #export_option.pre_foreclosure.add(*new_leads)
+                    export_option.client.pre_foreclosure.add(*new_leads)
                 elif export_option.delivery_type == "post-foreclosure":
-                    export_option.post_foreclosure.add(*new_leads)
+                    #export_option.post_foreclosure.add(*new_leads)
+                    export_option.client.post_foreclosure.add(*new_leads)
                 elif export_option.delivery_type == "verified":
-                    export_option.verified_surplus.add(*new_leads)
+                    #export_option.verified_surplus.add(*new_leads)
+                    export_option.client.verified_surplus.add(*new_leads)
 
                 self.stdout.write(self.style.SUCCESS(
-                    f"✅ Updated next delivery date for {export_option.client_name} → {next_date}"
+                    f"✅ Updated next delivery date for {export_option.client.name} → {next_date}"
                     f"✅ Added {new_leads.count()} new leads to {export_option.delivery_type} history"
                 ))
 
