@@ -485,7 +485,7 @@ class CustomExportResource:
     def export_to_excel(self):
         df = self.to_dataframe()
         buffer = BytesIO()
-        filename = f"{timezone.now().date()} {self.export_option.get_delivery_type_display} List.xlsx"
+        filename = f"{timezone.now().date()} {self.export_option.get_delivery_type_display} List - {self.export_option.client.name}.xlsx"
 
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, sheet_name="Leads")
