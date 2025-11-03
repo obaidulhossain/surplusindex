@@ -451,48 +451,17 @@ class CustomExportResource:
 
         return df
 
-
-    # def to_dataframe(self):
-    #     queryset = self.get_queryset()
-    #     data = [self.dehydrate_foreclosure(obj) for obj in queryset]
-    #     df = pd.DataFrame(data)
-
-    #     # If user selected specific columns, use them.
-    #     if self.export_option.columns:
-    #         # Use only the requested columns that actually exist
-    #         cols = [c for c in self.export_option.columns if c in df.columns]
-    #         df = df[cols]
-    #     else:
-    #         # Default full fixed layout
-    #         base_cols = [
-    #             "id", "State", "county", "sale_type", "sale_status",
-    #             "surplus_status", "case_number", "Sale Date", "plaintiff",
-    #             "defendant", "street_address", "city", "zip_code",
-    #             "parcel", "possible_surplus", "verified_surplus"
-    #         ]
-    #         contact_cols = []
-    #         for i in range(1, 5):
-    #             contact_cols.append(f"Contact Name {i}")
-    #             contact_cols.append(f"Email {i}")
-    #             for j in range(1, 5):
-    #                 contact_cols.append(f"Wireless {i}.{j}")
-    #             for j in range(1, 5):
-    #                 contact_cols.append(f"Landline {i}.{j}")
-    #         df = df[[c for c in base_cols + contact_cols if c in df.columns]]
-
-    #     return df
-
     def export_to_excel(self):
         df = self.to_dataframe()
         buffer = BytesIO()
-        filename = f"{timezone.now().date()} {self.export_option.get_delivery_type_display} List - {self.export_option.client.name}.xlsx"
+        filename = f"{timezone.now().date()} {self.export_option.get_delivery_type_display()} List - {self.export_option.client.name}.xlsx"
 
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, sheet_name="Leads")
 
             # --- Style header after writing ---
             workbook = writer.book
-            worksheet = writer.sheets[f"{self.export_option.get_delivery_type_display} Leads"]
+            worksheet = writer.sheets[f"{self.export_option.get_delivery_type_display()} Leads"]
 
             # Header styling
             header_fill = PatternFill(start_color="516699", end_color="516699", fill_type="solid")  # blue background
