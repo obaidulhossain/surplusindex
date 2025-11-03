@@ -115,3 +115,21 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // ============================================================
 // ============================================================
+
+
+// Reuseable function
+// -------------------------toggle filters button-----(start)-----------------------------
+//Example Usage: <button id="toggle-filters" class="toogle-button" onclick="toggleFilters(this.id, 'filters')">Hide</button>
+function toggleFilters(togglebtn, hide_id, event) {
+    event.preventDefault(); // Prevent the form submission
+    const section = document.getElementById(hide_id); // hide_id = section id to be hidden
+    const button = document.getElementById(togglebtn); // togglebtn = button id that will perform the action
+
+    if (section.style.display === "block" || section.style.display === "") {
+        section.style.display = "none";
+        button.innerHTML = '<i class="bi bi-eye"></i>';
+    } else {
+        section.style.display = "block";
+        button.innerHTML = '<i class="bi bi-eye-slash"></i>';
+    }
+}
