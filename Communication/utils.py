@@ -360,10 +360,10 @@ def notify(n_subject: str, n_body: str, n_source: str, recipients=None):
         notification_msg.attach_alternative(html_Notification_body, "text/html")
                 # Attach HTML version
         notification_msg.send(fail_silently=False)
-        print(f"✅ Notification sent for {n_source}: {n_subject}")
+        print(f" Notification sent for {n_source}: {n_subject}")
 
     except Exception as e:
-        print(f"❌ Notification failed: {e}")
+        print(f"Notification failed: {e}")
         traceback.print_exc()
 
     # # ---- Fetch latest UID from Sent folder ----
