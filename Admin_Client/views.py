@@ -23,7 +23,7 @@ from django.urls import reverse
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from authentication.utils import token_generator
-from Admin_Client.models import UserDetail
+from si_user.models import UserDetail
 
 
 def allClients(request):
