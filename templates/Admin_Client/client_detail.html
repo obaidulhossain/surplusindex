@@ -63,6 +63,42 @@ Clients
             <h5 id="last-online"><span style="{% if login_status == "Online" %}color:#1db170{% else %}color:#254056{% endif %}">{{login_status}}</span></h5>
         </div>    
     </div>
+
+    <div class="section-header" style="margin-top:20px; background-color: #587b98">
+    <h4>Purchase Stat</h4>
+    </div>
+    <div class="section-body-full">
+        <div class="onethird" style="    justify-items: left;">
+            <h4>Total Purchased: {{total_purchased}}</h4>
+            <h6>Active: {{active}}</h6>
+            <h6>Sold: {{sold}}</h6>
+            <h6>Cancelled: {{cancelled}}</h6>
+            <h6>Bankruptcy: {{bankruptcy}}</h6>
+            <h6>Plaintiff Buy Back: {{sold_to_plt}}</h6>
+        </div>
+        <div class="onethird" style="    justify-items: left;">
+            <h4>Sold: {{sold}}</h4>
+            <h6>Not Determined: {{not_determined}}</h6>
+            <h6>Possible Surplus: {{possible_surplus}}</h6>
+            <h6>Verified Surplus: {{verified_surplus}}</h6>
+            {% comment %} <h6>Claiming in Progress: {{motion_filed}}</h6> {% endcomment %}
+            <h6>Fund Claimed: {{fund_claimed}}</h6>
+            {% comment %} <h6>No Possible Surplus: {{no_possible_surplus}}</h6> {% endcomment %}
+            <h6>No Surplus: {{no_surplus}}</h6>
+            
+        </div>
+        <div class="onethird" style="    justify-items: left;">
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
     <div class="section-header" style="margin-top:20px; background-color: #587b98">
     <h4>Create Order</h4>
     </div>

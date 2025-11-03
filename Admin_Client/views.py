@@ -3,6 +3,7 @@ from django.contrib.auth.models import User, Group
 from django.core.paginator import Paginator
 from si_user.models import *
 from .models import *
+from propertydata.models import *
 from django.db.models import Min
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
@@ -107,6 +108,25 @@ def clientDetail(request):
         total_paid = stat_instance.orders.filter(payment_status=Orders.PAID).aggregate(paid_amount=Sum('order_price'))['paid_amount']
         total_unpaid = stat_instance.orders.exclude(payment_status=Orders.PAID).aggregate(unpaid_amount=Sum('order_price'))['unpaid_amount']
 
+        purchased_leads = Foreclosure.objects.filter(purchased_by = client_instance.user)
+        total_purchased = len(purchased_leads)
+        active = len(purchased_leads.filter(sale_status = "Active"))
+        sold = len(purchased_leads.filter(sale_status = "Sold"))
+        cancelled = len(purchased_leads.filter(sale_status = "Cancelled"))
+        bankruptcy = len(purchased_leads.filter(sale_status = "Bankruptcy Hold"))
+        sold_to_plt = len(purchased_leads.filter(sale_status = "Sold To Plaintiff"))
+
+        possible_surplus = len(purchased_leads.filter(sale_status = "Sold", surplus_status = "Possible Surplus"))
+        verified_surplus = len(purchased_leads.filter(sale_status = "Sold", surplus_status = "Fund Available"))
+        not_determined = len(purchased_leads.filter(sale_status = "Sold", surplus_status = "Not Determined"))
+        no_possible_surplus = len(purchased_leads.filter(sale_status = "Sold", surplus_status = "No Possible Surplus"))
+        motion_filed = len(purchased_leads.filter(sale_status = "Sold", surplus_status = "Motion Filed"))
+        fund_claimed = len(purchased_leads.filter(sale_status = "Sold", surplus_status = "Fund Claimed"))
+        no_surplus = len(purchased_leads.filter(sale_status = "Sold", surplus_status = "No Surplus"))
+
+
+
+
         orders = client_instance.orders.all()
         if selected_orderstatus and selected_orderstatus == "running":
             orders = orders.filter(order_status="running")
@@ -140,6 +160,20 @@ def clientDetail(request):
         'delivered':delivered,
         'pending':pending,
         'login_status':login_status,
+
+        'total_purchased':total_purchased,
+        'active':active,
+        'sold':sold,
+        'cancelled':cancelled,
+        'bankruptcy':bankruptcy,
+        'sold_to_plt':sold_to_plt,
+        'possible_surplus':possible_surplus,
+        'verified_surplus':verified_surplus,
+        'not_determined':not_determined,
+        'no_possible_surplus':no_possible_surplus,
+        'motion_filed':motion_filed,
+        'fund_claimed':fund_claimed,
+        'no_surplus':no_surplus,
 
     }
     return render(request, 'Admin_Client/client_detail.html', context)
