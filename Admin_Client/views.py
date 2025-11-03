@@ -428,8 +428,8 @@ def resend_activation_email(request):
 
     # send mail
     send_mail(
-        "Resend Activation - SurplusIndex",
-        f"Hi {user.username},\n\nPlease use this link to activate your account:\n{activate_url}",
+        "Activate SurplusIndex Account",
+        f"Hi {user.username},\n\nYour SurplusIndex account is created successfully!\n\nPlease use this link to activate your account and get access to thousands of up to date surplus leads:\n{activate_url}",
         "contact@surplusindex.com",
         [user.email],
         fail_silently=False
