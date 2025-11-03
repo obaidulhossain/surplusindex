@@ -7,6 +7,7 @@ from CustomDelivery.models import *
 from CustomDelivery.resources import CustomExportResource
 from django.core.mail import EmailMessage
 from django.conf import settings
+import traceback
 class Command(BaseCommand):
     help = "Processes CustomExportOptions and updates next delivery dates if due."
 
@@ -76,11 +77,14 @@ class Command(BaseCommand):
                     f"✅ Updated next delivery date for {export_option.client.name} → {next_date}"
                     f"✅ Added {new_leads.count()} new leads to {export_option.delivery_type} history"
                 ))
-
             except Exception as e:
-                self.stderr.write(self.style.ERROR(
-                    f"❌ Failed for {export_option.client_name}: {str(e)}"
-                ))
+                self.stdout.write(f"❌ Failed for {export_option.client.name}: {repr(e)}")
+                traceback.print_exc()
+            # except Exception as e:
+            #     self.stderr.write(self.style.ERROR(
+            #         f"❌ Failed for {export_option.client_name}: {str(e)}"
+            #         traceback.print_exc()
+            #     ))
 
     def calculate_next_delivery_date(self, export_option):
         """
