@@ -24,8 +24,9 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from authentication.utils import token_generator
 from si_user.models import UserDetail
+from django.contrib.auth.decorators import login_required
 
-
+@login_required
 def allClients(request):
     today_date = date.today()
     if request.method == 'POST':
@@ -76,6 +77,7 @@ def allClients(request):
     }
     return render(request, 'Admin_Client/all_clients.html', context)
 
+@login_required
 def updateCredits(request):
     if request.method == "POST":
         count = 0
@@ -97,7 +99,7 @@ def updateCredits(request):
     return HttpResponseRedirect("/all_clients/")
 
 
-
+@login_required
 def clientDetail(request):
     deliveries = ""
     delivered = ""
@@ -189,7 +191,7 @@ def clientDetail(request):
     return render(request, 'Admin_Client/client_detail.html', context)
 
 
-
+@login_required
 def clientSettings(request):
     if request.method == 'POST':
         client = request.POST.get('client','')
@@ -200,6 +202,7 @@ def clientSettings(request):
     }
     return render(request, 'Admin_Client/client_settings.html', context)
 
+@login_required
 def registerClient(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -245,7 +248,7 @@ def registerClient(request):
 
 
 
-
+@login_required
 def CreateOrder(request):
     if request.method == 'POST':
         client = request.POST.get('client','')
@@ -294,6 +297,7 @@ def CreateOrder(request):
         return HttpResponseRedirect(f"/client_detail/?client={client}&order-status={selected_orderstatus}")
     return redirect('client_detail')
 
+@login_required
 def UpdatePaymentStatus(request):
     if request.method == 'POST':
         client = request.POST.get('client','')
@@ -314,7 +318,7 @@ def UpdatePaymentStatus(request):
         return HttpResponseRedirect(f"/client_detail/?client={client}&order-status={selected_orderstatus}")
     return redirect('client_detail')
 
-
+@login_required
 def createDelivery(request):
     if request.method == "POST":
         client_id = request.POST.get('client_id','')
@@ -340,6 +344,7 @@ def createDelivery(request):
         order_instance.deliveries.add(delivery_instance)
     return HttpResponseRedirect (f"/client_detail/?client={client_id}")
 
+@login_required
 @csrf_exempt
 def updateDeliveryStatus(request):
     if request.method == 'POST':
@@ -367,6 +372,7 @@ def updateDeliveryStatus(request):
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
+@login_required
 @csrf_exempt
 def updateOrderStatus(request):
     if request.method == 'POST':
@@ -439,3 +445,14 @@ def resend_activation_email(request):
         'message': f"Email sent to {user.email}",
         'attempts': detail.activation_attempt if detail else 1
     })
+
+@login_required
+def delete_user(request, user_id):
+    if request.method == "POST":
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+            return JsonResponse({"success": True})
+        except User.DoesNotExist:
+            return JsonResponse({"success": False, "error": "User not found"})
+    return JsonResponse({"success": False, "error": "Invalid request"})

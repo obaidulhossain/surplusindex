@@ -144,7 +144,7 @@ Clients
                 {% for group in client.user.groups.all %}
                 {% if 'clients' in group.name %}
                     
-                    <tr class="{% if client.created_at|date:"Y-m-d" == today_date|date:"Y-m-d" %}highlight-today{% elif client.created_at|date:"Y-m-d" >= today_date|add:"-3 days"|date:"Y-m-d" %}highlight-recent{% endif %}">
+                    <tr class="{% if client.created_at|date:"Y-m-d" == today_date|date:"Y-m-d" %}highlight-today{% elif client.created_at|date:"Y-m-d" >= today_date|add:"-3 days"|date:"Y-m-d" %}highlight-recent{% endif %}" id="user-{{ client.user.id }}">
                         <td>{{client.user.id}}</td>
                         <td>{{client.created_at|date:"m/d/Y"}}</td>
                         <td>{{client.user.first_name}} {{client.user.last_name}}</td>
@@ -165,7 +165,11 @@ Clients
                                 Resend ({{ client.activation_attempt }})
                             </button>
                         {% else %}
-                            <button class="btn btn-sm btn-danger" disabled>Max Attempts</button>
+                            <button 
+                                class="btn btn-danger btn-sm delete-user-btn" 
+                                data-user-id="{{ client.user.id }}">
+                                Delete
+                            </button>
                         {% endif %}
                             {% comment %} <i class="bi bi-exclamation-circle-fill" style="color:red;"></i> {% endcomment %}
                         {% endif %}
@@ -202,6 +206,45 @@ Clients
         </ul>
     </div>
 </div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const buttons = document.querySelectorAll(".delete-user-btn");
+
+  buttons.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const userId = btn.dataset.userId;
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      if (!confirm("Are you sure you want to delete this user?")) return;
+
+      btn.disabled = true;
+      btn.textContent = "Deleting...";
+
+      fetch(`/delete-user/${userId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": csrfToken,
+          "X-Requested-With": "XMLHttpRequest"
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          document.querySelector(`#user-${userId}`).remove();
+        } else {
+          btn.textContent = "Error";
+          btn.disabled = false;
+        }
+      })
+      .catch(() => {
+        btn.textContent = "Error";
+        btn.disabled = false;
+      });
+    });
+  });
+});
+</script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const buttons = document.querySelectorAll('.resend-btn');
