@@ -100,7 +100,7 @@ Manage Projects
 <div class="section-body-full" style="margin-top:20px;">
     <div class="section-header">
         <h4>Week {{cycle_instance.week}} | {{cycle_instance.year}} <small>({{cycle_instance.cycle_start|date:'m/d/Y'}}-{{cycle_instance.cycle_end|date:'m/d/Y'}})</small></h4>
-        <button id="toggle-cycle" class="toogle-button" onclick="toggleFilters(this.id, 'cycle_tasks')">Hide</button>
+        <button id="toggle-cycle" class="button toogle-button" onclick="toggleFilters(this.id, 'cycle_tasks', event)">Hide</button>
     </div>
     <div class="section-body-full" id="cycle_tasks">
     {% if tasks.count > 0 %}
