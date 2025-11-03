@@ -16,5 +16,7 @@ urlpatterns = [
     path('CreateOrder', views.CreateOrder, name="CreateOrder"),
     path('createDelivery', views.createDelivery, name="createDelivery"),
     
+    path('resend-activation/', views.resend_activation_email, name='resend_activation_email'),
+
 
 ]

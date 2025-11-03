@@ -14,6 +14,16 @@ import json
 from django.contrib import messages
 from datetime import date
 # Create your views here.
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.models import User
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.urls import reverse
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import send_mail
+from authentication.utils import token_generator
+from Admin_Client.models import UserDetail
 
 
 def allClients(request):
@@ -383,3 +393,49 @@ def updateOrderStatus(request):
 
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
+
+
+@require_POST
+def resend_activation_email(request):
+    user_id = request.POST.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'error': 'Missing user_id'})
+
+    try:
+        user = User.objects.get(id=user_id)
+        detail = getattr(user, 'credits', None)
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'User not found'})
+
+    if user.is_active:
+        return JsonResponse({'success': False, 'error': 'Already active'})
+
+    if detail and detail.activation_attempt >= 3:
+        return JsonResponse({'success': False, 'error': 'Attempt limit reached'})
+
+    # build activation link
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    domain = get_current_site(request).domain
+    link = reverse('activate', kwargs={'uidb64': uidb64, 'token': token_generator.make_token(user)})
+    activate_url = f"http://{domain}{link}"
+
+    # send mail
+    send_mail(
+        "Resend Activation - SurplusIndex",
+        f"Hi {user.username},\n\nPlease use this link to activate your account:\n{activate_url}",
+        "contact@surplusindex.com",
+        [user.email],
+        fail_silently=False
+    )
+
+    # increment attempts
+    if detail:
+        detail.activation_attempt += 1
+        detail.save()
+
+    return JsonResponse({
+        'success': True,
+        'message': f"Email sent to {user.email}",
+        'attempts': detail.activation_attempt if detail else 1
+    })

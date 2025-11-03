@@ -33,6 +33,7 @@ class UserDetail(Timelogger):
     free_credit_balance = models.IntegerField(default=20)
     purchased_credit_balance = models.IntegerField(default=0)
     Total_credits = models.IntegerField(default=0)
+    activation_attempt = models.IntegerField(default=1)
     def update_total_credits(self):
         self.Total_credits = self.free_credit_balance + self.purchased_credit_balance
         self.save()

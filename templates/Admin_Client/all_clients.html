@@ -153,7 +153,23 @@ Clients
                         <td>{{client.purchased_credit_balance}}</td>
                         <td>{{client.Total_credits}}</td>
                         <td>{{client.changed_at|date:"m/d/Y"}}</td>
-                            <td>{% if client.user.is_active %}<i class="bi bi-check-circle-fill" style="color:green;"></i>{% else %}<i class="bi bi-exclamation-circle-fill" style="color:red;"></i>{% endif %}</td>
+                        <td>
+                        {% if client.user.is_active %}
+                            <i class="bi bi-check-circle-fill" style="color:green;"></i>
+                        {% else %}
+                        {% if client.activation_attempt < 3 %}
+                            <button 
+                                class="btn btn-sm btn-warning resend-btn"
+                                data-user-id="{{ client.user.id }}"
+                                data-attempt="{{ client.activation_attempt }}">
+                                Resend ({{ client.activation_attempt }})
+                            </button>
+                        {% else %}
+                            <button class="btn btn-sm btn-danger" disabled>Max Attempts</button>
+                        {% endif %}
+                            {% comment %} <i class="bi bi-exclamation-circle-fill" style="color:red;"></i> {% endcomment %}
+                        {% endif %}
+                        </td>
                         <td><a class="button" href="/client_detail/?client={{client.id}}">View</a></td>
                         
                     </tr>
@@ -186,6 +202,49 @@ Clients
         </ul>
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const buttons = document.querySelectorAll('.resend-btn');
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      const userId = this.dataset.userId;
+      const btn = this;
+      btn.disabled = true;
+      btn.textContent = 'Sending...';
+
+      fetch("{% url 'resend_activation_email' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: new URLSearchParams({ 'user_id': userId })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          btn.textContent = `Sent (${data.attempts}) ✅`;
+          btn.classList.remove('btn-warning');
+          btn.classList.add('btn-success');
+        } else {
+          btn.textContent = data.error || 'Error';
+          btn.classList.remove('btn-warning');
+          btn.classList.add('btn-danger');
+        }
+      })
+      .catch(err => {
+        btn.textContent = 'Failed';
+        btn.classList.remove('btn-warning');
+        btn.classList.add('btn-danger');
+      })
+      .finally(() => {
+        setTimeout(() => btn.disabled = false, 5000);
+      });
+    });
+  });
+});
+</script>
 
 
 {% endblock content %}
