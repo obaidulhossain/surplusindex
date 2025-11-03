@@ -454,14 +454,14 @@ class CustomExportResource:
     def export_to_excel(self):
         df = self.to_dataframe()
         buffer = BytesIO()
-        filename = f"{timezone.now().date()} {self.export_option.get_delivery_type_display()} List - {self.export_option.client.name}.xlsx"
+        filename = f"{timezone.now().date()} {self.export_option.delivery_type} List - {self.export_option.client.name}.xlsx"
 
         with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
             df.to_excel(writer, index=False, sheet_name="Leads")
 
             # --- Style header after writing ---
             workbook = writer.book
-            worksheet = writer.sheets[f"{self.export_option.get_delivery_type_display()} Leads"]
+            worksheet = writer.sheets[f"{self.export_option.delivery_type} Leads"]
 
             # Header styling
             header_fill = PatternFill(start_color="516699", end_color="516699", fill_type="solid")  # blue background
