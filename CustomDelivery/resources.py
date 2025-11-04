@@ -447,7 +447,12 @@ class CustomExportResource:
             print(f"Requested Columns: {client_columns}")
             print(f"Available Columns: {available_cols[:10]} ... ({len(available_cols)} total)")
             print(f"Matched Columns: {matched_cols}\n")
-
+            for req in client_columns:
+                if req not in available_cols:
+                    print(f"❌ No match for: '{req}'")
+                    close = [col for col in available_cols if col.lower().strip() == req.lower().strip()]
+                    if close:
+                        print(f"   🔸 Possible close match: {close}")
             if matched_cols:
                 df = df[matched_cols]
             else:
