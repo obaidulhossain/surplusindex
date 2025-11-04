@@ -422,36 +422,72 @@ class CustomExportResource:
                 rows.append(contact_data)
 
         return rows
-
     def to_dataframe(self):
         queryset = self.get_queryset()
 
-        #if getattr(self.export_option, "contact_align", "horizontal") == "vertical":
+        # Choose layout mode (horizontal or vertical)
         if getattr(self.export_option.client, "contact_align", "horizontal") == "vertical":
-            #queryset = queryset[:20]
-            # Vertical mode: each contact gets its own row
             data = []
             for obj in queryset:
                 data.extend(self.dehydrate_foreclosure_vertical(obj))
             df = pd.DataFrame(data)
         else:
-            # Default horizontal mode (existing)
             data = [self.dehydrate_foreclosure(obj) for obj in queryset]
             df = pd.DataFrame(data)
 
-        # Use selected columns if specified
-        #if self.export_option.columns:
-        if self.export_option.client.columns:
-            #cols = [c for c in self.export_option.columns if c in df.columns]
-            cols = [c for c in self.export_option.client.columns if c in df.columns]
-            self.stdout.write(df.columns)
-            self.stdout.write(self.export_option.client.columns)
-            df = df[cols]
-        # ✅ FIX: Convert timezone-aware datetimes to naive (Excel-safe)
+        # 🩵 Safe filtering by client-specified columns
+        client_columns = getattr(self.export_option.client, "columns", None)
+
+        if client_columns:
+            available_cols = list(df.columns)
+            matched_cols = [c for c in client_columns if c in available_cols]
+
+            # Debug print to help identify mismatches
+            print(f"\n--- Column Debug for {self.export_option.client.name} ---")
+            print(f"Requested Columns: {client_columns}")
+            print(f"Available Columns: {available_cols[:10]} ... ({len(available_cols)} total)")
+            print(f"Matched Columns: {matched_cols}\n")
+
+            if matched_cols:
+                df = df[matched_cols]
+            else:
+                print(f"[⚠️ WARNING] No matching columns found for {self.export_option.client.name}. Exporting all columns instead.")
+        else:
+            print(f"[ℹ️ INFO] No custom columns specified for {self.export_option.client.name}. Exporting all columns.")
+
+        # ✅ Fix timezone-aware datetimes before Excel export
         for col in df.select_dtypes(include=["datetimetz"]).columns:
             df[col] = df[col].dt.tz_localize(None)
 
         return df
+
+    # def to_dataframe(self):
+    #     queryset = self.get_queryset()
+
+    #     #if getattr(self.export_option, "contact_align", "horizontal") == "vertical":
+    #     if getattr(self.export_option.client, "contact_align", "horizontal") == "vertical":
+    #         #queryset = queryset[:20]
+    #         # Vertical mode: each contact gets its own row
+    #         data = []
+    #         for obj in queryset:
+    #             data.extend(self.dehydrate_foreclosure_vertical(obj))
+    #         df = pd.DataFrame(data)
+    #     else:
+    #         # Default horizontal mode (existing)
+    #         data = [self.dehydrate_foreclosure(obj) for obj in queryset]
+    #         df = pd.DataFrame(data)
+
+    #     # Use selected columns if specified
+    #     #if self.export_option.columns:
+    #     if self.export_option.client.columns:
+    #         #cols = [c for c in self.export_option.columns if c in df.columns]
+    #         cols = [c for c in self.export_option.client.columns if c in df.columns]
+    #         df = df[cols]
+    #     # ✅ FIX: Convert timezone-aware datetimes to naive (Excel-safe)
+    #     for col in df.select_dtypes(include=["datetimetz"]).columns:
+    #         df[col] = df[col].dt.tz_localize(None)
+
+    #     return df
 
     def export_to_excel(self):
         df = self.to_dataframe()
