@@ -7,6 +7,7 @@ from openpyxl import Workbook
 from datetime import datetime
 from openpyxl.styles import PatternFill, Font, Alignment
 from openpyxl.utils import get_column_letter
+import json
 class CustomExportResource:
     """
     Dynamically generates Excel data for a given CustomExportOptions instance.
@@ -437,7 +438,13 @@ class CustomExportResource:
 
         # 🩵 Safe filtering by client-specified columns
         client_columns = getattr(self.export_option.client, "columns", None)
-
+        # 🧩 Convert JSON string to list if necessary
+        if isinstance(client_columns, str):
+            try:
+                client_columns = json.loads(client_columns)
+            except json.JSONDecodeError:
+                print(f"[⚠️ WARNING] Failed to decode client columns for {self.export_option.client.name}: {client_columns}")
+                client_columns = []
         if client_columns:
             available_cols = list(df.columns)
             matched_cols = [c for c in client_columns if c in available_cols]
