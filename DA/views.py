@@ -1,5 +1,6 @@
 from django.shortcuts import redirect, render, get_object_or_404, HttpResponseRedirect
-
+from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 from django.utils.timezone import now
 from django.core.paginator import Paginator
 from django.http import JsonResponse
@@ -16,6 +17,8 @@ from . models import *
 from realestate_directory.models import *
 from propertydata.models import *
 
+@login_required(login_url="login")
+@allowed_users(['admin', 'researcher'])
 def caseChecklist(request):
     user = request.user
     if request.method == 'POST':
@@ -88,10 +91,9 @@ def caseChecklist(request):
     return render(request, 'da/active_tasks.html', context)
 
 
-
-
 # Create your views here.
-
+@login_required(login_url="login")
+@allowed_users(['admin', 'researcher'])
 def SkiptracingChecklist(request):
 
     current_user = request.user

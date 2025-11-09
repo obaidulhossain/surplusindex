@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from . forms import CreateUserForm, LoginForm, UpdateUserForm, UserDetailForm
 from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 from django.contrib import messages
 from django.contrib.auth.models import User
 from . models import *
@@ -26,20 +27,14 @@ from datetime import datetime, timedelta, date
 from collections import defaultdict
 from Client.resources import *
 from Communication.utils import notify
+from django.views.decorators.http import require_POST
+
 # Configure the logger
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
-
-
-## test if api key is working
-# try:
-#     stripe.Product.list(limit=1)  # Fetch a product to test the connection
-#     print("API key is okay")
-# except stripe.error.AuthenticationError:
-#     print("Invalid Stripe API key.")
-## end test if api key is working
 
 @login_required(login_url="login")
 def userSettings(request):
@@ -61,6 +56,8 @@ def userSettings(request):
         UserDetail.objects.create(user=current_user)
         return redirect('settings')
 
+
+@login_required(login_url="login")
 def changePassword(request):
     if request.method == 'POST':
         form = PasswordChangeForm(request.user, request.POST)
@@ -80,42 +77,12 @@ def changePassword(request):
     else:
         return redirect('settings')
 
-# ------------------------------------- Login View
-def user_login(request):
-    form = LoginForm()
-    if request.method == 'POST':
-        form = LoginForm(request, data=request.POST)
-        if form.is_valid():
-            username = request.POST.get('username')
-            password = request.POST.get('password')
 
-            user = authenticate(request, username=username, password=password)
-
-            if user is not None:
-                auth.login(request, user)
-                return redirect("dashboard")
-    context = {'loginform':form}
+# # ------------------------------------- Dashboard View
+# @login_required(login_url="my-login")
+# def dashboard(request):
     
-    return render(request, 'login.html', context=context)
-
-# ------------------------------------- Logout View  
-
-# ------------------------------------- Register View
-def register (request):
-    form = CreateUserForm()
-    if request.method == "POST":
-        form = CreateUserForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("my-login")
-    context = {'registerform':form}
-    return render(request, 'register.html', context=context)
-
-# ------------------------------------- Dashboard View
-@login_required(login_url="my-login")
-def dashboard(request):
-    
-    return render(request, 'dashboard.html')
+#     return render(request, 'dashboard.html')
 
 @login_required(login_url="login")
 def updateUserCredentials(request):
@@ -135,6 +102,7 @@ def updateUserCredentials(request):
             user_form = UpdateUserForm(instance=current_user)
             detail_form = UserDetailForm(instance=current_user_detail)
             messages.error(request, "Invalid Credentials")
+
 
 @login_required(login_url="login")
 def userProfile(request):
@@ -175,22 +143,18 @@ def export_leads_from_usage(request, usage_id):
         return redirect('profile')
 
 
-
-
-
-
-
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
         UserDetail.objects.create(user=instance)
+
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.credits.save()
 
 
-
+@login_required(login_url="login")
 @csrf_exempt
 def userSubscription(request):
     user = request.user
@@ -238,6 +202,8 @@ def userSubscription(request):
     }
     return render(request, 'si_user/subscription.html', context)
 
+
+@login_required(login_url="login")
 def HideShow_HiddenSubs(request):
     if request.method == "POST":
         ShowHidden = request.POST.get('show_hide_hidden')
@@ -248,7 +214,6 @@ def HideShow_HiddenSubs(request):
             settings.manage_sub_show_hidden = False
         settings.save()
     return redirect('subscriptions')
-
 
 
 @login_required
@@ -601,14 +566,10 @@ def stripe_webhook(request):
 
     return HttpResponse(status=200)
 
+
 @login_required
 def cancel_subscription(request, subscription_id):
-    # sub = get_object_or_404(
-    #     StripeSubscription,
-    #     user=request.user,
-    #     subscription_id=subscription_id,
-    #     status="active"
-    # )
+
     stripe.Subscription.delete(subscription_id)  # Immediate cancel
     messages.success(request, f"Subscription {subscription_id} has been canceled.")
     notify(
@@ -616,11 +577,7 @@ def cancel_subscription(request, subscription_id):
         n_body=f"An user ({request.user}) cancelled his/her subscription. Subscription id: {subscription_id}",
         n_source="Cancellation of Subscription")
     return redirect("subscriptions")
-# def cancel_subscription(request):
-#     sub = get_object_or_404(StripeSubscription, user=request.user, status="active")
-#     stripe.Subscription.delete(sub.subscription_id)  # immediate cancel
-#     messages.success(request, "Your subscription has been canceled.")
-#     return redirect("subscription_settings")
+
 
 @login_required
 def pause_subscription(request):
@@ -629,12 +586,14 @@ def pause_subscription(request):
     messages.success(request, "Your subscription has been paused.")
     return redirect("subscription_settings")
 
+
 @login_required
 def resume_subscription(request):
     sub = get_object_or_404(StripeSubscription, user=request.user, status="paused")
     stripe.Subscription.modify(sub.subscription_id, pause_collection="")
     messages.success(request, "Your subscription has been resumed.")
     return redirect("subscription_settings")
+
 
 @login_required
 def extend_subscription(request):
@@ -644,7 +603,7 @@ def extend_subscription(request):
     messages.success(request, "Your subscription validity has been extended by 30 days.")
     return redirect("subscription_settings")
 
-from django.views.decorators.http import require_POST
+
 @require_POST
 @login_required
 def hide_show_subscription(request):

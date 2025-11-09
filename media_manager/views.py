@@ -1,7 +1,8 @@
 import os
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
-
+from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.http import JsonResponse
@@ -59,27 +60,7 @@ def media_library(request):
         'files': page_obj,
         'query': query,
     })
-# @superuser_required
-# @xframe_options_exempt
-# def media_library(request):
-#     """Main media library page -- can be opened in an iframe/modal."""
-#     query = request.GET.get('q', '')
-#     files = MediaFile.objects.all()
-#     if query:
-#         files = files.filter(Q(title__icontains=query) | Q(file__icontains=query))
 
-#     paginator = Paginator(files, 12)
-#     page = request.GET.get('page')
-#     files_page = paginator.get_page(page)
-
-#     # if ?select_field=FIELDNAME is provided, the caller probably wants to receive selection callback
-#     select_field = request.GET.get('select_field', '')
-
-#     return render(request, 'media_manager/media_library.html', {
-#         'files': files_page,
-#         'query': query,
-#         'select_field': select_field,
-#     })
 
 @superuser_required
 @xframe_options_exempt
@@ -96,6 +77,7 @@ def upload_media(request):
         form = MediaFileForm()
     return render(request, 'media_manager/upload_media.html', {'form': form})
 
+
 @superuser_required
 @require_POST
 def delete_media(request, media_id):
@@ -106,6 +88,7 @@ def delete_media(request, media_id):
         return JsonResponse({'success': True})
     except MediaFile.DoesNotExist:
         raise Http404("File not found")
+
 
 @superuser_required
 @require_POST

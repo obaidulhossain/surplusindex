@@ -22,7 +22,11 @@ from .models import *
 from .tasks import *
 from email.utils import formataddr
 from realestate_directory.models import States
+from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 #----------------------------------- Communication Dashboard Views ---------------------------
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def ComDashboard(request):
     context = {
         "mail_accounts": MailAccount.objects.all(),
@@ -31,6 +35,9 @@ def ComDashboard(request):
     }
     return render(request, "Communication/communication.html", context)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def schedule_email_view(request):
     if request.method == "POST":
         sender_id = request.POST.get("sender")
@@ -140,7 +147,8 @@ def schedule_email_view(request):
         return redirect("com_dashboard")
 
 #----------------------------------- Contacts Views ---------------------------
-
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def ComContacts(request):
     params = request.POST if request.method == "POST" else request.GET
     selected_contact = params.get('contact_id')
@@ -156,6 +164,9 @@ def ComContacts(request):
     }
     return render(request, "Communication/contacts_lists.html", context)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def CreateUpdateClientContact(request):
     params = request.POST if request.method == "POST" else request.GET
     selected_contact = params.get('contact_id')
@@ -216,7 +227,8 @@ def manage_preferred_states(request, contact_id):
     return JsonResponse({"status": "error", "message": "Invalid request"}, status=400)
 
 #----------------------------------- Inbox Views ---------------------------
-
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def ComInbox(request):
     params = request.POST if request.method == "POST" else request.GET
     selected_email_id = params.get('selectedemail', '')
@@ -261,6 +273,9 @@ def ComInbox(request):
     }
     return render(request, "Communication/inbox.html", context)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def archive_email(request, email_id):
     if request.method == "POST":
         try:
@@ -297,6 +312,9 @@ def archive_email(request, email_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def delete_email(request, email_id):
     if request.method == "POST":
         try:
@@ -329,72 +347,9 @@ def delete_email(request, email_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
 
-# def archive_email(request, msg_id):
-#     if request.method == "POST":
-#         account_id = request.POST.get("account_id")
-#         account = get_object_or_404(MailAccount, id=account_id)
-#         msg = get_object_or_404(MailMessage, id=msg_id, account=account)
-
-#         try:
-#             # Connect IMAP
-#             if account.use_ssl:
-#                 imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
-#             else:
-#                 imap = imaplib.IMAP4(account.imap_host, account.imap_port)
-#             imap.login(account.username, account.password)
-#             imap.select("INBOX")
-            
-#             result, _ = imap.uid("COPY", msg.uid, "INBOX.Archive")
-#             if result != "OK":
-#                 raise Exception(f"Failed to copy to Archive")
-#             # Move to Archive
-#             # imap.uid("COPY", msg.uid, "Archived")
-#             imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
-#             imap.expunge()
-#             imap.logout()
-
-#             # Update DB
-#             msg.folder = "archive"
-#             msg.save()
-#             messages.success(request, f"Message archived: {msg.subject}")
-#         except Exception as e:
-#             messages.error(request, f"Failed to archive: {e}")
-
-#     return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
-
-# def delete_email(request, msg_id):
-#     if request.method == "POST":
-#         account_id = request.POST.get("account_id")
-#         account = get_object_or_404(MailAccount, id=account_id)
-#         msg = get_object_or_404(MailMessage, id=msg_id, account=account)
-
-#         try:
-#             # Connect IMAP
-#             if account.use_ssl:
-#                 imap = imaplib.IMAP4_SSL(account.imap_host, account.imap_port)
-#             else:
-#                 imap = imaplib.IMAP4(account.imap_host, account.imap_port)
-#             imap.login(account.username, account.password)
-#             imap.select(msg.folder.capitalize())  # select the folder where the mail currently is
-
-#             # Mark as deleted + expunge
-#             result, _ = imap.uid("COPY", msg.uid, "INBOX.Trash")
-#             if result != "OK":
-#                 raise Exception(f"Failed to Delete")
-#             imap.uid("STORE", msg.uid, "+FLAGS", "(\Deleted)")
-#             imap.expunge()
-#             imap.logout()
-
-#             # Remove from DB
-#             msg.delete()
-#             messages.success(request, "Message deleted from server & DB.")
-#         except Exception as e:
-#             messages.error(request, f"Failed to delete: {e}")
-
-#     return redirect(f"{reverse('com_inbox')}?selectedemail={account.id}")
-
 #----------------------------------- Conversation Views ---------------------------
-
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def conversation_view(request, thread_key, account_id ):
     account = get_object_or_404(MailAccount, pk=account_id)
     messages_qs = MailMessage.objects.filter(account=account, thread_key=thread_key).order_by("received_at")
@@ -416,6 +371,8 @@ def conversation_view(request, thread_key, account_id ):
     }
     return render(request, "Communication/conversation.html", context)
 
+@login_required(login_url="login")
+@allowed_users(['admin'])
 @require_POST
 def toggle_read_status(request, msg_id):
     msg = get_object_or_404(MailMessage, id=msg_id)
@@ -423,6 +380,9 @@ def toggle_read_status(request, msg_id):
     msg.save(update_fields=["is_read"])
     return JsonResponse({"success": True, "is_read": msg.is_read})
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 @require_POST
 def edit_message_body(request, msg_id):
     msg = get_object_or_404(MailMessage, id=msg_id)
@@ -433,6 +393,9 @@ def edit_message_body(request, msg_id):
         msg.save(update_fields=["body_plain", "body_html"])
     return JsonResponse({"success": True, "body": msg.body_plain})
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 @require_POST
 def send_reply_view(request, account_id, message_id):
     account = get_object_or_404(MailAccount, pk=account_id)
@@ -462,7 +425,8 @@ def send_reply_view(request, account_id, message_id):
 
 
 #----------------------------------- Sent Views ---------------------------
-
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def ComSent(request):
     params = request.POST if request.method == "POST" else request.GET
     selected_email_id = params.get('selectedemail', '')
@@ -507,6 +471,9 @@ def ComSent(request):
     }
     return render(request, "Communication/sent.html", context)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def archive_sent(request, email_id):
     if request.method == "POST":
         try:
@@ -543,6 +510,9 @@ def archive_sent(request, email_id):
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def delete_sent(request, email_id):
     if request.method == "POST":
         try:
@@ -576,8 +546,11 @@ def delete_sent(request, email_id):
             return JsonResponse({"success": False, "error": str(e)}, status=400)
 
     return JsonResponse({"success": False, "error": "Invalid request"}, status=405)
-#-----------------------------------Campaign Manager ---------------------------
 
+
+#-----------------------------------Campaign Manager ---------------------------
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def ComCampaign(request):
     log_path = "/home/priddxvk/logs/scheduled_emails.log"
     try:
@@ -591,10 +564,16 @@ def ComCampaign(request):
     }
     return render(request, "Communication/campaign.html", context)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def download_email_logs(request):
     log_path = "/home/priddxvk/logs/scheduled_emails.log"
     return FileResponse(open(log_path, "rb"), as_attachment=True, filename="scheduled_emails.log")
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def clear_email_logs(request):
     log_path = "/home/priddxvk/logs/scheduled_emails.log"
     try:
@@ -604,8 +583,10 @@ def clear_email_logs(request):
         messages.error(request, f"Error clearing logs: {e}")
     return redirect("com_campaign")
 
-#----------------------------------- Template Views ---------------------------
 
+#----------------------------------- Template Views ---------------------------
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def ComTemplates(request):
     params = request.POST if request.method == "POST" else request.GET
     
@@ -622,6 +603,9 @@ def ComTemplates(request):
     }
     return render(request, "Communication/email_templates.html", context)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def createUpdateTemplate(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -656,8 +640,10 @@ def createUpdateTemplate(request):
         messages.error(request, "Post Method Required")
     return redirect('com_templates')
 
-#-----------------------------------Communication Settings ---------------------------
 
+#-----------------------------------Communication Settings ---------------------------
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def ComSettings(request):
     params = request.POST if request.method == "POST" else request.GET
     SelectedEmail = params.get('selectedemail', '')
@@ -672,6 +658,9 @@ def ComSettings(request):
     }
     return render(request, "Communication/com_settings.html", context)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def CreateUpdateEmailAc(request):
     params = request.POST if request.method == "POST" else request.GET
     selected_email_id = params.get('selectedemail', '')
@@ -710,6 +699,9 @@ def CreateUpdateEmailAc(request):
 
     return redirect(f"{reverse('com_settings')}?selectedemail={email_instance.id}")
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def DeleteEmailAccount(request):
     if request.method == "POST":
         Email = request.POST.get('selectedemail',"")
@@ -720,6 +712,9 @@ def DeleteEmailAccount(request):
             messages.success(request, f"Email Account: {email_address} Deleted!")
     return redirect('com_settings')
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def TestEmailAccount(request, pk):
     email_account = get_object_or_404(MailAccount, pk=pk)
     success, message = test_email_connection(email_account)

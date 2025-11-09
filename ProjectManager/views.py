@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from . models import *
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 import datetime
 from datetime import date, timedelta
 from django.views.decorators.csrf import csrf_exempt
@@ -21,7 +22,8 @@ from django.conf import settings
 from django.db.models import F
 # Create your views here.
 #-----------------------Project Manager---------------------
-
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def ProjectManager(request):
     current_year = datetime.date.today().year
     years = range(current_year - 2, current_year + 3)  # two years back & two ahead
@@ -102,7 +104,9 @@ def ProjectManager(request):
     }
 
     return render(request, 'ProjectManager/project-manager.html', context)
-@login_required
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def CreateUpdateCycles(request):
     if request.method == "POST":
         selected_project = request.POST.get('project')
@@ -148,8 +152,8 @@ def CreateUpdateCycles(request):
 
     return redirect("project_manager")
 
-
-@login_required
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def CreateProject(request):
     if request.method == "POST":
         Name = request.POST.get('pr_name')
@@ -179,7 +183,10 @@ def CreateProject(request):
             messages.error(request, "Project name cannot be empty.")
         
     return redirect('project_manager')
-@login_required
+
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def UpdateProject(request):
     if request.method == "POST":
         project_id = request.POST.get('project_id')
@@ -260,7 +267,8 @@ def update_assignment(request):
             return JsonResponse({"success": False, "error": str(e)})
     return JsonResponse({"success": False, "error": "Invalid request"})
 
-
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def get_tasks(request, cycle_id):
     # Get the cycle instance
     try:
@@ -276,7 +284,8 @@ def get_tasks(request, cycle_id):
 
 
 
-
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def LoadTasks(request):
     if request.method == "POST":
         selected_project = request.POST.get('project')
@@ -326,7 +335,8 @@ def LoadTasks(request):
 #-----------------------Dashboard---------------------
 
 
-
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def ProjectDashboard(request):
     return render(request, 'ProjectManager/project-dashboard.html')
 

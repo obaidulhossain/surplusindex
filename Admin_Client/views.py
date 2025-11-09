@@ -25,8 +25,10 @@ from django.core.mail import send_mail
 from authentication.utils import token_generator
 from si_user.models import UserDetail
 from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 
-@login_required
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def allClients(request):
     today_date = date.today()
     if request.method == 'POST':
@@ -77,7 +79,9 @@ def allClients(request):
     }
     return render(request, 'Admin_Client/all_clients.html', context)
 
-@login_required
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def updateCredits(request):
     if request.method == "POST":
         count = 0
@@ -99,7 +103,8 @@ def updateCredits(request):
     return HttpResponseRedirect("/all_clients/")
 
 
-@login_required
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def clientDetail(request):
     deliveries = ""
     delivered = ""
@@ -191,7 +196,8 @@ def clientDetail(request):
     return render(request, 'Admin_Client/client_detail.html', context)
 
 
-@login_required
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def clientSettings(request):
     if request.method == 'POST':
         client = request.POST.get('client','')
@@ -202,7 +208,9 @@ def clientSettings(request):
     }
     return render(request, 'Admin_Client/client_settings.html', context)
 
-@login_required
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def registerClient(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -246,9 +254,8 @@ def registerClient(request):
     return redirect ('client_settings')
 
 
-
-
-@login_required
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def CreateOrder(request):
     if request.method == 'POST':
         client = request.POST.get('client','')
@@ -297,7 +304,9 @@ def CreateOrder(request):
         return HttpResponseRedirect(f"/client_detail/?client={client}&order-status={selected_orderstatus}")
     return redirect('client_detail')
 
-@login_required
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def UpdatePaymentStatus(request):
     if request.method == 'POST':
         client = request.POST.get('client','')
@@ -318,7 +327,9 @@ def UpdatePaymentStatus(request):
         return HttpResponseRedirect(f"/client_detail/?client={client}&order-status={selected_orderstatus}")
     return redirect('client_detail')
 
-@login_required
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def createDelivery(request):
     if request.method == "POST":
         client_id = request.POST.get('client_id','')
@@ -344,7 +355,7 @@ def createDelivery(request):
         order_instance.deliveries.add(delivery_instance)
     return HttpResponseRedirect (f"/client_detail/?client={client_id}")
 
-@login_required
+
 @csrf_exempt
 def updateDeliveryStatus(request):
     if request.method == 'POST':
@@ -372,7 +383,7 @@ def updateDeliveryStatus(request):
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
-@login_required
+
 @csrf_exempt
 def updateOrderStatus(request):
     if request.method == 'POST':
@@ -401,7 +412,8 @@ def updateOrderStatus(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
-
+@allowed_users(['admin'])
+@login_required(login_url="login")
 @require_POST
 def resend_activation_email(request):
     user_id = request.POST.get('user_id')
@@ -429,7 +441,7 @@ def resend_activation_email(request):
     # send mail
     send_mail(
         "Activate SurplusIndex Account",
-        f"Hi {user.username},\n\nYour SurplusIndex account is created successfully!\n\nPlease use this link to activate your account and get access to thousands of up to date surplus leads:\n{activate_url}",
+        f"Hi {user.username},\n\nYour SurplusIndex account is created successfully!\n\nPlease use this link to activate your account and get access to thousands of up to date surplus leads:\n{activate_url}\n\n\n\n Note that: Inactive user accounts will be deleted after 3rd activation remainder.",
         "contact@surplusindex.com",
         [user.email],
         fail_silently=False
@@ -446,7 +458,8 @@ def resend_activation_email(request):
         'attempts': detail.activation_attempt if detail else 1
     })
 
-@login_required
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def delete_user(request, user_id):
     if request.method == "POST":
         try:

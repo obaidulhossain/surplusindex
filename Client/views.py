@@ -4,7 +4,7 @@ from django.http import HttpResponse
 from authentication.decorators import allowed_users
 from django.core.paginator import Paginator
 from django.contrib import messages
-
+from decimal import Decimal
 from .models import *
 from propertydata.models import *
 from .forms import *
@@ -70,9 +70,8 @@ def get_client_dashboard_context(request, user):
     return context
 
 
-
-
-
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def availableLeads(request):
     user = request.user
 
@@ -249,6 +248,9 @@ def availableLeads(request):
     }
     return render(request, 'Client/available_leads.html', context)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def purchaseLeads(request):
     if request.method == "POST":
         selected_leads_ids = request.POST.getlist('selected_items')
@@ -309,6 +311,9 @@ def purchaseLeads(request):
     else:
         return HttpResponse("Invalid Request", status=400)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def hidefromallLeads(request):
     selectedState = request.POST.get('stateFilter','')
     selectedCounty = request.POST.get('countyFilter','')
@@ -334,6 +339,9 @@ def hidefromallLeads(request):
     else:
         return HttpResponse("Invalid Request", status=400)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def myLeads(request):
     user = request.user
     params = request.POST if request.method == "POST" else request.GET
@@ -538,6 +546,8 @@ def myLeads(request):
     return render(request, 'Client/my_leads.html', context)
 
 
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def archivefromMyLeads(request):
     showArchived = request.POST.get('show_archived','')
     if request.method == "POST":
@@ -564,6 +574,9 @@ def archivefromMyLeads(request):
     else:
         return HttpResponse("Invalid Request", status=400)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def updateAssignment(request):
     if request.method == "POST":
         assignment_status = request.POST.get('assignment_status')
@@ -599,6 +612,8 @@ def updateAssignment(request):
         return HttpResponse("Invalid Request", status=400)
 
 
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def leadsDetail(request):
     if request.method == "POST":
         selected_status = request.POST.get('status_id')
@@ -632,6 +647,8 @@ def leadsDetail(request):
     }
     return render(request, 'Client/leads-detail.html', context)
 
+
+
 @csrf_exempt
 def saveFDetails(request):
     if request.method == 'POST':
@@ -662,6 +679,7 @@ def saveFDetails(request):
 
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
+
 
 @csrf_exempt
 def updateFstatus(request):
@@ -697,8 +715,8 @@ def updateFstatus(request):
 
 
 
-
-
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def updateContact(request):
     if request.method == "POST":
         selected_status = request.POST.get('status_id')
@@ -843,10 +861,6 @@ def createFollowup(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
-
-
-
-
 @csrf_exempt
 def updateStatus_ajax(request):
     if request.method == 'POST':
@@ -906,6 +920,7 @@ def updateStatus_ajax(request):
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
+
 @csrf_exempt
 def UpdateText(request):
     if request.method == 'POST':
@@ -959,7 +974,8 @@ def UpdateText(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
-
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def export_data(request):
     data = set()
     if request.method == "POST":
@@ -974,6 +990,9 @@ def export_data(request):
     response['Content-Disposition'] = 'attachment; filename="filtered_data.csv"'
     return response
 
+
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def exportMyleads(request):
     data = set()
     if request.method == "POST":
@@ -988,6 +1007,7 @@ def exportMyleads(request):
     response = HttpResponse(dataset.csv, content_type="text/csv")
     response['Content-Disposition'] = 'attachment; filename="filtered_data.csv"'
     return response
+
 
 @csrf_exempt
 def update_CLStatus(request):
@@ -1037,8 +1057,8 @@ def update_CLStatus(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
-
-
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def CloseDealNote(request):
     if request.method == "POST":
         selected_status = request.POST.get('SID')
@@ -1072,7 +1092,9 @@ def CloseDealNote(request):
 
     return HttpResponseRedirect(f"/leads-detail/?status_id={status_instance.pk}")
 
-from decimal import Decimal
+
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
 def updatedClosed(request):
     if request.method == 'POST':
         selected_status = request.POST.get('StatusID')
@@ -1096,6 +1118,7 @@ def updatedClosed(request):
         status_instance.save()
         messages.success(request, 'Accounting Updated')
     return HttpResponseRedirect(f"/leads-detail/?status_id={status_instance.pk}")
+
 
 @csrf_exempt
 def delete_action(request):

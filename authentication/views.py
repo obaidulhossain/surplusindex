@@ -1,7 +1,8 @@
 from django.contrib import messages, auth
 from django.contrib.auth import logout, login, authenticate
 from django.contrib.auth.models import User, auth, Group
-
+from .decorators import unauthenticated_user, allowed_users
+from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage, send_mail
 
 from django.http import JsonResponse
@@ -168,6 +169,7 @@ class LoginView(View):
         messages.error(request,'Please fill out all the fields')
         return render(request,'authentication/login.html')
 
+@login_required(login_url="login")
 def user_logout(request):
     auth.logout(request)
     return redirect("homepage")

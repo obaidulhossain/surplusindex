@@ -10,5 +10,4 @@ urlpatterns = [
     path('archived/', views.archivedLeads, name="archived"),
     path('archive', views.archive_mylead, name="archive"),
     path('unarchive', views.unarchive_mylead, name="unarchive"),
-    path('all-data', views.all_data, name="all-data")
 ]

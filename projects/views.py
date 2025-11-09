@@ -6,7 +6,8 @@ from django.http import JsonResponse
 import json
 from django.contrib import messages
 from datetime import timedelta
-
+from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 # -----------Forms------------------
 from .forms import *
 from propertydata.forms import *

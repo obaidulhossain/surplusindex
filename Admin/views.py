@@ -8,7 +8,10 @@ from django.http import JsonResponse
 import json
 from django.db.models import Prefetch
 from si_user.models import *
+from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 #----------------Data--------------------start
+@login_required
 def get_admin_dashboard_context(request, user):
     transaction_queryset = UserTransactions.objects.all().order_by('-created_at')
     total_transactions = transaction_queryset.count()
@@ -26,6 +29,8 @@ def get_admin_dashboard_context(request, user):
     # Logic to get context data for client dashboard
     return context
 
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def All_Contacts(request):
     user = request.user
     selectedUserInstance = User.objects.get(username=user)
@@ -239,6 +244,8 @@ def All_Contacts(request):
     return render(request, 'Admin/all_contacts.html', context)
 
 
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def All_Data(request):
 # Filter foreclosure objects where published=False
     user = request.user
@@ -413,7 +420,8 @@ def All_Data(request):
     }
     return render(request, 'Admin/new_leads.html', context)
 
-
+@allowed_users(['admin'])
+@login_required(login_url="login")
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def caseSearchStatus(request):
 
@@ -451,7 +459,8 @@ def caseSearchStatus(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
-
+@allowed_users(['admin'])
+@login_required(login_url="login")
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def publishStatus(request):  
 
@@ -497,7 +506,8 @@ def publishStatus(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
-
+@allowed_users(['admin'])
+@login_required(login_url="login")
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def assignSKP(request):
 
@@ -541,6 +551,9 @@ def assignSKP(request):
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def CreateUpdatePlan(request):
     plan = None
     if request.method == "POST":
@@ -596,6 +609,9 @@ def CreateUpdatePlan(request):
 
     return HttpResponseRedirect(f"/manage_subscription/?selected_plan={plan}")
 
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def SubscriptionSettings(request):
     AllPlans = SubscriptionPlan.objects.all().order_by('created_at')
     PlanInstance = None
@@ -614,6 +630,9 @@ def SubscriptionSettings(request):
     }
     return render(request, 'Admin/manage_subs.html', context)
 
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def CreateAnnouncement(request):
     if request.method == 'POST':
         date = request.POST.get('effective_date')
@@ -623,6 +642,9 @@ def CreateAnnouncement(request):
         messages.success(request, 'Announcement Created')
     return redirect('subscription_settings')
 
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def DeleteAnnouncement(request):
     if request.method == 'POST':
         announcement_id = request.POST.get('announcement')
@@ -630,6 +652,9 @@ def DeleteAnnouncement(request):
             Announcements.objects.filter(pk=announcement_id).delete()     
     return redirect('subscription_settings')
 
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
 def ActiveSubscriptions(request):
     AvailablePlans = SubscriptionPlan.objects.all().order_by('name')
     Subscriptions = StripeSubscription.objects.all().order_by('current_period_end')

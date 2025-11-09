@@ -8,7 +8,8 @@ from django.http import JsonResponse
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 import json
-
+from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 from tablib import Dataset
 import pandas as pd
 from django.contrib import messages
@@ -16,7 +17,8 @@ from .resources import ForeclosureEventsResource, ForeclosureEventsExportResourc
 
 
 # Create your views here.
-
+@login_required(login_url="login")
+@allowed_users(['researcher', 'admin',])
 def auctionCalendar(request):
     user = request.user
     userList = User.objects.filter(groups__name='researcher')
@@ -96,7 +98,8 @@ def auctionCalendar(request):
     return render(request, 'auction_calendar/auction_calendar.html', context)
 
 
-
+@login_required(login_url="login")
+@allowed_users(['researcher', 'admin',])
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def update_row(request):
     if request.method == 'POST':
@@ -140,6 +143,9 @@ def update_row(request):
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
+
+@login_required(login_url="login")
+@allowed_users(['researcher', 'admin',])
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def update_row_post(request):
     if request.method == 'POST':
@@ -184,7 +190,8 @@ def update_row_post(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
-
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def calendarSettings(request):
     params = request.POST if request.method == "POST" else request.GET
     SelectedEvent = params.get('selectedevent', '')
@@ -202,6 +209,9 @@ def calendarSettings(request):
     
     return render(request, 'auction_calendar/calendar_settings.html', context)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def CreateUpdateEvents(request):
     params = request.POST if request.method == "POST" else request.GET
     SelectedEvent = params.get('selectedevent', '')
@@ -307,8 +317,8 @@ def CreateUpdateEvents(request):
             messages.info(request, "Event already exist and selected")
     return redirect(f"{reverse('calendar_settings')}?selectedevent={EventInstance.id}")
 
-def FilterEvents(request):
 
+def FilterEvents(request):
     State = request.GET.get('state', '')
     County = request.GET.get('county', '')
     SaleType = request.GET.get('sale_type', '')
@@ -332,6 +342,8 @@ def FilterEvents(request):
     return JsonResponse({'Events': results})
 
 
+@login_required(login_url="login")
+@allowed_users(['admin'])
 @csrf_exempt
 def DeleteEvent(request):
     if request.method == 'POST':
@@ -348,6 +360,8 @@ def DeleteEvent(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def upload_file(request):
     if request.method == "POST":
         dataset = Dataset()
@@ -370,6 +384,8 @@ def upload_file(request):
     return render(request, 'auction_calendar/upload_file.html')
     
 
+@login_required(login_url="login")
+@allowed_users(['admin'])
 def export_data(request):
     resource = ForeclosureEventsExportResource()
     dataset = Dataset()# Export all data

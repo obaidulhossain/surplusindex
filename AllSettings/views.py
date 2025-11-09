@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from authentication.decorators import allowed_users
 import json
 
 # core/views.py
@@ -21,6 +22,7 @@ def save_sidebar_setting(request):
         return JsonResponse({'status': 'saved'})
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
+@login_required
 @csrf_exempt  # (better: use CSRF token properly, see above)
 def update_client_filter_display_setting(request):
     if request.method == "POST":

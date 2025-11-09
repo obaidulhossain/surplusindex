@@ -9,7 +9,8 @@ from django.contrib import messages
 from authentication.decorators import allowed_users
 from Client.views import get_client_dashboard_context
 from Admin.views import get_admin_dashboard_context
-
+from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 
 # Create your views here.
 @login_required(login_url="login")
@@ -36,17 +37,9 @@ def dashboard(request):
     return render(request, 'propertydata/dashboard.html', context)
 
 
-
-
-
-
-
-
-
-
-
 #--------------view for My leads page ---------------------------------start
 @login_required(login_url="login")
+@allowed_users(['clients', 'admin'])
 def myLeads(request):
     user = request.user
     # purchased_leads=Foreclosure.objects.filter(purchased_by=user).prefetch_related('status_for_lead')
@@ -63,7 +56,9 @@ def myLeads(request):
 #--------------view for My leads page ---------------------------------end
 
 
-#--------------Archive My Leads button action for My Leads Section ----------------Start    
+#--------------Archive My Leads button action for My Leads Section ----------------Start
+@login_required(login_url="login")
+@allowed_users(['clients', 'admin'])
 def archive_mylead(request):
     if request.method == "POST":
         selected_leads_ids = request.POST.getlist('selected_items')
@@ -76,10 +71,11 @@ def archive_mylead(request):
         return redirect('myleads')
     else:
         return HttpResponse("Invalid Request", status=400)
-#--------------Archive My Leads button action for My Leads Section ----------------End    
 
 
 #--------------view for Archived leads page ---------------------------------Start
+@login_required(login_url="login")
+@allowed_users(['clients', 'admin'])
 def archivedLeads(request):
     user = request.user
     # purchased_leads=Foreclosure.objects.filter(purchased_by=user).prefetch_related('status_for_lead')
@@ -93,10 +89,10 @@ def archivedLeads(request):
         }
     return render(request, 'propertydata/archived.html', context)
 
-#--------------view for Archived leads page ---------------------------------Start
-
 
 #--------------Unrchive My Leads button action for Archived leads Section ----------------Start    
+@login_required(login_url="login")
+@allowed_users(['clients', 'admin'])
 def unarchive_mylead(request):
     if request.method == "POST":
         selected_leads_ids = request.POST.getlist('selected_items')
@@ -109,11 +105,11 @@ def unarchive_mylead(request):
         return redirect('archived')
     else:
         return HttpResponse("Invalid Request", status=400)
-#--------------Unrchive My Leads button action for Archived leads Section ----------------Start    
-
 
 
 #--------------view for hidden leads page -----------------------------------start
+@login_required(login_url="login")
+@allowed_users(['clients', 'admin'])
 def hiddenLeads(request):
     user = request.user
     p=Paginator(Foreclosure.objects.filter(hidden_for=user).exclude(purchased_by=user), 50)
@@ -126,9 +122,11 @@ def hiddenLeads(request):
     }
 
     return render(request, 'propertydata/hiddenleads.html', context)
-#--------------view for hidden leads page -----------------------------------end
+
 
 #--------------unhide button action for Hidden Leads Section ----------------start
+@login_required(login_url="login")
+@allowed_users(['clients', 'admin'])
 def unhideLeads(request):
     if request.method == "POST":
         selected_leads_ids = request.POST.getlist('selected_items')
@@ -140,8 +138,3 @@ def unhideLeads(request):
         return redirect('hidden-leads')
     else:
         return HttpResponse("Invalid Request", status=400)
-#--------------unhide button action for Hidden Leads Section ----------------end
-
-
-def all_data(request):
-    return render(request,'data/all_data.html')
