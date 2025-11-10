@@ -98,8 +98,7 @@ def auctionCalendar(request):
     return render(request, 'auction_calendar/auction_calendar.html', context)
 
 
-@login_required(login_url="login")
-@allowed_users(['researcher', 'admin',])
+
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def update_row(request):
     if request.method == 'POST':
@@ -144,8 +143,7 @@ def update_row(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
-@login_required(login_url="login")
-@allowed_users(['researcher', 'admin',])
+
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def update_row_post(request):
     if request.method == 'POST':
