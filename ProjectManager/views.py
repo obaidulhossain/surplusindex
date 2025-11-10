@@ -539,7 +539,7 @@ def TaskViewer(request):
         users = [sub.user for sub in active_subscriptions]
         all_events = foreclosure_Events.objects.filter(state__iexact=task_instance.project.state).order_by('event_next')
         post_events = foreclosure_Events.objects.filter(state__iexact=task_instance.project.state, post_event_next__lt=today).order_by('-event_next')
-        events = foreclosure_Events.objects.filter(state__iexact=task_instance.project.state, event_next__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to)).order_by("-event_next")
+        events = foreclosure_Events.objects.filter(state__iexact=task_instance.project.state, event_next__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to)).order_by("event_next")
         status = task_instance.get_current_status(request.user)
         delivery_reports = DeliveryReport.objects.filter(task=task_instance).order_by("created_at")
         delivery_success = delivery_reports.filter(report="Successful")
