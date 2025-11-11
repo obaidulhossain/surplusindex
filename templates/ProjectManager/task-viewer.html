@@ -309,8 +309,8 @@ Task Viewer
                     <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
                     <td>{{lead.sale_date}}</td>
                     <td>{% if lead.plaintiff.individual_name %}{{lead.plaintiff.individual_name}}{% else %}{{lead.plaintiff.business_name}}{% endif %}</td>
-                    <td>{{lead.defendant.first_name}}{% if lead.defendant.middle_name %} {{lead.defendant.middle_name}}{% endif %} {{lead.defendant.last_name}}{% if lead.defendant.name_suffix %} {{lead.defendant.name_suffix}}{% endif %}{% if lead.defendant.business_name %} {{lead.defendant.designation}} for {% endif %}{{lead.defendant.business_name}}</td>
-                    <td>{% for prop in lead.property.all %}{{prop}}</br>{% endfor %}</td>
+                    <td><small>{% for def in lead.defendant.all %}{{def}}</br>{% endfor %}</small></td>
+                    <td><small>{% for prop in lead.property.all %}{{prop}}</br>{% endfor %}</small></td>
                     <td>
                         <form method="POST" action="{% url 'add_edit_fcl' %}">
                         {% csrf_token %}
