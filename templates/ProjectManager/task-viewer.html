@@ -306,8 +306,8 @@ Task Viewer
                 <tr>
                     <td>{{lead.state}}</td>
                     <td>{{lead.county}}</td>
-                    <td>{{lead.case_number}}{% if not lead.case_number_ext == "None" %}({{lead.case_number_ext}}){% endif %}</td>
-                    <td>{{lead.sale_date}}</td>
+                    <td>{{lead.case_number}}{% if lead.case_number_ext %}({{lead.case_number_ext}}){% endif %}</td>
+                    <td>{{lead.sale_date|date:'m/d/Y'}}</td>
                     <td><small>{% for plt in lead.plaintiff.all %}{{plt}}</br>{% endfor %}</small></td>
                     <td><small>{% for def in lead.defendant.all %}{{def}}</br>{% endfor %}</small></td>
                     <td><small>{% for prop in lead.property.all %}{{prop}}</br>{% endfor %}</small></td>
