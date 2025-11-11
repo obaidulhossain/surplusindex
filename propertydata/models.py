@@ -62,9 +62,6 @@ class Property(OperationStat):
     city = models.CharField(max_length=255, blank=True, verbose_name='City')
     zip_code = models.CharField(max_length=255, blank=True, verbose_name='Zip')
 
-    def __str__(self):
-        return f"{self.house_number} {self.road_name} {self.road_type} {self.direction} {self.apt_unit} {self.extention}, {self.city}, {self.state} {self.zip_code}"
-    
     class Meta:
         verbose_name = 'Property'
         verbose_name_plural = 'Properties'
@@ -81,6 +78,11 @@ class Property(OperationStat):
             ]
         full_street = " ".join(filter(None, [part.strip() for part in street_parts if part]))
         return full_street
+    
+    # def __str__(self):
+    #     return f"{self.house_number} {self.road_name} {self.road_type} {self.direction} {self.apt_unit} {self.extention}, {self.city}, {self.state} {self.zip_code}"
+    def __str__(self):
+        return f"{self.street_address}, {self.city}, {self.state} {self.zip_code}"
     
     @property
     def fulladdress (self):
