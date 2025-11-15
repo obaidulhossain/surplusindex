@@ -111,22 +111,22 @@ Checklists
 
                 <div class="onesixth">
                     <label for="judgment">Judgment Amount</label><br>
-                    <input type="number" name="judgment" id="judgment" placeholder="Judgment Amount" value="{{ current_fcl_instance.fcl_final_judgment }}">
+                    <input type="number" name="judgment" step="0.01" min="-9999999999" max="9999999999" id="judgment" placeholder="Judgment Amount" value="{{ current_fcl_instance.fcl_final_judgment }}">
                 </div>
 
                 <div class="onesixth">
                     <label for="saleprice">Sale Price</label><br>
-                    <input type="number" name="saleprice" id="saleprice" placeholder="Sale Price" value="{{ current_fcl_instance.sale_price }}">
+                    <input type="number" name="saleprice" step="0.01" min="-9999999999" max="9999999999" id="saleprice" placeholder="Sale Price" value="{{ current_fcl_instance.sale_price }}">
                 </div>
 
                 <div class="onesixth">
                     <label for="possible_sf">Possible Surplus</label><br>
-                    <input type="number" name="possible_sf" id="possible_sf" placeholder="Possible Surplus" value="{{ current_fcl_instance.possible_surplus }}">
+                    <input type="number" name="possible_sf" step="0.01" min="-9999999999" max="9999999999" id="possible_sf" placeholder="Possible Surplus" value="{{ current_fcl_instance.possible_surplus }}">
                 </div>
 
                 <div class="onesixth">
                     <label for="verified_sf">Verified Surplus</label><br>
-                    <input type="number" name="verified_sf" id="verified_sf" placeholder="Verified Surplus" value="{{ current_fcl_instance.verified_surplus }}">
+                    <input type="number" name="verified_sf" step="0.01" min="-9999999999" max="9999999999" id="verified_sf" placeholder="Verified Surplus" value="{{ current_fcl_instance.verified_surplus }}">
                 </div>
                 
                 <div class="onesixth">
@@ -848,6 +848,16 @@ document.addEventListener("keydown", function(e) {
         e.preventDefault(); // optional if you want to block browser find dialog
         e.stopPropagation(); // optional but safer
         document.getElementById("first").focus();
+    }
+    if (e.ctrlKey && e.key === "1") {
+        e.preventDefault(); // optional if you want to block browser find dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("case_num").focus();
+    }
+    if (e.ctrlKey && e.key === "2") {
+        e.preventDefault(); // optional if you want to block browser find dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("sale_date").focus();
     }
 });
 

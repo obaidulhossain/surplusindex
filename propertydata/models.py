@@ -280,7 +280,7 @@ class Foreclosure(OperationStat):
     state = models.CharField(max_length=225)
     county = models.CharField(max_length=225)
     case_number = models.CharField(max_length=255, blank=True, verbose_name='Case Number')
-    case_number_ext = models.CharField(max_length=10, blank=True, null=True, verbose_name='Case Extension')
+    case_number_ext = models.CharField(max_length=10, blank=True, verbose_name='Case Extension',default="")
     court_name = models.CharField(max_length=255, blank=True, verbose_name='Court Name')
     case_type = models.CharField(max_length=255, blank=True, verbose_name='Case Type')
     property = models.ManyToManyField(Property, blank=True, related_name='court_records', verbose_name='Property')

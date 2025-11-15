@@ -105,10 +105,10 @@ def update_foreclosure(request):
     sale_type = request.POST.get('sale_type','')
     sale_status = request.POST.get('sale_status','')
 
-    judgment = request.POST.get('judgment', '')
-    saleprice = request.POST.get('saleprice', '')
-    possible_sf = request.POST.get('possible_sf', '')
-    verified_sf = request.POST.get('verified_sf', '')
+    judgment = request.POST.get('judgment', None)
+    saleprice = request.POST.get('saleprice', None)
+    possible_sf = request.POST.get('possible_sf', None)
+    verified_sf = request.POST.get('verified_sf', None)
     surplus_status = request.POST.get('surplus_status', '')
 
     case_ext = request.POST.get('case_ext','')
@@ -129,14 +129,26 @@ def update_foreclosure(request):
         fcl_instance.sale_type = sale_type
         fcl_instance.sale_status = sale_status
         
-        if not judgment == "":
+        if judgment == "":
+            fcl_instance.fcl_final_judgment = None
+        else:
             fcl_instance.fcl_final_judgment = judgment
-        if not saleprice == "":
+
+        if saleprice == "":
+            fcl_instance.sale_price = None
+        else:
             fcl_instance.sale_price = saleprice
-        if not possible_sf == "":
+
+        if possible_sf == "":
+            fcl_instance.possible_surplus = None
+        else:
             fcl_instance.possible_surplus = possible_sf
-        if not verified_sf == "":
+
+        if verified_sf == "":
+            fcl_instance.verified_surplus = None
+        else:
             fcl_instance.verified_surplus = verified_sf
+
         fcl_instance.surplus_status = surplus_status
         
         fcl_instance.case_number_ext = case_ext
