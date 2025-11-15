@@ -747,14 +747,7 @@ document.addEventListener("keydown", function(e) {
         e.preventDefault(); // optional if you want to block browser find dialog
         e.stopPropagation(); // optional but safer
         document.getElementById("landline").focus();
-        try {
-            const text = await navigator.clipboard.readText();
-            document.getElementById("landline").value = text;
-        
-        } catch(err) {
-            console.error("Clipboard read permission denied", err);
-            alert("Clipboard access is blocked by your browser.");
-        }
+
     }
     // ctrl+r to focus on related contact section
     if (e.ctrlKey && e.key.toLowerCase() === "r") {
