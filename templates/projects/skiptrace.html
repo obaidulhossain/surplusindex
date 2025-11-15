@@ -320,7 +320,7 @@ Skiptracing
                         {% csrf_token %}
                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
                         <input type="hidden" name="related_contact" value="{{related_contact}}">
-                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="email" placeholder="Email Address" name="email"></td>
+                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="email" placeholder="Email (ctrl+e)" name="email"></td>
                         <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
                         <td></td>
                     </form>
@@ -417,7 +417,7 @@ Skiptracing
                         {% csrf_token %}
                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
                         <input type="hidden" name="related_contact" value="{{related_contact}}">
-                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="wireless" placeholder="Wireless Number" name="wireless"></td>
+                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="wireless" placeholder="Wireless (ctrl+p)" name="wireless"></td>
                         <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
                     </form>
                 </tr>
@@ -503,7 +503,7 @@ Skiptracing
                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
                         <input type="hidden" name="related_contact" value="{{related_contact}}">
                         <input type="hidden" name = "landline-id" value="{{landline.id}}">
-                        <td><input style="width: 290px;" type="text" placeholder="Landline Number" name="landline" value="{{landline.l_number}}"></td>
+                        <td><input style="width: 290px;" type="text" name="landline" value="{{landline.l_number}}"></td>
                         <td><input type="submit" name="update" value="Update" ></td>
                         <td><input type="submit" name="delete" value="Delete" ></td>
                     </form>
@@ -514,7 +514,7 @@ Skiptracing
                         {% csrf_token %}
                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
                         <input type="hidden" name="related_contact" value="{{related_contact}}">
-                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="landline" placeholder="Landline Number" name="landline"></td>
+                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="landline" placeholder="Landline (ctrl+l)" name="landline"></td>
                         <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
                     </form>
                 </tr>
@@ -635,7 +635,7 @@ Skiptracing
                     <input type="hidden" name="related_contact" value="{{ related_contact }}">
                     <td></td>
                     <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_prefix" placeholder="Prefix" name="rc_prefix"></td>
-                    <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_first" placeholder="First Name" name="rc_first"></td>
+                    <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_first" placeholder="First Name (ctrl+r)" name="rc_first"></td>
                     <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_middle" placeholder="Middle Name" name="rc_middle"></td>
                     <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_last" placeholder="Last Name" name="rc_last"></td>
                     <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_suffix" placeholder="Suffix" name="rc_suffix"></td>                  
@@ -719,8 +719,49 @@ Skiptracing
         {% csrf_token %}
         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
         <input type="hidden" name="related_contact" value="{{ related_contact }}">
-        <input type="submit" {% if not related_contact == "" %}style="background-color: #fe8420; color: #101010;" value="Mark Related as Skiptraced"{% else %}style="background-color: #b1cc16; color: #101010;" value="Mark as Skiptraced"{% endif %}>
+        <input id="mark-as-skiptraced" type="submit" {% if not related_contact == "" %}style="background-color: #fe8420; color: #101010;" value="Mark Related as Skiptraced (ctrl+m)"{% else %}style="background-color: #b1cc16; color: #101010;" value="Mark as Skiptraced (ctrl+m)"{% endif %}>
     </form>
 </div>
 <script src="{% static 'js/Surplusindex.js' %}"></script>
+<script>
+document.addEventListener("keydown", function(e) {
+    if (e.ctrlKey && e.key.toLowerCase() === "m") {
+        e.preventDefault();  // ⛔ blocks browser save dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("mark-as-skiptraced").click();
+    }
+    // ctrl+e to focus on email section
+    if (e.ctrlKey && e.key.toLowerCase() === "e") {
+        e.preventDefault(); // optional if you want to block browser find dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("email").focus();
+    }
+    // ctrl+w to focus on wireless section
+    if (e.ctrlKey && e.key.toLowerCase() === "p") {
+        e.preventDefault(); // optional if you want to block browser find dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("wireless").focus();
+    }
+    // ctrl+l to focus on landline section
+    if (e.ctrlKey && e.key.toLowerCase() === "l") {
+        e.preventDefault(); // optional if you want to block browser find dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("landline").focus();
+        try {
+            const text = await navigator.clipboard.readText();
+            document.getElementById("landline").value = text;
+        
+        } catch(err) {
+            console.error("Clipboard read permission denied", err);
+            alert("Clipboard access is blocked by your browser.");
+        }
+    }
+    // ctrl+r to focus on related contact section
+    if (e.ctrlKey && e.key.toLowerCase() === "r") {
+        e.preventDefault(); // optional if you want to block browser find dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("rc_first").focus();
+    }
+});
+</script>
 {% endblock content %}
