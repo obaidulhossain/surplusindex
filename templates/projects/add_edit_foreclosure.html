@@ -200,7 +200,7 @@ Checklists
 
             {% endif %}
 
-            <input type="submit" style="margin-top:20px;" value="{% if selected_foreclosure == "" %}Create Foreclosure Instance{% else %}Update Foreclosure{% endif %}">
+            <input type="submit" style="margin-top:20px;" value="{% if selected_foreclosure == "" %}Create Foreclosure Instance{% else %}Update Foreclosure{% endif %} (ctrl + s)" id="create-update-btn">
             <!--<input type="text" id="" placeholder="" value="" name="">-->           
         </form>
         
@@ -423,7 +423,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <input type="hidden" name="caseid" value="{{ current_fcl_instance.pk }}">
                         <td></td>
                         <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="icounty" placeholder="County" name="county" value="{% if current_fcl_instance %}{{current_fcl_instance.county}}{% endif %}"></td>
-                        <td><input style="width: 170px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="iparcel" placeholder="Parcel" name="parcel"></td>
+                        <td><input style="width: 170px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="iparcel" placeholder="Parcel (ctrl+a)" name="parcel"></td>
                         <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="ihouse" placeholder="House" name="house"></td>
                         <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="istreet" placeholder="Street" name="road"></td>
                         <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="isttype" placeholder="Type" name="type"></td>
@@ -551,7 +551,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     <form id="search-form" method="post" action="{% url 'create_update_plt' %}">
                         {% csrf_token %}
                         <input type="hidden" name="caseid" value="{{ current_fcl_instance.pk }}">
-                        <td><input style="width: 450px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="business_name" placeholder="Business Name" value="" name="business_name"></td>
+                        <td><input style="width: 450px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="business_name" placeholder="Business Name (ctrl+p)" value="" name="business_name"></td>
                         <td><input style="width: 300px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="dba" placeholder="DBA" value="" name="dba"></td>
                         <td><input style="width: 300px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="contact_name" placeholder="Contact Name" value="" name="contact_name"></td>                      
                         <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
@@ -655,7 +655,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <input type="hidden" name="caseid" value="{{ current_fcl_instance.pk }}">
                         <input type="hidden" name = "def-id" value="{{defendant.id}}">
                         <td><input style="width: 80px;" type="text" placeholder="Prefix" name="u_prefix" value="{{defendant.name_prefix}}"></td>
-                        <td><input style="width: 180px;" type="text" placeholder="First name" name="u_first" value="{{defendant.first_name}}"></td>
+                        <td><input style="width: 180px;" id="first_name" type="text" placeholder="First name" name="u_first" value="{{defendant.first_name}}"></td>
                         <td><input style="width: 140px;" type="text" placeholder="Middle Name" name="u_middle" value="{{defendant.middle_name}}"></td>
                         <td><input style="width: 180px;" type="text" placeholder="Last name" name="u_last" value="{{defendant.last_name}}"></td>
                         <td><input style="width: 80px;" type="text" placeholder="Suffix" name="u_suffix" value="{{defendant.name_suffix}}"></td>
@@ -671,7 +671,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         {% csrf_token %}
                         <input type="hidden" name="caseid" value="{{ current_fcl_instance.pk }}">
                         <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="prefix" placeholder="Prefix" value="" name="prefix"></td>
-                        <td><input style="width: 180px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="first" placeholder="First Name" value="" name="first"></td>
+                        <td><input style="width: 180px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="first" placeholder="First Name (ctrl+d)" value="" name="first"></td>
                         <td><input style="width: 140px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="middle" placeholder="Middle Name" value="" name="middle"></td>
                         <td><input style="width: 180px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="last" placeholder="Last Name" value="" name="last"></td>
                         <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="suffix" placeholder="Suffix" value="" name="suffix"></td>
@@ -821,6 +821,31 @@ function copyToClipboard(element, messageId) {
     });
   }
 } {% endcomment %}
+
+// ctrl+s to create or update foreclosure 
+document.addEventListener("keydown", function(e) {
+    if (e.ctrlKey && e.key.toLowerCase() === "s") {
+        e.preventDefault();  // ⛔ blocks browser save dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("create-update-btn").click();
+    }
+    // ctrl+a to focus on property address section
+    if (e.ctrlKey && e.key.toLowerCase() === "a") {
+        e.preventDefault(); // optional if you want to block browser find dialog
+        document.getElementById("iparcel").focus();
+    }
+    if (e.ctrlKey && e.key.toLowerCase() === "p") {
+        e.preventDefault(); // optional if you want to block browser find dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("business_name").focus();
+    }
+    if (e.ctrlKey && e.key.toLowerCase() === "d") {
+        e.preventDefault(); // optional if you want to block browser find dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("first").focus();
+    }
+});
+
 </script>
 
 
