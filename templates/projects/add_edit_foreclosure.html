@@ -56,7 +56,7 @@ Checklists
         {% if researcher %}
         <a class="headerbutton" href="{% url 'case_checklist' %}">Go to Active Tasks</a>
         {% endif %}
-        <a class="headerbutton" id="new-entry" href="{% url 'add_edit_fcl' %}">Start New Entry(ctrl+n)</a>
+        <a class="headerbutton" id="new-entry" href="{% url 'add_edit_fcl' %}">Start New Entry (ctrl+n)</a>
         </div>
     </div>
     <div class="section-body-full">
@@ -824,9 +824,9 @@ function copyToClipboard(element, messageId) {
 
 // ctrl+s to create or update foreclosure 
 document.addEventListener("keydown", function(e) {
-    if (e.ctrlKey && e.key.toLowerCase() === "n") {
-        e.preventDefault();  // ⛔ blocks browser save dialog
-        e.stopPropagation(); // optional but safer
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === "n") {
+        e.preventDefault();
+        e.stopPropagation();
         document.getElementById("new-entry").click();
     }
     if (e.ctrlKey && e.key.toLowerCase() === "s") {
