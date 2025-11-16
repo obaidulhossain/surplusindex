@@ -859,6 +859,11 @@ document.addEventListener("keydown", function(e) {
         e.stopPropagation(); // optional but safer
         document.getElementById("sale_date").focus();
     }
+    if (e.ctrlKey && e.key === "3") {
+        e.preventDefault(); // optional if you want to block browser find dialog
+        e.stopPropagation(); // optional but safer
+        document.getElementById("case_search_status").focus();
+    }
 });
 
 </script>
