@@ -569,6 +569,29 @@ def TaskViewer(request):
     }
     return render(request, 'ProjectManager/task-viewer.html',context)
 
+def VerifyAllSkiptraced(request):
+    if request.method == "POST":
+        selected_task = request.POST.get('task_id')
+        task_instance = Tasks.objects.get(pk=selected_task)
+        leads = Foreclosure.objects.filter(state__iexact=task_instance.project.state, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
+        saved, problem = 0, 0
+        for lead in leads:
+            try:
+                if lead.case_search_status == "Completed" and lead.defendant.filter(skiptraced=True).exists():
+                    lead.case_search_status = "Verified"
+                    lead.save(update_fields=["case_search_status"])
+                    saved += 1
+            except:
+                problem += 1
+        messages.info(request, f"{saved} skiptraced case marked as verified and problem verifying {problem}")
+    else:
+        messages.info(request, "Post Method Required")
+        return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
+    return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
+
+
+
+
 def VerifyAll(request):
     if request.method == "POST":
         selected_task = request.POST.get('task_id')
@@ -588,6 +611,28 @@ def VerifyAll(request):
         messages.info(request, "Post Method Required")
         return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
     return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
+
+
+def PublishAllSkiptraced(request):
+    if request.method == "POST":
+        selected_task = request.POST.get('task_id')
+        task_instance = Tasks.objects.get(pk=selected_task)
+        leads = Foreclosure.objects.filter(state__iexact=task_instance.project.state, sale_date__range=(task_instance.cycle.sale_from,task_instance.cycle.sale_to))
+        saved, problem = 0, 0
+        for lead in leads:
+            try:
+                if lead.case_search_status == "Verified" and lead.published == False :
+                    lead.published = True
+                    lead.save(update_fields=["published"])
+                    saved += 1
+            except:
+                problem += 1
+        messages.info(request, f"{saved} Published and Error Publishing {problem}")
+    else:
+        messages.info(request, "Post Method Required")
+        return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
+    return redirect(f"{reverse('task_viewer')}?task={task_instance.id}")
+
 
 def PublishAll(request):
     if request.method == "POST":

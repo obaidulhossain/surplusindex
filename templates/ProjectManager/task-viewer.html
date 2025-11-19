@@ -752,6 +752,11 @@ Task Viewer
         <input type="hidden" name="task_id" value="{{task_instance.id}}">
         <input type="submit"class="button" value="Mark all as verified">
     </form>
+    <form method="POST" action="{% url "verify_all_skiptraced" %}">
+    {% csrf_token %}
+        <input type="hidden" name="task_id" value="{{task_instance.id}}">
+        <input type="submit"class="button" value="Mark all skiptraced as verified">
+    </form>
     <div class="table-wrapper" style="overflow-x: auto;">
         <table class="table table-striped table-hover task-table">
             <thead>
@@ -808,6 +813,11 @@ Task Viewer
     {% csrf_token %}
         <input type="hidden" name="task_id" value="{{task_instance.id}}">
         <input type="submit"class="button" value="Publish All">
+    </form>
+    <form method="POST" action="{% url "publish_all_skiptraced" %}">
+    {% csrf_token %}
+        <input type="hidden" name="task_id" value="{{task_instance.id}}">
+        <input type="submit"class="button" value="Publish All Skiptraced Only">
     </form>
     <div class="table-wrapper" style="overflow-x: auto;">
         <table class="table table-striped table-hover task-table">
