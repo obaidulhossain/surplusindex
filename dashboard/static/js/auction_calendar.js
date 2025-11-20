@@ -26,13 +26,19 @@ function saveRow(button) {
     const eventNext = row.querySelector('.event_next').value;
     const eventUpdatedFrom = row.querySelector('.event_updated_from').value;
     const eventUpdatedTo = row.querySelector('.event_updated_to').value;
+    const posteventNext = row.querySelector('.post_event_next').value;
+    const posteventUpdatedFrom = row.querySelector('.post_event_updated_from').value;
+    const posteventUpdatedTo = row.querySelector('.post_event_updated_to').value;
 
     // Prepare data for updating
     const updatedData = {
         id: rowId,
         event_next: eventNext,
         event_updated_from: eventUpdatedFrom,
-        event_updated_to: eventUpdatedTo
+        event_updated_to: eventUpdatedTo,
+        post_event_next: posteventNext,
+        post_event_updated_from: posteventUpdatedFrom,
+        post_event_updated_to: posteventUpdatedTo,
     };
 
     // Send data to the server using fetch

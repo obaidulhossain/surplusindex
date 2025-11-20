@@ -111,6 +111,9 @@ def update_row(request):
             event_next = data.get('event_next')
             event_updated_to = data.get('event_updated_to')
             event_updated_from = data.get('event_updated_from')
+            post_event_next = data.get('post_event_next')
+            post_event_updated_to = data.get('post_event_updated_to')
+            post_event_updated_from = data.get('post_event_updated_from')
 
             # Fetch the corresponding event object from the database
             event = foreclosure_Events.objects.get(id=event_id)
@@ -122,6 +125,13 @@ def update_row(request):
                 event.event_updated_to = event_updated_to
             if event_updated_from:
                 event.event_updated_from = event_updated_from
+
+            if post_event_next:
+                event.post_event_next = post_event_next
+            if post_event_updated_to:
+                event.post_event_updated_to = post_event_updated_to
+            if post_event_updated_from:
+                event.post_event_updated_from = post_event_updated_from
             # Save the updated object
             event.save()
 

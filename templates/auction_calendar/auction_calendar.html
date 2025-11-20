@@ -82,6 +82,9 @@ Auction Calendar
                         <th>Next Sale Date</th>
                         <th>Updated From</th>
                         <th>Updated To</th>
+                        <th>Post Next Sale</th>
+                        <th>Post Updated From</th>
+                        <th>Post Updated To</th>
                         <th>Website</th>
                         <th>Save</th>
                     </tr>
@@ -103,6 +106,18 @@ Auction Calendar
                         <td>
                             <input type="date" class="form-control event_updated_to"
                                 value="{{ event.event_updated_to|date:'Y-m-d' }}">
+                        </td>
+                        <td>
+                            <input type="date" class="form-control post_event_next"
+                                value="{{ event.post_event_next|date:'Y-m-d' }}">
+                        </td>
+                        <td>
+                            <input type="date" class="form-control post_event_updated_from"
+                                value="{{ event.post_event_updated_from|date:'Y-m-d' }}">
+                        </td>
+                        <td>
+                            <input type="date" class="form-control post_event_updated_to"
+                                value="{{ event.post_event_updated_to|date:'Y-m-d' }}">
                         </td>
                         <td>
                             <input type="button" class="copyButton" value="Copy" data-url="{{ event.event_site }}"
