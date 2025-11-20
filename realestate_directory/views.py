@@ -71,7 +71,7 @@ def auctionCalendar(request):
     
     # Paginate the results
     total_events = event_queryset.count()
-    p = Paginator(event_queryset, 20)
+    p = Paginator(event_queryset, 200)
     page = request.GET.get('page')
     events = p.get_page(page)
 
