@@ -466,7 +466,7 @@ def ProjectDashboard(request):
     
     # ---------------------------------------------------------------------------------------------------------------
 
-    leads_queryset.order_by("county", "-sale_date")
+    leads_queryset = leads_queryset.order_by("county", "-sale_date")
     total_leads = leads_queryset.count()
     p = Paginator(leads_queryset, 50)
     page = params.get('page')
