@@ -377,11 +377,7 @@ def ProjectDashboard(request):
     
     # -------------Base querysets----------------------------
     leads_queryset = (
-        Foreclosure.objects
-        .exclude(purchased_by=user)
-        #.exclude(sale_status__in=["Cancelled","Active"])
-        #.exclude(surplus_status__in=["No Surplus", None])
-        .exclude(published=False)
+        Foreclosure.objects.all()
         )
     #--------------------------------------------------------
 
