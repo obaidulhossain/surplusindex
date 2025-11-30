@@ -20,6 +20,10 @@ from django.core.mail import EmailMessage,send_mail
 from email.utils import formataddr
 from django.conf import settings
 from django.db.models import F
+
+from django.core.paginator import Paginator
+from AllSettings.models import*
+import calendar
 # Create your views here.
 #-----------------------Project Manager---------------------
 @login_required(login_url="login")
@@ -338,7 +342,180 @@ def LoadTasks(request):
 @login_required(login_url="login")
 @allowed_users(['admin'])
 def ProjectDashboard(request):
-    return render(request, 'ProjectManager/project-dashboard.html')
+    user = request.user
+
+    params = request.POST if request.method == "POST" else request.GET
+    selectedState = params.get('stateFilter', '')
+    selectedCounty = params.get('countyFilter', '')
+    selectedSaletype = params.get('saletypeFilter', '')
+    psmin = params.get('ps_min', '')
+    vsmin = params.get('vs_min', '')
+    showHidden = params.get('show_hidden', '')
+    saledateOrder = params.get('sale_date_order', 'sale_date')
+    surplusStatusND = params.get('status_nd', '')
+    surplusStatusPS = params.get('status_ps', '')
+    surplusStatusNPS = params.get('status_nps', '')
+    surplusStatusFA = params.get('status_fa', '')
+    surplusStatusMF = params.get('status_mf', '')
+    surplusStatusFC = params.get('status_fc', '')
+    surplusStatusNS = params.get('status_ns', '')
+    saleStatusACTIVE = params.get('sale_status_active', '')
+    saleStatusSOLD = params.get('sale_status_sold', '')
+    saleStatusCANCELED = params.get('sale_status_canceled', '')
+
+    saledateYear = params.get('sale_date_year', '')
+    if saledateYear.isdigit():
+        saledateYear = int(saledateYear)
+    
+    saledateMonth = params.get('sale_date_month', '')
+    if saledateMonth.isdigit():
+        saledateMonth = int(saledateMonth)
+
+    showUpcoming = params.get('show_upcoming', '')
+    
+
+    
+    # -------------Base querysets----------------------------
+    leads_queryset = (
+        Foreclosure.objects
+        .exclude(purchased_by=user)
+        #.exclude(sale_status__in=["Cancelled","Active"])
+        #.exclude(surplus_status__in=["No Surplus", None])
+        .exclude(published=False)
+        )
+    #--------------------------------------------------------
+
+    # -------------Filters-----------------------------------
+    filters = {}
+    if selectedState:
+        filters["state__iexact"] = selectedState
+    if selectedCounty:
+        filters["county__iexact"] = selectedCounty
+    if selectedSaletype:
+        filters["sale_type__iexact"] = selectedSaletype
+    if psmin:
+        filters["possible_surplus__gte"] = psmin
+    if vsmin:
+        filters["verified_surplus__gte"] = vsmin
+    if saledateYear:
+        filters["sale_date__year"] = saledateYear
+    if saledateMonth:
+        filters["sale_date__month"] = saledateMonth
+
+    leads_queryset = leads_queryset.filter(**filters)
+    
+    # --------------- Surplus Status --------------------------------------------------
+    surplus_filters = []
+    if surplusStatusND:
+        surplus_filters.append(surplusStatusND)
+    if surplusStatusPS:
+        surplus_filters.append(surplusStatusPS)
+    if surplusStatusNPS:
+        surplus_filters.append(surplusStatusNPS)
+    if surplusStatusFA:
+        surplus_filters.append(surplusStatusFA)
+    if surplusStatusMF:
+        surplus_filters.append(surplusStatusMF)
+    if surplusStatusFC:
+        surplus_filters.append(surplusStatusFC)
+    if surplusStatusNS:
+        surplus_filters.append(surplusStatusNS)
+
+    if surplus_filters:
+        leads_queryset = leads_queryset.filter(surplus_status__in=surplus_filters)
+    #-------------------------------------------------------------------------------
+
+    # ----------------- Sale Status -------------------------------------------------
+    sale_filters = []
+    if saleStatusACTIVE:
+        sale_filters.append(saleStatusACTIVE)
+    if saleStatusSOLD:
+        sale_filters.append(saleStatusSOLD)
+    if saleStatusCANCELED:
+        sale_filters.append(saleStatusCANCELED)
+
+    if sale_filters:
+        leads_queryset = leads_queryset.filter(sale_status__in=sale_filters)
+
+    #-------------------------------------------------------------------------------
+
+    #--------------Orders-------------------------------------
+    if saledateOrder:
+        leads_queryset = leads_queryset.order_by(saledateOrder)
+    
+    #-------------------------------------------------------------
+
+    #-------Show Hide Hidden Leads--------------------------------
+    if showHidden == "show":
+        leads_queryset = leads_queryset.filter(hidden_for=user)
+    else:
+        leads_queryset = leads_queryset.exclude(hidden_for=user)
+    #--------------------------------------------------------------
+        
+    # -------------Dropdown Data-------------------------------------------------------------------------------------
+    states = Foreclosure.objects.values_list("state", flat=True).order_by("state").distinct()
+    #counties = leads_queryset.values_list("county", flat=True).distinct()
+    counties = (
+        leads_queryset.values("county")
+        .order_by("county")   # required by distinct()
+        .distinct()
+        .values_list("county", flat=True)
+    )
+    saletypes = (
+        leads_queryset.values("sale_type")
+        .order_by("sale_type")
+        .distinct()
+        .values_list("sale_type", flat=True)
+    )
+    
+    # ---------------------------------------------------------------------------------------------------------------
+
+
+    total_leads = leads_queryset.count()
+    p = Paginator(leads_queryset, 50)
+    page = params.get('page')
+    leads = p.get_page(page)
+    current_page = int(leads.number)
+    second_previous = current_page + 2 if leads.has_next() else None
+
+    current_year = datetime.date.today().year
+    years = range(current_year - 5, current_year + 2)
+    months = [(i, calendar.month_name[i]) for i in range(1, 13)]
+# -------------Settings-------------------------------------------------------------------------------------
+    client_settings, created = ClientSettings.objects.get_or_create(user=user)
+    
+    context = {
+        'client_settings':client_settings,
+        'current_user':user,
+        'leads':leads,
+        'total_leads':total_leads,
+        'states':states,
+        'counties':counties,
+        'saletypes':saletypes,
+        'selectedState':selectedState,
+        'selectedCounty':selectedCounty,
+        'selectedSaletype':selectedSaletype,
+        'psmin':psmin,
+        'vsmin':vsmin,
+        'showHidden':showHidden,
+        'second_previous':second_previous,
+        'saledateOrder':saledateOrder,
+        'years':years,
+        'months':months,
+        'saledateYear':saledateYear,
+        'saledateMonth':saledateMonth,
+        'surplusStatusND':surplusStatusND,
+        'surplusStatusPS':surplusStatusPS,
+        'surplusStatusNPS':surplusStatusNPS, 
+        'surplusStatusFA':surplusStatusFA,
+        'surplusStatusMF':surplusStatusMF,
+        'surplusStatusFC':surplusStatusFC,
+        'surplusStatusNS':surplusStatusNS,
+        'saleStatusACTIVE':saleStatusACTIVE,
+        'saleStatusSOLD':saleStatusSOLD,
+        'saleStatusCANCELED':saleStatusCANCELED,
+    }
+    return render(request, 'ProjectManager/project-dashboard.html', context)
 
 
 

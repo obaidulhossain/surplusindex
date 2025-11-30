@@ -3,14 +3,253 @@
 Project Dashboard
 {% endblock title %}
 
-{% block content %}
+
+{% block content%}
 {% load static %}
 {% load custom_filters %}
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/client.css' %}" rel="stylesheet">
+<div class="body-section">
+    <div class="client-sec-header" style="margin-top:0px;">
+        <h4>Filter Surplus Data</h4>
+        <button id="toggle-filters" class="icon-button" data-url="{% url 'update-show-hide-setting' %}" onclick="Toggle_and_Save(this.id, 'filters', 'alldata_show_filter', event)" style="padding: 2px 7px;"><i class="bi bi-eye-slash"></i></button>
+    </div>
 
-<h1>Dashboard</h1>
+    <div class="filter-section" id="filters" style="display:{% if client_settings.alldata_show_filter %}block{% else %}none{% endif %};">
+        <form method="post">
+        {% csrf_token %}
+            <div style="width: 99%;">
+                <h4>General Filters</h4></br>
+                <div class="filter-item-section">
+                    <div class="onefifth">
+                        <label for="stateFilter">Select State</label><br>
+                        <select id="stateFilter" name="stateFilter" onchange="this.form.submit()" style="width:100%;">
+                            <option value="" {% if selectedState == "" %}selected{% endif %}>--- Select State ---</option>
+                            {% for state in states %}
+                            {% if not state == "" %}
+                            <option value="{{state}}" {% if state == selectedState %}selected{% endif %}>{{state|upper}}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="onefifth">
+                        <label for="countyFilter">Select County</label><br>
+                        <select id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} style="width:100%;">
+                            <option value="">All</option>
+                            {% for county in counties %}
+                            <option value="{{county}}" {% if county == selectedCounty %}selected{% endif %}>{{county|upper}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="onefifth">
+                        <label for="saletypeFilter">Sale Type</label><br>
+                        <select id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} style="width:100%;">
+                            <option value="">All</option>
+                            {% for saletype in saletypes %}
+                            <option value="{{saletype}}" {% if saletype == selectedSaletype %}selected{% endif %}>{{saletype|upper}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="onefifth">
+                        <label for="possiblesurplusFilter">Possible Surplus</label><br>
+                        <input type="number" placeholder="Set Minimum" name="ps_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if psmin %}{{psmin}}{% endif %}" style="width:100%;"><br>
+                    </div>
+                    <div class="onefifth">
+                        <label for="verifiedsurplusFilter">Verified Surplus</label><br>
+                        <input type="number" placeholder="Set Minimum" name="vs_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if vsmin %}{{vsmin}}{% endif %}" style="width:100%;"><br>
+                    </div>
+                </div>
+            </div>
+            {% if selectedState %}
+            <div style="width: 99%;">
+                <h4>Advanced Filters</h4></br></br>
+                <div class="onethird" style="margin: 0px 10px;">
+                    <div class="filter-item-section" style="text-align-last: left;">
+                        <h5>Sale Date Filter Options</h5></br></br>
+                        <label>Year</label></br>
+                        <select name="sale_date_year" onchange="this.form.submit()" style="width:100%">
+                            <option value="">Select Sale Year</option>
+                            {% for year in years reversed %}
+                            <option value="{{year}}" {% if saledateYear == year %}selected{% endif %}>{{year}}</option>
+                            {% endfor %}
+                        </select>
+                        </br>
+                        <label>Month</label></br>
+                        <select name="sale_date_month" onchange="this.form.submit()" style="width:100%">
+                            <option value="">Select Sale Month</option>
+                            {% for num, name in months %}
+                                <option value="{{ num }}" {% if saledateMonth == num %}selected{% endif %}>{{ name }}</option>
+                            {% endfor %}
+                        </select>
+                        </br>
+                        <label>Order By</label></br>
+                        <select name="sale_date_order" onchange="this.form.submit()" style="width:100%">
+                            <option value="">Sale Date Order</option>
+                            <option value="-sale_date"{% if saledateOrder == '-sale_date' %}selected{% endif %}>Newest First</option>
+                            <option value="sale_date"{% if saledateOrder == 'sale_date' %}selected{% endif %}>Oldest First</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="onethird" style="margin: 0px 10px;">
+                    <div class="filter-item-section" style="text-align-last: left;">
+                        <h5>Sale Status</h5></br></br>
+
+                        <input type="checkbox" name="sale_status_active" value="Active" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusACTIVE == "Active" %}checked{% endif %}>
+                        <label style="vertical-align: middle;">Active</label></br>
+
+                        <input type="checkbox" name="sale_status_sold" value="Sold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusSOLD == "Sold" %}checked{% endif %}>
+                        <label style="vertical-align: middle;">Sold</label></br>
+
+                        <input type="checkbox" name="sale_status_canceled" value="Cancelled" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusCANCELED == "Cancelled" %}checked{% endif %}>
+                        <label style="vertical-align: middle;">Cancelled</label></br>
+                    </div></br></br>
+                    <label for="show_hidden">Show Hidden Leads</label></br>
+                    <input type="checkbox" name="show_hidden" id="show_hidden" value="show" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if showHidden == "show" %}checked{% endif %} {% if selectedState == "" %}disabled{% endif %}>
+                </div>
+                <div class="onethird" style="margin: 0px 10px;">
+                    <div class="filter-item-section" style="text-align-last: left;">
+                        <h5>Surplus Status</h5></br></br>
+                    
+                        <input type="checkbox" name="status_nd" value="Not Determined" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusND == "Not Determined" %}checked{% endif %}>
+                        <label style="vertical-align: middle;" for="show_hidden">Not Determined</label></br>
+
+                        <input type="checkbox" name="status_ps" value="Possible Surplus" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusPS == "Possible Surplus" %}checked{% endif %}>
+                        <label style="vertical-align: middle;" for="show_hidden">Possible Surplus</label></br>
+
+                        <input type="checkbox" name="status_nps" value="No Possible Surplus" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusNPS == "No Possible Surplus" %}checked{% endif %}>
+                        <label style="vertical-align: middle;" for="show_hidden">No Possible Surplus</label></br>
+
+                        <input type="checkbox" name="status_fa" value="Fund Available" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusFA == "Fund Available" %}checked{% endif %}>
+                        <label style="vertical-align: middle;" for="show_hidden">Fund Available</label></br>
+
+                        <input type="checkbox" name="status_mf" value="Motion Filed" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusMF == "Motion Filed" %}checked{% endif %}>
+                        <label style="vertical-align: middle;" for="show_hidden">Motion Filed</label></br>
+
+                        <input type="checkbox" name="status_fc" value="Fund Claimed" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusFC == "Fund Claimed" %}checked{% endif %}>
+                        <label style="vertical-align: middle;" for="show_hidden">Fund Claimed</label></br>
+
+                        <input type="checkbox" name="status_ns" value="No Surplus" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusNS == "No Surplus" %}checked{% endif %}>
+                        <label style="vertical-align: middle;" for="show_hidden">No Surplus</label></br>
+                    </div>
+                </div>
+            </div></br>
+            
+            
+            {% endif %}
+            </form>
+        </div>
+    <div class="client-sec-header" style="margin-top:20px;">
+        <h4>Available Data as Leads</h4>
+    </div>
+    <div class="section-body-full">
+        <form id="add-to-myleads" method="POST" action="{% url 'purchaseLeads' %}">
+            {% csrf_token %}
+            <div class="action-section">
+                <input type="hidden" name="unhide" value={{showHidden}}>
+                <input type="hidden" name="stateFilter" value={{selectedState}}>
+                <input type="hidden" name="countyFilter" value={{selectedCounty}}>
+                <input type="hidden" name="saletypeFilter" value={{selectedSaletype}}>
+                <input type="hidden" name="ps_min" value={{psmin}}>
+                <input type="hidden" name="vs_min" value={{vsmin}}>
+                <div class="action-item">
+                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmAddToMyLeads()">Add <span data-selected-count>0</span> to My Leads</button>
+                </div>
+                <div class="action-item">
+                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmHideLeads()" formaction="{% url 'hide-leads' %}">{% if showHidden == "show" %}Unhide{% else %}Hide{% endif %} <span data-selected-count>0</span> Selected</button>
+                </div>
+                {% if user.is_authenticated %}
+                {% for group in user.groups.all %}
+                    {% if group.name == "admin" %}
+                    <div class="action-item">
+                        <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmExport()" formaction="{% url 'export_filtered_data' %}">Export <span data-selected-count>0</span> Selected Leads</button>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+            </div>
+            <div class="table-wrapper">
+                <table id="leads-table" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>
+                                <span>
+                                <input type="checkbox" id="selectAll" style="width:20px;">
+                                </span>
+                            </th>
+                            <th>State</th>
+                            <th>County</th>
+                            <th>Sale Date</th>
+                            <th>Sale Type</th>
+                            <th>Sale Status</th>
+                            <th>Sale Price</th>
+                            <th>Possible Surplus</th>
+                            <th>Verified Surplus</th>
+                            <th>Surplus Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% if selectedState == "" %}
+                        <tr>
+                            <td colspan=9>Please select a State to load data</td>
+                        <tr>
+                    {% else %}
+                        {% for i in leads %}
+
+                        <tr>
+                            <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">
+                                <span class="custom-checkbox">
+                                    <input type="checkbox" id="checkbox" class="checkbox" name="selected_items" value="{{ i.id }}">
+                                    <label for="checkbox"></label>
+                                </span>
+                            </td>
+                            <td class="state {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.state|title}}</td>
+                            <td class="county {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.county|title}}</td>
+                            <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.sale_date|date:'m/d/Y'}}</td>
+                            <td class="saletype {% if current_user in i.hidden_for.all %}highlight-row{% endif %}" >{{i.get_sale_type_display}}</td>
+                            <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.get_sale_status_display}}</td>
+                            <td class="amount {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.sale_price|currency}}</td>
+                            <td class="possible-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.possible_surplus|currency}}</td>
+                            <td class="verified-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.verified_surplus|currency}}</td>
+                            <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.get_surplus_status_display}}</td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
+                    </tbody>
+
+                </table>
+                <div class="clearfix">
+                    <div class="hint-text">Showing Page <b>{{ leads.number }}</b> out of <b>{{ leads.paginator.num_pages }}</b> Pages | Leads count ({{total_leads}})</div>
+                    <ul class="pagination">
+                        {% if leads.has_previous %}
+                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page=1" class="page-link">First</a></li>
+                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{ leads.previous_page_number }}">Previous</a></li>
+                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{ leads.previous_page_number }}" class="page-link">{{ leads.previous_page_number }}</a></li>
+                        {% endif %}
+{% comment %} &countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}} {% endcomment %}
+
+                        <li class="page-item active"><a href="#" class="page-link">{{ leads.number }}</a></li>
 
 
-<script src="{% static 'js/ProjectManager.js' %}"></script>
-<script src="{% static 'js/Surplusindex.js' %}"></script>
-{% endblock content %}
+
+                        {% if leads.has_next %}
+                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{ leads.next_page_number }}" class="page-link">{{ leads.next_page_number }}</a></li>
+                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{ second_previous }}" class="page-link">{{ second_previous }}</a></li>
+                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{leads.next_page_number}}" class="page-link">Next</a></li>
+                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{ leads.paginator.num_pages }}">Last</a></li>
+                        {% endif %}
+
+                    </ul>
+                </div>
+            </div>
+        </form>
+
+
+
+
+    </div>
+    <script src="{% static 'js/nouislider.min.js' %}"></script>
+    <script src="{% static 'js/Client.js' %}"></script>
+    <script src="{% static 'js/Surplusindex.js' %}"></script>
+    <script src="{% static 'js/ProjectManager.js' %}"></script>
+</div>
+{% endblock content%}
