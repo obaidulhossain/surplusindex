@@ -94,6 +94,7 @@ Checklists
                     <option value="">Select Sale Status</option>
                     <option value="Active" {% if current_fcl_instance.sale_status == "Active" %}selected{% endif %}>Active</option>
                     <option value="Sold" {% if current_fcl_instance.sale_status == "Sold" %}selected{% endif %}>Sold</option>
+                    <option value="Unsold" {% if current_fcl_instance.sale_status == "Unsold" %}selected{% endif %}>Unsold</option>
                     <option value="Cancelled" {% if current_fcl_instance.sale_status == "Cancelled" %}selected{% endif %}>Cancelled</option>
                     <option value="Sold To Plaintiff" {% if current_fcl_instance.sale_status == "Sold To Plaintiff" %}selected{% endif %}>Sold To Plaintiff</option>
                     <option value="Bankruptcy Hold" {% if current_fcl_instance.sale_status == "Bankruptcy Hold" %}selected{% endif %}>Bankruptcy Hold</option>

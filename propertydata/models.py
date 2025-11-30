@@ -262,12 +262,14 @@ class Foreclosure(OperationStat):
 
     ACTIVE = 'pending'
     SOLD = 'sold'
+    UNSOLD = 'unsold'
     CANCELLED = 'cancelled'
     SOLD_TO_PLAINTIFF = 'sold_to_plaintiff'
     BANKRUPTCY_HOLD = 'bankruptcy_hold'
     SALE_STATUS = (
         (ACTIVE, 'Active'),
         (SOLD, 'Sold'),
+        (UNSOLD, 'Unsold'),
         (CANCELLED, 'Cancelled'),
         (SOLD_TO_PLAINTIFF, 'Sold To Plaintiff'),
         (BANKRUPTCY_HOLD, 'Bankruptcy Hold'),
