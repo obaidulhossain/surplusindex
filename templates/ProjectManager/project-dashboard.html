@@ -176,6 +176,7 @@ Project Dashboard
                                 <input type="checkbox" id="selectAll" style="width:20px;">
                                 </span>
                             </th>
+                            <th>Updated</th>
                             <th>State</th>
                             <th>County</th>
                             <th>Sale Date</th>
@@ -204,6 +205,7 @@ Project Dashboard
                                     <label for="checkbox"></label>
                                 </span>
                             </td>
+                            <td>{{i.changed_at|date:'m/d/Y'}}</td>
                             <td>{{i.state|title}}</td>
                             <td>{{i.county|title}}</td>
                             <td>{{i.sale_date|date:'m/d/Y'}}</td>
