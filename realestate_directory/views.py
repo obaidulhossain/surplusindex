@@ -350,8 +350,6 @@ def FilterEvents(request):
     return JsonResponse({'Events': results})
 
 
-@login_required(login_url="login")
-@allowed_users(['admin'])
 @csrf_exempt
 def DeleteEvent(request):
     if request.method == 'POST':

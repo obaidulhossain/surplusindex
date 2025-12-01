@@ -11,7 +11,6 @@ import json
 
 
 @csrf_exempt
-@login_required
 def save_sidebar_setting(request):
     if request.method == 'POST':
         data = json.loads(request.body)
@@ -22,7 +21,7 @@ def save_sidebar_setting(request):
         return JsonResponse({'status': 'saved'})
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
-@login_required
+
 @csrf_exempt  # (better: use CSRF token properly, see above)
 def update_client_filter_display_setting(request):
     if request.method == "POST":
