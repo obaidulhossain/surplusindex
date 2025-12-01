@@ -36,10 +36,10 @@ def auctionCalendar(request):
         saledateFilter = request.GET.get('saledateFilter','')
     
     event_queryset = foreclosure_Events.objects.all()
-    event_queryset = event_queryset.order_by("state","county", "sale_type")
-    states = event_queryset.values_list('state', flat=True).distinct()
-    counties = event_queryset.values_list('county', flat=True).distinct()
-    saletypes = event_queryset.values_list('sale_type', flat=True).distinct()
+    
+    states = event_queryset.order_by('state').values_list('state', flat=True).distinct()
+    counties = event_queryset.order_by('county').values_list('county', flat=True).distinct()
+    saletypes = event_queryset.order_by('sale_type').values_list('sale_type', flat=True).distinct()
     
     if selectedUser:
         selectedUserinstance = User.objects.get(username=selectedUser)
@@ -69,7 +69,7 @@ def auctionCalendar(request):
     elif saledateFilter == "upcoming":
         event_queryset = event_queryset.filter(event_next__gte=now().date())
 
-    # event_queryset = event_queryset.order_by("county","sale_type")
+    event_queryset = event_queryset.order_by("county","sale_type")
     # Paginate the results
     total_events = event_queryset.count()
     p = Paginator(event_queryset, 200)
