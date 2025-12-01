@@ -344,7 +344,7 @@ def FilterEvents(request):
         Events = Events.filter(county__icontains=County)
     if SaleType:
         Events = Events.filter(sale_type__icontains=SaleType)
-    
+    Events = Events.order_by("county","sale_type")
 
     results = list(Events.values('id', 'state','county','population', 'sale_type', 'event_status','event_next','post_event_next'))
     return JsonResponse({'Events': results})
