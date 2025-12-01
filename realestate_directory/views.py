@@ -35,7 +35,7 @@ def auctionCalendar(request):
         saletypeFilter = request.GET.get('saletypeFilter','')
         saledateFilter = request.GET.get('saledateFilter','')
     
-    event_queryset = foreclosure_Events.objects.all()
+    event_queryset = foreclosure_Events.objects.all().order_by("county","sale_type")
     states = event_queryset.values_list('state', flat=True).distinct()
     counties = event_queryset.values_list('county', flat=True).distinct()
     saletypes = event_queryset.values_list('sale_type', flat=True).distinct()
