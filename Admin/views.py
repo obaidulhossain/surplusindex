@@ -420,8 +420,7 @@ def All_Data(request):
     }
     return render(request, 'Admin/new_leads.html', context)
 
-@allowed_users(['admin'])
-@login_required(login_url="login")
+
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def caseSearchStatus(request):
 
@@ -459,8 +458,7 @@ def caseSearchStatus(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
-@allowed_users(['admin'])
-@login_required(login_url="login")
+
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def publishStatus(request):  
 
@@ -506,8 +504,7 @@ def publishStatus(request):
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 
-@allowed_users(['admin'])
-@login_required(login_url="login")
+
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def assignSKP(request):
 
