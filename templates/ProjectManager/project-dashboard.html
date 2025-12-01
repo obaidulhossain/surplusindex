@@ -187,6 +187,7 @@ Project Dashboard
                             <th>Possible Surplus</th>
                             <th>Verified Surplus</th>
                             <th>Surplus Status</th>
+                            <th>Published</th>
                             <th>Edit</th>
                         </tr>
                     </thead>
@@ -216,6 +217,9 @@ Project Dashboard
                             <td>{{i.possible_surplus|currency}}</td>
                             <td>{{i.verified_surplus|currency}}</td>
                             <td>{{i.get_surplus_status_display}}</td>
+                            <td>
+                            {% if i.published %}<i class="bi bi-check-circle-fill" style="color:green;"></i>{% else %}<i class="bi bi-x-circle-fill" style="color:red;"></i>{% endif %}
+                            </td>
                             <td>
                             <a class="button" href="https://app.surplusindex.com/add_edit_foreclosure/?fcl_id={{i.id}}" target="_blank">View</a>
                             </td>
