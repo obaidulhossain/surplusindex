@@ -23,22 +23,29 @@ function copyToClipboard(button) {
 function saveRow(button) {
     const row = button.closest('tr');
     const rowId = row.getAttribute('data-id');
-    const eventNext = row.querySelector('.event_next').value;
-    const eventUpdatedFrom = row.querySelector('.event_updated_from').value;
-    const eventUpdatedTo = row.querySelector('.event_updated_to').value;
-    const posteventNext = row.querySelector('.post_event_next').value;
-    const posteventUpdatedFrom = row.querySelector('.post_event_updated_from').value;
-    const posteventUpdatedTo = row.querySelector('.post_event_updated_to').value;
+    // const eventNext = row.querySelector('.event_next').value;
+    // const eventUpdatedFrom = row.querySelector('.event_updated_from').value;
+    // const eventUpdatedTo = row.querySelector('.event_updated_to').value;
+    // const posteventNext = row.querySelector('.post_event_next').value;
+    // const posteventUpdatedFrom = row.querySelector('.post_event_updated_from').value;
+    // const posteventUpdatedTo = row.querySelector('.post_event_updated_to').value;
 
     // Prepare data for updating
     const updatedData = {
         id: rowId,
-        event_next: eventNext,
-        event_updated_from: eventUpdatedFrom,
-        event_updated_to: eventUpdatedTo,
-        post_event_next: posteventNext,
-        post_event_updated_from: posteventUpdatedFrom,
-        post_event_updated_to: posteventUpdatedTo,
+        // event_next: eventNext,
+        // event_updated_from: eventUpdatedFrom,
+        // event_updated_to: eventUpdatedTo,
+        // post_event_next: posteventNext,
+        // post_event_updated_from: posteventUpdatedFrom,
+        // post_event_updated_to: posteventUpdatedTo,
+        event_next: row.querySelector('.event_next').value,
+        event_updated_from: row.querySelector('.event_updated_from').value,
+        event_updated_to: row.querySelector('.event_updated_to').value,
+
+        post_event_next: row.querySelector('.post_event_next').value,
+        post_event_updated_from: row.querySelector('.post_event_updated_from').value,
+        post_event_updated_to: row.querySelector('.post_event_updated_to').value
     };
 
     // Send data to the server using fetch
