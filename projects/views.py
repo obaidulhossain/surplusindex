@@ -93,7 +93,31 @@ def filter_foreclosure(request):
     foreclosure = foreclosure.order_by("state", "county", "sale_date", "sale_type")
 
     results = list(foreclosure.values('id', 'state', 'county', 'case_number', 'sale_date', 'sale_type', 'sale_status','surplus_status', 'published'))
-    return JsonResponse({'foreclosure': results})
+    is_admin_group = request.user.groups.filter(name="admin").exists()
+    return JsonResponse({'foreclosure': results, 'is_admin_group': is_admin_group,})
+
+def is_admin_group(user):
+    return user.groups.filter(name="admin").exists()
+
+from django.contrib.auth.decorators import user_passes_test
+@user_passes_test(is_admin_group)
+def toggle_publish(request):
+    if request.method == "POST":
+        fcl_id = request.POST.get("fcl_id")
+        current_status = request.POST.get("current_status")
+
+        try:
+            obj = Foreclosure.objects.get(id=fcl_id)
+            obj.published = not bool(int(current_status))
+            obj.save()
+
+            return JsonResponse({"success": True, "new_status": obj.published})
+
+        except Foreclosure.DoesNotExist:
+            return JsonResponse({"success": False}, status=404)
+
+    return JsonResponse({"success": False}, status=400)
+
 
 def update_foreclosure(request):
     current_user = request.user

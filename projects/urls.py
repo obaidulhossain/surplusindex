@@ -14,6 +14,7 @@ path('add_edit_foreclosure/', views.fclview, name="add_edit_fcl"),
 path('filter-fcl', views.filter_foreclosure, name="filter-fcl"),
 path("save_notes_ajax/<int:fcl_id>/", views.save_notes_ajax, name="save_notes_ajax"),
 path('create_update_fcl', views.update_foreclosure, name="create_update_fcl"),
+path("toggle-publish/", views.toggle_publish, name="toggle-publish"),
 
     # views for property section
 path('update_prop', views.update_property, name='update_prop'),

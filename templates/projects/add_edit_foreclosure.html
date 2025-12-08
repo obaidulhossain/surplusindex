@@ -12,7 +12,20 @@ Checklists
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <style>
+    .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #3498db;
+        border-radius: 50%;
+        width: 14px;
+        height: 14px;
+        animation: spin 0.6s linear infinite;
+        display: inline-block;
+    }
 
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 </style>
 <!--Foreclosure Section               End -->
 <div class="body-section">
@@ -246,13 +259,22 @@ Checklists
                     sale_status: salestatus
                 },
                 success: function (data) {
+                    const is_admin_group = data.is_admin_group;  // TRUE if user is in admin group
                     const foreclosure = data.foreclosure;
                     const fclresultcontainer = $('#fcl-results');
                     fclresultcontainer.empty();
 
                     if (foreclosure.length > 0) {
                         foreclosure.forEach(foreclosure => {
-                            const published_icon = foreclosure.published ? '<span style="color:green;">🟢</span>' : '<span style="color:red;">🔴</span>';
+                            let published_icon = "";
+                            if (is_admin_group) {
+                                published_icon = foreclosure.published ? `<span class="toggle-publish" data-id="${foreclosure.id}" data-status="1" style="cursor:pointer;color:green;font-size:18px;">🟢</span>` : `<span class="toggle-publish" data-id="${foreclosure.id}" data-status="0" style="cursor:pointer;color:red;font-size:18px;">🔴</span>`;
+                            } else {
+                                // No toggle for other users
+                                published_icon = foreclosure.published ? `<span>🟢</span>` : `<span >🔴</span>`;
+                            }
+        
+                            
                             fclresultcontainer.append(`
 
                             <tr>
@@ -793,40 +815,6 @@ function copyToClipboard(element, messageId) {
     });
   }
 }
-{% comment %} function copyToClipboard(element) {
-  let value = element.value;
-  if (value) {
-    navigator.clipboard.writeText(value).then(() => {
-      console.log("Copied: " + value);
-
-      // Save old background color
-      let oldBg = element.style.backgroundColor;
-
-      // Apply highlight directly
-      element.style.transition = "background-color 0.5s ease";
-      element.style.backgroundColor = "#c8f7c5"; // light green
-
-      // Reset after 2 seconds
-      setTimeout(() => {
-        element.style.backgroundColor = oldBg || "";
-      }, 2000);
-    }).catch(err => {
-      console.error("Failed to copy: ", err);
-    });
-  }
-} {% endcomment %}
-{% comment %} function copyToClipboard(element) {
-  let value = element.value;
-  if (value) {
-    navigator.clipboard.writeText(value).then(() => {
-      console.log("Copied: " + value);
-      // Optional: show a notification
-      // alert("Copied: " + value);
-    }).catch(err => {
-      console.error("Failed to copy: ", err);
-    });
-  }
-} {% endcomment %}
 
 // ctrl+s to create or update foreclosure 
 document.addEventListener("keydown", function(e) {
@@ -870,6 +858,50 @@ document.addEventListener("keydown", function(e) {
         e.stopPropagation(); // optional but safer
         document.getElementById("case_search_status").focus();
     }
+});
+
+
+// Handle publish/unpublish click
+$(document).on("click", ".toggle-publish", function () {
+
+    const el = $(this);
+    const fcl_id = el.data("id");
+    const current_status = el.data("status");
+
+    // Disable clicking to prevent multiple requests
+    el.css("pointer-events", "none");
+
+    // Show spinner
+    el.fadeOut(150, function () {
+        el.html(`<span class="spinner"></span>`).fadeIn(150);
+    });
+
+    $.ajax({
+        url: "{% url 'toggle-publish' %}",
+        type: "POST",
+        data: {
+            fcl_id: fcl_id,
+            current_status: current_status,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function (data) {
+
+            // Determine new icon
+            const newIcon = data.new_status
+                ? '<span style="color:green;font-size:18px;">🟢</span>'
+                : '<span style="color:red;font-size:18px;">🔴</span>';
+
+            const newStatusValue = data.new_status ? 1 : 0;
+
+            // Replace spinner with new icon
+            el.fadeOut(150, function () {
+                el.html(newIcon);
+                el.data("status", newStatusValue);
+                el.css("pointer-events", "auto"); // enable clicking again
+                el.fadeIn(150);
+            });
+        }
+    });
 });
 
 </script>
