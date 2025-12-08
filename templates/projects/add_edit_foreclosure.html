@@ -216,6 +216,8 @@ Checklists
                     <th>Sale Date</th>
                     <th>Sale Type</th>
                     <th>Sale Status</th>
+                    <th>Surplus Status</th>
+                    <th>Published</th>
                     <th>Select</th>
                 </tr>
             </thead>
@@ -250,6 +252,7 @@ Checklists
 
                     if (foreclosure.length > 0) {
                         foreclosure.forEach(foreclosure => {
+                            const published_icon = foreclosure.published ? '<span style="color:green;">🟢</span>' : '<span style="color:red;">🔴</span>';
                             fclresultcontainer.append(`
 
                             <tr>
@@ -259,6 +262,8 @@ Checklists
                                 <td>${foreclosure.sale_date}</td>
                                 <td>${foreclosure.sale_type}</td>
                                 <td>${foreclosure.sale_status}</td>
+                                <td>${foreclosure.surplus_status}</td>
+                                <td>${published_icon}</td>
                                 <td>
                                     <form method="get" action="{% url 'add_edit_fcl' %}">
                                         <input type="hidden" name="fcl_id" value="${foreclosure.id}">
