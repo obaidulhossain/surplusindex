@@ -153,7 +153,47 @@ def update_row(request):
     # Respond with an error if the request method is not POST
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
+@csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
+def update_row_event(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
 
+            event_id = data.get('id')
+            event_next = data.get('event_next')
+            event_updated_to = data.get('event_updated_to')
+            event_updated_from = data.get('event_updated_from')
+
+
+            # Fetch the corresponding event object from the database
+            event = foreclosure_Events.objects.get(id=event_id)
+
+            # Update the fields
+            if event_next:
+                event.event_next = event_next
+            if event_updated_to:
+                event.event_updated_to = event_updated_to
+            if event_updated_from:
+                event.event_updated_from = event_updated_from
+            event.save()
+
+            # Respond with success
+            
+            return JsonResponse({'status': 'success', 'message': 'Row updated successfully!'})
+
+        except foreclosure_Events.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Event not found.'}, status=404)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+
+        except Exception as e:
+            
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+
+    # Respond with an error if the request method is not POST
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=405)
 
 @csrf_exempt  # Add this only if CSRF tokens are not used. Otherwise, use the CSRF token in your AJAX request.
 def update_row_post(request):

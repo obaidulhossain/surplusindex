@@ -87,6 +87,73 @@ function saveRow(button) {
 document.getElementById('select-state').addEventListener('click', function () {
     this.value = '';
 });
+
+
+function saveRowEvent(button) {
+    const row = button.closest('tr');
+    const rowId = row.getAttribute('data-id');
+
+
+
+    // Prepare data for updating
+    const updatedData = {
+        id: rowId,
+        event_next: row.querySelector('.event_next').value,
+        event_updated_from: row.querySelector('.event_updated_from').value,
+        event_updated_to: row.querySelector('.event_updated_to').value,
+    };
+
+    // Send data to the server using fetch
+    fetch('/update-row-event/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
+        },
+        body: JSON.stringify(updatedData)
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Change button style to indicate success
+                button.innerHTML = "Saved!";
+                button.style.transition = "background-color 0.3s ease, color 0.3s ease";
+                button.style.backgroundColor = "#4CAF50"; // Green background
+                button.style.color = "#fff"; // White text
+
+                // Reset the button after a short delay
+                setTimeout(() => {
+                    button.innerHTML = "Save";
+                    button.style.backgroundColor = ""; // Reset to original background
+                    button.style.color = ""; // Reset to original text color
+                }, 1500); // Reset after 1.5 seconds
+            } else {
+                // Show error message box
+                alert("Failed to save row: " + (data.message || "Unknown error"));
+            }
+        })
+        .catch(error => {
+            // Show error message box for unexpected errors
+            console.error('Error:', error);
+            alert("An error occurred while saving the row. Please try again.");
+        });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function saveRowPostEvent(button) {
     const row = button.closest('tr');
     const rowId = row.getAttribute('data-id');
