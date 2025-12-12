@@ -73,5 +73,8 @@ path('skiptrace_related_contact', views.skiptrace_related_contact, name="skiptra
 
 # Urls for Delivered Tasks Section------------------------------------------------------------------------
 path('deliveredtasks', views.deliveredtasks, name="deliveredtasks"),
+# url for global dynamic save Foreclosures fields
+path("update-field/<int:pk>/", views.update_foreclosure_field, name="update_field"),
+
 
 ]

@@ -1095,3 +1095,40 @@ def deliveredtasks(request):
     return render(request,'da/delivered_tasks.html',context)
 
 # --------------------------------------------------------------------------------
+
+@csrf_exempt
+def update_foreclosure_field(request, pk):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=400)
+
+    try:
+        data = json.loads(request.body)
+        field = data.get("field")
+        value = data.get("value")
+
+        obj = Foreclosure.objects.get(pk=pk)
+
+        # Handle booleans
+        if value in ["true", "false"]:
+            value = value == "true"
+
+        # Handle empty values
+        if value == "":
+            value = None
+
+        # Dynamic setattr update
+        setattr(obj, field, value)
+
+        # Auto-update derived fields
+        if field in ["sale_price", "fcl_final_judgment"]:
+            obj.update_possible_surplus()
+
+        obj.save()
+
+        return JsonResponse({"success": True})
+
+    except Foreclosure.DoesNotExist:
+        return JsonResponse({"error": "Object not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+

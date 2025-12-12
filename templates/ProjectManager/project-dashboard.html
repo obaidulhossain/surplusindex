@@ -9,6 +9,8 @@ Project Dashboard
 {% load custom_filters %}
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
 <link href="{% static 'css/client.css' %}" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 <div class="body-section">
     <div class="client-sec-header" style="margin-top:0px;">
         <h4>Filter Surplus Data</h4>
@@ -21,7 +23,7 @@ Project Dashboard
             <div style="width: 99%;">
                 <h4>General Filters</h4></br>
                 <div class="filter-item-section">
-                    <div class="onefifth">
+                    <div class="onefourth">
                         <label for="stateFilter">Select State</label><br>
                         <select id="stateFilter" name="stateFilter" onchange="this.form.submit()" style="width:100%;">
                             <option value="" {% if selectedState == "" %}selected{% endif %}>--- Select State ---</option>
@@ -32,7 +34,7 @@ Project Dashboard
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="onefifth">
+                    <div class="onefourth">
                         <label for="countyFilter">Select County</label><br>
                         <select id="countyFilter" name="countyFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} style="width:100%;">
                             <option value="">All</option>
@@ -41,7 +43,7 @@ Project Dashboard
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="onefifth">
+                    <div class="onefourth">
                         <label for="saletypeFilter">Sale Type</label><br>
                         <select id="saletypeFilter" name="saletypeFilter" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} style="width:100%;">
                             <option value="">All</option>
@@ -50,13 +52,30 @@ Project Dashboard
                             {% endfor %}
                         </select>
                     </div>
-                    <div class="onefifth">
-                        <label for="possiblesurplusFilter">Possible Surplus</label><br>
-                        <input type="number" placeholder="Set Minimum" name="ps_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if psmin %}{{psmin}}{% endif %}" style="width:100%;"><br>
+                    <div class="onefourth">
+                        <label for="published">Published</label><br>
+                        <select id="published" name="published" onchange="this.form.submit()"style="width:100%;">
+                            <option value="">All</option>
+                            <option value="true" {% if published == "true" %}selected{% endif %}>Published</option>
+                            <option value="false" {% if published == "false" %}selected{% endif %}>Unpublished</option>
+                        </select>
+                    </div></br></br>
+                    <div class="onefourth">
+                        <label for="case_number">Case Number</label><br>
+                        <input type="text" placeholder="Case Number" name="case_number" onchange="this.form.submit()" style="width:100%;"><br>
                     </div>
-                    <div class="onefifth">
-                        <label for="verifiedsurplusFilter">Verified Surplus</label><br>
-                        <input type="number" placeholder="Set Minimum" name="vs_min" onchange="this.form.submit()" {% if selectedState == "" %}disabled{% endif %} value="{% if vsmin %}{{vsmin}}{% endif %}" style="width:100%;"><br>
+                    
+                    <div class="onefourth">
+                        <label for="case_number">Property Address</label><br>
+                        <input type="text" placeholder="Address" name="address" onchange="this.form.submit()" style="width:100%;"><br>
+                    </div>
+                    <div class="onefourth">
+                        <label for="defendant">Defendant</label><br>
+                        <input type="text" placeholder="Defendant" name="defendant" onchange="this.form.submit()" style="width:100%;"><br>
+                    </div>
+                    <div class="onefourth">
+                        <label for="plaintiff">Plaintiff</label><br>
+                        <input type="text" placeholder="Plaintiff" name="plaintiff" onchange="this.form.submit()" style="width:100%;"><br>
                     </div>
                 </div>
             </div>
@@ -66,6 +85,16 @@ Project Dashboard
                 <div class="onethird" style="margin: 0px 10px;">
                     <div class="filter-item-section" style="text-align-last: left;">
                         <h5>Sale Date Filter Options</h5></br></br>
+                        <div class="onehalf">
+                            <label>From</label></br>
+                            <input type="date" name="sale_from" on {% if saleFROM %}value="{{saleFROM}}"{% endif %} style="width:90%">
+                        </div>
+                        
+                        <div class="onehalf">
+                            <label>To</label></br>
+                            <input type="date" name="sale_to"  {% if saleTO %}value="{{saleTO}}"{% endif %} style="width:90%">
+                        </div>
+
                         <label>Year</label></br>
                         <select name="sale_date_year" onchange="this.form.submit()" style="width:100%">
                             <option value="">Select Sale Year</option>
@@ -100,11 +129,19 @@ Project Dashboard
                         <input type="checkbox" name="sale_status_sold" value="Sold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusSOLD == "Sold" %}checked{% endif %}>
                         <label style="vertical-align: middle;">Sold</label></br>
 
+                        <input type="checkbox" name="sale_status_unsold" value="Unsold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusUNSOLD == "Unsold" %}checked{% endif %}>
+                        <label style="vertical-align: middle;">Unsold</label></br>
+
+                        <input type="checkbox" name="sale_status_soldtoplaintiff" value="Sold To Plaintiff" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusSOLDTOPLT == "Sold To Plaintiff" %}checked{% endif %}>
+                        <label style="vertical-align: middle;">Sold To Plaintiff</label></br>
+
+                        <input type="checkbox" name="sale_status_bankruptcy" value="Bankruptcy Hold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusBANKRUPTCY == "Bankruptcy Hold" %}checked{% endif %}>
+                        <label style="vertical-align: middle;">Bankruptcy Hold</label></br>
+                        
                         <input type="checkbox" name="sale_status_canceled" value="Cancelled" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusCANCELED == "Cancelled" %}checked{% endif %}>
                         <label style="vertical-align: middle;">Cancelled</label></br>
-                    </div></br></br>
-                    <label for="show_hidden">Show Hidden Leads</label></br>
-                    <input type="checkbox" name="show_hidden" id="show_hidden" value="show" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if showHidden == "show" %}checked{% endif %} {% if selectedState == "" %}disabled{% endif %}>
+
+                    </div></br>
                 </div>
                 <div class="onethird" style="margin: 0px 10px;">
                     <div class="filter-item-section" style="text-align-last: left;">
@@ -134,12 +171,12 @@ Project Dashboard
                 </div>
             </div></br>
             
-            
+            <button type="submit" style="display:none"></button>
             {% endif %}
             </form>
         </div>
     <div class="client-sec-header" style="margin-top:20px;">
-        <h4>Available Data as Leads</h4>
+        <h4>{{total_leads}}</h4>
     </div>
     <div class="section-body-full">
         <form id="add-to-myleads" method="POST" action="{% url 'purchaseLeads' %}">
@@ -151,23 +188,9 @@ Project Dashboard
                 <input type="hidden" name="saletypeFilter" value={{selectedSaletype}}>
                 <input type="hidden" name="ps_min" value={{psmin}}>
                 <input type="hidden" name="vs_min" value={{vsmin}}>
-                <div class="action-item">
-                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmAddToMyLeads()">Add <span data-selected-count>0</span> to My Leads</button>
-                </div>
-                <div class="action-item">
-                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmHideLeads()" formaction="{% url 'hide-leads' %}">{% if showHidden == "show" %}Unhide{% else %}Hide{% endif %} <span data-selected-count>0</span> Selected</button>
-                </div>
-                {% if user.is_authenticated %}
-                {% for group in user.groups.all %}
-                    {% if group.name == "admin" %}
-                    <div class="action-item">
-                        <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmExport()" formaction="{% url 'export_filtered_data' %}">Export <span data-selected-count>0</span> Selected Leads</button>
-                    </div>
-                    {% endif %}
-                {% endfor %}
-                {% endif %}
+                
             </div>
-            <div class="table-wrapper">
+            <div class="table-wrapper" style="max-height:600px;">
                 <table id="leads-table" class="table table-striped table-hover">
                     <thead>
                         <tr>
@@ -179,6 +202,7 @@ Project Dashboard
                             <th>Updated</th>
                             <th>State</th>
                             <th>County</th>
+                            <th>Case Number</th>
                             <th>Sale Date</th>
                             <th>Sale Type</th>
                             <th>Sale Status</th>
@@ -209,16 +233,52 @@ Project Dashboard
                             <td>{{i.changed_at|date:'m/d/Y'}}</td>
                             <td>{{i.state|title}}</td>
                             <td>{{i.county|title}}</td>
+                            {% comment %} <td>{{i.case_number}}</td> {% endcomment %}
+                            <td><input type="text" onchange="saveField('{{ i.id }}', 'case_number', this)" value="{{ i.case_number }}"></td>
                             <td>{{i.sale_date|date:'m/d/Y'}}</td>
                             <td>{{i.get_sale_type_display}}</td>
-                            <td>{{i.get_sale_status_display}}</td>
-                            <td>{{i.fcl_final_judgment|currency}}</td>
-                            <td >{{i.sale_price|currency}}</td>
-                            <td>{{i.possible_surplus|currency}}</td>
-                            <td>{{i.verified_surplus|currency}}</td>
-                            <td>{{i.get_surplus_status_display}}</td>
                             <td>
-                            {% if i.published %}<i class="bi bi-check-circle-fill" style="color:green;"></i>{% else %}<i class="bi bi-x-circle-fill" style="color:red;"></i>{% endif %}
+                                <select onchange="saveField('{{ i.id }}', 'sale_status', this)">
+                                    <option>No Status</option>
+                                    <option value="Active" {% if i.sale_status == "Active" %}selected{% endif %}>Active</option>
+                                    <option value="Sold" {% if i.sale_status == "Sold" %}selected{% endif %}>Sold</option>
+                                    <option value="Unsold" {% if i.sale_status == "Unsold" %}selected{% endif %}>Unsold</option>
+                                    <option value="Sold To Plaintiff" {% if i.sale_status == "Sold To Plaintiff" %}selected{% endif %}>Sold to Plaintiff</option>
+                                    <option value="Bankruptcy Hold" {% if i.sale_status == "Bankruptcy Hold" %}selected{% endif %}>Bankruptcy</option>
+                                    <option value="Cancelled" {% if i.sale_status == "Cancelled" %}selected{% endif %}>Cancelled</option>
+                                </select>
+                            </td>
+                            {% comment %} <td>{{i.get_sale_status_display}}</td> {% endcomment %}
+                            <td>
+                                <input type="number" step="0.01" min="-9999999999" max="9999999999" onchange="saveField('{{ i.id }}', 'fcl_final_judgment', this)" {% if i.fcl_final_judgment %} value="{{i.fcl_final_judgment}}"{% endif %}>
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" min="-9999999999" max="9999999999" onchange="saveField('{{ i.id }}', 'sale_price', this)" {% if i.sale_price %} value="{{i.sale_price}}"{% endif %}>
+                            </td>
+                            <td>{{i.possible_surplus|currency}}</td>
+                            <td>
+                                <input type="number" step="0.01" min="-9999999999" max="9999999999" onchange="saveField('{{ i.id }}', 'verified_surplus', this)" {% if i.verified_surplus %} value="{{i.verified_surplus}}"{% endif %}>
+                            </td>
+                            <td>
+                                <select onchange="saveField('{{ i.id }}', 'surplus_status', this)">
+                                    <option>No Surplus Status</option>
+                                    <option value="Not Determined" {% if i.surplus_status == "Not Determined" %}selected{% endif %}>Not Determined</option>
+                                    <option value="Possible Surplus" {% if i.surplus_status == "Possible Surplus" %}selected{% endif %}>Possible Surplus</option>
+                                    <option value="No Possible Surplus" {% if i.surplus_status == "No Possible Surplus" %}selected{% endif %}>No Possible Surplus</option>
+                                    <option value="Fund Available" {% if i.surplus_status == "Fund Available" %}selected{% endif %}>Fund Available</option>
+                                    <option value="Motion Filed" {% if i.surplus_status == "Motion Filed" %}selected{% endif %}>Motion Filed</option>
+                                    <option value="Fund Claimed" {% if i.surplus_status == "Fund Claimed" %}selected{% endif %}>Fund Claimed</option>
+                                    <option value="No Surplus" {% if i.surplus_status == "No Surplus" %}selected{% endif %}>No Surplus</option>
+                                </select>
+                            </td>
+                            <td>
+                                <span class="toggle-publish-case"
+                                    data-id="{{ i.id }}"
+                                    data-status="{{ i.published|yesno:'1,0' }}"
+                                    style="cursor:pointer;font-size:18px;color:{{ i.published|yesno:'green,red' }};">
+                                    {% if i.published %}🟢{% else %}🔴{% endif %}
+                                </span>
+                                
                             </td>
                             <td>
                             <a class="button" href="https://app.surplusindex.com/add_edit_foreclosure/?fcl_id={{i.id}}" target="_blank">View</a>
@@ -230,29 +290,6 @@ Project Dashboard
                     </tbody>
 
                 </table>
-                <div class="clearfix">
-                    <div class="hint-text">Showing Page <b>{{ leads.number }}</b> out of <b>{{ leads.paginator.num_pages }}</b> Pages | Leads count ({{total_leads}})</div>
-                    <ul class="pagination">
-                        {% if leads.has_previous %}
-                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page=1" class="page-link">First</a></li>
-                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{ leads.previous_page_number }}">Previous</a></li>
-                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{ leads.previous_page_number }}" class="page-link">{{ leads.previous_page_number }}</a></li>
-                        {% endif %}
-{% comment %} &countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}} {% endcomment %}
-
-                        <li class="page-item active"><a href="#" class="page-link">{{ leads.number }}</a></li>
-
-
-
-                        {% if leads.has_next %}
-                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{ leads.next_page_number }}" class="page-link">{{ leads.next_page_number }}</a></li>
-                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{ second_previous }}" class="page-link">{{ second_previous }}</a></li>
-                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{leads.next_page_number}}" class="page-link">Next</a></li>
-                        <li class="page-item"><a href="?stateFilter={{selectedState}}&countyFilter={{selectedCounty}}&saletypeFilter={{selectedSaletype}}&ps_min={{psmin}}&vs_min={{vsmin}}&show_hidden={{showHidden}}&page={{ leads.paginator.num_pages }}">Last</a></li>
-                        {% endif %}
-
-                    </ul>
-                </div>
             </div>
         </form>
 
@@ -260,9 +297,53 @@ Project Dashboard
 
 
     </div>
+
     <script src="{% static 'js/nouislider.min.js' %}"></script>
     <script src="{% static 'js/Client.js' %}"></script>
     <script src="{% static 'js/Surplusindex.js' %}"></script>
     <script src="{% static 'js/ProjectManager.js' %}"></script>
 </div>
+<script>
+$(document).on("click", ".toggle-publish-case", function () {
+
+    const el = $(this);
+    const fcl_id = el.data("id");
+    const current_status = el.data("status");
+
+    // Disable clicking to prevent multiple requests
+    el.css("pointer-events", "none");
+
+    // Show spinner
+    el.fadeOut(150, function () {
+        el.html(`<span class="spinner"></span>`).fadeIn(150);
+    });
+
+    $.ajax({
+        url: "{% url 'toggle-publish' %}",
+        type: "POST",
+        data: {
+            fcl_id: fcl_id,
+            current_status: current_status,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function (data) {
+
+            // Determine new icon
+            const newIcon = data.new_status
+                ? '<span style="color:green;font-size:18px;">🟢</span>'
+                : '<span style="color:red;font-size:18px;">🔴</span>';
+
+            const newStatusValue = data.new_status ? 1 : 0;
+
+            // Replace spinner with new icon
+            el.fadeOut(150, function () {
+                el.html(newIcon);
+                el.data("status", newStatusValue);
+                el.css("pointer-events", "auto"); // enable clicking again
+                el.fadeIn(150);
+            });
+        }
+    });
+});
+</script>
 {% endblock content%}
