@@ -439,7 +439,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         {% csrf_token %}
                         <input type="hidden" name="caseid" value="{{ current_fcl_instance.pk }}">
                         <input type="hidden" name="propid" value="{{ prop.pk }}">
-                        <td><input type="button" class="copyButton" value="Copy" data="{{prop.house_number}} {{prop.road_name}} {{prop.road_type}} {{prop.direction}} {{prop.apt_unit}} {{prop.extention}}, {{prop.city}} {{prop.zip_code}}"onclick="copyToClipboard(this);"></td>
+                        <td><input type="button" class="copyButton" value="Copy" data="{{prop.street_address|upper}}"onclick="copyToClipboard(this);"></td>
                         <td><input style="width: 120px; " type="text" id="county" placeholder="County" value="{{prop.county}}" name="county"></td>
                         <td><input style="width: 170px;" type="text" id="parcel" placeholder="Parcel" value="{{prop.parcel}}" name="parcel"></td>
                         <td><input style="width: 80px;" type="text" id="house" placeholder="House" value="{{prop.house_number}}" name="house"></td>
@@ -799,36 +799,6 @@ document.addEventListener("DOMContentLoaded", function() {
 <!--defendants section-end-->
 <script src="{% static 'js/Surplusindex.js' %}"></script>
 <script>
-function copyToClipboard(element, messageId) {
-  let value = element.value;
-  if (value) {
-    navigator.clipboard.writeText(value).then(() => {
-      console.log("Copied: " + value);
-
-      // Highlight effect
-      element.style.transition = "background-color 0.5s ease";
-      element.style.backgroundColor = "#c8f7c5";
-      setTimeout(() => {
-        element.style.backgroundColor = "";
-      }, 2000);
-
-      // Show "Copied!" in the target element
-      let msg = document.getElementById(messageId);
-      if (msg) {
-        msg.innerText = `Copied!`;
-        msg.style.opacity = 1;
-
-        // Hide after 2 seconds
-        setTimeout(() => {
-          msg.style.opacity = 0;
-        }, 2000);
-      }
-    }).catch(err => {
-      console.error("Failed to copy: ", err);
-    });
-  }
-}
-
 // ctrl+s to create or update foreclosure 
 document.addEventListener("keydown", function(e) {
     if (e.ctrlKey && e.altKey && e.key.toLowerCase() === "n") {

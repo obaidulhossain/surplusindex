@@ -820,47 +820,8 @@ def addMailing(request):
 # ---------Note------ search_create_property view is used to search and create mailing address
 
 #---------------------------------------------------Email Section
-def update_email(request):
-    if request.method == 'POST':
-        contact = request.POST.get('con_id','')
-        
-        related_contact = request.POST.get('related_contact')
-        email = request.POST.get('email_id')
-        if email:
-            emailinstance = Email.objects.get(pk=email)
-            contact_instance = Contact.objects.get(pk=contact)
-            if request.POST.get('delete') == "Delete":
-                contact_instance.emails.remove(emailinstance)
-                messages.info(request, "Email Removed!")
-            elif request.POST.get('update') == "Update":
-                emailinstance.email_address = request.POST.get('email')
-                emailinstance.save()
-                messages.info(request, "Email Saved!")
-        if related_contact:
-            url = f"/skiptrace/?con_id={contact}&related_contact={related_contact}#em"
-        else:
-            url = f"/skiptrace/?con_id={contact}#em"
-    return redirect(url)
 
 @csrf_exempt
-
-#     if request.method != "POST":
-#         return JsonResponse({"error": "POST only"}, status=400)
-
-#     data = json.loads(request.body)
-
-#     emailaddress = (data.get("email") or "").strip().lower()
-#     con_id = data.get("con_id")
-
-#     if not emailaddress:
-#         return JsonResponse({"error": "Email required"}, status=400)
-
-#     email_obj, created = Email.objects.get_or_create(email_address=emailaddress)
-
-#     if con_id:
-#         contact = Contact.objects.get(pk=con_id)
-#         contact.emails.add(email_obj)
-
 def search_create_email(request):
     if request.method != "POST":
         return JsonResponse({"error": "POST only"}, status=400)
@@ -902,190 +863,84 @@ def delete_email_ajax(request):
 
 
 
-
-# def search_create_email(request):
-#     if request.method == 'POST':
-#         selected_contact = request.POST.get('con_id')
-#         related_contact = request.POST.get('related_contact')
-#         emailaddress = (request.POST.get('email') or "").strip().lower()
-#         if not emailaddress:
-#             messages.error(request, "Email address is required.")
-#             return redirect(request.META.get('HTTP_REFERER'))
-#         # 🔍 Get or create Email instance
-#         email_obj, created = Email.objects.get_or_create(
-#             email_address=emailaddress
-#         )
-#         if created:
-#             messages.success(request, 'New Email Instance Created')
-#         else:
-#             messages.info(request, 'Existing Email reused')
-        
-#         if selected_contact:
-#             contactinstance = get_object_or_404(Contact, pk=selected_contact)
-#             contactinstance.emails.add(email_obj)
-#             messages.info(request, 'Email added to current contact instance')
-
-#         if related_contact:
-#             url = f"/skiptrace/?con_id={contactinstance.pk}&related_contact={related_contact}#em"
-#         else:
-#             url = f"/skiptrace/?con_id={contactinstance.pk}#em"
-#     return redirect(url)
-
-def filterEmail(request):
-    emailaddress = request.GET.get('email')
-
-    emails = Email.objects.all()
-    if emailaddress:
-        emails = emails.filter(email_address__icontains=emailaddress)
-    else:
-        emails = Email.objects.all()[:0]
-    results = list(emails.values('id', 'email_address'))
-    return JsonResponse({'emails':results})
-
-def add_email(request):
-    selected_contact = request.POST.get('con_id')
-    related_contact = request.POST.get('related_contact')
-    emailid = request.POST.get('email_id')
-    if selected_contact:
-        contactinstance = Contact.objects.get(pk=selected_contact)
-        emailinstance = Email.objects.get(pk=emailid)
-        contactinstance.emails.add(emailinstance)
-        messages.info(request,'Email added to contact')
-    if related_contact:
-            url = f"/skiptrace/?con_id={contactinstance.pk}&related_contact={related_contact}#em"
-    else:
-        url = f"/skiptrace/?con_id={contactinstance.pk}#em"
-    return redirect(url)
+def search_create_wireless(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=400)
     
-#---------------------------------------------------Wireless Section
-def update_wireless(request):
-    if request.method == 'POST':
-        contact = request.POST.get('con_id','')
-        related_contact = request.POST.get('related_contact')
-        wireless = request.POST.get('wireless-id')
-        if wireless:
-            w_instance = Wireless_Number.objects.get(pk=wireless)
-            contact_instance = Contact.objects.get(pk=contact)
-            if request.POST.get('delete') == "Delete":
-                contact_instance.wireless.remove(w_instance)
-                messages.info(request, "Number Removed!")
-            elif request.POST.get('update') == "Update":
-                w_instance.w_number = request.POST.get('wireless')
-                w_instance.save()
-                messages.info(request, "Number Updated!")
-        if related_contact:
-            url = f"/skiptrace/?con_id={contact}&related_contact={related_contact}#wn"
-        else:
-            url = f"/skiptrace/?con_id={contact}#wn"
-    return redirect(url)
+    data = json.loads(request.body)
+    wireless = (data.get("wireless") or "").strip()
+    con_id = data.get("con_id")
+    
 
-def create_wireless(request):
-    if request.method == 'POST':
-        selected_contact = request.POST.get('con_id')
-        related_contact = request.POST.get('related_contact')
-        wNumber = request.POST.get('wireless')
-        createwireless = Wireless_Number(w_number = wNumber)
-        createwireless.save()
-        messages.success(request,'New Wireless Number Instance Created')
-        if selected_contact:
-            contactinstance = Contact.objects.get(pk=selected_contact)
-            contactinstance.wireless.add(createwireless)
-            messages.info(request, 'Wireless Number added to current contact instance')
-        if related_contact:
-            url = f"/skiptrace/?con_id={contactinstance.pk}&related_contact={related_contact}#wn"
-        else:
-            url = f"/skiptrace/?con_id={contactinstance.pk}#wn"
-    return redirect(url)
+    if not wireless:
+        return JsonResponse({"error": "Wireless required"}, status=400)
 
-def filterWireless(request):
-    w_number = request.GET.get('wireless')
-    wireless = Wireless_Number.objects.all()
-    if w_number:
-        wireless = wireless.filter(w_number__icontains=w_number)
-    else:
-        wireless = Wireless_Number.objects.all()[:0]
-    results = list(wireless.values('id', 'w_number'))
-    return JsonResponse({'wireless':results})
 
-def add_wireless(request):
-    selected_contact = request.POST.get('con_id')
-    related_contact = request.POST.get('related_contact')
-    w_id = request.POST.get('wireless-id')
-    if selected_contact:
-        contactinstance = Contact.objects.get(pk=selected_contact)
-        w_instance = Wireless_Number.objects.get(pk=w_id)
-        contactinstance.wireless.add(w_instance)
-        messages.info(request,'Wireless number added to contact')
-    if related_contact:
-        url = f"/skiptrace/?con_id={contactinstance.pk}&related_contact={related_contact}#wn"
-    else:
-        url = f"/skiptrace/?con_id={contactinstance.pk}#wn"
-    return redirect(url)
+    obj, created = Wireless_Number.objects.get_or_create(w_number=wireless)
+    if con_id:
+        contact = Contact.objects.get(pk=con_id)
+        contact.wireless.add(obj)
 
-#---------------------------------------------------Landline Section
-def updateLandline(request):
-    if request.method == 'POST':
-        contact = request.POST.get('con_id','')
-        related_contact = request.POST.get('related_contact')
-        landline = request.POST.get('landline-id')
-        if landline:
-            l_instance = Landline_Number.objects.get(pk=landline)
-            contact_instance = Contact.objects.get(pk=contact)
-            if request.POST.get('delete') == "Delete":
-                contact_instance.landline.remove(l_instance)
-                messages.info(request, "Number Removed!")
-            elif request.POST.get('update') == "Update":
-                l_instance.l_number = request.POST.get('landline')
-                l_instance.save()
-                messages.info(request, "Landline Number Updated!")
-        if related_contact:
-            url = f"/skiptrace/?con_id={contact}&related_contact={related_contact}#ln"
-        else:
-            url = f"/skiptrace/?con_id={contact}#ln"
-    return redirect(url)
+    return JsonResponse({
+        "success": True,
+        "id": obj.id,
+        "wireless": obj.w_number
+    })
 
-def createLandline(request):
-    if request.method == 'POST':
-        selected_contact = request.POST.get('con_id')
-        related_contact = request.POST.get('related_contact')
-        lNumber = request.POST.get('landline')
-        createlandline = Landline_Number(l_number = lNumber)
-        createlandline.save()
-        messages.success(request,'New Landline Number Instance Created')
-        if selected_contact:
-            contactinstance = Contact.objects.get(pk=selected_contact)
-            contactinstance.landline.add(createlandline)
-            messages.info(request, 'Landline Number added to current contact instance')
-        if related_contact:
-            url = f"/skiptrace/?con_id={contactinstance.pk}&related_contact={related_contact}#ln"
-        else:
-            url = f"/skiptrace/?con_id={contactinstance.pk}#ln"
-    return redirect(url)
+@csrf_exempt
+def update_wireless_ajax(request):
+    data = json.loads(request.body)
+    wireless = Wireless_Number.objects.get(pk=data["id"])
+    wireless.w_number = data["wireless"]
+    wireless.save()
 
-def filterLandline(request):
-    l_number = request.GET.get('landline')
-    landline = Landline_Number.objects.all()
-    if l_number:
-        landline = landline.filter(l_number__icontains=l_number)
-    else:
-        landline = Landline_Number.objects.all()[:0]
-    results = list(landline.values('id', 'l_number'))
-    return JsonResponse({'landline':results})
+    return JsonResponse({"success": True})
 
-def addLandline(request):
-    selected_contact = request.POST.get('con_id')
-    related_contact = request.POST.get('related_contact')
-    l_id = request.POST.get('landline-id')
-    if selected_contact:
-        contactinstance = Contact.objects.get(pk=selected_contact)
-        l_instance = Landline_Number.objects.get(pk=l_id)
-        contactinstance.landline.add(l_instance)
-        messages.info(request,'Landline number added to contact')
-    if related_contact:
-        url = f"/skiptrace/?con_id={contactinstance.pk}&related_contact={related_contact}#ln"
-    else:
-        url = f"/skiptrace/?con_id={contactinstance.pk}#ln"
-    return redirect(url)
+@csrf_exempt
+def delete_wireless_ajax(request):
+    data = json.loads(request.body)
+    Wireless_Number.objects.filter(pk=data["id"]).delete()
+    return JsonResponse({"success": True})
+
+
+def search_create_landline(request):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=400)
+    
+    data = json.loads(request.body)
+    landline = (data.get("landline") or "").strip()
+    con_id = data.get("con_id")
+    
+
+    if not landline:
+        return JsonResponse({"error": "Landline Number required"}, status=400)
+
+
+    obj, created = Landline_Number.objects.get_or_create(l_number=landline)
+    if con_id:
+        contact = Contact.objects.get(pk=con_id)
+        contact.landline.add(obj)
+
+    return JsonResponse({
+        "success": True,
+        "id": obj.id,
+        "landline": obj.l_number
+    })
+
+@csrf_exempt
+def update_landline_ajax(request):
+    data = json.loads(request.body)
+    landline = Landline_Number.objects.get(pk=data["id"])
+    landline.l_number = data["landline"]
+    landline.save()
+    return JsonResponse({"success": True})
+
+@csrf_exempt
+def delete_landline_ajax(request):
+    data = json.loads(request.body)
+    Landline_Number.objects.filter(pk=data["id"]).delete()
+    return JsonResponse({"success": True})
+
 
 #---------------------------------------------------Related Contact Section
 def filter_related_contact(request):

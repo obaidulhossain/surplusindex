@@ -51,23 +51,18 @@ path('update_contacts', views.update_contact, name="update_contacts"),#used to u
 path('add_mailing', views.addMailing, name="add_mailing"),
         #Note: search_create_property url is used to search and create mailing address----------
 
-path('update_email', views.update_email, name="update_email"),
+
 path('search_create_email', views.search_create_email, name="search_create_email"),
-path('filteremail', views.filterEmail, name="filteremail"),
-path('add_email',views.add_email, name="add_email"),
 path('update_email_ajax',views.update_email_ajax, name="update_email_ajax"),
 path('delete_email_ajax',views.delete_email_ajax, name="delete_email_ajax"),
 
+path('search_create_wireless', views.search_create_wireless, name="search_create_wireless"),
+path('update_wireless_ajax',views.update_wireless_ajax, name="update_wireless_ajax"),
+path('delete_wireless_ajax',views.delete_wireless_ajax, name="delete_wireless_ajax"),
 
-path('update_wireless', views.update_wireless, name="update_wireless"),
-path('create_wireless', views.create_wireless, name="create_wireless"),
-path('filterwireless', views.filterWireless, name="filterwireless"),
-path('add_wireless',views.add_wireless, name="add_wireless"),
-
-path('update_landline', views.updateLandline, name="update_landline"),
-path('create_landline', views.createLandline, name="create_landline"),
-path('filter_landline', views.filterLandline, name="filter_landline"),
-path('add_landline', views.addLandline, name="add_landline"),
+path('search_create_landline', views.search_create_landline, name="search_create_landline"),
+path('update_landline_ajax',views.update_landline_ajax, name="update_landline_ajax"),
+path('delete_landline_ajax',views.delete_landline_ajax, name="delete_landline_ajax"),
 
 path('filter_related_contact', views.filter_related_contact, name="filter_related_contact"),
 path('create_related_contact', views.create_related_contact, name="create_related_contact"),

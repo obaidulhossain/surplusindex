@@ -167,7 +167,7 @@ Skiptracing
                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
                         <input type="hidden" name="related_contact" value="{{ related_contact }}">
                         <input type="hidden" name="propid" value="{{ prop.pk }}">
-                        <td><input type="button" class="copyButton" value="Copy" data="{{prop.house_number}} {{prop.road_name}} {{prop.road_type}} {{prop.direction}} {{prop.apt_unit}}{{prop.extention}}, {{prop.city}} {{prop.zip_code}}"onclick="copyToClipboard(this);"></td>
+                        <td><input type="button" class="copyButton" value="Copy" data="{{prop.street_address|upper}}"onclick="copyToClipboard(this);"></td>
                         <td><input style="width: 120px; " type="text" id="county" placeholder="County" value="{{prop.county}}" name="county"></td>
                         <td><input style="width: 170px;" type="text" id="parcel" placeholder="Parcel" value="{{prop.parcel}}" name="parcel"></td>
                         <td><input style="width: 80px;" type="text" id="house" placeholder="House" value="{{prop.house_number}}" name="house"></td>
@@ -288,13 +288,13 @@ Skiptracing
 
 <!--Email section-start-->
 
-<div style="margin-top:20px; width:32%; display:inline-block;">
+<div style="margin-top:20px; width:33%; display:inline-block; vertical-align: top;">
     <div id="em" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
         <h4>Emails</h4>
         <input
             type="email"
             id="email-input"
-            placeholder="Email"
+            placeholder="Email (ctrl+e)"
             data-con-id="{{ current_con_instance.pk }}"
             onchange="saveEmail(this)"
             style="width:230px;border:2px solid #767776ff;"
@@ -303,7 +303,7 @@ Skiptracing
 
 
 
-    <div class="section-body-full">
+    <div class="section-body-full" style="min-height:300px;">
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
@@ -320,7 +320,7 @@ Skiptracing
                     <td>
                         <input type="text"
                             value="{{ email.email_address }}"
-                            style="width:230px"
+                            style="width:155px!important;"
                             onblur="updateEmail({{ email.id }}, this)">
                     </td>
                     <td>
@@ -402,7 +402,7 @@ function addEmailRow(data) {
         <td>
             <input type="text"
                    value="${data.email}"
-                   style="width:230px"
+                   style="width:155px!important;"
                    onblur="updateEmail(${data.id}, this)">
         </td>
         <td>
@@ -475,13 +475,13 @@ function blinkRow(id) {
 <!--Email section-end-->
 
 <!--Wireless section-start-->
-<div style="margin-top:20px; width:32%; display:inline-block;">
+<div style="margin-top:20px; width:33%; display:inline-block; vertical-align: top;">
     <div id="em" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
         <h4>Wireless</h4>
         <input
             type="text"
             id="wireless-input"
-            placeholder="Wireless"
+            placeholder="Wireless (ctrl+p)"
             data-con-id="{{ current_con_instance.pk }}"
             onchange="saveWireless(this)"
             style="width:230px;border:2px solid #767776ff;"
@@ -490,7 +490,7 @@ function blinkRow(id) {
 
 
 
-    <div class="section-body-full">
+    <div class="section-body-full" style="min-height:300px;">
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
@@ -504,24 +504,14 @@ function blinkRow(id) {
             <tbody id="wireless-table-body">
                 {% for wireless in all_wireless %}
                 <tr id="wireless-row-{{ wireless.id }}">
-                    <td>
-                        <input type="text"
-                            value="{{ wireless.w_number }}"
-                            style="width:48%"
-                            onchange="updateWireless({{ wireless.id }}, this)">
+                    <td> 
+                        <input type="text" value="{{ wireless.w_number }}" style="width:155px!important;" onchange="updateWireless({{ wireless.id }}, this)">
                     </td>
                     <td>
-                        <button class="button"
-                                style="width:48%"
-                                onclick="updateWireless({{ wireless.id }}, this)">
-                            Update
-                        </button>
+                        <button class="button" onclick="updateWireless({{ wireless.id }}, this)">Update</button>
                     </td>
                     <td>
-                        <button class="button"
-                                onclick="deleteWireless({{ wireless.id }})">
-                            Delete
-                        </button>
+                        <button class="button"onclick="deleteWireless({{ wireless.id }})">Delete</button>
                     </td>
                 </tr>
                 {% endfor %}
@@ -576,7 +566,7 @@ function addWirelessRow(data) {
     const rowId = `wireless-row-${data.id}`;
 
     if (document.getElementById(rowId)) {
-        blinkRow(rowId);
+        blinkRowWireless(rowId);
         return;
     }
 
@@ -586,42 +576,42 @@ function addWirelessRow(data) {
     row.innerHTML = `
         <td>
             <input type="text"
-                   value="${data.email}"
-                   style="width:230px"
-                   onblur="updateEmail(${data.id}, this)">
+                   value="${data.wireless}"
+                   style="width:155px!important;"
+                   onchange="updateWireless(${data.id}, this)">
         </td>
         <td>
             <button class="button"
-                    onclick="updateEmail(${data.id}, this)">
+                    onclick="updateWireless(${data.id}, this)">
                 Update
             </button>
         </td>
         <td>
             <button class="button"
-                    onclick="deleteEmail(${data.id})">
+                    onclick="deleteWireless(${data.id})">
                 Delete
             </button>
         </td>
     `;
 
     tbody.appendChild(row);
-    blinkRow(rowId);
+    blinkRowWireless(rowId);
 }
 
 
-function updateEmail(id, el) {
-    const row = document.getElementById(`email-row-${id}`);
-    const email = row.querySelector("input").value.trim().toLowerCase();
+function updateWireless(id, el) {
+    const row = document.getElementById(`wireless-row-${id}`);
+    const wireless = row.querySelector("input").value.trim()
 
     row.style.backgroundColor = "#fff3cd";
 
-    fetch("{% url 'update_email_ajax' %}", {
+    fetch("{% url 'update_wireless_ajax' %}", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
             "X-CSRFToken": getCSRFToken()
         },
-        body: JSON.stringify({ id, email })
+        body: JSON.stringify({ id, wireless })
     })
     .then(res => res.json())
     .then(data => {
@@ -630,10 +620,10 @@ function updateEmail(id, el) {
     });
 }
 
-function deleteEmail(id) {
-    if (!confirm("Delete this email?")) return;
+function deleteWireless(id) {
+    if (!confirm("Delete this wireless number?")) return;
 
-    fetch("{% url 'delete_email_ajax' %}", {
+    fetch("{% url 'delete_wireless_ajax' %}", {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -644,12 +634,12 @@ function deleteEmail(id) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            document.getElementById(`email-row-${id}`).remove();
+            document.getElementById(`wireless-row-${id}`).remove();
         }
     });
 }
 
-function blinkRow(id) {
+function blinkRowWireless(id) {
     const row = document.getElementById(id);
     row.style.backgroundColor = "#ffaf53ff";
     setTimeout(() => row.style.backgroundColor = "", 600);
@@ -658,222 +648,178 @@ function blinkRow(id) {
 </script>
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div style="margin-top:20px;" class="body-section onethird">
-    <div id="wn" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
-        <h4>Wireless Numbers</h4>   
+<!-- =======================Landline section-start==================================== -->
+<div style="margin-top:20px; width:33%; display:inline-block; vertical-align: top;">
+    <div id="em" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
+        <h4>Landline</h4>
+        <input
+            type="text"
+            id="landline-input"
+            placeholder="Landline (ctrl+l)"
+            data-con-id="{{ current_con_instance.pk }}"
+            onchange="saveLandline(this)"
+            style="width:230px;border:2px solid #767776ff;"
+        >
     </div>
-    <div class="section-body-full">
+
+
+
+    <div class="section-body-full" style="min-height:300px;">
         <table class="table table-striped table-hover">
             <thead>
                 <tr>
-                    <th>Wireless Numbers</th>
+                    <th>Landline</th>
                     <th>Update</th>
                     <th>Delete</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for wireless in all_wireless %}
-                <tr>
-                    <form method="post" action="{% url 'update_wireless' %}">
-                        {%csrf_token%}
-                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                        <input type="hidden" name="related_contact" value="{{related_contact}}">
-                        <input type="hidden" name = "wireless-id" value="{{wireless.id}}">
-                        <td><input style="width: 290px;" type="text" placeholder="Wireless" name="wireless" value="{{wireless.w_number}}"></td>
-                        <td><input type="submit" name="update" value="Update" ></td>
-                        <td><input type="submit" name="delete" value="Delete" ></td>
-                    </form>
-                </tr>
-                {% endfor %}
-                <tr style="background-color: #fff;">
-                    <form id="search-form" method="post" action="{% url 'create_wireless' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                        <input type="hidden" name="related_contact" value="{{related_contact}}">
-                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="wireless" placeholder="Wireless (ctrl+p)" name="wireless"></td>
-                        <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
-                    </form>
-                </tr>
-            </tbody>
-            <tbody id="wireless-results">
-            </tbody>
-        </table>
-    </div>
-</div>
 
-<script>
-    $(document).ready(function () {
-        // Function to fetch and update search results
-        function fetchwireless() {
-            const wireless = $('#wireless').val();
-            
-
-            $.ajax({
-                url: "{% url 'filterwireless' %}",
-                data: {
-                    wireless: wireless,
-
-                },
-                success: function (data) {
-                    const wireless = data.wireless;
-                    const wirelessresultsContainer = $('#wireless-results');
-
-                    wirelessresultsContainer.empty();
-
-                    if (wireless.length > 0) {
-                        wireless.forEach(wireless => {
-                            wirelessresultsContainer.append(`
-
-                            <tr>
-                                <td>${wireless.w_number}</td>
-                                <td>
-                                    <form method="post" action="{% url 'add_wireless'%}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                                    <input type="hidden" name="related_contact" value="{{related_contact}}">
-                                    <input type="hidden" name="wireless-id" value="${wireless.id}">
-                                    <input type="submit" value="Add" onclick="this.form.submit()">
-                                    </form>
-                                </td>
-                            </tr>
-                            
-                                `);
-                        });
-                    } else {
-                        wirelessresultsContainer.append('<tr><th colspan="2"><center>No Wireless Number Found!</center></th></tr>');
-                    }
-                }
-            });
-        }
-
-        // Trigger AJAX call on input change
-        $('#wireless').on('input', fetchwireless);
-    });
-</script>
-<!--Wireless section-end-->
-
-
-
-<!--Landline section-start-->
-<div style="margin-top:20px;" class="body-section onethird">
-    <div id="ln" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
-        <h4>Landline Numbers</h4>   
-    </div>
-    <div class="section-body-full">
-        <table class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>Landline Numbers</th>
-                    <th>Update</th>
-                    <th>Delete</th>
-                </tr>
-            </thead>
-            <tbody>
+            <!-- existing emails -->
+            <tbody id="landline-table-body">
                 {% for landline in all_landline %}
-                <tr>
-                    <form method="post" action="{% url 'update_landline' %}">
-                        {%csrf_token%}
-                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                        <input type="hidden" name="related_contact" value="{{related_contact}}">
-                        <input type="hidden" name = "landline-id" value="{{landline.id}}">
-                        <td><input style="width: 290px;" type="text" name="landline" value="{{landline.l_number}}"></td>
-                        <td><input type="submit" name="update" value="Update" ></td>
-                        <td><input type="submit" name="delete" value="Delete" ></td>
-                    </form>
+                <tr id="landline-row-{{ landline.id }}">
+                    <td> 
+                        <input style="width:155px!important;" type="text" value="{{ landline.l_number }}" onchange="updateLandline({{ landline.id }}, this)">
+                    </td>
+                    <td>
+                        <button class="button" onclick="updateLandline({{ landline.id }}, this)">Update</button>
+                    </td>
+                    <td>
+                        <button class="button" onclick="deleteLandline({{ landline.id }})">Delete</button>
+                    </td>
                 </tr>
                 {% endfor %}
-                <tr style="background-color: #fff;">
-                    <form id="search-form" method="post" action="{% url 'create_landline' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                        <input type="hidden" name="related_contact" value="{{related_contact}}">
-                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="landline" placeholder="Landline (ctrl+l)" name="landline"></td>
-                        <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
-                    </form>
-                </tr>
             </tbody>
-            <tbody id="landline-results">
-            </tbody>
+
+            <!-- search/add results like defendants -->
+            <tbody id="landline-results"></tbody>
         </table>
     </div>
 </div>
-
 <script>
-    $(document).ready(function () {
-        // Function to fetch and update search results
-        function fetchlandline() {
-            const landline = $('#landline').val();
-            
 
-            $.ajax({
-                url: "{% url 'filter_landline' %}",
-                data: {
-                    landline: landline,
+function saveLandline(input) {
+    const landline = input.value.trim();
+    const conId = input.dataset.conId;
+    if (!landline) return;
 
-                },
-                success: function (data) {
-                    const landline = data.landline;
-                    const landlineresultsContainer = $('#landline-results');
+    
 
-                    landlineresultsContainer.empty();
+    // 🟡 saving indicator
+    input.style.backgroundColor = "#fff3cd";
 
-                    if (landline.length > 0) {
-                        landline.forEach(landline => {
-                            landlineresultsContainer.append(`
+    fetch("{% url 'search_create_landline' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ landline, con_id: conId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) return;
 
-                            <tr>
-                                <td>${landline.l_number}</td>
-                                <td>
-                                    <form method="post" action="{% url 'add_landline' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                                    <input type="hidden" name="related_contact" value="{{related_contact}}">
-                                    <input type="hidden" name="landline-id" value="${landline.id}">
-                                    <input type="submit" value="Add" onclick="this.form.submit()">
-                                    </form>
-                                </td>
-                            </tr>
-                            
-                                `);
-                        });
-                    } else {
-                        landlineresultsContainer.append('<tr><th colspan="2"><center>No Landline Number Found!</center></th></tr>');
-                    }
-                }
-            });
-        }
+        input.style.backgroundColor = "#a1fcb6ff";
 
-        // Trigger AJAX call on input change
-        $('#landline').on('input', fetchlandline);
+        addLandlineRow(data);
+
+        setTimeout(() => {
+            input.value = "";
+            input.style.backgroundColor = "";
+            input.focus();
+        }, 400);
+    })
+    .catch(() => {
+        input.style.backgroundColor = "#f8d7da";
     });
+}
+
+function addLandlineRow(data) {
+    const tbody = document.getElementById("landline-table-body");
+    const rowId = `landline-row-${data.id}`;
+
+    if (document.getElementById(rowId)) {
+        blinkRowLandline(rowId);
+        return;
+    }
+
+    const row = document.createElement("tr");
+    row.id = rowId;
+
+    row.innerHTML = `
+        <td>
+            <input type="text"
+                   value="${data.landline}"
+                   style="width:155px!important;"
+                   onchange="updateLandline(${data.id}, this)">
+        </td>
+        <td>
+            <button class="button"
+                    onclick="updateLandline(${data.id}, this)">
+                Update
+            </button>
+        </td>
+        <td>
+            <button class="button"
+                    onclick="deleteLandline(${data.id})">
+                Delete
+            </button>
+        </td>
+    `;
+
+    tbody.appendChild(row);
+    blinkRowLandline(rowId);
+}
+
+
+function updateLandline(id, el) {
+    const row = document.getElementById(`landline-row-${id}`);
+    const landline = row.querySelector("input").value.trim()
+
+    row.style.backgroundColor = "#fff3cd";
+
+    fetch("{% url 'update_landline_ajax' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ id, landline })
+    })
+    .then(res => res.json())
+    .then(data => {
+        row.style.backgroundColor = data.success ? "#d4edda" : "#f8d7da";
+        setTimeout(() => row.style.backgroundColor = "", 500);
+    });
+}
+
+function deleteLandline(id) {
+    if (!confirm("Delete this landline number?")) return;
+
+    fetch("{% url 'delete_landline_ajax' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`landline-row-${id}`).remove();
+        }
+    });
+}
+
+function blinkRowLandline(id) {
+    const row = document.getElementById(id);
+    row.style.backgroundColor = "#ffaf53ff";
+    setTimeout(() => row.style.backgroundColor = "", 600);
+}
+
 </script>
-<!--Landline section-start-->
-
-
-
-
-
-
-
-
-
-
 
 {% if not related_contact %}
 <div style="margin-top: 20px;" class="body-section">
@@ -891,7 +837,8 @@ function blinkRow(id) {
                 <th>Last Name</th>
                 <th>Suffix</th>
                 <th>Mailing Addresses</th>
-                <th>Action</th>
+                <th>Add / Edit</th>
+                <th>Delete</th>
             </tr>
         </thead>
         <tbody>
@@ -929,7 +876,7 @@ function blinkRow(id) {
                     <td><input style="width: 150px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_last" placeholder="Last Name" name="rc_last"></td>
                     <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="rc_suffix" placeholder="Suffix" name="rc_suffix"></td>                  
                     <td><input style="width: 500px; border: 2px solid #08c88e; background-color: #54ff001f"type="text" id="search_query" placeholder="Search by name, business, or other details"></td>
-                    <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
+                    <td colspan="2"><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
                 </form>
             </tr>
         </tbody>
@@ -978,7 +925,7 @@ function blinkRow(id) {
                             <tr>
                                 <td colspan="4">${contact.name_prefix} ${contact.first_name} ${contact.middle_name} ${contact.last_name} ${contact.name_suffix}<br><small>${contact.business_name}</small></td>
                                 <td colspan="3">${mailingAddressesHtml}</td>
-                                <td>
+                                <td colspan="2">
                                     <form method="post" action="{% url 'add_related_contact' %}">
                                         {% csrf_token %}
                                         <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
@@ -992,7 +939,7 @@ function blinkRow(id) {
                             `);
                         });
                     } else {
-                        conresultcontainer.append('<tr><th colspan="4"><center>No Contact Record found</center></th></tr>');
+                        conresultcontainer.append('<tr><th colspan="9"><center>No Contact Record found</center></th></tr>');
                     }
                 }
             });
@@ -1023,19 +970,19 @@ document.addEventListener("keydown", function(e) {
     if (e.ctrlKey && e.key.toLowerCase() === "e") {
         e.preventDefault(); // optional if you want to block browser find dialog
         e.stopPropagation(); // optional but safer
-        document.getElementById("email").focus();
+        document.getElementById("email-input").focus();
     }
     // ctrl+w to focus on wireless section
     if (e.ctrlKey && e.key.toLowerCase() === "p") {
         e.preventDefault(); // optional if you want to block browser find dialog
         e.stopPropagation(); // optional but safer
-        document.getElementById("wireless").focus();
+        document.getElementById("wireless-input").focus();
     }
     // ctrl+l to focus on landline section
     if (e.ctrlKey && e.key.toLowerCase() === "l") {
         e.preventDefault(); // optional if you want to block browser find dialog
         e.stopPropagation(); // optional but safer
-        document.getElementById("landline").focus();
+        document.getElementById("landline-input").focus();
     }
     // ctrl+r to focus on related contact section
     if (e.ctrlKey && e.key.toLowerCase() === "r") {
