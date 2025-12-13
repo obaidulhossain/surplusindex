@@ -17,7 +17,9 @@ from realestate_directory.models import *
 from propertydata.models import *
 # -----------Resources---------------
 from .resources import *
-
+from django.db import models
+from decimal import Decimal, InvalidOperation
+from django.db.models import Q
 imported_data_cache = None
 
 
@@ -270,24 +272,55 @@ def defendant_search(request):
 
 def search_create_defendant(request):
     if request.method == 'POST':
+        foreclosure_id = request.POST.get('caseid')
+        # 🔤 Normalize inputs
+        prefix = (request.POST.get('prefix') or "").strip().upper()
+        first = (request.POST.get('first') or "").strip().upper()
+        middle = (request.POST.get('middle') or "").strip().upper()
+        last = (request.POST.get('last') or "").strip().upper()
+        suffix = (request.POST.get('suffix') or "").strip().upper()
+        business = (request.POST.get('business') or "").strip().upper()
+        designation = (request.POST.get('designation') or "").strip().upper()
 
-        foreclosure = request.POST.get('caseid')
-        prefix = request.POST.get('prefix')
-        first = request.POST.get('first')
-        middle = request.POST.get('middle')
-        last = request.POST.get('last')
-        suffix = request.POST.get('suffix')
-        business = request.POST.get('business')
-        designation = request.POST.get('designation')
+        fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure_id)
+        # 🔍 Step 1: Find contacts with same name
+        possible_contacts = Contact.objects.filter(
+            first_name__iexact=first,
+            last_name__iexact=last,
+        )
+        if suffix:
+            possible_contacts = possible_contacts.filter(name_suffix__iexact=suffix)
 
-        add_defendant = Contact(name_prefix=prefix, first_name=first, middle_name=middle, last_name=last, name_suffix=suffix, business_name=business, designation=designation)
-        add_defendant.save()
-        messages.success(request, 'Defendant Record Created')
-        if foreclosure:
-            fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
-            fcl_instance.defendant.add(add_defendant)
-            messages.info(request, 'Defendant Added to Current Foreclosure Instance')
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#def")
+        matched_contact = None
+
+        # 🔍 Step 2: Cross-check property match
+        if possible_contacts.exists():
+            fcl_properties = fcl_instance.property.all()
+
+            for contact in possible_contacts:
+                if contact.mailing_address.filter(id__in=fcl_properties.values_list("id", flat=True)).exists():
+                    matched_contact = contact
+                    break
+        # 🆕 Create only if no match found
+        if matched_contact:
+            add_defendant = matched_contact
+            messages.info(request, 'Existing Defendant reused (name + property match)')
+        else:
+            add_defendant = Contact.objects.create(
+                name_prefix=prefix,
+                first_name=first,
+                middle_name=middle,
+                last_name=last,
+                name_suffix=suffix,
+                business_name=business,
+                designation=designation
+            )
+            messages.success(request, 'New Defendant Record Created')
+        # 🔗 Attach to foreclosure
+        fcl_instance.defendant.add(add_defendant)
+        messages.info(request, 'Defendant Added to Current Foreclosure Instance')
+        return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure_id}#def")
+
 
 def update_defendant(request):
     if request.method == 'POST':
@@ -319,22 +352,45 @@ def update_defendant(request):
     return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#def")
 
 ##-------------------------------------Plaintiff Section
+
 def create_update_plaintiff(request):
     if request.method == 'POST':
 
+        # foreclosure = request.POST.get('caseid')
         foreclosure = request.POST.get('caseid')
-        # property = request.POST.get('propertyid')
-        contact_nm = request.POST.get('contact_name')
-        business_nm = request.POST.get('business_name')
-        dba = request.POST.get('dba')
-        add_plaintiff = ForeclosingEntity(individual_name=contact_nm, business_name=business_nm, dba=dba)
-        add_plaintiff.save()
-        messages.success(request, 'Foreclosing Entity Record Created')
+
+        # 🔤 Normalize all text inputs
+        contact_nm = (request.POST.get('contact_name') or "").strip().upper()
+        business_nm = (request.POST.get('business_name') or "").strip().upper()
+        dba = (request.POST.get('dba') or "").strip().upper()
+        
+        # 🔍 Find existing entity (case-insensitive)
+        existing_entity = None
+        if business_nm:
+            existing_entity = ForeclosingEntity.objects.filter(
+                Q(business_name__iexact=business_nm) |
+                Q(business_name__icontains=business_nm)
+            ).first()
+        # 🆕 Create only if not found
+        if existing_entity:
+            add_plaintiff = existing_entity
+            messages.info(request, 'Existing Foreclosing Entity reused')
+        else:
+            add_plaintiff = ForeclosingEntity.objects.create(
+                individual_name=contact_nm,
+                business_name=business_nm,
+                dba=dba
+            )
+            messages.success(request, 'New Foreclosing Entity Record Created')
+
+        # 🔗 Attach to foreclosure
         if foreclosure:
             fcl_instance = get_object_or_404(Foreclosure, pk=foreclosure)
             fcl_instance.plaintiff.add(add_plaintiff)
             messages.info(request, 'Foreclosing Entity Added to Current Foreclosure Instance')
-    return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#plt")
+
+        return HttpResponseRedirect(f"/add_edit_foreclosure/?fcl_id={foreclosure}#plt")
+
 
 def update_plaintiff(request):
     if request.method == 'POST':
@@ -368,21 +424,15 @@ def add_plaintiff(request):
 
 def plaintiff_search(request):
     business = request.GET.get('business_name', '')
-    dba = request.GET.get('dba', '')
-    contact = request.GET.get('contact_name', '')
 
-    if not any([business, dba, contact]):
+    if not business:
         plaintiff = ForeclosingEntity.objects.all()[:0]
     else:
-        plaintiff = ForeclosingEntity.objects.all()
+        plaintiff = ForeclosingEntity.objects.filter(
+                Q(business_name__iexact=business) |
+                Q(business_name__icontains=business)
+            )[:10]
 
-    if business:
-        plaintiff = plaintiff.filter(business_name__icontains=business)
-    if dba:
-        plaintiff = plaintiff.filter(dba__icontains=dba)
-    if contact:
-        plaintiff = plaintiff.filter(individual_name__icontains=contact)
-    
     pltresults = list(plaintiff.values('id','business_name', 'dba','individual_name'))
     return JsonResponse({'plaintiff': pltresults})
 
@@ -469,17 +519,13 @@ def address_search(request):
     street = request.GET.get('street', '')
     sttype = request.GET.get('sttype', '')
 
-    if not any([parcel, state, county, house, street, sttype]):
+    if not any([parcel, house, street, sttype]):
         address = Property.objects.all()[:0]
     else:
-        address = Property.objects.all()
+        address = Property.objects.filter(state__icontains=state, county__icontains=county)
     #address = Property.objects.all()
     if parcel:
         address = address.filter(parcel__icontains=parcel)
-    if state:
-        address = address.filter(state__icontains=state)
-    if county:
-        address = address.filter(county__icontains=county)
     if house:
         address = address.filter(house_number__icontains=house)
     if street:
@@ -796,23 +842,94 @@ def update_email(request):
             url = f"/skiptrace/?con_id={contact}#em"
     return redirect(url)
 
+@csrf_exempt
+
+#     if request.method != "POST":
+#         return JsonResponse({"error": "POST only"}, status=400)
+
+#     data = json.loads(request.body)
+
+#     emailaddress = (data.get("email") or "").strip().lower()
+#     con_id = data.get("con_id")
+
+#     if not emailaddress:
+#         return JsonResponse({"error": "Email required"}, status=400)
+
+#     email_obj, created = Email.objects.get_or_create(email_address=emailaddress)
+
+#     if con_id:
+#         contact = Contact.objects.get(pk=con_id)
+#         contact.emails.add(email_obj)
+
 def search_create_email(request):
-    if request.method == 'POST':
-        selected_contact = request.POST.get('con_id')
-        related_contact = request.POST.get('related_contact')
-        emailaddress = request.POST.get('email')
-        createEmail = Email(email_address = emailaddress)
-        createEmail.save()
-        messages.success(request,'New Email Instance Created')
-        if selected_contact:
-            contactinstance = Contact.objects.get(pk=selected_contact)
-            contactinstance.emails.add(createEmail)
-            messages.info(request, 'Email added to current contact instance')
-        if related_contact:
-            url = f"/skiptrace/?con_id={contactinstance.pk}&related_contact={related_contact}#em"
-        else:
-            url = f"/skiptrace/?con_id={contactinstance.pk}#em"
-    return redirect(url)
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=400)
+    
+    data = json.loads(request.body)
+    email = (data.get("email") or "").strip().lower()
+    con_id = data.get("con_id")
+    
+
+    if not email:
+        return JsonResponse({"error": "Email required"}, status=400)
+
+
+    obj, created = Email.objects.get_or_create(email_address=email)
+    if con_id:
+        contact = Contact.objects.get(pk=con_id)
+        contact.emails.add(obj)
+
+    return JsonResponse({
+        "success": True,
+        "id": obj.id,
+        "email": obj.email_address
+    })
+
+@csrf_exempt
+def update_email_ajax(request):
+    data = json.loads(request.body)
+    email = Email.objects.get(pk=data["id"])
+    email.email_address = data["email"]
+    email.save()
+
+    return JsonResponse({"success": True})
+
+@csrf_exempt
+def delete_email_ajax(request):
+    data = json.loads(request.body)
+    Email.objects.filter(pk=data["id"]).delete()
+    return JsonResponse({"success": True})
+
+
+
+
+# def search_create_email(request):
+#     if request.method == 'POST':
+#         selected_contact = request.POST.get('con_id')
+#         related_contact = request.POST.get('related_contact')
+#         emailaddress = (request.POST.get('email') or "").strip().lower()
+#         if not emailaddress:
+#             messages.error(request, "Email address is required.")
+#             return redirect(request.META.get('HTTP_REFERER'))
+#         # 🔍 Get or create Email instance
+#         email_obj, created = Email.objects.get_or_create(
+#             email_address=emailaddress
+#         )
+#         if created:
+#             messages.success(request, 'New Email Instance Created')
+#         else:
+#             messages.info(request, 'Existing Email reused')
+        
+#         if selected_contact:
+#             contactinstance = get_object_or_404(Contact, pk=selected_contact)
+#             contactinstance.emails.add(email_obj)
+#             messages.info(request, 'Email added to current contact instance')
+
+#         if related_contact:
+#             url = f"/skiptrace/?con_id={contactinstance.pk}&related_contact={related_contact}#em"
+#         else:
+#             url = f"/skiptrace/?con_id={contactinstance.pk}#em"
+#     return redirect(url)
 
 def filterEmail(request):
     emailaddress = request.GET.get('email')
@@ -1107,16 +1224,37 @@ def update_foreclosure_field(request, pk):
         value = data.get("value")
 
         obj = Foreclosure.objects.get(pk=pk)
-
-        # Handle booleans
-        if value in ["true", "false"]:
-            value = value == "true"
-
-        # Handle empty values
+        # 🔒 Validate field exists
+        if not hasattr(obj, field):
+            return JsonResponse({"error": "Invalid field"}, status=400)
+        model_field = obj._meta.get_field(field)
+        
+# ==================================================================
+    # 🔁 VALUE NORMALIZATION
+# ==================================================================
+        # Empty string → NULL
         if value == "":
             value = None
+        # BooleanField
+        elif isinstance(model_field, models.BooleanField):
+            value = str(value).lower() == "true"
+        # DecimalField (remove commas)
+        elif isinstance(model_field, models.DecimalField):
+            try:
+                value = Decimal(str(value).replace(",", ""))
+            except (InvalidOperation, TypeError):
+                value = None
 
-        # Dynamic setattr update
+        # CharField / TextField → TRIM + UPPERCASE
+        elif isinstance(model_field, (models.CharField, models.TextField)):
+            if field not in ("sale_type", "sale_status", "surplus_status", "case_search_status"):
+                value = value.strip().upper()
+
+        # DateField (HTML date is already YYYY-MM-DD)
+        elif isinstance(model_field, models.DateField):
+            value = value  # Django handles ISO date strings
+        
+        # 💾 SAVE FIELD with dynamic setattr update
         setattr(obj, field, value)
 
         # Auto-update derived fields

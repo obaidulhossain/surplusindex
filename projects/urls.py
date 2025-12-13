@@ -55,6 +55,9 @@ path('update_email', views.update_email, name="update_email"),
 path('search_create_email', views.search_create_email, name="search_create_email"),
 path('filteremail', views.filterEmail, name="filteremail"),
 path('add_email',views.add_email, name="add_email"),
+path('update_email_ajax',views.update_email_ajax, name="update_email_ajax"),
+path('delete_email_ajax',views.delete_email_ajax, name="delete_email_ajax"),
+
 
 path('update_wireless', views.update_wireless, name="update_wireless"),
 path('create_wireless', views.create_wireless, name="create_wireless"),

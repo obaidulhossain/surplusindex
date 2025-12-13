@@ -201,8 +201,8 @@ Skiptracing
                         <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="icity" placeholder="City" name="city"></td>
                         <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="istate" placeholder="State" name="state"></td>                      
                         <td><input style="width: 70px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="izip" placeholder="Zip" name="zip"></td>
-                        <td><input type="submit" style="border: 2px solid #08c88e;" Value="Create"></td>
-                        <td></td>
+                        <td colspan="2"><input type="submit" style="border: 2px solid #08c88e;" Value="Create"></td>
+                        
                     </form>
                 </tr>
             </tbody>
@@ -257,7 +257,7 @@ Skiptracing
                                 <td>${address.city}</td>
                                 <td>${address.state}</td>
                                 <td>${address.zip_code}</td>
-                                <td>
+                                <td colspan="2"> 
                                     <form method="post" action="{% url 'add_mailing'%}">
                                     {% csrf_token %}
                                     <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
@@ -288,102 +288,391 @@ Skiptracing
 
 <!--Email section-start-->
 
-<div style="margin-top:20px;" class="body-section onethird">
+<div style="margin-top:20px; width:32%; display:inline-block;">
     <div id="em" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
         <h4>Emails</h4>
+        <input
+            type="email"
+            id="email-input"
+            placeholder="Email"
+            data-con-id="{{ current_con_instance.pk }}"
+            onchange="saveEmail(this)"
+            style="width:230px;border:2px solid #767776ff;"
+        >
     </div>
+
+
+
     <div class="section-body-full">
         <table class="table table-striped table-hover">
             <thead>
-                <tr>                   
+                <tr>
                     <th>Email Address</th>
                     <th>Update</th>
                     <th>Delete</th>
                 </tr>
             </thead>
-            <tbody>
+
+            <!-- existing emails -->
+            <tbody id="email-table-body">
                 {% for email in all_email %}
-                <tr>
-                    <form method="post" action="{% url 'update_email' %}">
-                        {%csrf_token%}
-                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                        <input type="hidden" name="related_contact" value="{{related_contact}}">
-                        <input type="hidden" name="email_id" value="{{ email.pk }}">
-                        <td><input style="width: 290px;" type="text" placeholder="Email" name="email" value="{{email.email_address}}"></td>
-                        <td><input type="submit" name="update" value="Update"></td>
-                        <td><input type="submit" name="delete" value="Delete"></td>
-                    </form>
+                <tr id="email-row-{{ email.id }}">
+                    <td>
+                        <input type="text"
+                            value="{{ email.email_address }}"
+                            style="width:230px"
+                            onblur="updateEmail({{ email.id }}, this)">
+                    </td>
+                    <td>
+                        <button class="button"
+                                onclick="updateEmail({{ email.id }}, this)">
+                            Update
+                        </button>
+                    </td>
+                    <td>
+                        <button class="button"
+                                onclick="deleteEmail({{ email.id }})">
+                            Delete
+                        </button>
+                    </td>
                 </tr>
                 {% endfor %}
-                <tr style="background-color: #fff;">
-                    <form id="search-form" method="post" action="{% url 'search_create_email' %}">
-                        {% csrf_token %}
-                        <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                        <input type="hidden" name="related_contact" value="{{related_contact}}">
-                        <td><input style="width: 290px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="email" placeholder="Email (ctrl+e)" name="email"></td>
-                        <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
-                        <td></td>
-                    </form>
-                </tr>
             </tbody>
-            <tbody id="email-results">
-            </tbody>
+
+            <!-- search/add results like defendants -->
+            <tbody id="email-results"></tbody>
         </table>
     </div>
 </div>
-
 <script>
-    $(document).ready(function () {
-        // Function to fetch and update search results
-        function fetchemail() {
-            const email = $('#email').val();
-            
-            $.ajax({
-                url: "{% url 'filteremail' %}",
-                data: {
-                    email: email,
-                },
-                success: function (data) {
-                    const emails = data.emails;
-                    const emailresultsContainer = $('#email-results');
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
 
-                    emailresultsContainer.empty();
+function saveEmail(input) {
+    const email = input.value.trim().toLowerCase();
+    const conId = input.dataset.conId;
+    if (!email) return;
 
-                    if (emails.length > 0) {
-                        emails.forEach(emails => {
-                            emailresultsContainer.append(`
+    
 
-                            <tr>
-                                <td>${emails.email_address}</td>
-                                <td>
-                                    <form method="post" action="{% url 'add_email' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="con_id" value="{{ current_con_instance.pk }}">
-                                    <input type="hidden" name="related_contact" value="{{related_contact}}">
-                                    <input type="hidden" name="email_id" value="${emails.id}">
-                                    <input type="submit" value="Add" onclick="this.form.submit()">
-                                    </form>
-                                </td>
-                                <td></td>
-                            </tr>
-                                `);
-                        });
-                    } else {
-                        emailresultsContainer.append('<tr><th colspan="2"><center>Email Not Found!</center></th></tr>');
-                    }
-                }
-            });
-        }
+    // 🟡 saving indicator
+    input.style.backgroundColor = "#fff3cd";
 
-        // Trigger AJAX call on input change
-        $('#email').on('input', fetchemail);
+    fetch("{% url 'search_create_email' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ email, con_id: conId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) return;
+
+        input.style.backgroundColor = "#a1fcb6ff";
+
+        addEmailRow(data);
+
+        setTimeout(() => {
+            input.value = "";
+            input.style.backgroundColor = "";
+            input.focus();
+        }, 400);
+    })
+    .catch(() => {
+        input.style.backgroundColor = "#f8d7da";
     });
-</script>
+}
 
+function addEmailRow(data) {
+    const tbody = document.getElementById("email-table-body");
+    const rowId = `email-row-${data.id}`;
+
+    if (document.getElementById(rowId)) {
+        blinkRow(rowId);
+        return;
+    }
+
+    const row = document.createElement("tr");
+    row.id = rowId;
+
+    row.innerHTML = `
+        <td>
+            <input type="text"
+                   value="${data.email}"
+                   style="width:230px"
+                   onblur="updateEmail(${data.id}, this)">
+        </td>
+        <td>
+            <button class="button"
+                    onclick="updateEmail(${data.id}, this)">
+                Update
+            </button>
+        </td>
+        <td>
+            <button class="button"
+                    onclick="deleteEmail(${data.id})">
+                Delete
+            </button>
+        </td>
+    `;
+
+    tbody.appendChild(row);
+    blinkRow(rowId);
+}
+
+
+function updateEmail(id, el) {
+    const row = document.getElementById(`email-row-${id}`);
+    const email = row.querySelector("input").value.trim().toLowerCase();
+
+    row.style.backgroundColor = "#fff3cd";
+
+    fetch("{% url 'update_email_ajax' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ id, email })
+    })
+    .then(res => res.json())
+    .then(data => {
+        row.style.backgroundColor = data.success ? "#d4edda" : "#f8d7da";
+        setTimeout(() => row.style.backgroundColor = "", 500);
+    });
+}
+
+function deleteEmail(id) {
+    if (!confirm("Delete this email?")) return;
+
+    fetch("{% url 'delete_email_ajax' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`email-row-${id}`).remove();
+        }
+    });
+}
+
+function blinkRow(id) {
+    const row = document.getElementById(id);
+    row.style.backgroundColor = "#ffaf53ff";
+    setTimeout(() => row.style.backgroundColor = "", 600);
+}
+
+</script>
 
 <!--Email section-end-->
 
 <!--Wireless section-start-->
+<div style="margin-top:20px; width:32%; display:inline-block;">
+    <div id="em" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>
+        <h4>Wireless</h4>
+        <input
+            type="text"
+            id="wireless-input"
+            placeholder="Wireless"
+            data-con-id="{{ current_con_instance.pk }}"
+            onchange="saveWireless(this)"
+            style="width:230px;border:2px solid #767776ff;"
+        >
+    </div>
+
+
+
+    <div class="section-body-full">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th>Wireless Numbers</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+
+            <!-- existing emails -->
+            <tbody id="wireless-table-body">
+                {% for wireless in all_wireless %}
+                <tr id="wireless-row-{{ wireless.id }}">
+                    <td>
+                        <input type="text"
+                            value="{{ wireless.w_number }}"
+                            style="width:48%"
+                            onchange="updateWireless({{ wireless.id }}, this)">
+                    </td>
+                    <td>
+                        <button class="button"
+                                style="width:48%"
+                                onclick="updateWireless({{ wireless.id }}, this)">
+                            Update
+                        </button>
+                    </td>
+                    <td>
+                        <button class="button"
+                                onclick="deleteWireless({{ wireless.id }})">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+            <!-- search/add results like defendants -->
+            <tbody id="wireless-results"></tbody>
+        </table>
+    </div>
+</div>
+<script>
+
+function saveWireless(input) {
+    const wireless = input.value.trim();
+    const conId = input.dataset.conId;
+    if (!wireless) return;
+
+    
+
+    // 🟡 saving indicator
+    input.style.backgroundColor = "#fff3cd";
+
+    fetch("{% url 'search_create_wireless' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ wireless, con_id: conId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (!data.success) return;
+
+        input.style.backgroundColor = "#a1fcb6ff";
+
+        addWirelessRow(data);
+
+        setTimeout(() => {
+            input.value = "";
+            input.style.backgroundColor = "";
+            input.focus();
+        }, 400);
+    })
+    .catch(() => {
+        input.style.backgroundColor = "#f8d7da";
+    });
+}
+
+function addWirelessRow(data) {
+    const tbody = document.getElementById("wireless-table-body");
+    const rowId = `wireless-row-${data.id}`;
+
+    if (document.getElementById(rowId)) {
+        blinkRow(rowId);
+        return;
+    }
+
+    const row = document.createElement("tr");
+    row.id = rowId;
+
+    row.innerHTML = `
+        <td>
+            <input type="text"
+                   value="${data.email}"
+                   style="width:230px"
+                   onblur="updateEmail(${data.id}, this)">
+        </td>
+        <td>
+            <button class="button"
+                    onclick="updateEmail(${data.id}, this)">
+                Update
+            </button>
+        </td>
+        <td>
+            <button class="button"
+                    onclick="deleteEmail(${data.id})">
+                Delete
+            </button>
+        </td>
+    `;
+
+    tbody.appendChild(row);
+    blinkRow(rowId);
+}
+
+
+function updateEmail(id, el) {
+    const row = document.getElementById(`email-row-${id}`);
+    const email = row.querySelector("input").value.trim().toLowerCase();
+
+    row.style.backgroundColor = "#fff3cd";
+
+    fetch("{% url 'update_email_ajax' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ id, email })
+    })
+    .then(res => res.json())
+    .then(data => {
+        row.style.backgroundColor = data.success ? "#d4edda" : "#f8d7da";
+        setTimeout(() => row.style.backgroundColor = "", 500);
+    });
+}
+
+function deleteEmail(id) {
+    if (!confirm("Delete this email?")) return;
+
+    fetch("{% url 'delete_email_ajax' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCSRFToken()
+        },
+        body: JSON.stringify({ id })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById(`email-row-${id}`).remove();
+        }
+    });
+}
+
+function blinkRow(id) {
+    const row = document.getElementById(id);
+    row.style.backgroundColor = "#ffaf53ff";
+    setTimeout(() => row.style.backgroundColor = "", 600);
+}
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <div style="margin-top:20px;" class="body-section onethird">
     <div id="wn" class="section-header" {% if current_con_instance and current_con_instance.skiptraced == True %}style="background-color: #bce376; color: #101010;"{% endif %}>

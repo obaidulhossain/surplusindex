@@ -79,22 +79,26 @@ Checklists
             <input type="hidden" name="caseid" value="{{ current_fcl_instance.pk }}">
             <div class="onefifth">
             <label for="case_num">Case Number</label><br>
-            <input type="text" name="case_num" id="case_num" placeholder="Case Number" value="{{ current_fcl_instance.case_number }}">
+            <input 
+                type="text" name="case_num" id="case_num" placeholder="Case Number" value="{{ current_fcl_instance.case_number }}"
+                {% if current_fcl_instance %}onchange="saveField('{{ current_fcl_instance.id }}', 'case_number', this)"{% endif %}>
             </div>
 
             <div class="onefifth">
             <label for="f_county">County</label></br>
-            <input type="text" name="f_county" id="f_county" placeholder="County" value="{{ current_fcl_instance.county }}">
+            <input type="text" name="f_county" id="f_county" placeholder="County" value="{{ current_fcl_instance.county }}"
+            {% if current_fcl_instance %}onchange="saveField('{{ current_fcl_instance.id }}', 'county', this)"{% endif %}>
             </div>
 
             <div class="onefifth">
                 <label for="f_state">State</label></br>
-                <input type="text" name="f_state" id="f_state" placeholder="State" value="{{ current_fcl_instance.state }}">
+                <input type="text" name="f_state" id="f_state" placeholder="State" value="{{ current_fcl_instance.state }}"
+                {% if current_fcl_instance %}onchange="saveField('{{ current_fcl_instance.id }}', 'state', this)"{% endif %}>
             </div>
 
             <div class="onefifth">
                 <label for="sale_type">Sale Type</label><br>
-                <select name="sale_type" id="sale_type">
+                <select name="sale_type" id="sale_type" {% if current_fcl_instance %}onchange="saveField('{{ current_fcl_instance.id }}', 'sale_type', this)"{% endif %}>
                     <option value="">Select Sale Type</option>
                     <option value="Tax" {% if current_fcl_instance.sale_type == "Tax" %}selected{% endif %}>Tax</option>
                     <option value="Mortgage" {% if current_fcl_instance.sale_type == "Mortgage" %}selected{% endif %}>Mortgage</option>
@@ -103,7 +107,7 @@ Checklists
 
             <div class="onefifth">
                 <label for="sale_status">Sale Status</label><br>
-                <select name="sale_status" id="sale_status">
+                <select name="sale_status" id="sale_status" {% if current_fcl_instance %} onchange="saveField('{{ current_fcl_instance.id }}', 'sale_status', this)"{% endif %}>
                     <option value="">Select Sale Status</option>
                     <option value="Active" {% if current_fcl_instance.sale_status == "Active" %}selected{% endif %}>Active</option>
                     <option value="Sold" {% if current_fcl_instance.sale_status == "Sold" %}selected{% endif %}>Sold</option>
@@ -120,32 +124,37 @@ Checklists
             <div class="subsection-body">
                 <div class="onesixth">
                     <label for="sale_date">Sale Date</label><br>
-                    <input type="date" name="sale_date" id="sale_date" {% if current_fcl_instance.sale_date %}value="{{ current_fcl_instance.sale_date|date:'Y-m-d' }}"{% else %}value=""{% endif %}>      
+                    <input type="date" name="sale_date" id="sale_date" onchange="saveField('{{ current_fcl_instance.id }}', 'sale_date', this)"
+                    {% if current_fcl_instance.sale_date %}value="{{ current_fcl_instance.sale_date|date:'Y-m-d' }}"{% else %}value=""{% endif %}>      
                 </div>
 
                 <div class="onesixth">
                     <label for="judgment">Judgment Amount</label><br>
-                    <input type="number" name="judgment" step="0.01" min="-9999999999" max="9999999999" id="judgment" placeholder="Judgment Amount" value="{{ current_fcl_instance.fcl_final_judgment }}">
+                    <input type="number" name="judgment" step="0.01" min="-9999999999" max="9999999999" onchange="saveField('{{ current_fcl_instance.id }}', 'fcl_final_judgment', this)"
+                    id="judgment" placeholder="Judgment Amount" value="{{ current_fcl_instance.fcl_final_judgment }}">
                 </div>
 
                 <div class="onesixth">
                     <label for="saleprice">Sale Price</label><br>
-                    <input type="number" name="saleprice" step="0.01" min="-9999999999" max="9999999999" id="saleprice" placeholder="Sale Price" value="{{ current_fcl_instance.sale_price }}">
+                    <input type="number" name="saleprice" step="0.01" min="-9999999999" max="9999999999" onchange="saveField('{{ current_fcl_instance.id }}', 'sale_price', this)"
+                    id="saleprice" placeholder="Sale Price" value="{{ current_fcl_instance.sale_price }}">
                 </div>
 
                 <div class="onesixth">
                     <label for="possible_sf">Possible Surplus</label><br>
-                    <input type="number" name="possible_sf" step="0.01" min="-9999999999" max="9999999999" id="possible_sf" placeholder="Possible Surplus" value="{{ current_fcl_instance.possible_surplus }}">
+                    <input type="number" name="possible_sf" step="0.01" min="-9999999999" max="9999999999" onchange="saveField('{{ current_fcl_instance.id }}', 'possible_surplus', this)"
+                    id="possible_sf" placeholder="Possible Surplus" value="{{ current_fcl_instance.possible_surplus }}">
                 </div>
 
                 <div class="onesixth">
                     <label for="verified_sf">Verified Surplus</label><br>
-                    <input type="number" name="verified_sf" step="0.01" min="-9999999999" max="9999999999" id="verified_sf" placeholder="Verified Surplus" value="{{ current_fcl_instance.verified_surplus }}">
+                    <input type="number" name="verified_sf" step="0.01" min="-9999999999" max="9999999999" onchange="saveField('{{ current_fcl_instance.id }}', 'verified_surplus', this)"
+                    id="verified_sf" placeholder="Verified Surplus" value="{{ current_fcl_instance.verified_surplus }}">
                 </div>
                 
                 <div class="onesixth">
                     <label for="surplus_status">Surplus Status</label><br>
-                        <select name="surplus_status" id="surplus_status">
+                        <select name="surplus_status" id="surplus_status" onchange="saveField('{{ current_fcl_instance.id }}', 'surplus_status', this)">
                             <option value="">Select Status</option>
                             <option value="Not Determined" {% if current_fcl_instance.surplus_status == "Not Determined" %}selected{% endif %}>Not Determined</option>
                             <option value="Possible Surplus" {% if current_fcl_instance.surplus_status == "Possible Surplus" %}selected{% endif %}>Possible Surplus</option>
@@ -164,23 +173,23 @@ Checklists
             <div class="subsection-body">
                 <div class="onefifth">
                     <label for="case_ext">Case Extension</label><br>
-                    <input type="text" name="case_ext" id="case_ext" placeholder="Case Extension" value="{{ current_fcl_instance.case_number_ext }}">
+                    <input type="text" name="case_ext" id="case_ext" placeholder="Case Extension" value="{{ current_fcl_instance.case_number_ext }}" onchange="saveField('{{ current_fcl_instance.id }}', 'case_number_ext', this)">
                 </div>
                 <div class="onefifth">
                     <label for="court_name">Court Name</label><br>
-                    <input type="text" name="court_name" id="court_name" placeholder="Court Name" value="{{ current_fcl_instance.court_name }}">
+                    <input type="text" name="court_name" id="court_name" placeholder="Court Name" value="{{ current_fcl_instance.court_name }}" onchange="saveField('{{ current_fcl_instance.id }}', 'court_name', this)">
                 </div>
                 <div class="onefifth">
                     <label for="case_type">Case Type</label><br>
-                    <input type="text" name="case_type" id="case_type" placeholder="Case Type" value="{{ current_fcl_instance.case_type }}">
+                    <input type="text" name="case_type" id="case_type" placeholder="Case Type" value="{{ current_fcl_instance.case_type }}" onchange="saveField('{{ current_fcl_instance.id }}', 'case_type', this)">
                 </div>
                 <div class="onefifth">
                     <label for="case_status">Case Status</label><br>
-                    <input type="text" name="case_status" id="case_status" placeholder="Case Status" value="{{ current_fcl_instance.case_status }}"><br>
+                    <input type="text" name="case_status" id="case_status" placeholder="Case Status" value="{{ current_fcl_instance.case_status }}" onchange="saveField('{{ current_fcl_instance.id }}', 'case_status', this)"><br>
                 </div>
                 <div class="onefifth">
                     <label for="case_search_status">Case Search Status</label><br>
-                    <select name="case_search_status" id="case_search_status">
+                    <select name="case_search_status" id="case_search_status" onchange="saveField('{{ current_fcl_instance.id }}', 'case_search_status', this)">
                         <option value="">Case Search Status</option>
                         <option value="Pending" {% if current_fcl_instance.case_search_status == "Pending" %}selected{% endif %}>Pending</option>
                         <option value="Completed" {% if current_fcl_instance.case_search_status == "Completed" %}selected{% endif %}>Completed</option>
@@ -208,7 +217,9 @@ Checklists
                 </div>
                 <div class="onehalf">
                     <label for="notes">Notes</label><br>
-                    <textarea name="notes" id="notes" rows="7" placeholder="Write Note Here" class="custom-textarea" style="width:90%;">{% if current_fcl_instance.notes %}{{current_fcl_instance.notes}}{% endif %}</textarea>
+                    <textarea name="notes" id="notes" rows="7" placeholder="Write Note Here" class="custom-textarea" style="width:90%;" onchange="saveField('{{ current_fcl_instance.id }}', 'notes', this)">
+                        {% if current_fcl_instance.notes %}{{current_fcl_instance.notes}}{% endif %}
+                    </textarea>
                 </div>
             </div>
 
@@ -671,6 +682,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     <th>Suffix</th>
                     <th>Business Name</th>
                     <th>Designation</th>
+                    <th>View</th>
                     <th>Update</th>
                     <th>Delete</th>
                 </tr>
@@ -689,6 +701,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <td><input style="width: 80px;" type="text" placeholder="Suffix" name="u_suffix" value="{{defendant.name_suffix}}"></td>
                         <td><input style="width: 250px;" type="text" placeholder="Business Name" name="u_business_name" value="{{defendant.business_name}}"></td>
                         <td><input style="width: 120px;" type="text" placeholder="Designation" name="u_designation" value="{{defendant.designation}}"></td>
+                        <td><a class="button" href="/skiptrace/?con_id={{ defendant.id}}" target="_blank">View</a></td>
                         <td><input type="submit" name="update" value="Update"></td>
                         <td><input type="submit" name="delete" value="Delete"></td>
                     </form>
@@ -705,7 +718,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <td><input style="width: 80px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="suffix" placeholder="Suffix" value="" name="suffix"></td>
                         <td><input style="width: 250px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="business_def" placeholder="Business Name" value="" name="business"></td>
                         <td><input style="width: 120px; border: 2px solid #08c88e; background-color: #54ff001f" type="text" id="designation_def" placeholder="Designation" value="" name="designation"></td>                      
-                        <td><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
+                        <td colspan="3"><input style="border: 2px solid #08c88e;" type="submit" value="Create"></td>
                         <td></td>
                     </form>
                 </tr>
