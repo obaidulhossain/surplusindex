@@ -72,9 +72,9 @@ def fclview(request):
     return render(request, 'projects/add_edit_foreclosure.html', context)
 
 def filter_foreclosure(request):
-    state = request.GET.get('f_state','')
-    county = request.GET.get('f_county','')
-    case_num = request.GET.get('case_num','')
+    state = request.GET.get('f_state','').strip()
+    county = request.GET.get('f_county','').strip()
+    case_num = request.GET.get('case_num','').strip()
     sale_type = request.GET.get('sale_type','')
     sale_status = request.GET.get('sale_status','')
 
@@ -239,13 +239,13 @@ def add_defendant(request):
 
 def defendant_search(request):
 
-    prefix = request.GET.get('prefix', '')
-    first = request.GET.get('first', '')
-    middle = request.GET.get('middle', '')
-    last = request.GET.get('last', '')
-    suffix = request.GET.get('suffix', '')
-    business = request.GET.get('business_def', '')
-    designation = request.GET.get('designation_def', '')
+    prefix = request.GET.get('prefix', '').strip()
+    first = request.GET.get('first', '').strip()
+    middle = request.GET.get('middle', '').strip()
+    last = request.GET.get('last', '').strip()
+    suffix = request.GET.get('suffix', '').strip()
+    business = request.GET.get('business_def', '').strip()
+    designation = request.GET.get('designation_def', '').strip()
 
     if not any([prefix, first, middle, last, suffix, business, designation]):
         defendant = Contact.objects.all()[:0]    
@@ -332,13 +332,13 @@ def update_defendant(request):
             foreclosure_instance.defendant.remove(def_instance)
             messages.success(request, "Defendant Removed")
         elif request.POST.get('update') == "Update":
-            prefix = request.POST.get('u_prefix')
-            first = request.POST.get('u_first')
-            middle = request.POST.get('u_middle')
-            last = request.POST.get('u_last')
-            suffix = request.POST.get('u_suffix')
-            business = request.POST.get('u_business_name')
-            designation = request.POST.get('u_designation')
+            prefix = request.POST.get('u_prefix').strip().upper()
+            first = request.POST.get('u_first').strip().upper()
+            middle = request.POST.get('u_middle').strip().upper()
+            last = request.POST.get('u_last').strip().upper()
+            suffix = request.POST.get('u_suffix').strip().upper()
+            business = request.POST.get('u_business_name').strip().upper()
+            designation = request.POST.get('u_designation').strip().upper()
         
             def_instance.name_prefix = prefix
             def_instance.first_name = first
@@ -397,9 +397,9 @@ def update_plaintiff(request):
         foreclosure = request.POST.get('caseid')
         plaintiff = request.POST.get('plt-id')
         plt_instance = get_object_or_404(ForeclosingEntity,pk=plaintiff)
-        contact_nm = request.POST.get('u_contact')
-        business_nm = request.POST.get('u_business')
-        dba = request.POST.get('u_dba')
+        contact_nm = request.POST.get('u_contact').strip().upper()
+        business_nm = request.POST.get('u_business').strip().upper()
+        dba = request.POST.get('u_dba').strip().upper()
         if request.POST.get('delete') == "Delete":
             foreclosure_instance = Foreclosure.objects.get(pk=foreclosure)
             foreclosure_instance.plaintiff.remove(plt_instance)
@@ -442,17 +442,17 @@ def search_create_property(request):
         foreclosure = request.POST.get('caseid')
         contact = request.POST.get('con_id')
         related_contact = request.POST.get('related_contact')
-        parcel = request.POST.get('parcel')
-        state = request.POST.get('state')
-        county = request.POST.get('county')
-        house = request.POST.get('house')
-        road = request.POST.get('road')
-        roadtype = request.POST.get('type')
-        dir = request.POST.get('dir')
-        apt = request.POST.get('apt')
-        ext = request.POST.get('ext')
-        city = request.POST.get('city')
-        zip = request.POST.get('zip')
+        parcel = (request.POST.get('parcel') or "").strip().upper()
+        state = (request.POST.get('state') or "").strip().upper()
+        county = (request.POST.get('county') or "").strip().upper()
+        house = (request.POST.get('house') or "").strip().upper()
+        road = (request.POST.get('road') or "").strip().upper()
+        roadtype = (request.POST.get('type') or "").strip().upper()
+        dir = (request.POST.get('dir') or "").strip().upper()
+        apt = (request.POST.get('apt') or "").strip().upper()
+        ext = (request.POST.get('ext') or "").strip().upper()
+        city = (request.POST.get('city') or "").strip().upper()
+        zip = (request.POST.get('zip') or "").strip()
         add_property = Property(parcel=parcel, state=state, county=county, house_number=house, road_name=road, road_type=roadtype, direction=dir, apt_unit=apt, extention=ext, city=city, zip_code=zip)
         add_property.save()
         messages.success(request, 'Property Record Created')
@@ -475,17 +475,17 @@ def update_property(request):
     if request.method == 'POST':
         foreclosure = request.POST.get('caseid')
         property = request.POST.get('propid')
-        parcel = request.POST.get('parcel')
-        state = request.POST.get('state')
-        county = request.POST.get('county')
-        house = request.POST.get('house')
-        road = request.POST.get('road')
-        roadtype = request.POST.get('type')
-        dir = request.POST.get('dir')
-        apt = request.POST.get('apt')
-        ext = request.POST.get('ext')
-        city = request.POST.get('city')
-        zip = request.POST.get('zip')
+        parcel = (request.POST.get('parcel') or "").strip().upper()
+        state = (request.POST.get('state') or "").strip().upper()
+        county = (request.POST.get('county') or "").strip().upper()
+        house = (request.POST.get('house') or "").strip().upper()
+        road = (request.POST.get('road') or "").strip().upper()
+        roadtype = (request.POST.get('type') or "").strip().upper()
+        dir = (request.POST.get('dir') or "").strip().upper()
+        apt = (request.POST.get('apt') or "").strip().upper()
+        ext = (request.POST.get('ext') or "").strip().upper()
+        city = (request.POST.get('city') or "").strip().upper()
+        zip = (request.POST.get('zip') or "").strip()
         if property:
             property_instance = get_object_or_404(Property, pk=property)
             if request.POST.get('delete') == "Delete":
@@ -651,12 +651,12 @@ def saveskiptraceComment(request):
 def CreateUpdateContact(request):
     contact_selected = request.POST.get('con_id','')
     related_contact = request.POST.get('related_contact')
-    prefix = request.POST.get('prefix','')
-    f_name = request.POST.get('f_name','')
-    m_name = request.POST.get('m_name','')
-    l_name = request.POST.get('l_name','')
-    suffix = request.POST.get('suffix', '')
-    b_name = request.POST.get('b_name','')
+    prefix = (request.POST.get('prefix') or "").strip().upper()
+    f_name = (request.POST.get('f_name') or "").strip().upper()
+    m_name = (request.POST.get('m_name') or "").strip().upper()
+    l_name = (request.POST.get('l_name') or "").strip().upper()
+    suffix = (request.POST.get('suffix') or "").strip().upper()
+    b_name = (request.POST.get('b_name') or "").strip().upper()
     designation = request.POST.get('designation','')
 
 
@@ -693,13 +693,13 @@ def CreateUpdateContact(request):
     return redirect(url)
 
 def filter_contact(request):
-        prefix = request.GET.get('prefix','')
-        firstname = request.GET.get('f_name','')
-        middlename = request.GET.get('m_name','')
-        lastname = request.GET.get('l_name','')
-        suffix = request.GET.get('suffix','')
-        business = request.GET.get('b_name','')
-        designation = request.GET.get('b_desig','')
+        prefix = request.GET.get('prefix','').strip()
+        firstname = request.GET.get('f_name','').strip()
+        middlename = request.GET.get('m_name','').strip()
+        lastname = request.GET.get('l_name','').strip()
+        suffix = request.GET.get('suffix','').strip()
+        business = request.GET.get('b_name','').strip()
+        designation = request.GET.get('b_desig','').strip()
         
         if not any([prefix, firstname, middlename, lastname, suffix, business, designation]):
             contact = Contact.objects.all()[:0]

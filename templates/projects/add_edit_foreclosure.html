@@ -32,21 +32,21 @@ Checklists
     <div class="section-header">
         <h4>Useful Links</h4>
         <div>
-            <span id="msg1" style="color:yellow; opacity:0; transition:opacity 0.5s;"></span>
-            <select onchange="copyToClipboard(this, 'msg1')">
+            <span id="msg1" style="color: #ffffffff; padding:0px 20px; opacity:0; transition:opacity 0.5s;"></span>
+            <select onchange="CopyAndMsg(this, 'msg1')">
                 <option value="">Foreclosure</option>
                 {% if event.event_site %}<option value="{{event.event_site}}">Auction</option>{% endif %}
                 {% if event.event_case_search %}<option value="{{event.event_case_search}}">Case Search</option>{% endif %}
                 {% if event.public_notice %}<option value="{{event.public_notice}}">Public Notice</option>{% endif %}
             </select>
-            <select onchange="copyToClipboard(this, 'msg1')">
+            <select onchange="CopyAndMsg(this, 'msg1')">
                 <option value="">Property Records</option>
                 {% if event.recorder %}<option value="{{event.recorder}}">Recorder</option>{% endif %}
                 {% if event.assessor %}<option value="{{event.assessor}}">Assessor</option>{% endif %}
                 {% if event.tax_collector %}<option value="{{event.tax_collector}}">Tax Collector</option>{% endif %}
                 {% if event.gis %}<option value="{{event.gis}}">GIS Map</option>{% endif %}
             </select>
-            <select onchange="copyToClipboard(this, 'msg1')">
+            <select onchange="CopyAndMsg(this, 'msg1')">
                 <option value="">Court Records</option>
                 {% if event.district %}<option value="{{event.district}}">District Court</option>{% endif %}
                 {% if event.civil %}<option value="{{event.civil}}">Civil Court</option>{% endif %}
@@ -658,7 +658,6 @@ document.addEventListener("DOMContentLoaded", function() {
         $('#business_name, #dba, #contact_name').on('input', fetchplt);
     });
 </script>
-
 
 <!--plaintiff section-end-->
 

@@ -170,3 +170,29 @@ function saveField(id, field, inputElement) {
         });
 }
 //--------------- End fo dynamic saver function
+
+
+function CopyAndMsg(selectEl, msgId) {
+    const value = selectEl.value;
+    if (!value) return;
+
+    // 📋 Copy to clipboard
+    navigator.clipboard.writeText(value).then(() => {
+        const msg = document.getElementById(msgId);
+
+        // Show message
+        msg.textContent = "-- Copied --";
+        msg.style.opacity = "1";
+
+        // Hide after 3 seconds
+        setTimeout(() => {
+            msg.style.opacity = "0";
+        }, 3000);
+    }).catch(() => {
+        // Optional error feedback
+        const msg = document.getElementById(msgId);
+        msg.textContent = "-- Copy failed --";
+        msg.style.opacity = "1";
+        setTimeout(() => msg.style.opacity = "0", 3000);
+    });
+}
