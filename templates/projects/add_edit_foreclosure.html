@@ -124,7 +124,7 @@ Checklists
             <div class="subsection-body">
                 <div class="onesixth">
                     <label for="sale_date">Sale Date</label><br>
-                    <input type="date" name="sale_date" id="sale_date" onchange="saveField('{{ current_fcl_instance.id }}', 'sale_date', this)"
+                    <input type="date" name="sale_date" id="sale_date" onblur="saveField('{{ current_fcl_instance.id }}', 'sale_date', this)"
                     {% if current_fcl_instance.sale_date %}value="{{ current_fcl_instance.sale_date|date:'Y-m-d' }}"{% else %}value=""{% endif %}>      
                 </div>
 

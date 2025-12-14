@@ -152,7 +152,7 @@ function saveField(id, field, inputElement) {
         },
         body: JSON.stringify({
             field: field,
-            value: inputElement.value
+            value: inputElement.value.trim()
         })
     })
         .then(res => res.json())
