@@ -68,7 +68,6 @@ def get_filtered_foreclosure_queryset(params):
     selectedSaletype = params.get('saletypeFilter', '')
     published = params.get('published','')
 
-    saledateOrder = params.get('sale_date_order', 'sale_date')
     surplusStatusND = params.get('status_nd', '')
     surplusStatusPS = params.get('status_ps', '')
     surplusStatusNPS = params.get('status_nps', '')
@@ -160,6 +159,7 @@ def get_filtered_foreclosure_queryset(params):
 
     if sale_filters:
         leads_queryset = leads_queryset.filter(sale_status__in=sale_filters)
-    qs = leads_queryset
     
+    qs = leads_queryset
+
     return qs

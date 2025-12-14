@@ -345,6 +345,9 @@ def LoadTasks(request):
 def ProjectDashboard(request):
     user = request.user
     params = request.POST if request.method == "POST" else request.GET
+    # ✅ SAVE FILTERS FOR DOWNLOAD
+    request.session["dashboard_filters"] = params.dict()
+
     selectedState = params.get('stateFilter', '')
     selectedCounty = params.get('countyFilter', '')
     selectedSaletype = params.get('saletypeFilter', '')
@@ -1133,11 +1136,33 @@ def ProjectSettings(request):
 
 # --------------------------------------------------------------------------------
 
+@login_required(login_url="login")
+@allowed_users(['admin'])
+def download_dashboard_leads(request):
+
+    params = request.session.get("dashboard_filters", {})
+
+    print("DOWNLOAD PARAMS (SESSION):", params)
+
+    qs = get_filtered_foreclosure_queryset(params)
+
+    resource = DashboardCloneExportResource(qs)
+    filename, buffer = resource.export_excel()
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 @login_required(login_url="login")
 @allowed_users(['admin'])
 def download_dashboard_leads(request):
-    queryset = get_filtered_foreclosure_queryset(request.GET)
+    params = request.session.get("dashboard_filters", {})
+    queryset = get_filtered_foreclosure_queryset(params)
+    # print("DOWNLOAD PARAMS:", request.GET)
+    # queryset = get_filtered_foreclosure_queryset(request.GET)
 
     resource = DashboardCloneExportResource(queryset)
     filename, buffer, _ = resource.export_to_excel("dashboard_filtered_leads")
@@ -1150,5 +1175,19 @@ def download_dashboard_leads(request):
     return response
 
 
+# @login_required(login_url="login")
+# @allowed_users(['admin'])
+# def download_dashboard_leads(request):
+#     print("DOWNLOAD PARAMS:", request.GET)
+#     queryset = get_filtered_foreclosure_queryset(request.GET)
 
+#     resource = DashboardCloneExportResource(queryset)
+#     filename, buffer, _ = resource.export_to_excel("dashboard_filtered_leads")
+
+#     response = HttpResponse(
+#         buffer.getvalue(),
+#         content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+#     )
+#     response["Content-Disposition"] = f'attachment; filename="{filename}"'
+#     return response
 
