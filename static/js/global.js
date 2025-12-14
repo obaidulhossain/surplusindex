@@ -133,3 +133,66 @@ function toggleFilters(togglebtn, hide_id, event) {
         button.innerHTML = '<i class="bi bi-eye-slash"></i>';
     }
 }
+
+// this function will save any fields in Foreclosure model
+// use it like...............
+// <input type="text" onchange="saveField('{{ i.id }}', 'case_status', this)" value="{{ i.case_status }}">
+// <input type="date" onchange="saveField('{{ i.id }}', 'sale_date', this)" value="{{ i.sale_date }}">
+// <select onchange="saveField('{{ i.id }}', 'sale_status', this)">
+function saveField(id, field, inputElement) {
+    inputElement.style.transition = "background 0.3s";
+    inputElement.style.background = "#fdd9b2ff"; // yellow-light
+
+
+    fetch(`/update-field/${id}/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+            field: field,
+            value: inputElement.value.trim()
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                inputElement.style.transition = "background 0.5s";
+                inputElement.style.background = "#b2ffabff"; // green
+                setTimeout(() => {
+                    inputElement.style.background = "";
+                }, 800);
+            } else {
+                // 4️⃣ Optional: flash red on error
+                inputElement.style.background = "#f7a8a8ff"; // red
+            }
+        });
+}
+//--------------- End fo dynamic saver function
+
+
+function CopyAndMsg(selectEl, msgId) {
+    const value = selectEl.value;
+    if (!value) return;
+
+    // 📋 Copy to clipboard
+    navigator.clipboard.writeText(value).then(() => {
+        const msg = document.getElementById(msgId);
+
+        // Show message
+        msg.textContent = "-- Copied --";
+        msg.style.opacity = "1";
+
+        // Hide after 3 seconds
+        setTimeout(() => {
+            msg.style.opacity = "0";
+        }, 3000);
+    }).catch(() => {
+        // Optional error feedback
+        const msg = document.getElementById(msgId);
+        msg.textContent = "-- Copy failed --";
+        msg.style.opacity = "1";
+        setTimeout(() => msg.style.opacity = "0", 3000);
+    });
+}
