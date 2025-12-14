@@ -177,6 +177,7 @@ Project Dashboard
         </div>
     <div class="client-sec-header" style="margin-top:20px;">
         <h4>{{total_leads}}</h4>
+        <a href="{% url 'download_dashboard_leads' %}" target="_blank" class="button">Download</a>
     </div>
     <div class="section-body-full">
         <form id="add-to-myleads" method="POST" action="{% url 'purchaseLeads' %}">

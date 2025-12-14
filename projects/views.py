@@ -20,6 +20,7 @@ from .resources import *
 from django.db import models
 from decimal import Decimal, InvalidOperation
 from django.db.models import Q
+from .resources import*
 imported_data_cache = None
 
 
@@ -1125,3 +1126,18 @@ def update_foreclosure_field(request, pk):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
+def download_dashboard_leads(request):
+    queryset = get_filtered_foreclosure_queryset(request.GET)
+
+    resource = DashboardCloneExportResource(queryset)
+    filename, buffer, _ = resource.export_to_excel("dashboard_filtered_leads")
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response

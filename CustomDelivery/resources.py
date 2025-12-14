@@ -473,33 +473,6 @@ class CustomExportResource:
 
         return df
 
-    # def to_dataframe(self):
-    #     queryset = self.get_queryset()
-
-    #     #if getattr(self.export_option, "contact_align", "horizontal") == "vertical":
-    #     if getattr(self.export_option.client, "contact_align", "horizontal") == "vertical":
-    #         #queryset = queryset[:20]
-    #         # Vertical mode: each contact gets its own row
-    #         data = []
-    #         for obj in queryset:
-    #             data.extend(self.dehydrate_foreclosure_vertical(obj))
-    #         df = pd.DataFrame(data)
-    #     else:
-    #         # Default horizontal mode (existing)
-    #         data = [self.dehydrate_foreclosure(obj) for obj in queryset]
-    #         df = pd.DataFrame(data)
-
-    #     # Use selected columns if specified
-    #     #if self.export_option.columns:
-    #     if self.export_option.client.columns:
-    #         #cols = [c for c in self.export_option.columns if c in df.columns]
-    #         cols = [c for c in self.export_option.client.columns if c in df.columns]
-    #         df = df[cols]
-    #     # ✅ FIX: Convert timezone-aware datetimes to naive (Excel-safe)
-    #     for col in df.select_dtypes(include=["datetimetz"]).columns:
-    #         df[col] = df[col].dt.tz_localize(None)
-
-    #     return df
 
     def export_to_excel(self):
         df = self.to_dataframe()

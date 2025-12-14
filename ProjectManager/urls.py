@@ -8,6 +8,7 @@ urlpatterns = [
 
 # Urls for Active Skiptracing Section
 path('dashboard/', views.ProjectDashboard, name="project_dashboard"),
+path('download_dashboard_leads/', views.download_dashboard_leads, name="download_dashboard_leads"),
 
 path('', views.ProjectManager, name="project_manager"),
 path('create-project',views.CreateProject, name="create_project"),

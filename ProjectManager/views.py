@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect, get_object_or_404, HttpResponse
 from django.urls import reverse
 from django.http import JsonResponse
 from . models import *
@@ -20,10 +20,11 @@ from django.core.mail import EmailMessage,send_mail
 from email.utils import formataddr
 from django.conf import settings
 from django.db.models import F
-
+from . resources import *
 from django.core.paginator import Paginator
 from AllSettings.models import*
 import calendar
+from .utils import *
 # Create your views here.
 #-----------------------Project Manager---------------------
 @login_required(login_url="login")
@@ -1133,6 +1134,20 @@ def ProjectSettings(request):
 # --------------------------------------------------------------------------------
 
 
+@login_required(login_url="login")
+@allowed_users(['admin'])
+def download_dashboard_leads(request):
+    queryset = get_filtered_foreclosure_queryset(request.GET)
+
+    resource = DashboardCloneExportResource(queryset)
+    filename, buffer, _ = resource.export_to_excel("dashboard_filtered_leads")
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
 
 
 
