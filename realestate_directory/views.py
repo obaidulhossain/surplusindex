@@ -28,12 +28,14 @@ def auctionCalendar(request):
         countyFilter = request.POST.get('countyFilter','')
         saletypeFilter = request.POST.get('saletypeFilter','')
         saledateFilter = request.POST.get('saledateFilter','')
+        orderbyFilter = request.POST.get('orderbyFilter','')
     else:
         selectedUser = request.GET.get('selectedUser','')
         stateFilter = request.GET.get('stateFilter','')
         countyFilter = request.GET.get('countyFilter','')
         saletypeFilter = request.GET.get('saletypeFilter','')
         saledateFilter = request.GET.get('saledateFilter','')
+        orderbyFilter = request.GET.get('orderbyFilter','')
     
     event_queryset = foreclosure_Events.objects.all()
     
@@ -68,8 +70,11 @@ def auctionCalendar(request):
         event_queryset = event_queryset.filter(event_next__lt=now().date())
     elif saledateFilter == "upcoming":
         event_queryset = event_queryset.filter(event_next__gte=now().date())
-
-    event_queryset = event_queryset.order_by("county","sale_type")
+    
+    if orderbyFilter:
+        event_queryset = event_queryset.order_by(orderbyFilter)
+    else:
+        event_queryset = event_queryset.order_by("state","county","sale_type")
     # Paginate the results
     total_events = event_queryset.count()
     p = Paginator(event_queryset, 200)
@@ -94,6 +99,7 @@ def auctionCalendar(request):
         'saletypes':saletypes,
         'current_user':user,
         'second_previous':second_previous,
+        'orderbyFilter':orderbyFilter,
         }
 
     return render(request, 'auction_calendar/auction_calendar.html', context)

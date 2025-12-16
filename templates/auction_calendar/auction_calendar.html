@@ -65,6 +65,24 @@ Auction Calendar
             <option value="upcoming" {% if saledateFilter == "upcoming" %}selected{% endif %}>Upcoming Events</option>
         </select>
         </div>
+        <div class="onethird">
+        <label for="orderbyFilter">Order By</label><br>
+        <select id="orderbyFilter" name="orderbyFilter" onchange="this.form.submit()" style="width:95%;">
+            <option value=""{% if orderbyFilter == "" %}selected{% endif %}>Order by dates</option>
+            <option value="event_next" {% if orderbyFilter == "event_next" %}selected{% endif %}>Pre Foreclosure Ascending</option>
+            <option value="-event_next" {% if orderbyFilter == "-event_next" %}selected{% endif %}>Pre Foreclosure Descending</option>
+            <option value="event_updated_from" {% if orderbyFilter == "event_updated_from" %}selected{% endif %}>Pre from Ascending</option>
+            <option value="-event_updated_from" {% if orderbyFilter == "-event_updated_from" %}selected{% endif %}>Pre from Descending</option>
+            <option value="event_updated_to" {% if orderbyFilter == "event_updated_to" %}selected{% endif %}>Pre to Ascending</option>
+            <option value="-event_updated_to" {% if orderbyFilter == "-event_updated_to" %}selected{% endif %}>Pre to Descending</option>
+            <option value="post_event_next" {% if orderbyFilter == "post_event_next" %}selected{% endif %}>Post Foreclosure Ascending</option>
+            <option value="-post_event_next" {% if orderbyFilter == "-post_event_next" %}selected{% endif %}>Post Foreclosure Descending</option>
+            <option value="post_event_updated_from" {% if orderbyFilter == "post_event_updated_from" %}selected{% endif %}>Post from Ascending</option>
+            <option value="-post_event_updated_from" {% if orderbyFilter == "-post_event_updated_from" %}selected{% endif %}>Post from Descending</option>
+            <option value="post_event_updated_to" {% if orderbyFilter == "post_event_updated_to" %}selected{% endif %}>Post to Ascending</option>
+            <option value="-post_event_updated_to" {% if orderbyFilter == "-post_event_updated_to" %}selected{% endif %}>Post to Descending</option>
+        </select>
+        </div>
         </form>
     </div>
     <div class="section-header" style="margin-top:20px;">
