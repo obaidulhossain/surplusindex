@@ -62,6 +62,7 @@ class Property(OperationStat):
     city = models.CharField(max_length=255, blank=True, verbose_name='City')
     zip_code = models.CharField(max_length=255, blank=True, verbose_name='Zip')
 
+
     class Meta:
         verbose_name = 'Property'
         verbose_name_plural = 'Properties'
@@ -292,6 +293,7 @@ class Foreclosure(OperationStat):
     sale_date = models.DateField(blank=True, null=True)
     sale_type = models.CharField(max_length=225, choices=SALE_TYPE, null=True, blank=True)
     sale_status = models.CharField(max_length=225, choices=SALE_STATUS, null=True, blank=True)
+    appraised_value = models.DecimalField(decimal_places=2, max_digits=15, null=True, blank=True)
     fcl_final_judgment = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
     sale_price = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
     possible_surplus = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
@@ -306,6 +308,7 @@ class Foreclosure(OperationStat):
     case_search_updated = models.DateField(null=True, blank=True)
     case_search_status = models.CharField(max_length=100, choices=CASE_SEARCH_STATUS, null=True, blank=True)
     published = models.BooleanField(default=False)
+    auction_source = models.CharField(max_length=255, null=True, blank=True)
     def update_possible_surplus(self):
         try:
             sale_price = float(self.sale_price)

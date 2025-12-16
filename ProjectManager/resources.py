@@ -17,9 +17,9 @@ class DashboardCloneExportResource:
     FIELDS = [
         "ID", "Changed At", "Surplus Status", "Sale Status", "State", "County",
         "Case Number", "Sale Date", "Confirmation Date", "Sale Type",
-        "Plaintiff", "Defendant",
-        "Judgment Amount", "Sale Price", "Possible Surplus", "Verified Surplus",
-        "Parcel", "Street Address", "City", "ST", "Zip", "Mailing Address",
+        "Plaintiff", "Defendant", 
+        "Appraised Value", "Judgment Amount", "Sale Price", "Possible Surplus", "Verified Surplus",
+        "Parcel", "Street Address", "City", "ST", "Zip", "Mailing Address", "Auction Source",
 
         "Contact Name 1", "Email 1",
         "Wireless 1.1", "Wireless 1.2", "Wireless 1.3", "Wireless 1.4",
@@ -83,11 +83,13 @@ class DashboardCloneExportResource:
             "Sale Date": obj.sale_date,
             "Confirmation Date": getattr(obj, "confirmation_date", None),
             "Sale Type": obj.sale_type,
+            "Appraised Value": obj.appraised_value or "-",
             "Judgment Amount": obj.fcl_final_judgment,
             "Sale Price": obj.sale_price,
             "Possible Surplus": obj.possible_surplus,
             "Verified Surplus": obj.verified_surplus,
             "Mailing Address": getattr(obj, "mailing_address", "-"),
+            "Auction Source":obj.auction_source or "-",
         })
 
         # ---- Plaintiff

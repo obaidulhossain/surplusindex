@@ -77,6 +77,7 @@ class CustomExportResource:
             "Surplus Status": obj.surplus_status or "-",
             "Case Number": obj.case_number or "-",
             "Sale Date": obj.sale_date or "-",
+            "Appraised Value": obj.appraised_value or "-",
             "Judgment Amount": obj.fcl_final_judgment or "-",
             "Sale Price": obj.sale_price or "-",
             "Possible Surplus": obj.possible_surplus or "-",
@@ -86,7 +87,8 @@ class CustomExportResource:
             "Confirmation Date":"",
             "Foreclosure Deed":"-",
             "Prior Deed":"-",
-            "Mailing Address":"-",          
+            "Mailing Address":"-",
+            "Auction Source":obj.auction_source or "-",
         }
 
         # --- Handle Plaintiff (ManyToMany) -
@@ -249,6 +251,7 @@ class CustomExportResource:
             "Surplus Status": obj.surplus_status or "-",
             "Case Number": obj.case_number or "-",
             "Sale Date": obj.sale_date or "-",
+            "Appraised Value": obj.appraised_value or "-",
             "Possible Surplus": obj.possible_surplus or "-",
             "Verified Surplus": obj.verified_surplus or "-",
             "Judgment Amount": obj.fcl_final_judgment or "-",
@@ -259,6 +262,7 @@ class CustomExportResource:
             "Foreclosure Deed":"-",
             "Prior Deed":"-",
             "Mailing Address":"-",
+            "Auction Source":obj.auction_source or "-",
         }
 
         # --- Handle Plaintiff (ManyToMany) -

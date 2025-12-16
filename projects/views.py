@@ -154,8 +154,10 @@ def update_foreclosure(request):
     surplus_status = request.POST.get('surplus_status', '')
 
     case_ext = request.POST.get('case_ext','')
-    court_name = request.POST.get('court_name','')
-    case_type = request.POST.get('case_type','')
+    appraised_value = request.POST.get('appraised_value','')
+    auction_source = request.POST.get('auction_source','')
+    # court_name = request.POST.get('court_name','')
+    # case_type = request.POST.get('case_type','')
     case_status = request.POST.get('case_status','')
     case_search_status = request.POST.get('case_search_status','')
     notes = request.POST.get('notes','')
@@ -194,8 +196,10 @@ def update_foreclosure(request):
         fcl_instance.surplus_status = surplus_status
         
         fcl_instance.case_number_ext = case_ext
-        fcl_instance.court_name = court_name
-        fcl_instance.case_type = case_type
+        fcl_instance.appraised_value = appraised_value
+        fcl_instance.auction_source = auction_source
+        #fcl_instance.court_name = court_name
+        #fcl_instance.case_type = case_type
         fcl_instance.case_status = case_status
         if not notes == fcl_instance.notes:
             print("note saved")
@@ -1117,7 +1121,7 @@ def update_foreclosure_field(request, pk):
 
         # CharField / TextField → TRIM + UPPERCASE
         elif isinstance(model_field, (models.CharField, models.TextField)):
-            if field not in ("sale_type", "sale_status", "surplus_status", "case_search_status"):
+            if field not in ("sale_type", "sale_status", "surplus_status", "case_search_status", "auction_source"):
                 value = value.strip().upper()
 
         # DateField (HTML date is already YYYY-MM-DD)
