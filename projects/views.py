@@ -121,6 +121,20 @@ def toggle_publish(request):
 
     return JsonResponse({"success": False}, status=400)
 
+@csrf_exempt
+def delete_fcl(request):
+    if request.method == 'POST':
+        try:
+            # Parse the JSON data from the request body
+            data = json.loads(request.body)
+          
+            FclID = data.get('Fcl_ID')           
+            Fcl = Foreclosure.objects.get(pk=FclID)
+            Fcl.delete()
+            return JsonResponse({'status': 'success'})
+        except Foreclosure.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Foreclosure record not found'}, status=404)
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 def update_foreclosure(request):
     current_user = request.user

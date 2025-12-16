@@ -243,6 +243,14 @@ Checklists
                     <th>Surplus Status</th>
                     <th>Published</th>
                     <th>Select</th>
+                    {% if user.is_authenticated %}
+                    {% for group in user.groups.all %}
+                    {% if group.name == "admin" %}
+                    <th style="width:20px!important;">❌</th>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
                 </tr>
             </thead>
             <tbody id="fcl-results">
@@ -251,71 +259,110 @@ Checklists
     </div>
 </div>
 <script>
-    $(document).ready(function () {
-        // Function to fetch and update search results
-        function fclResults() {
-            const state = $('#f_state').val();
-            const county = $('#f_county').val();
-            const case_num = $('#case_num').val();
-            const saletype = $('#sale_type').val();
-            const salestatus = $('#sale_status').val();
+$(document).ready(function () {
+    // Function to fetch and update search results
+    function fclResults() {
+        const state = $('#f_state').val();
+        const county = $('#f_county').val();
+        const case_num = $('#case_num').val();
+        const saletype = $('#sale_type').val();
+        const salestatus = $('#sale_status').val();
 
-            $.ajax({
-                url: "{% url 'filter-fcl' %}",
-                data: {
-                    f_state: state,
-                    f_county: county,
-                    case_num: case_num,
-                    sale_type: saletype,
-                    sale_status: salestatus
-                },
-                success: function (data) {
-                    const is_admin_group = data.is_admin_group;  // TRUE if user is in admin group
-                    const foreclosure = data.foreclosure;
-                    const fclresultcontainer = $('#fcl-results');
-                    fclresultcontainer.empty();
+        $.ajax({
+            url: "{% url 'filter-fcl' %}",
+            data: {
+                f_state: state,
+                f_county: county,
+                case_num: case_num,
+                sale_type: saletype,
+                sale_status: salestatus
+            },
+            success: function (data) {
+                const is_admin_group = data.is_admin_group;  // TRUE if user is in admin group
+                const foreclosure = data.foreclosure;
+                const fclresultcontainer = $('#fcl-results');
+                fclresultcontainer.empty();
 
-                    if (foreclosure.length > 0) {
-                        foreclosure.forEach(foreclosure => {
-                            let published_icon = "";
-                            if (is_admin_group) {
-                                published_icon = foreclosure.published ? `<span class="toggle-publish" data-id="${foreclosure.id}" data-status="1" style="cursor:pointer;color:green;font-size:18px;">🟢</span>` : `<span class="toggle-publish" data-id="${foreclosure.id}" data-status="0" style="cursor:pointer;color:red;font-size:18px;">🔴</span>`;
-                            } else {
-                                // No toggle for other users
-                                published_icon = foreclosure.published ? `<span>🟢</span>` : `<span >🔴</span>`;
-                            }
-        
-                            
-                            fclresultcontainer.append(`
+                if (foreclosure.length > 0) {
+                    foreclosure.forEach(foreclosure => {
+                        let published_icon = "";
+                        let delete_icon = "";
+                        if (is_admin_group) {
+                            published_icon = foreclosure.published ? `<span class="toggle-publish" data-id="${foreclosure.id}" data-status="1" style="cursor:pointer;color:green;font-size:18px;">🟢</span>` : `<span class="toggle-publish" data-id="${foreclosure.id}" data-status="0" style="cursor:pointer;color:red;font-size:18px;">🔴</span>`;
+                            delete_icon = `<td><span class="delete-fcl" onclick="deletefcl('${foreclosure.id}')"style="cursor:pointer;">❌</span></td>`;
+                        } else {
+                            // No toggle for other users
+                            published_icon = foreclosure.published ? `<span>🟢</span>` : `<span >🔴</span>`;
+                        }
+    
+                        
+                        fclresultcontainer.append(`
 
-                            <tr>
-                                <td>${foreclosure.state}</td>
-                                <td>${foreclosure.county}</td>
-                                <td>${foreclosure.case_number}</td>
-                                <td>${foreclosure.sale_date}</td>
-                                <td>${foreclosure.sale_type}</td>
-                                <td>${foreclosure.sale_status}</td>
-                                <td>${foreclosure.surplus_status}</td>
-                                <td>${published_icon}</td>
-                                <td>
-                                    <form method="get" action="{% url 'add_edit_fcl' %}">
-                                        <input type="hidden" name="fcl_id" value="${foreclosure.id}">
-                                        <input type="submit" value="Edit">
-                                    </form>
-                                </td>
-                            </tr>
+                        <tr id="${foreclosure.id}">
+                            <td>${foreclosure.state}</td>
+                            <td>${foreclosure.county}</td>
+                            <td>${foreclosure.case_number}</td>
+                            <td>${foreclosure.sale_date}</td>
+                            <td>${foreclosure.sale_type}</td>
+                            <td>${foreclosure.sale_status}</td>
+                            <td>${foreclosure.surplus_status}</td>
+                            <td>${published_icon}</td>
+                            <td>
+                                <form method="get" action="{% url 'add_edit_fcl' %}">
+                                    <input type="hidden" name="fcl_id" value="${foreclosure.id}">
+                                    <input type="submit" value="Edit">
+                                </form>
+                            </td>
+                            ${delete_icon}
+                        </tr>
 
-                            `);
-                        });
-                    } else {
-                        fclresultcontainer.append('<tr><th colspan="6"><center>No Foreclosure Record found</center></th></tr>');
-                    }
+                        `);
+                    });
+                } else {
+                    fclresultcontainer.append('<tr><th colspan="6"><center>No Foreclosure Record found</center></th></tr>');
                 }
+            }
+        });
+    }
+    // Trigger AJAX call on input change
+    $('#f_state, #f_county, #case_num, #sale_type, #sale_status').on('input', fclResults);
+});
+
+function deletefcl(FclID) {
+    if (confirm("Are you sure you want to delete this record?")) {
+        fetch('/delete-fcl/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Function to get CSRF token
+            },
+            body: JSON.stringify({ Fcl_ID: FclID })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove the row from the DOM
+                    const row = document.getElementById(FclID);
+                    if (row) {
+                        // Add the transition style first
+                        row.style.transition = "border 0.2s ease, color 0.2s ease";
+                        row.style.border = "3px solid #a92e10"; // Change color after transition is set
+                        // Use a small delay to ensure the transition is applied
+
+                        setTimeout(() => {
+                            row.remove();
+                        }, 1000);
+                    }
+                } else {
+                    alert("Failed to delete: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred while deleting.");
             });
-        }
-        // Trigger AJAX call on input change
-        $('#f_state, #f_county, #case_num, #sale_type, #sale_status').on('input', fclResults);
-    });
+    }
+}
 </script>
 {% if current_fcl_instance %}
 <script>
@@ -885,7 +932,41 @@ $(document).on("click", ".toggle-publish", function () {
         }
     });
 });
+function deleteEvent(EventID) {
+    if (confirm("Are you sure you want to delete this Event?")) {
+        fetch('/delete-event/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Function to get CSRF token
+            },
+            body: JSON.stringify({ Event_ID: EventID })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove the row from the DOM
+                    const row = document.getElementById(EventID);
+                    if (row) {
+                        // Add the transition style first
+                        row.style.transition = "border 0.2s ease, color 0.2s ease";
+                        row.style.border = "3px solid #a92e10"; // Change color after transition is set
+                        // Use a small delay to ensure the transition is applied
 
+                        setTimeout(() => {
+                            row.remove();
+                        }, 1000);
+                    }
+                } else {
+                    alert("Failed to delete action: " + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("An error occurred while deleting the action.");
+            });
+    }
+}
 </script>
 
 
