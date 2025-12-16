@@ -140,9 +140,9 @@ def update_foreclosure(request):
     current_user = request.user
     sel_fcl = request.POST.get('caseid','')
     
-    case = request.POST.get('case_num','')
-    county = request.POST.get('f_county','')
-    state = request.POST.get('f_state','')
+    case = request.POST.get('case_num','').strip().upper()
+    county = request.POST.get('f_county','').strip().upper()
+    state = request.POST.get('f_state','').strip().upper()
     sale_date = request.POST.get('sale_date', '')
     sale_type = request.POST.get('sale_type','')
     sale_status = request.POST.get('sale_status','')
@@ -153,14 +153,14 @@ def update_foreclosure(request):
     verified_sf = request.POST.get('verified_sf', None)
     surplus_status = request.POST.get('surplus_status', '')
 
-    case_ext = request.POST.get('case_ext','')
+    case_ext = request.POST.get('case_ext','').strip().upper()
     appraised_value = request.POST.get('appraised_value','')
     auction_source = request.POST.get('auction_source','')
     # court_name = request.POST.get('court_name','')
     # case_type = request.POST.get('case_type','')
     case_status = request.POST.get('case_status','')
     case_search_status = request.POST.get('case_search_status','')
-    notes = request.POST.get('notes','')
+    notes = request.POST.get('notes','').strip()
     
     if sel_fcl:
         fcl_instance = Foreclosure.objects.get(pk=sel_fcl)
