@@ -38,7 +38,7 @@ def auctionCalendar(request):
         orderbyFilter = request.GET.get('orderbyFilter','')
     
     event_queryset = foreclosure_Events.objects.all()
-    
+    valuelist_qs = foreclosure_Events.objects.all()
     states = event_queryset.order_by('state').values_list('state', flat=True).distinct()
     counties = event_queryset.order_by('county').values_list('county', flat=True).distinct()
     saletypes = event_queryset.order_by('sale_type').values_list('sale_type', flat=True).distinct()
@@ -56,7 +56,7 @@ def auctionCalendar(request):
 
     if not stateFilter == "":
         event_queryset = event_queryset.filter(state=stateFilter)
-        counties = event_queryset.values_list('county', flat=True).distinct()
+        counties = event_queryset.order_by('county').values_list('county', flat=True).distinct()
         saletypes = event_queryset.values_list('sale_type', flat=True).distinct()
     
     if not countyFilter =="":
