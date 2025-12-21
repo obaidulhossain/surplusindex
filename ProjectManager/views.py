@@ -13,7 +13,7 @@ from propertydata.models import *
 from si_user.models import *
 from realestate_directory.models import *
 from django.utils.timezone import now
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Count, Q
 from django.views.decorators.http import require_POST
 from .mailers import send_cycle_leads
 from django.core.mail import EmailMessage,send_mail
@@ -25,6 +25,7 @@ from django.core.paginator import Paginator
 from AllSettings.models import*
 import calendar
 from .utils import *
+
 # Create your views here.
 #-----------------------Project Manager---------------------
 @login_required(login_url="login")
@@ -381,10 +382,23 @@ def ProjectDashboard(request):
 
 
 # -------------Base querysets----------------------------
+    # leads_queryset = (
+    #     Foreclosure.objects.all()
+    #     )
     leads_queryset = (
-        Foreclosure.objects.all()
+        Foreclosure.objects
+        .annotate(
+            total_defendants=Count('defendant_for_foreclosure', distinct=True),
+            unskiptraced_defendants=Count(
+                'defendant_for_foreclosure',
+                filter=Q(defendant_for_foreclosure__skiptraced=False),
+                distinct=True
+            ),
         )
-    # -------------Filters-----------------------------------
+    )
+
+
+# -------------Filters-----------------------------------
     filters = {}
     if selectedState:
         filters["state__iexact"] = selectedState

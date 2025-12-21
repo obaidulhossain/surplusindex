@@ -280,7 +280,13 @@ Project Dashboard
                                     style="cursor:pointer;font-size:18px;color:{{ i.published|yesno:'green,red' }};">
                                     {% if i.published %}🟢{% else %}🔴{% endif %}
                                 </span>
-                                
+                                {% if i.unskiptraced_defendants > 0 %}
+                                <span
+                                    title="{{ i.unskiptraced_defendants }} of {{ i.total_defendants }} defendants not skip-traced"
+                                    style="margin-left:6px;color:orange;font-size:16px;cursor:help;">
+                                    ⚠️
+                                </span>
+                                {% endif %}
                             </td>
                             <td>
                             <a class="button" href="https://app.surplusindex.com/add_edit_foreclosure/?fcl_id={{i.id}}" target="_blank">View</a>
