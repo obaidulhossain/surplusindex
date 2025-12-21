@@ -388,10 +388,10 @@ def ProjectDashboard(request):
     leads_queryset = (
         Foreclosure.objects
         .annotate(
-            total_defendants=Count('defendant_for_foreclosure', distinct=True),
+            total_defendants=Count('defendant', distinct=True),
             unskiptraced_defendants=Count(
-                'defendant_for_foreclosure',
-                filter=Q(defendant_for_foreclosure__skiptraced=False),
+                'defendant',
+                filter=Q(defendant__skiptraced=False),
                 distinct=True
             ),
         )
