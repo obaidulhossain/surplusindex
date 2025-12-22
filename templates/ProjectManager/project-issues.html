@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% block title %}
+Project Issues
+{% endblock title %}
+
+
+{% block content%}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/client.css' %}" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<div class="body-section">
+    <div class="onehalf">
+        <div class="client-sec-header" style="margin-top:0px;">
+            <h4>Create Issues</h4> 
+        </div>
+        <div class="section-body-full" >
+        <form method="post" action="{% url 'create_issue' %}">
+        {% csrf_token %}
+            
+            <input type="text" name="type" placeholder="Issue Type" required style="width:100%;"><br><br>
+
+            <input type="text" name="title" required placeholder="Issue Title" style="width:100%;"><br><br>
+
+            <textarea name="description" rows="4" placeholder="Issue Detail" style="width:100%;"></textarea><br><br>
+
+            <select name="status" style="width:100%;">
+                <option value="open">Open</option>
+                <option value="resolved">Resolved</option>
+                <option value="unsolved">Unsolved</option>
+                <option value="closed">Closed</option>
+            </select><br><br>
+
+            <button type="submit" class="button" style="width:100%;">Save</button><br><br>
+            <a class="button" href="{% url 'project_issues' %}" style="width:100%; background-color: #e49688!important;" >Cancel</a><br>
+        </form>
+        </div>
+    </div>
+</div>
+
+
+<div class="body-section" style="margin-top:20px;">
+    <div class="client-sec-header" style="margin-top:0px;">
+        <h4>Active Project Issues</h4>
+    </div>
+    <div class="filter-section" >
+    <table class="table table-striped table-hover">
+        <tr>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Status</th>
+        </tr>
+
+        {% for issue in active_issues %}
+        <tr>
+            <td>{{ issue.type }}</br><span style="font-size:12px; font-weight:bold;">{{issue.user.username|upper}}</span></td>
+            <td>{{ issue.title }}</td>
+            <td><textarea type="text" onchange="saveIssue('{{ issue.id }}', 'description', this)" rows="3" style="width:100%; padding:10px;">{{ issue.description }}</textarea></td>
+            <td>
+                <select onchange="saveIssue('{{ issue.id }}', 'status', this)">
+                    <option value="open"{% if issue.status == "open" %}selected{% endif %}>Open</option>
+                    <option value="resolved"{% if issue.status == "resolved" %}selected{% endif %}>Resolved</option>
+                    <option value="unsolved"{% if issue.status == "unsolved" %}selected{% endif %}>Unsolved</option>
+                    <option value="closed"{% if issue.status == "closed" %}selected{% endif %}>Closed</option>
+                    <option value="delete">----Delete----</option>
+                </select>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No issues found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+</div>
+
+
+
+<div class="body-section" style="margin-top:20px;">
+    <div class="client-sec-header" style="margin-top:0px; background-color: #4ea180ff; color: black;" >
+        <h4>Resolved or Closed Issues</h4>
+    </div>
+    <div class="filter-section" >
+    <table class="table table-striped table-hover">
+        <tr>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Status</th>
+        </tr>
+
+        {% for c_issue in closed_issues %}
+        <tr>
+            <td>{{ c_issue.type }}</br><span style="font-size:12px; font-weight:bold;">{{c_issue.user.username|upper}}</span></td>
+            <td>{{ c_issue.title }}</td>
+            <td><textarea type="text" onchange="saveIssue('{{ c_issue.id }}', 'description', this)" rows="3" style="width:100%; padding:10px;">{{ c_issue.description }}</textarea></td>
+            <td>
+                <select onchange="saveIssue('{{ c_issue.id }}', 'status', this)">
+                    <option value="open"{% if c_issue.status == "open" %}selected{% endif %}>Open</option>
+                    <option value="resolved"{% if c_issue.status == "resolved" %}selected{% endif %}>Resolved</option>
+                    <option value="unsolved"{% if c_issue.status == "unsolved" %}selected{% endif %}>Unsolved</option>
+                    <option value="closed"{% if c_issue.status == "closed" %}selected{% endif %}>Closed</option>
+                    <option value="delete">----Delete----</option>
+                </select>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No issues found.</td>
+        </tr>
+        {% endfor %}
+    </table>
+    </div>
+</div>
+<script>
+// this function will save any fields in ProjectIssues model
+// use it like...............
+// <input type="text" onchange="saveIssue('{{ i.id }}', 'case_status', this)" value="{{ i.case_status }}">
+// <input type="date" onchange="saveIssue('{{ i.id }}', 'sale_date', this)" value="{{ i.sale_date }}">
+// <select onchange="saveIssue('{{ i.id }}', 'sale_status', this)">
+function saveIssue(id, field, inputElement) {
+    inputElement.style.transition = "background 0.3s";
+    inputElement.style.background = "#fdd9b2ff"; // yellow-light
+
+
+    fetch(`/Project-Manager/update-issue/${id}/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+        },
+        body: JSON.stringify({
+            field: field,
+            value: inputElement.value.trim()
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                inputElement.style.transition = "background 0.5s";
+                inputElement.style.background = "#b2ffabff"; // green
+                setTimeout(() => {
+                    inputElement.style.background = "";
+                }, 800);
+            } else {
+                // 4️⃣ Optional: flash red on error
+                inputElement.style.background = "#f7a8a8ff"; // red
+            }
+        });
+}
+</script>
+<script src="{% static 'js/nouislider.min.js' %}"></script>
+<script src="{% static 'js/Client.js' %}"></script>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+<script src="{% static 'js/ProjectManager.js' %}"></script>
+{% endblock content%}

@@ -28,3 +28,7 @@ class TimeTrackerAdmin(admin.ModelAdmin):
 @admin.register(DeliveryReport)
 class DeliveryReportAdmin(admin.ModelAdmin):
     list_display = ('task','user','delivered','report')
+
+@admin.register(ProjectIssues)
+class ProjectIssuesAdmin(admin.ModelAdmin):
+    list_display = ('type','user','title','description', 'status')

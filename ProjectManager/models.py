@@ -162,3 +162,18 @@ class TimeTracker(models.Model):
         if self.end_time:
             return (self.end_time - self.start_time).total_seconds()
         return 0
+    
+class ProjectIssues(Timelogger):
+    type = models.CharField(max_length=255, blank=True)
+    title = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=255, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    status = models.CharField(max_length=255, choices=[
+        ("open","Open"),
+        ("resolved","Resolved"),
+        ("unsolved","Unsolved"),
+        ("closed","Closed"),
+    ], default="open")
+    def __str__(self):
+        return f"{self.user.username} created a {self.type} issue: {self.title} : {self.description}"
+

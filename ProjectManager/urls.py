@@ -47,4 +47,8 @@ path('delivered-tasks/', views.DeliveredTasks, name="delivered_tasks"),
 
 path('project-settings/', views.ProjectSettings, name="project_settings"),
 path('update-project/', views.UpdateProject, name="update_project"),
+
+path('project-issues/', views.ProjectIssueview, name="project_issues"),
+path('create-issues/', views.createIssue, name="create_issue"),
+path("update-issue/<int:pk>/", views.update_issues_field, name="update_issue"),
 ]

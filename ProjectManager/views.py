@@ -1169,3 +1169,58 @@ def download_dashboard_leads(request):
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
 
+
+
+
+@login_required
+def ProjectIssueview(request):    
+    active_issues = ProjectIssues.objects.filter(status__in=['Open', 'Unsolved']).order_by('-created_at')
+    closed_issues = ProjectIssues.objects.filter(status__in=['Resolved', 'Closed']).order_by('-changed_at')
+    context = {
+        'active_issues': active_issues,
+        'closed_issues':closed_issues,
+
+    }
+    return render(request, 'ProjectManager/project-issues.html', context)
+
+def createIssue(request):
+    if request.method == "POST":
+        ProjectIssues.objects.create(
+            user=request.user,
+            type=request.POST.get('type', ''),
+            title=request.POST.get('title', ''),
+            description=request.POST.get('description', ''),
+            status=request.POST.get('status', 'open')
+        )
+        messages.success(request, "New Issue Created")
+        return redirect('project_issues')
+    
+@csrf_exempt
+def update_issues_field(request, pk):
+    if request.method != "POST":
+        return JsonResponse({"error": "POST only"}, status=400)
+
+    try:
+        data = json.loads(request.body)
+        field = data.get("field")
+        value = data.get("value")
+        if value == "delete":
+            obj = ProjectIssues.objects.get(pk=pk)
+            obj.delete()
+            return JsonResponse({"deleted": True})
+        
+        obj = ProjectIssues.objects.get(pk=pk)
+        # 🔒 Validate field exists
+        if not hasattr(obj, field):
+            return JsonResponse({"error": "Invalid field"}, status=400)
+        
+        # 💾 SAVE FIELD with dynamic setattr update
+        setattr(obj, field, value)
+        obj.save()
+
+        return JsonResponse({"success": True})
+
+    except ProjectIssues.DoesNotExist:
+        return JsonResponse({"error": "Object not found"}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
