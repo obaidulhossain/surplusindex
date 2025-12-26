@@ -66,9 +66,10 @@ Active SkipTracing
                     </tr>
                 </thead>
                 <tbody>
-                {% for i in checklist %}
-                    {% for contact in i.pending_contacts %}
-
+                {% comment %} {% for i in checklist %}
+                    {% for contact in i.pending_contacts %} {% endcomment %}
+                {% for contact in checklist %}
+                    {% with i=contact.defendant_for_foreclosure.first %}
                     <tr>
                         <td style="padding: 0px 10px;">{{i.state|title}} - {{i.county|title}} - {{i.case_number|upper}}</td>
                         <td style="padding: 0px 10px;">{{contact}}</td>
@@ -87,7 +88,7 @@ Active SkipTracing
                                 <input type="submit" class="button" value="Skiptrace" style="color: #ffffff; padding:0px 10px;">
                             </form>
                         </td>
-                    {% endfor %}
+                    {% endwith %}
                 {% endfor %}
                 </tbody>
             </table>

@@ -215,6 +215,7 @@ Project Dashboard
                             <th>Surplus Status</th>
                             <th>Published</th>
                             <th>Edit</th>
+                            <th>Assign Skp</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -291,7 +292,15 @@ Project Dashboard
                             <td>
                             <a class="button" href="https://app.surplusindex.com/add_edit_foreclosure/?fcl_id={{i.id}}" target="_blank">View</a>
                             </td>
-
+                            <td>
+                                <select onchange="assignSkiptrace(this, '{{ i.id }}')" style="border:3px solid {% if i.unassigned_defendants > 0 %}#e22f2f{% else %}#34d613{% endif %}!important;">
+                                    <option value="">Assign {{i.unassigned_defendants}}</option>
+                                    {% for r in researchers %}
+                                    <option value="{{r.id}}">{{r.username|upper}}</option>
+                                    {% endfor %}
+                                    <option value="clear">Clear</option>
+                                </select>
+                            </td>
                         </tr>
                         {% endfor %}
                     {% endif %}

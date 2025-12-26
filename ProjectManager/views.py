@@ -345,6 +345,7 @@ def LoadTasks(request):
 @allowed_users(['admin'])
 def ProjectDashboard(request):
     user = request.user
+    researchers = User.objects.filter(groups__name__icontains="researcher", is_active=True)
     params = request.POST if request.method == "POST" else request.GET
     # ✅ SAVE FILTERS FOR DOWNLOAD
     request.session["dashboard_filters"] = params.dict()
@@ -389,11 +390,8 @@ def ProjectDashboard(request):
         Foreclosure.objects
         .annotate(
             total_defendants=Count('defendant', distinct=True),
-            unskiptraced_defendants=Count(
-                'defendant',
-                filter=Q(defendant__skiptraced=False),
-                distinct=True
-            ),
+            unskiptraced_defendants=Count('defendant',filter=Q(defendant__skiptraced=False),distinct=True),
+            unassigned_defendants=Count('defendant',filter=Q(defendant__skp_assignedto__isnull=True),distinct=True),
         )
     )
 
@@ -492,6 +490,7 @@ def ProjectDashboard(request):
 
         'client_settings':client_settings,
         'current_user':user,
+        'researchers':researchers,
         'leads':leads_queryset,
         'selectedState':selectedState,
         'selectedCounty':selectedCounty,
@@ -526,7 +525,35 @@ def ProjectDashboard(request):
     
     
 
+@login_required
+def assign_skiptrace(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Require Post Request"})
 
+    data = json.loads(request.body)
+    lead_id = data.get("lead_id")
+    user_id = data.get("user_id")
+
+    try:
+        foreclosure = Foreclosure.objects.get(id=lead_id)
+
+        # Assign / Unassign
+        if user_id in ["", None]:
+            pass
+        elif user_id == "clear":
+            foreclosure.defendant.update(skp_assignedto=None)
+        else:
+            user = User.objects.get(id=user_id)
+            foreclosure.defendant.update(
+                skp_assignedto=user,
+            )
+
+        return JsonResponse({"success": True})
+
+    except Foreclosure.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Lead not found"})
+    except User.DoesNotExist:
+        return JsonResponse({"success": False, "error": "User not found"})
 
 
 #-----------------------Task Manager---------------------

@@ -68,3 +68,47 @@ function update_assignment(userId, taskId) {
             console.error("⚡ Error:", err);
         });
 }
+
+function assignSkiptrace(select, lead_id) {
+    const user_id = select.value;
+
+    fetch("/Project-Manager/assign-skiptrace/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+        },
+        body: JSON.stringify({
+            lead_id: lead_id,
+            user_id: user_id
+        })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                select.style.backgroundColor = "#6fdfa0";
+                setTimeout(() => {
+                    select.style.backgroundColor = "";
+                }, 1500);
+            } else {
+                select.style.backgroundColor = "#df916fff";
+                setTimeout(() => {
+                    select.style.backgroundColor = "";
+                }, 1500);
+            }
+        });
+}
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}

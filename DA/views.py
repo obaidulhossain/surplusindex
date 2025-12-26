@@ -101,59 +101,131 @@ def SkiptracingChecklist(request):
     selectedState = params.get('stateFilter', '')
     selectedCounty = params.get('countyFilter', '')
     selectedSaletype = params.get('saletypeFilter', '')
-
-    #--------------------Queryset---------------------------------------------------------------
-    # Get foreclosure records linked to contacts assigned to the current user and not skiptraced
-    foreclosure_qs = (
-        Foreclosure.objects
-        .filter(defendant__skp_assignedto=current_user, defendant__skiptraced=False)
-        .prefetch_related(
-            Prefetch(
-                "defendant",
-                queryset=Contact.objects.filter(skp_assignedto=current_user, skiptraced=False),
-                to_attr="pending_contacts"
-            )
+    # ---------------- Base queryset (CONTACT FIRST) ----------------
+    contacts_qs = (
+        Contact.objects
+        .filter(
+            skp_assignedto=current_user,
+            skiptraced=False
         )
+        .prefetch_related('defendant_for_foreclosure')
         .distinct()
     )
-    #-------------------------------------------------------------------------------------------
-
-    #---------------Filters-----------------------------
-    filters = {}
+    # ---------------- Apply Foreclosure filters ----------------
     if selectedState:
-        filters["state__iexact"] = selectedState
+        contacts_qs = contacts_qs.filter(
+            defendant_for_foreclosure__state__iexact=selectedState
+        )
+
     if selectedCounty:
-        filters["county__iexact"] = selectedCounty
+        contacts_qs = contacts_qs.filter(
+            defendant_for_foreclosure__county__iexact=selectedCounty
+        )
+
     if selectedSaletype:
-        filters["sale_type__iexact"] = selectedSaletype
-
-    foreclosure_qs = foreclosure_qs.filter(**filters)
-    #---------------------------------------------------
-
-    # Pagination
-    p = Paginator(foreclosure_qs, 20)
+        contacts_qs = contacts_qs.filter(
+            defendant_for_foreclosure__sale_type__iexact=selectedSaletype
+        )
+        
+    contacts_qs = contacts_qs.distinct()
+    # ---------------- Pagination ----------------
+    paginator = Paginator(contacts_qs, 20)
     page = request.GET.get('page')
-    checklist = p.get_page(page)
+    checklist = paginator.get_page(page)
 
-    current_page = int(checklist.number)
+    current_page = checklist.number
     second_previous = current_page + 2 if checklist.has_next() else None
-    contacts_count = foreclosure_qs.count()
-    # Dropdown filters
-    states = foreclosure_qs.values_list("state", flat=True).distinct()
-    counties = foreclosure_qs.values_list("county", flat=True).distinct()
-    saletypes = foreclosure_qs.values_list("sale_type", flat=True).distinct()
-    
+    contacts_count = contacts_qs.count()
 
+    # ---------------- Dropdown filters ----------------
+    states = (
+        Foreclosure.objects
+        .filter(defendant__in=contacts_qs)
+        .values_list('state', flat=True)
+        .distinct()
+    )
+
+    counties = (
+        Foreclosure.objects
+        .filter(defendant__in=contacts_qs)
+        .values_list('county', flat=True)
+        .distinct()
+    )
+
+    saletypes = (
+        Foreclosure.objects
+        .filter(defendant__in=contacts_qs)
+        .values_list('sale_type', flat=True)
+        .distinct()
+    )
     context = {
         'current_user': current_user,
         'checklist': checklist,
-        'contacts_count':contacts_count,
+        'contacts_count': contacts_count,
         'states': states,
         'counties': counties,
         'saletypes': saletypes,
         'second_previous': second_previous,
-        'selectedState':selectedState,
-        'selectedCounty':selectedCounty,
-        'selectedSaletype':selectedSaletype,
+        'selectedState': selectedState,
+        'selectedCounty': selectedCounty,
+        'selectedSaletype': selectedSaletype,
     }
+
     return render(request, 'da/active_skp.html', context)
+
+
+    # #--------------------Queryset---------------------------------------------------------------
+    # # Get foreclosure records linked to contacts assigned to the current user and not skiptraced
+    # foreclosure_qs = (
+    #     Foreclosure.objects
+    #     .filter(defendant__skp_assignedto=current_user, defendant__skiptraced=False)
+    #     .prefetch_related(
+    #         Prefetch(
+    #             "defendant",
+    #             queryset=Contact.objects.filter(skp_assignedto=current_user, skiptraced=False),
+    #             to_attr="pending_contacts"
+    #         )
+    #     )
+    #     .distinct()
+    # )
+    # #-------------------------------------------------------------------------------------------
+
+    # #---------------Filters-----------------------------
+    # filters = {}
+    # if selectedState:
+    #     filters["state__iexact"] = selectedState
+    # if selectedCounty:
+    #     filters["county__iexact"] = selectedCounty
+    # if selectedSaletype:
+    #     filters["sale_type__iexact"] = selectedSaletype
+
+    # foreclosure_qs = foreclosure_qs.filter(**filters)
+    # #---------------------------------------------------
+
+    # # Pagination
+    # p = Paginator(foreclosure_qs, 20)
+    # page = request.GET.get('page')
+    # checklist = p.get_page(page)
+
+    # current_page = int(checklist.number)
+    # second_previous = current_page + 2 if checklist.has_next() else None
+    # contacts_count = foreclosure_qs.count()
+    # # Dropdown filters
+    # states = foreclosure_qs.values_list("state", flat=True).distinct()
+    # counties = foreclosure_qs.values_list("county", flat=True).distinct()
+    # saletypes = foreclosure_qs.values_list("sale_type", flat=True).distinct()
+    
+
+    # context = {
+    #     'current_user': current_user,
+    #     'checklist': checklist,
+    #     'contacts_count':contacts_count,
+    #     'states': states,
+    #     'counties': counties,
+    #     'saletypes': saletypes,
+    #     'second_previous': second_previous,
+    #     'selectedState':selectedState,
+    #     'selectedCounty':selectedCounty,
+    #     'selectedSaletype':selectedSaletype,
+    # }
+    # return render(request, 'da/active_skp.html', context)
