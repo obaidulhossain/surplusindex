@@ -104,6 +104,7 @@ Auction Calendar
                         <th>Post Updated From</th>
                         <th>Post Updated To</th>
                         <th>Website</th>
+                        <th>Edit</th>
                         <th>Save</th>
                     </tr>
                 </thead>
@@ -144,6 +145,13 @@ Auction Calendar
 
                             <input TYPE="button" class="small-button" VALUE="Visit"
                                 onclick="window.open('{{ event.event_site }}');">
+                        </td>
+                        <td>
+                            <form method="post" action="{% url 'calendar_settings'%}">
+                            {% csrf_token %}
+                                <input type="hidden" name="selectedevent" value="{{event.id}}">
+                                <input type="submit" value="Edit" onclick="this.form.submit()">
+                            </form>
                         </td>
                         <td>
                             <button class="save-button" onclick="saveRow(this)">Save</button>
