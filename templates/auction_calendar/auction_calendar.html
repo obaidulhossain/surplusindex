@@ -147,7 +147,7 @@ Auction Calendar
                                 onclick="window.open('{{ event.event_site }}');">
                         </td>
                         <td>
-                            <form method="post" action="{% url 'calendar_settings'%}" target="_blank">
+                            <form method="post" action="{% url 'calendar_settings'%}" target="blank">
                             {% csrf_token %}
                                 <input type="hidden" name="selectedevent" value="{{event.id}}">
                                 <input type="submit" value="Edit" onclick="this.form.submit()">
