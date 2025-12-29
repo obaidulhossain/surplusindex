@@ -1,61 +1,4 @@
 
-// function UpdateStatus(select) {
-//     // const row = select.closest('div');
-//     // const rowId = row.getAttribute('data-id');
-
-//     const StatusID = document.getElementById('statusID').value;
-
-
-//     const SelectedStatus = document.getElementById('Pros_Status').value; //old
-//     const StatusFor = document.getElementById('Pros_Status').getAttribute('for'); //old
-
-
-//     // Prepare data for updating
-//     const updatedData = {
-//         Status_id: StatusID,
-//         selected_status: SelectedStatus,
-//         status_for: StatusFor,
-//     };
-
-//     // Send data to the server using fetch
-//     fetch('/updateStatus_ajax/', {
-//         method: 'POST',
-//         headers: {
-//             'Content-Type': 'application/json',
-//             'X-CSRFToken': '{{ csrf_token }}' // Include if using Django
-//         },
-//         body: JSON.stringify(updatedData)
-//     })
-//         .then(response => response.json())
-//         .then(data => {
-//             if (data.status === 'success') {
-//                 select.style.transition = "background-color 0.3s ease, color 0.3s ease";
-//                 select.style.backgroundColor = "#4CAF50"; // Green background
-//                 select.style.color = "#fff"; // White text
-
-//                 // Reset the select after a short delay
-//                 setTimeout(() => {
-
-//                     select.style.backgroundColor = ""; // Reset to original background
-//                     select.style.color = ""; // Reset to original text color
-//                 }, 1500); // Reset after 1.5 seconds
-//             } else {
-//                 // Show error message box
-//                 alert("Failed to save row: " + (data.message || "Unknown error"));
-//             }
-//         })
-//         .catch(error => {
-//             // Show error message box for unexpected errors
-//             console.error('Error:', error);
-//             alert("An error occurred while saving the row. Please try again.");
-//         });
-// }
-
-
-
-
-
-
 function confirmAddToMyLeads() {
     // Get the count of selected checkboxes
     const selectedLeads = document.querySelectorAll('input[name="selected_items"]:checked').length;
@@ -67,7 +10,7 @@ function confirmAddToMyLeads() {
     }
 
     // Show the confirmation dialog with the count of selected leads
-    const message = `Are you sure you want to move ${selectedLeads} selected leads to My Leads Section for ${selectedLeads} credits?`;
+    const message = `Are you sure you want DOWNLOAD ${selectedLeads} foreclosure surplus leads for ${selectedLeads} SurplusIndex credits? Downloaded leads can be found in the My Leads section with lifetime status update upon availability.`;
     return confirm(message); // Returns true if OK is clicked, false otherwise
 }
 

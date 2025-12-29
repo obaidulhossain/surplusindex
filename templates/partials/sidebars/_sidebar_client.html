@@ -12,25 +12,25 @@
     </center>
 </div>
 <ul class="sidebar-nav">
-    <li class="sidebar-item">
+    <li class="sidebar-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
         <a href="{% url 'dashboard' %}" class="sidebar-link">
             <i class="bi bi-columns-gap"></i>
             <span>Dashboard</span>
         </a>
     </li>
-    <li class="sidebar-item">
+    <li class="sidebar-item {% if request.resolver_match.url_name == 'leads' %}active{% endif %}">
         <a href="{% url 'leads' %}" class="sidebar-link">
-            <i class="bi bi-journal-text"></i>
-            <span>All Surplus Data</span>
+            <i class="bi bi-house-exclamation"></i>
+            <span>Foreclosures</span>
         </a>
     </li>
-    <li class="sidebar-item">
+    <li class="sidebar-item {% if request.resolver_match.url_name == 'myleads' %}active{% endif %}">
         <a href="{% url 'myleads' %}" class="sidebar-link">
             <i class="bi bi-journal-check"></i>
             <span>Purchased Data</span>
         </a>
     </li>
-    <li class="sidebar-item">
+    <li class="sidebar-item {% if request.resolver_match.url_name == 'get_assistance' %}active{% endif %}">
         <a href="{% url 'get_assistance' %}" class="sidebar-link">
             <i class="bi bi-chat-square-text"></i>
             <span>Assistance</span>
@@ -43,19 +43,19 @@
             <span>Account</span>
         </a>
         <ul id="auth" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
-            <li class="sidebar-item child">
+            <li class="sidebar-item child {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
                 <a href="{% url 'profile' %}" class="sidebar-link">
                     <i class="bi bi-person-lines-fill"></i>
                     <span>Profile</span>
                 </a>
             </li>
-            <li class="sidebar-item child">
+            <li class="sidebar-item child {% if request.resolver_match.url_name == 'subscriptions' %}active{% endif %}">
                 <a href="{% url 'subscriptions' %}" class="sidebar-link">
                     <i class="bi bi-bag-check"></i>
                     <span>Subscription</span>
                 </a>
             </li>
-            <li class="sidebar-item child">
+            <li class="sidebar-item child {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
                 <a href="{% url 'settings' %}" class="sidebar-link">
                     <i class="bi bi-gear"></i>
                     <span>Settings</span>

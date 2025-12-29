@@ -22,7 +22,7 @@ from django.urls import reverse
 import datetime
 import calendar
 from AllSettings.models import*
-
+from ProjectManager.resources import *
 
 
 def get_client_dashboard_context(request, user):
@@ -203,7 +203,7 @@ def availableLeads(request):
 
 
     total_leads = leads_queryset.count()
-    p = Paginator(leads_queryset, 50)
+    p = Paginator(leads_queryset, 100)
     page = params.get('page')
     leads = p.get_page(page)
     current_page = int(leads.number)
@@ -264,7 +264,7 @@ def purchaseLeads(request):
         # Check if user has enough credits
         total_credit = free_credit + purchased_credit
         if lead_count > total_credit:
-            messages.error(request, "Insufficient credits to add the selected leads.")
+            messages.error(request, "Insufficient credits to Download selected leads.")
             return redirect('leads')  # Redirect back to the leads page
         else:
             credit_usage = CreditUsage.objects.create(user=request.user)
@@ -278,7 +278,7 @@ def purchaseLeads(request):
                 remaining_leads = 0
                 
                 messages.info(request, str(lead_count) + ' Credits have been deducted from free credits')
-                messages.success(request,str(lead_count) + ' successfully added to My Leads. Visit My Leads Tab to explore lead details.')
+                messages.success(request, str(lead_count) + ' successfully added to My Leads. Visit My Leads Tab to explore lead details.')
 
             else:
                 if free_credit >= 1:
@@ -300,16 +300,57 @@ def purchaseLeads(request):
             user_details.save()
             user_details.update_total_credits()
             credit_usage.save()
-
-            for lead_id in selected_leads_ids:
-                status = Status.objects.create(lead_id=lead_id, client=request.user)
+            purchased_leads = Foreclosure.objects.filter(id__in=selected_leads_ids)
+            
+            for fcl in purchased_leads:
+                status = Status.objects.create(lead=fcl, client=request.user)
                 credit_usage.leads.add(status)
-                fcl = Foreclosure.objects.get(pk=lead_id)
                 fcl.purchased_by.add(request.user)
-                
+            request.session['auto_download_leads'] = selected_leads_ids
+            # for lead_id in selected_leads_ids:
+            #     status = Status.objects.create(lead_id=lead_id, client=request.user)
+            #     credit_usage.leads.add(status)
+            #     fcl = Foreclosure.objects.get(pk=lead_id)
+            #     fcl.purchased_by.add(request.user)
+            # -------------------------- download
+            # resource = DashboardCloneExportResource(purchased_leads)
+            # filename, buffer, _ = resource.export_to_excel("SurplusIndex_Download")
+
+            # response = HttpResponse(
+            #     buffer.getvalue(),
+            #     content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            # )
+            # response["Content-Disposition"] = f'attachment; filename="{filename}"'
+            # return response       
             return redirect('leads')
     else:
         return HttpResponse("Invalid Request", status=400)
+
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
+def auto_download_purchased_leads(request):
+    lead_ids = request.session.pop('auto_download_leads', None)
+
+    if not lead_ids:
+        return HttpResponse(status=204)
+
+    queryset = Foreclosure.objects.filter(
+        id__in=lead_ids,
+        purchased_by=request.user
+    )
+
+    resource = DashboardCloneExportResource(queryset)
+    filename, buffer, _ = resource.export_to_excel("SurplusIndex_Download")
+
+    return HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f'attachment; filename="{filename}"'
+        }
+    )
+
+
 
 
 @login_required(login_url="login")

@@ -23,7 +23,7 @@ Available Leads
                 <div class="filter-item-section">
                     <div class="onefifth">
                         <label for="stateFilter">Select State</label><br>
-                        <select id="stateFilter" name="stateFilter" onchange="this.form.submit()" style="width:100%;">
+                        <select id="stateFilter" name="stateFilter" onchange="this.form.submit()" style="width:100%;" class="{% if selectedState == '' %}blink-border{% endif %}">
                             <option value="" {% if selectedState == "" %}selected{% endif %}>--- Select State ---</option>
                             {% for state in states %}
                             {% if not state == "" %}
@@ -152,10 +152,10 @@ Available Leads
                 <input type="hidden" name="ps_min" value={{psmin}}>
                 <input type="hidden" name="vs_min" value={{vsmin}}>
                 <div class="action-item">
-                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmAddToMyLeads()">Add <span data-selected-count>0</span> to My Leads</button>
+                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmAddToMyLeads()">Download (<span data-selected-count>0</span>)</button>
                 </div>
                 <div class="action-item">
-                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmHideLeads()" formaction="{% url 'hide-leads' %}">{% if showHidden == "show" %}Unhide{% else %}Hide{% endif %} <span data-selected-count>0</span> Selected</button>
+                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmHideLeads()" formaction="{% url 'hide-leads' %}">{% if showHidden == "show" %}Unhide{% else %}Hide{% endif %} (<span data-selected-count>0</span>)</button>
                 </div>
                 {% if user.is_authenticated %}
                 {% for group in user.groups.all %}
@@ -247,6 +247,13 @@ Available Leads
 
 
     </div>
+    {% if request.session.auto_download_leads %}
+    <script>
+        window.addEventListener("load", function () {
+            window.location.href = "{% url 'auto_download_purchased_leads' %}";
+        });
+    </script>
+    {% endif %}
     <script src="{% static 'js/nouislider.min.js' %}"></script>
     <script src="{% static 'js/Client.js' %}"></script>
     <script src="{% static 'js/Surplusindex.js' %}"></script>

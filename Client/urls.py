@@ -5,6 +5,7 @@ urlpatterns = [
     
     path('leads/', views.availableLeads, name="leads"),
     path('purchaseLeads', views.purchaseLeads, name="purchaseLeads"),
+    path('auto_download_purchased_leads', views.auto_download_purchased_leads, name="auto_download_purchased_leads"),
     path('hide-leads', views.hidefromallLeads, name="hide-leads"),
 
     path('archive_leads', views.archivefromMyLeads, name="archive_leads"),
