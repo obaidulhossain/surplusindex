@@ -380,6 +380,157 @@ def hidefromallLeads(request):
     else:
         return HttpResponse("Invalid Request", status=400)
 
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
+def DownloadedData(request):
+    user = request.user
+    params = request.POST if request.method == "POST" else request.GET
+
+    selectedState = params.get('stateFilter', '')
+    selectedCounty = params.get('countyFilter', '')
+    selectedSaletype = params.get('saletypeFilter', '')
+    showArchived = params.get('show_archived', '')
+    saledateOrder = params.get('sale_date_order', 'lead__sale_date')
+    surplusStatusND = params.get('status_nd', '')
+    surplusStatusPS = params.get('status_ps', '')
+    surplusStatusNPS = params.get('status_nps', '')
+    surplusStatusFA = params.get('status_fa', '')
+    surplusStatusMF = params.get('status_mf', '')
+    surplusStatusFC = params.get('status_fc', '')
+    surplusStatusNS = params.get('status_ns', '')
+    saleStatusACTIVE = params.get('sale_status_active', '')
+    saleStatusSOLD = params.get('sale_status_sold', '')
+    saleStatusCANCELED = params.get('sale_status_canceled', '')
+    saledateYear = params.get('sale_date_year', '')
+    if saledateYear.isdigit():
+        saledateYear = int(saledateYear)
+    saledateMonth = params.get('sale_date_month', '')
+    if saledateMonth.isdigit():
+        saledateMonth = int(saledateMonth)
+
+
+    
+    # -------------Base querysets----------------------------    
+    leads_queryset = Status.objects.filter(client=user)    #.prefetch_related('foreclosure_as_lead')
+    purchase_qs = Status.objects.filter(client=user)
+    #--------------------------------------------------------
+    
+    # -------------Filters-----------------------------------
+    filters = {}
+    if selectedState:
+        filters["lead__state__iexact"] = selectedState
+    if selectedCounty:
+        filters["lead__county__iexact"] = selectedCounty
+    if selectedSaletype:
+        filters["lead__sale_type__iexact"] = selectedSaletype
+
+    if saledateYear:
+        filters["lead__sale_date__year"] = saledateYear
+    if saledateMonth:
+        filters["lead__sale_date__month"] = saledateMonth
+
+    leads_queryset = leads_queryset.filter(**filters)
+
+    # --------------- Surplus Status --------------------------------------------------
+    surplus_filters = []
+    if surplusStatusND:
+        surplus_filters.append(surplusStatusND)
+    if surplusStatusPS:
+        surplus_filters.append(surplusStatusPS)
+    if surplusStatusNPS:
+        surplus_filters.append(surplusStatusNPS)
+    if surplusStatusFA:
+        surplus_filters.append(surplusStatusFA)
+    if surplusStatusMF:
+        surplus_filters.append(surplusStatusMF)
+    if surplusStatusFC:
+        surplus_filters.append(surplusStatusFC)
+    if surplusStatusNS:
+        surplus_filters.append(surplusStatusNS)
+
+    if surplus_filters:
+        leads_queryset = leads_queryset.filter(lead__surplus_status__in=surplus_filters)
+
+    # ----------------- Sale Status -------------------------------------------------
+    sale_filters = []
+    if saleStatusACTIVE:
+        sale_filters.append(saleStatusACTIVE)
+    if saleStatusSOLD:
+        sale_filters.append(saleStatusSOLD)
+    if saleStatusCANCELED:
+        sale_filters.append(saleStatusCANCELED)
+
+    if sale_filters:
+        leads_queryset = leads_queryset.filter(lead__sale_status__in=sale_filters)
+    
+    #--------------Orders-------------------------------------
+    if saledateOrder:
+        leads_queryset = leads_queryset.order_by(saledateOrder)
+    
+    #-------Show Hide Hidden Leads--------------------------------
+    if showArchived == "show":
+        leads_queryset = leads_queryset.filter(archived=True)
+    else:
+        leads_queryset = leads_queryset.filter(archived=False)
+    #-------------------------------------------------------------
+
+    # -------------Dropdown Data-------------------------------------------------------------------------------------
+    states = Status.objects.filter(client=user).values_list("lead__state", flat=True).distinct()
+    
+    foreclosure_ids = leads_queryset.values_list("lead_id", flat=True).distinct()
+    counties = Foreclosure.objects.filter(id__in=foreclosure_ids).values_list("county", flat=True).distinct()
+    saletypes = Foreclosure.objects.filter(id__in=foreclosure_ids).values_list("sale_type", flat=True).distinct()
+
+       
+    # --------------------------------------------------------------------------------------------------------------- 
+
+    
+    total_leads = leads_queryset.count()
+    p = Paginator(leads_queryset, 100)
+    page = request.GET.get('page')
+    leads = p.get_page(page)
+    current_page = int(leads.number)
+    second_previous = current_page + 2
+
+    current_year = datetime.date.today().year
+    years = range(current_year - 5, current_year + 2)
+    months = [(i, calendar.month_name[i]) for i in range(1, 13)]
+
+# -------------Settings-------------------------------------------------------------------------------------
+    client_settings, created = ClientSettings.objects.get_or_create(user=user)
+    context = {
+        'client_settings':client_settings,
+        'current_user':user,
+        'leads':leads,
+        'total_leads':total_leads,
+        'states':states,
+        'counties':counties,
+        'saletypes':saletypes,
+        'selectedState':selectedState,
+        'selectedCounty':selectedCounty,
+        'selectedSaletype':selectedSaletype,
+
+        'showArchived':showArchived,
+        'second_previous':second_previous,
+
+        'saledateOrder':saledateOrder,
+        'years':years,
+        'months':months,
+        'saledateYear':saledateYear,
+        'saledateMonth':saledateMonth,
+        'surplusStatusND':surplusStatusND,
+        'surplusStatusPS':surplusStatusPS,
+        'surplusStatusNPS':surplusStatusNPS, 
+        'surplusStatusFA':surplusStatusFA,
+        'surplusStatusMF':surplusStatusMF,
+        'surplusStatusFC':surplusStatusFC,
+        'surplusStatusNS':surplusStatusNS,
+        'saleStatusACTIVE':saleStatusACTIVE,
+        'saleStatusSOLD':saleStatusSOLD,
+        'saleStatusCANCELED':saleStatusCANCELED,
+     
+    }
+    return render(request, 'Client/downloaded-data.html', context)
 
 @login_required(login_url="login")
 @allowed_users(['admin', 'clients'])

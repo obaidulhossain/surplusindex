@@ -24,6 +24,12 @@
             <span>Foreclosures</span>
         </a>
     </li>
+    <li class="sidebar-item {% if request.resolver_match.url_name == 'downloaded-data' %}active{% endif %}">
+        <a href="{% url 'downloaded-data' %}" class="sidebar-link">
+            <i class="bi bi-cloud-arrow-down"></i>
+            <span>Downloaded Data</span>
+        </a>
+    </li>
     <li class="sidebar-item {% if request.resolver_match.url_name == 'myleads' %}active{% endif %}">
         <a href="{% url 'myleads' %}" class="sidebar-link">
             <i class="bi bi-journal-check"></i>
@@ -32,8 +38,8 @@
     </li>
     <li class="sidebar-item {% if request.resolver_match.url_name == 'get_assistance' %}active{% endif %}">
         <a href="{% url 'get_assistance' %}" class="sidebar-link">
-            <i class="bi bi-chat-square-text"></i>
-            <span>Assistance</span>
+            <i class="bi bi-person-raised-hand"></i>
+            <span>Help</span>
         </a>
     </li>
     <li class="sidebar-item">
