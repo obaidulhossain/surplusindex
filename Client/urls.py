@@ -11,6 +11,7 @@ urlpatterns = [
     path('archive_leads', views.archivefromMyLeads, name="archive_leads"),
     
     path('downloaded-data/', views.DownloadedData, name="downloaded-data"),
+    path('downloaded-leads/', views.DownloadLeads, name="download-leads"),
 
     path('myleads/', views.myLeads, name="myleads"),
     path('leads-detail/', views.leadsDetail, name="leads-detail"),

@@ -23,6 +23,7 @@ import datetime
 import calendar
 from AllSettings.models import*
 from ProjectManager.resources import *
+from django.db.models.functions import TruncDate, ExtractYear, ExtractMonth
 
 
 def get_client_dashboard_context(request, user):
@@ -94,6 +95,7 @@ def availableLeads(request):
     saleStatusSOLD = params.get('sale_status_sold', '')
     saleStatusCANCELED = params.get('sale_status_canceled', '')
 
+    
     saledateYear = params.get('sale_date_year', '')
     if saledateYear.isdigit():
         saledateYear = int(saledateYear)
@@ -326,6 +328,34 @@ def purchaseLeads(request):
     else:
         return HttpResponse("Invalid Request", status=400)
 
+
+
+@login_required(login_url="login")
+@allowed_users(['admin', 'clients'])
+def DownloadLeads(request):
+    if request.method == "POST":
+        selected_leads_ids = request.POST.getlist('selected_items')
+        Statuses = Status.objects.filter(id__in=selected_leads_ids)
+        fcl_list = []
+        for l in Statuses:
+            fcl_list.append(l.lead.id)
+        purchased_leads = Foreclosure.objects.filter(id__in=fcl_list)
+            
+        #-------------------------- download
+        resource = DashboardCloneExportResource(purchased_leads)
+        filename, buffer, _ = resource.export_to_excel("SurplusIndex_Download")
+
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response           
+    else:
+        return HttpResponse("Invalid Request", status=400)
+
+
+
 @login_required(login_url="login")
 @allowed_users(['admin', 'clients'])
 def auto_download_purchased_leads(request):
@@ -408,10 +438,27 @@ def DownloadedData(request):
     if saledateMonth.isdigit():
         saledateMonth = int(saledateMonth)
 
-
+    purchaseYear = params.get('purchase-year', '')
+    if purchaseYear.isdigit():
+        purchaseYear = int(purchaseYear)
+    
+    purchaseMonth = params.get('purchase-month', '')
+    if purchaseMonth.isdigit():
+        purchaseMonth = int(purchaseMonth)
+    
+    purchaseDate = params.get('purchase-date', '')
+    # purchaseDateStr = params.get('purchase-date', '')
+    # purchaseDate = None
+    # if purchaseDateStr:
+    #     try:
+    #         purchaseDate = datetime.datetime.strptime(purchaseDateStr, "%Y-%m-%d").date()
+            
+    #     except ValueError:
+    #         purchaseDate = None
+    
     
     # -------------Base querysets----------------------------    
-    leads_queryset = Status.objects.filter(client=user)    #.prefetch_related('foreclosure_as_lead')
+    leads_queryset = Status.objects.filter(client=user) #.prefetch_related('foreclosure_as_lead')
     purchase_qs = Status.objects.filter(client=user)
     #--------------------------------------------------------
     
@@ -419,16 +466,27 @@ def DownloadedData(request):
     filters = {}
     if selectedState:
         filters["lead__state__iexact"] = selectedState
+        purchase_qs = purchase_qs.filter(lead__state__iexact = selectedState)
     if selectedCounty:
         filters["lead__county__iexact"] = selectedCounty
+        purchase_qs = purchase_qs.filter(lead__county__iexact = selectedCounty)
     if selectedSaletype:
         filters["lead__sale_type__iexact"] = selectedSaletype
+        purchase_qs = purchase_qs.filter(lead__sale_type__iexact = selectedSaletype)
 
     if saledateYear:
         filters["lead__sale_date__year"] = saledateYear
     if saledateMonth:
         filters["lead__sale_date__month"] = saledateMonth
 
+    if purchaseYear:
+        filters["created_at__year"] = purchaseYear
+        purchase_qs = purchase_qs.filter(created_at__year = purchaseYear)
+    if purchaseMonth:
+        filters["created_at__month"] = purchaseMonth
+        purchase_qs = purchase_qs.filter(created_at__month = purchaseMonth)
+    if purchaseDate:
+        filters["created_at__date"] = datetime.datetime.strptime(purchaseDate, "%m/%d/%Y").date()
     leads_queryset = leads_queryset.filter(**filters)
 
     # --------------- Surplus Status --------------------------------------------------
@@ -476,7 +534,28 @@ def DownloadedData(request):
 
     # -------------Dropdown Data-------------------------------------------------------------------------------------
     states = Status.objects.filter(client=user).values_list("lead__state", flat=True).distinct()
-    
+    purchase_dates = (
+        purchase_qs
+        .annotate(purchase_date=TruncDate('created_at'))
+        .values_list('purchase_date', flat=True)
+        .distinct()
+        .order_by('-purchase_date')
+    )
+    purchase_years = (
+        Status.objects.filter(client=user)
+        .annotate(year=ExtractYear('created_at'))
+        .values_list('year', flat=True)
+        .distinct()
+        .order_by('-year')
+        )
+    p_months = (
+        Status.objects.filter(client=user)
+        .annotate(month=ExtractMonth('created_at'))
+        .values_list('month', flat=True)
+        .distinct()
+        .order_by('month')
+        )
+    purchase_months = [(m, calendar.month_name[m]) for m in p_months if m]
     foreclosure_ids = leads_queryset.values_list("lead_id", flat=True).distinct()
     counties = Foreclosure.objects.filter(id__in=foreclosure_ids).values_list("county", flat=True).distinct()
     saletypes = Foreclosure.objects.filter(id__in=foreclosure_ids).values_list("sale_type", flat=True).distinct()
@@ -513,6 +592,13 @@ def DownloadedData(request):
         'showArchived':showArchived,
         'second_previous':second_previous,
 
+        'purchaseDate':purchaseDate,
+        'purchaseYear':purchaseYear,
+        'purchaseMonth':purchaseMonth,
+        'purchase_dates':purchase_dates,
+        'purchase_years':purchase_years,
+        'purchase_months':purchase_months,
+        
         'saledateOrder':saledateOrder,
         'years':years,
         'months':months,
@@ -762,7 +848,7 @@ def archivefromMyLeads(request):
             messages.success(request, str(len(selected_status_ids)) + ' Leads unarchived!')
         else:
             messages.success(request, str(len(selected_status_ids)) + ' Leads archived!')
-        return redirect('myleads')
+        return redirect('downloaded-data')
     else:
         return HttpResponse("Invalid Request", status=400)
 
