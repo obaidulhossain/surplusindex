@@ -5,12 +5,13 @@
 <table class="table table-bordered table-striped">
   <thead>
     <tr>
-      <th>Client</th><th>Email</th><th>Delivery Type</th><th>Filters</th><th>Active</th><th>Actions</th>
+      <th>Next Delivery</th><th>Client</th><th>Email</th><th>Delivery Type</th><th>Filters</th><th>Active</th><th>Actions</th>
     </tr>
   </thead>
   <tbody>
     {% for o in options %}
       <tr>
+        <td>{{o.next_delivery_date|date:'m/d/Y'}}</td>
         <td>{{ o.client_name }}</td>
         <td>{{ o.client_email }}</td>
         <td>{{ o.delivery_type }}</td>
