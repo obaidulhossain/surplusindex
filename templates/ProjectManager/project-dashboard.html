@@ -208,6 +208,7 @@ Project Dashboard
                             <th>Sale Date</th>
                             <th>Sale Type</th>
                             <th>Sale Status</th>
+                            <th>Appr Value</th>
                             <th>Judgment</th>
                             <th>Sale Price</th>
                             <th>Possible Surplus</th>
@@ -250,6 +251,9 @@ Project Dashboard
                                     <option value="Bankruptcy Hold" {% if i.sale_status == "Bankruptcy Hold" %}selected{% endif %}>Bankruptcy</option>
                                     <option value="Cancelled" {% if i.sale_status == "Cancelled" %}selected{% endif %}>Cancelled</option>
                                 </select>
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" min="-9999999999" max="9999999999" onchange="saveField('{{ i.id }}', 'appraised_value', this)" {% if i.appraised_value %} value="{{i.appraised_value}}"{% endif %}>
                             </td>
                             {% comment %} <td>{{i.get_sale_status_display}}</td> {% endcomment %}
                             <td>
