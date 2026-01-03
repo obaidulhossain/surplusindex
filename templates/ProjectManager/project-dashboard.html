@@ -286,11 +286,11 @@ Project Dashboard
                                     {% if i.published %}🟢{% else %}🔴{% endif %}
                                 </span>
                                 {% if i.unskiptraced_defendants > 0 %}
-                                {% IF i.fcl_final_judgment > i.appraised_value %}
-                                <span title="{{ i.unskiptraced_defendants }} of {{ i.total_defendants }} defendants not skip-traced" style="margin-left:6px;color:orange;font-size:16px;cursor:help;">🚫</span>
-                                {% else %}
-                                <span title="{{ i.unskiptraced_defendants }} of {{ i.total_defendants }} defendants not skip-traced" style="margin-left:6px;color:orange;font-size:16px;cursor:help;">⚠️</span>
-                                {% endif %}
+                                    {% if i.fcl_final_judgment > i.appraised_value %}
+                                    <span title="{{ i.unskiptraced_defendants }} of {{ i.total_defendants }} defendants not skip-traced" style="margin-left:6px;color:orange;font-size:16px;cursor:help;">🚫</span>
+                                    {% else %}
+                                    <span title="{{ i.unskiptraced_defendants }} of {{ i.total_defendants }} defendants not skip-traced" style="margin-left:6px;color:orange;font-size:16px;cursor:help;">⚠️</span>
+                                    {% endif %}
                                 {% endif %}
                             </td>
                             <td>
