@@ -186,6 +186,13 @@
 </div>
 <script>
     $(document).ready(function () {
+        // Prevent form submit on Enter for search fields
+        $('#state, #county, #sale_type').on('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                return false;
+            }
+        });
         // Function to fetch and update search results
         function fetchevents() {
             const State = $('#state').val();

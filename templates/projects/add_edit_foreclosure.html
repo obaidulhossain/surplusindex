@@ -267,6 +267,14 @@ Checklists
 </div>
 <script>
 $(document).ready(function () {
+    // Prevent form submit on Enter for search fields
+        $('#case_num, #f_county, #f_state').on('keydown', function (e) {
+        
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                return false;
+            }
+        });
     // Function to fetch and update search results
     function fclResults() {
         const state = $('#f_state').val();
@@ -784,6 +792,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 <script>
     $(document).ready(function () {
+        
         // Function to fetch and update search results
         function fetchdef() {
             const prefix = $('#prefix').val();
