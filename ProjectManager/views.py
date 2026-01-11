@@ -25,7 +25,9 @@ from django.core.paginator import Paginator
 from AllSettings.models import*
 import calendar
 from .utils import *
-
+import pandas as pd
+from django.db import transaction
+from django.forms.models import model_to_dict
 # Create your views here.
 #-----------------------Project Manager---------------------
 @login_required(login_url="login")
@@ -1251,3 +1253,361 @@ def update_issues_field(request, pk):
         return JsonResponse({"error": "Object not found"}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
+def UploadManager(request):
+    alluploads = (Upload
+                  .objects
+                  .annotate(
+                      total=Count('data'),
+                      pending=Count('data',filter=Q(data__update_status="created")),
+                      completed=Count('data',filter=Q(data__update_status="updated")),
+                      )
+                    )
+
+    context = {
+        "alluploads":alluploads,
+    }
+    return render(request, "ProjectManager/Upload/manage-uploads.html",context)
+    
+
+@require_POST
+@login_required(login_url="login")
+@allowed_users(['admin'])
+def CreateUpload(request):
+    if request.method == "POST":
+        name= request.POST.get('upload-name',"Un-Named Upload")
+        NewUpload = Upload.objects.create(name=name)
+        messages.success(request, f"New {NewUpload.name} Upload Started")
+
+    return redirect(f"{reverse('preview-data')}?UID={NewUpload.id}")
+
+
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
+def PreviewData(request):
+    params = request.POST if request.method == "POST" else request.GET
+    UID = params.get("UID", None)
+    update_status = params.get("update_status", "")
+    update_type = params.get("update_type", "")
+
+    SelectedUpload = None
+    data_qs = TemporaryData.objects.none()
+
+    if UID:
+        SelectedUpload = Upload.objects.get(pk=UID)
+        data_qs = SelectedUpload.data.all()
+        # Filter by update_status
+        if update_status:
+            data_qs = data_qs.filter(update_status=update_status)
+
+        if update_type:
+            data_qs = data_qs.filter(update_type=update_type)
+
+    context = {
+        "SelectedUpload":SelectedUpload,
+        "data_qs": data_qs,
+        "UID":UID,
+        "update_type": update_type,
+        "update_status": update_status,
+    }
+    return render(request, "ProjectManager/Upload/data-preview.html",context)
+
+### upload and import data
+def clean_str(value):
+    if pd.isna(value):
+        return ""
+    return str(value).strip().upper()
+
+def clean_decimal(value):
+    if pd.isna(value):
+        return None
+    return value
+
+def clean_date(value):
+    if pd.isna(value):
+        return None
+    if isinstance(value, date):
+        return value
+    return pd.to_datetime(value).date()
+
+def normalize_choice(value):
+    if pd.isna(value) or not isinstance(value, str):
+        return None
+    if value.strip().lower()=="active":
+        value = "pending"
+    return value.strip().lower()
+
+@transaction.atomic
+def import_foreclosures_from_excel(request):
+    file = request.FILES.get("file")
+    params = request.POST if request.method == "POST" else request.GET
+    UID = params.get("UID")
+    if not UID:
+        messages.info(request, "No Upload ID Selected")
+        return redirect("upload-manager")
+    
+    UploadInstance = Upload.objects.get(pk=UID)
+    df = pd.read_excel(file)
+    df = df.dropna(subset=["CASE_LOOKUP"])
+    results = {"created": 0, "updated": 0}
+
+    foreclosures = Foreclosure.objects.all()
+    # foreclosure_map = {
+    #     f.fcl_case_lookup: f
+    #     for f in Foreclosure.objects.all()
+    # }
+    for _, row in df.iterrows():
+        case_lookup = clean_str(row.get("CASE_LOOKUP"))
+        #existing = UploadInstance.data.filter(case_lookup=case_lookup).first()
+        defaults = {
+            "state": clean_str(row.get("STATE")),
+            "county": clean_str(row.get("COUNTY")),
+            "case_number": clean_str(row.get("CASE_NUMBER")),
+            "case_number_ext": clean_str(row.get("CASE_EXTENSION")),
+            "sale_date": clean_date(row.get("SALE_DATE")),
+            "sale_type": normalize_choice(row.get("SALE_TYPE")),
+            "appraised_value": clean_decimal(row.get("APPRAISED_VALUE")),
+            "fcl_final_judgment": clean_decimal(row.get("JUDGMENT_AMOUNT")),
+            "sale_price": clean_decimal(row.get("SALE_PRICE")),
+            "possible_surplus": clean_decimal(row.get("POSSIBLE_SURPLUS")),
+            "verified_surplus": clean_decimal(row.get("VERIFIED_SURPLUS")),
+            "sale_status": normalize_choice(row.get("SALE_STATUS")),
+            "surplus_status": normalize_choice(row.get("SURPLUS_STATUS")),
+            "notes": clean_str(row.get("NOTES")),
+            "auction_source": clean_str(row.get("AUCTION_SOURCE")),
+            "parcel": clean_str(row.get("A_PARCEL")),
+            "house_number": clean_str(row.get("A_HOUSE")),
+            "road_name": clean_str(row.get("A_STREET")),
+            "road_type": clean_str(row.get("A_ROAD_TYPE")),
+            "direction": clean_str(row.get("A_DIRECTION")),
+            "apt_unit": clean_str(row.get("A_AUB")),
+            "extention": clean_str(row.get("A_EXTENSION")),
+            "city": clean_str(row.get("A_CITY")),
+            "zip_code": clean_str(row.get("A_ZIP")),
+            
+            "plaintiff": clean_str(row.get("P_BUSINESS_NAME")),
+
+            "business_name": clean_str(row.get("D_BUSINESS_NAME")),
+            "designation": clean_str(row.get("D_DESIGNATION")),
+            "name_prefix": clean_str(row.get("D_PREFIX")),
+            "first_name": clean_str(row.get("D_FIRST")),
+            "middle_name": clean_str(row.get("D_MIDDLE")),
+            "last_name": clean_str(row.get("D_LAST")),
+            "name_suffix": clean_str(row.get("D_SUFFIX")),
+        }
+
+        # if existing:
+        #     DataRow = existing
+        #     created = False
+        # else:
+
+        DataRow = TemporaryData.objects.create(case_lookup=case_lookup, **defaults)
+        UploadInstance.data.add(DataRow)
+        
+        fcls = Foreclosure.objects.filter(state=defaults.get("state"), county=defaults.get("county"), case_number=defaults.get("case_number"))
+        if len(fcls)>0:
+            DataRow.s_foreclosure.add(*fcls)
+            DataRow.update_type = "exist"
+            DataRow.save()
+        
+        if defaults.get("business_name"):
+            defs = Contact.objects.filter(business_name=defaults.get("business_name"))
+        else:
+            defs = Contact.objects.filter(first_name=defaults.get("first_name"), last_name=defaults.get("last_name"))
+        if len(defs)>0:
+            DataRow.s_defendant.add(*defs)
+        
+        plts = ForeclosingEntity.objects.filter(business_name=defaults.get("plaintiff"))
+        if len(plts)>0:
+            DataRow.s_plaintiff.add(*plts)
+        
+        props = Property.objects.filter(state=defaults.get("state"), county=defaults.get("county"), parcel=defaults.get("parcel"), house_number=defaults.get("house_number"), road_name=defaults.get("road_name"), road_type=defaults.get("road_type"),direction=defaults.get("direction"),apt_unit=defaults.get("apt_unit"),extention=defaults.get("extention"),city=defaults.get("city"), zip_code=defaults.get("zip_code"))
+        print (len(props))
+
+        if props.exists():
+            print (len(props))
+            DataRow.s_property.add(*props)
+        results["created"] += 1
+
+
+    return redirect(f"{reverse('preview-data')}?UID={UploadInstance.id}")
+
+@transaction.atomic    
+def updateForeclosure(id):
+    source_data = TemporaryData.objects.get(pk=id)
+    if source_data.s_foreclosure.exists():
+        fcl = source_data.s_foreclosure.first() 
+        # fcl.sale_date = source_data.sale_date
+        fields_to_copy = [
+            "sale_date",
+            "sale_type",
+            "appraised_value",
+            "fcl_final_judgment",
+            "sale_price",
+            "possible_surplus",
+            "verified_surplus",
+            "sale_status",
+            "surplus_status",
+            "notes",
+            "auction_source",
+        ]
+
+        data = model_to_dict(source_data, fields=fields_to_copy)
+
+        for field, value in data.items():
+            setattr(fcl, field, value)
+
+        fcl.save(update_fields=fields_to_copy)
+        source_data.update_status = "updated"
+        source_data.save()
+        return fcl
+
+@transaction.atomic    
+def createForeclosure(id):
+    source_data = TemporaryData.objects.get(pk=id)
+    Fcl, _ = Foreclosure.objects.get_or_create(
+        state = source_data.state,
+        county = source_data.county,
+        case_number = source_data.case_number,
+        case_number_ext = source_data.case_number_ext,
+        defaults={
+            "sale_date": source_data.sale_date,
+            "sale_type": source_data.sale_type,
+            "appraised_value": source_data.appraised_value,
+            "fcl_final_judgment": source_data.fcl_final_judgment,
+            "sale_price": source_data.sale_price,
+            "possible_surplus": source_data.possible_surplus,
+            "verified_surplus": source_data.verified_surplus,
+            "sale_status": source_data.sale_status,
+            "surplus_status": source_data.surplus_status,
+            "notes": source_data.notes,
+            "auction_source": source_data.auction_source,
+        }
+    )
+
+    
+    if source_data.u_property.exists():
+        for p in source_data.u_property.all():
+            Fcl.property.add(p)
+    else:
+        p, _ = Property.objects.get_or_create(
+            parcel = source_data.parcel,
+            state = source_data.state,
+            county = source_data.county,
+            house_number = source_data.house_number,
+            road_name = source_data.road_name,
+            road_type = source_data.road_type,
+            direction = source_data.direction,
+            apt_unit = source_data.apt_unit,
+            extention = source_data.extention,
+            city = source_data.city,
+            defaults={
+                "zip_code": source_data.zip_code,
+            }
+        )
+        Fcl.property.add(p)
+
+    if source_data.u_defendant.exists():
+        for d in source_data.u_defendant.all():
+            Fcl.defendant.add(d)
+    else:
+        d = Contact.objects.create(
+            business_name = source_data.business_name,
+            designation = source_data.designation,
+            name_prefix = source_data.name_prefix,
+            first_name = source_data.first_name,
+            middle_name = source_data.middle_name,
+            last_name= source_data.last_name,
+            name_suffix = source_data.name_suffix,
+        )
+        Fcl.defendant.add(d)
+        for p in Fcl.property.all():
+            d.mailing_address.add(p)
+
+    if source_data.u_plaintiff.exists():
+        for p in source_data.u_plaintiff.all():
+            Fcl.plaintiff.add(p)
+    else:
+        p, _ = ForeclosingEntity.objects.get_or_create(
+            business_name = source_data.plaintiff,
+            defaults={
+            "individual_name": "",
+            "dba": "",
+            }
+        )
+        Fcl.plaintiff.add(p)
+    source_data.update_status = "updated"
+    source_data.save()
+    return Fcl
+
+@transaction.atomic
+def updateForeclosureBulk(id):
+    uploads = Upload.objects.get(pk=id)
+    data_qs = uploads.data.all()
+    data_qs = data_qs.filter(update_status = TemporaryData.CREATED)
+    recordCreated = 0
+    for temp in data_qs.iterator(chunk_size=50):
+    
+        record = updateForeclosure(temp.id)
+        recordCreated += 1
+    return recordCreated
+
+@transaction.atomic
+def createForeclosureBulk(id):
+    uploads = Upload.objects.get(pk=id)
+    data_qs = uploads.data.all()
+    data_qs = data_qs.filter(update_status = TemporaryData.CREATED)
+    recordCreated = 0
+    for temp in data_qs.iterator(chunk_size=50):
+    
+        record = createForeclosure(temp.id)
+        recordCreated += 1
+    return recordCreated
+
+
+
+
+
+
+@require_POST
+@csrf_exempt
+def UploadCUF(request):
+    try:
+        data = json.loads(request.body)
+        record_id = data.get("id")
+        action = data.get("action").strip().lower()
+        volume = data.get("volume").strip().lower()
+        if not record_id:
+            return JsonResponse({"error": "id is required"}, status=400)
+
+        if volume == "single":
+            if action == "create":
+                fcl = createForeclosure(record_id)
+                return JsonResponse({
+                    "success": True,
+                })
+            elif action == "update":
+                fcl = updateForeclosure(record_id)
+                return JsonResponse({
+                    "success": True,
+                })
+        elif volume.strip().lower() == "bulk":
+            if action == "create":
+                fcl = createForeclosureBulk(record_id)
+                return JsonResponse({
+                    "success": True,
+                })
+            elif action == "update":
+                fcl = updateForeclosureBulk(record_id)
+                return JsonResponse({
+                    "success": True,
+                })
+
+
+        return JsonResponse({"status": "success"})
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+    

@@ -32,3 +32,15 @@ class DeliveryReportAdmin(admin.ModelAdmin):
 @admin.register(ProjectIssues)
 class ProjectIssuesAdmin(admin.ModelAdmin):
     list_display = ('type','user','title','description', 'status')
+
+
+
+@admin.register(TemporaryData)
+class TemporaryDataAdmin(admin.ModelAdmin):
+    list_display = ('case_lookup','plaintiff', 'first_name', 'business_name')
+
+
+
+@admin.register(Upload)
+class UploadAdmin(admin.ModelAdmin):
+    list_display = ('id','name','status')

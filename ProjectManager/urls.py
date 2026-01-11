@@ -4,7 +4,14 @@ from . import views
 
 urlpatterns = [
 
-# Urls for Active Case Search Section
+# Urls for Upload Data Section
+path('upload-manager/', views.UploadManager, name="upload-manager"),
+path('create-upload/', views.CreateUpload, name="create-upload"),
+path('preview-data/', views.PreviewData, name="preview-data"),
+path('upload-file/', views.import_foreclosures_from_excel, name="upload-file"),
+path('Upload-CUF/', views.UploadCUF, name="Upload-CUF"),
+
+
 
 # Urls for Active Skiptracing Section
 path('dashboard/', views.ProjectDashboard, name="project_dashboard"),

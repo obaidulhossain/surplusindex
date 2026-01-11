@@ -177,3 +177,117 @@ class ProjectIssues(Timelogger):
     def __str__(self):
         return f"{self.user.username} created a {self.type} issue: {self.title} : {self.description}"
 
+class TemporaryData(Timelogger):
+    NOT_DETERMINED = 'not determined'
+    POSSIBLE_SURPLUS = 'possible surplus'
+    NO_POSSIBLE_SURPLUS = 'no possible surplus'
+    FUND_AVAILABLE = 'fund available'
+    MOTION_FILED = 'motion filed'
+    FUND_CLAIMED = 'fund claimed'
+    NO_SURPLUS = 'no surplus'
+    SURPLUS_STATUS = (
+        (NOT_DETERMINED, 'Not Determined'),
+        (POSSIBLE_SURPLUS, 'Possible Surplus'),
+        (NO_POSSIBLE_SURPLUS, 'No Possible Surplus'),
+        (FUND_AVAILABLE, 'Fund Available'),
+        (MOTION_FILED, 'Motion Filed'),
+        (FUND_CLAIMED, 'Fund Claimed'),
+        (NO_SURPLUS, 'No Surplus'),
+        )
+    ACTIVE = 'pending'
+    SOLD = 'sold'
+    UNSOLD = 'unsold'
+    CANCELLED = 'cancelled'
+    SOLD_TO_PLAINTIFF = 'sold_to_plaintiff'
+    BANKRUPTCY_HOLD = 'bankruptcy_hold'
+    SALE_STATUS = (
+        (ACTIVE, 'Active'),
+        (SOLD, 'Sold'),
+        (UNSOLD, 'Unsold'),
+        (CANCELLED, 'Cancelled'),
+        (SOLD_TO_PLAINTIFF, 'Sold To Plaintiff'),
+        (BANKRUPTCY_HOLD, 'Bankruptcy Hold'),
+    )
+
+    TAX = 'tax'
+    MORTGAGE = 'mortgage'
+    SALE_TYPE = ((TAX, 'Tax'), (MORTGAGE, 'Mortgage'))
+
+    #foreclosure fields
+    state = models.CharField(max_length=225, null=True)
+    county = models.CharField(max_length=225,  null=True)
+    case_number = models.CharField(max_length=255, null=True, blank=True, verbose_name='Case Number')
+    case_number_ext = models.CharField(max_length=10, blank=True, verbose_name='Case Extension',default="")
+    sale_date = models.DateField(blank=True, null=True)
+    sale_type = models.CharField(max_length=225, choices=SALE_TYPE, null=True, blank=True)
+    appraised_value = models.DecimalField(decimal_places=2, max_digits=15, null=True, blank=True)
+    fcl_final_judgment = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
+    sale_price = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
+    possible_surplus = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
+    verified_surplus = models.DecimalField(decimal_places=2, max_digits=10, null=True, blank=True)
+    sale_status = models.CharField(max_length=225, choices=SALE_STATUS, null=True, blank=True)
+    surplus_status = models.CharField(max_length=100, choices=SURPLUS_STATUS, default="Not Determined", null=True, blank=True)
+    notes = models.TextField(blank=True, null=True)
+    auction_source = models.CharField(max_length=255, null=True, blank=True)
+    case_lookup = models.CharField(max_length=255, blank=True)
+    #property fields
+    parcel = models.CharField(max_length=255, blank=True, verbose_name='Parcel ID')
+    house_number = models.CharField(max_length=255, blank=True, verbose_name='House')
+    road_name = models.CharField(max_length=255, blank=True, verbose_name='Road')
+    road_type = models.CharField(max_length=255, blank=True, verbose_name='Road Type')
+    direction = models.CharField(max_length=255, blank=True, verbose_name='Direction')
+    apt_unit = models.CharField(max_length=255, blank=True, verbose_name='Apartment/Unit')
+    extention = models.CharField(max_length=255, blank=True, verbose_name='Extension')
+    city = models.CharField(max_length=255, blank=True, verbose_name='City')
+    zip_code = models.CharField(max_length=255, blank=True, verbose_name='Zip')
+    
+    #plaintiff fields
+    plaintiff = models.CharField(max_length=255, blank=True)
+    #defendant fields
+    business_name = models.CharField(max_length=255, blank=True, verbose_name='Business Name')
+    designation = models.CharField(max_length=100, blank=True, verbose_name='Designation')
+    name_prefix = models.CharField(max_length=10, blank=True, verbose_name='Prefix')
+    first_name = models.CharField(max_length=255, blank=True, verbose_name='First Name')
+    middle_name = models.CharField(max_length=255, blank=True, verbose_name='Middle Name')
+    last_name = models.CharField(max_length=255, blank=True, verbose_name='Last Name')
+    name_suffix = models.CharField(max_length=10, blank=True, verbose_name='Suffix')
+    s_foreclosure = models.ManyToManyField(Foreclosure, blank=True, related_name="suggested_fcl")
+    s_property = models.ManyToManyField(Property, blank=True, related_name="suggested_prop")
+    s_defendant = models.ManyToManyField(Contact, blank=True, related_name="suggested_def")
+    s_plaintiff = models.ManyToManyField(ForeclosingEntity, blank=True, related_name="suggested_plt")
+    u_foreclosure = models.ManyToManyField(Foreclosure, blank=True, related_name="update_fcl")
+    u_property = models.ManyToManyField(Property, blank=True, related_name="update_prop")
+    u_defendant = models.ManyToManyField(Contact, blank=True, related_name="update_def")
+    u_plaintiff = models.ManyToManyField(ForeclosingEntity, blank=True, related_name="update_plt")
+    
+    CREATED = 'created'
+    UPDATED = 'updated'
+    DATA_STATUS = ((CREATED, 'Created'), (UPDATED, 'Updated'))
+    update_status = models.CharField(max_length=255,choices=DATA_STATUS, blank=True, default="created")
+    
+    NEW = 'new'
+    EXIST = 'exist'
+    AVAILABILITY = ((NEW, 'New'), (EXIST, 'Exist'))
+    update_type = models.CharField(max_length=255,choices=AVAILABILITY, blank=True, default="new")
+    @property
+    def full_address (self):
+        street_parts = [
+                self.house_number,
+                self.road_name,
+                self.road_type,
+                self.direction,
+                self.apt_unit,
+                self.extention,
+            ]
+        full_street = " ".join(filter(None, [part.strip() for part in street_parts if part]))
+        return f"{full_street}, {self.city}, {self.state} {self.zip_code}"
+        
+
+class Upload(Timelogger):
+    name = models.CharField(max_length=255)
+    data = models.ManyToManyField(TemporaryData)
+    
+    PENDING = 'pending'
+    COMPLETED = 'completed'
+    STATUS = ((PENDING, 'Pending'), (COMPLETED, 'Completed'))
+    status = models.CharField(max_length=255,choices=STATUS, default="pending")

@@ -1,6 +1,19 @@
 //--------------Update task status function------------
 // select id must contain the task id. Use the function 
-
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 function update_task_status(taskId) {
     const select = document.getElementById(`update_status_${taskId}`);
     const status = document.getElementById(`update_status_${taskId}`).value;
@@ -98,17 +111,42 @@ function assignSkiptrace(select, lead_id) {
             }
         });
 }
-function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';');
-        for (let cookie of cookies) {
-            cookie = cookie.trim();
-            if (cookie.startsWith(name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                break;
+
+
+// this function will save any fields in Foreclosure model
+// use it like...............
+// <input type="text" onchange="saveField('{{ i.id }}', 'case_status', this)" value="{{ i.case_status }}">
+// <input type="date" onchange="saveField('{{ i.id }}', 'sale_date', this)" value="{{ i.sale_date }}">
+// <select onchange="saveField('{{ i.id }}', 'sale_status', this)">
+function Upload_CUF(id, action, volume, event, input) {
+    event.preventDefault();
+
+    input.style.transition = "background 0.3s";
+    input.style.background = "#fdd9b2ff"; // yellow-light
+    input.value = "Processing..."
+
+    fetch(`/Project-Manager/Upload-CUF/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({ id, action, volume })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                input.style.transition = "background 0.5s";
+                input.style.background = "#dfffabff"; // green
+                setTimeout(() => {
+                    input.style.background = "#17d080ff";
+                    input.value = "Completed"
+                    input.disabled = true;
+                }, 800);
+            } else {
+                // 4️⃣ Optional: flash red on error
+                input.style.background = "#f7a8a8ff"; // red
+                input.value = "Failed";
             }
-        }
-    }
-    return cookieValue;
+        });
 }

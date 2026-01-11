@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from Admin.utils.threadlocal import get_current_user
+from builtins import property as builtin_property
 # ----- CHOICES FOR GLOBAL USE -------------------------------- # 
 ACTIVE = 'active'                                               # 
 INACTIVE = 'inactive'                                           # 
@@ -326,6 +327,9 @@ class Foreclosure(OperationStat):
 
     def __str__(self):
         return f"{self.case_number} | {self.state} {self.county}"
+    @builtin_property
+    def fcl_case_lookup(self):
+        return " : ".join( v.strip() for v in [self.state, self.county, self.case_number, self.case_number_ext,] if v )
 
 
 

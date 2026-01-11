@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% block title %}
+Manage Uploads{% endblock title %}
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/client.css' %}" rel="stylesheet">
+
+<div class="body-section">
+    <div class="client-sec-header" style="margin-top:0px;">
+        <h4>All Uploads</h4>
+        <div>
+        <form method="POST" action="{% url 'create-upload' %}" class="inline-form">
+        {% csrf_token %}
+            <input type="text" name="upload-name" placeholder="Name your New Upload">
+            <input type="submit" class="button" value="Upload New">
+        </form>
+        
+        </div>
+    </div>
+    <div class="table-wrapper" style="max-height:600px;">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                <th>UID</th>
+                <th>Created in</th>
+                <th>Name</th>
+                <th>Total Leads</th>
+                <th>Pending</th>
+                <th>Updated</th>
+                <th>Status</th>
+                <th>Preview Data</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for u in alluploads %}
+            <tr>
+                <td>{{u.id}}</td>
+                <td>{{u.created_at|date:"m/d/Y"}}</td>
+                <td>{{u.name}}</td>
+                <td>{{u.total}}</td>
+                <td>{{u.pending}}</td>
+                <td>{{u.completed}}</td>
+                <td>{{u.get_status_display}}</td>
+                <td>
+                    <form method="POST" action="{% url 'preview-data' %}">
+                    {% csrf_token %}
+                        <input type="hidden" value="{{u.id}}" name="UID">
+                        <input type="submit" value="Preview" class="button">
+                    </form>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+
+
+
+
+
+<script src="{% static 'js/Client.js' %}"></script>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
+<script src="{% static 'js/ProjectManager.js' %}"></script>
+{% endblock content %}
