@@ -1377,7 +1377,7 @@ def import_foreclosures_from_excel(request):
             "sale_status": normalize_choice(row.get("SALE_STATUS")),
             "surplus_status": normalize_choice(row.get("SURPLUS_STATUS")),
             "notes": clean_str(row.get("NOTES")),
-            "auction_source": clean_str(row.get("AUCTION_SOURCE")),
+            "auction_source": row.get("AUCTION_SOURCE"),
             "parcel": clean_str(row.get("A_PARCEL")),
             "house_number": clean_str(row.get("A_HOUSE")),
             "road_name": clean_str(row.get("A_STREET")),
@@ -1514,7 +1514,36 @@ def createForeclosure(id):
         for d in source_data.u_defendant.all():
             Fcl.defendant.add(d)
     else:
-        d = Contact.objects.create(
+        check_sq_qs = Foreclosure.objects.filter(state=source_data.state, county=source_data.county, case_number=source_data.case_number)
+        for sq_fcl in check_sq_qs:
+            get_sq_def = sq_fcl.defendant.filter(
+                business_name=source_data.business_name,
+                designation=source_data.designation,
+                name_prefix=source_data.name_prefix,
+                first_name=source_data.first_name,
+                middle_name=source_data.middle_name,
+                last_name=source_data.last_name,
+                name_suffix=source_data.name_suffix,
+            )
+
+            if get_sq_def.exists():
+                Fcl.defendant.add(*get_sq_def)
+        # for sq_fcl in check_sq_qs:
+        #     sq_defs =  sq_fcl.defendant.all()
+        #     get_sq_def = sq_defs.filter(
+        #         business_name = source_data.business_name,
+        #         designation = source_data.designation,
+        #         name_prefix = source_data.name_prefix,
+        #         first_name = source_data.first_name,
+        #         middle_name = source_data.middle_name,
+        #         last_name= source_data.last_name,
+        #         name_suffix = source_data.name_suffix,
+        #         )
+        #     if get_sq_def.exists():
+        #         Fcl.defendant.add(*get_sq_def)
+        Fcl.refresh_from_db()
+
+        def_added_qs = Fcl.defendant.filter(
             business_name = source_data.business_name,
             designation = source_data.designation,
             name_prefix = source_data.name_prefix,
@@ -1523,9 +1552,21 @@ def createForeclosure(id):
             last_name= source_data.last_name,
             name_suffix = source_data.name_suffix,
         )
-        Fcl.defendant.add(d)
-        for p in Fcl.property.all():
-            d.mailing_address.add(p)
+        if not def_added_qs.exists():
+
+            d = Contact.objects.create(
+                business_name = source_data.business_name,
+                designation = source_data.designation,
+                name_prefix = source_data.name_prefix,
+                first_name = source_data.first_name,
+                middle_name = source_data.middle_name,
+                last_name= source_data.last_name,
+                name_suffix = source_data.name_suffix,
+            )
+            Fcl.defendant.add(d)
+            for p in Fcl.property.all():
+                d.mailing_address.add(p)
+
 
     if source_data.u_plaintiff.exists():
         for p in source_data.u_plaintiff.all():
@@ -1610,4 +1651,32 @@ def UploadCUF(request):
         return JsonResponse({"status": "success"})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-    
+from django.apps import apps
+@require_POST
+@csrf_exempt
+def markInstance(request):
+    try:
+        data = json.loads(request.body)
+        model_name = data.get("model")              # "Property"
+        field_name = data.get("field")              # "u_property"
+        source_id = data.get("source")              # property id
+        destination_id = data.get("destination")    # TemporaryData id
+        # Resolve model dynamically
+        Model = apps.get_model("propertydata", model_name)
+
+        instance = Model.objects.get(pk=source_id)
+        to_update = TemporaryData.objects.get(pk=destination_id)
+
+        # Resolve M2M field dynamically
+        m2m_field = getattr(to_update, field_name)
+        if m2m_field.filter(pk=instance.pk).exists():
+            m2m_field.remove(instance)
+        else:
+            m2m_field.add(instance)
+
+        return JsonResponse({"success": True})
+
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+        
+        

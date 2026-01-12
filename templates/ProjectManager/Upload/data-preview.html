@@ -98,17 +98,54 @@ Preview Data
                     <td>{{d.notes}}</td>
                     <td>{{d.auction_source}}</td>
                     <td></td>
-                    <td>
-                        {{d.full_address}}
-                        {% for addr in d.s_property.all %}
-                        </br>{{addr}}
-                        {% endfor %}
+                    <td class="address-preview">
+                        <div class="main-address">
+                            {{ d.full_address }}
+                        </div>
+
+                        <div class="property-list">
+                            {% for addr in d.s_property.all %}
+                                <label class="property-row">
+                                    <input type="checkbox" onchange="markInstance(this, 'Property', 'u_property', {{ addr.id }}, {{ d.id }})"
+                                    {% if addr in d.u_property.all %}
+                                    checked
+                                    {% endif %}>
+                                    <span class="property-text">{{ addr }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
                     </td>
-                    <td>{{d.}}</td>
-                    <td>{{d.}}</td>
+                    <td class="address-preview">
+                        <div class="main-address">
+                            {{ d.full_defendant }}
+                        </div>
+
+                        <div class="property-list">
+                            {% for def in d.s_defendant.all %}
+                                <label class="property-row">
+                                    <input type="checkbox" onchange="markInstance(this, 'Contact', 'u_defendant', {{ def.id }}, {{ d.id }})"{% if def in d.u_defendant.all %}checked{% endif %}>
+                                    <span class="property-text">{{ def }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td class="address-preview">
+                        <div class="main-address">
+                            {{ d.plaintiff }}
+                        </div>
+
+                        <div class="property-list">
+                            {% for plt in d.s_plaintiff.all %}
+                                <label class="property-row">
+                                    <input type="checkbox" onchange="markInstance(this, 'ForeclosingEntity', 'u_plaintiff', {{ plt.id }}, {{ d.id }})"{% if plt in d.u_plaintiff.all %}checked{% endif %}>
+                                    <span class="property-text">{{ plt }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </td>
                     <td>
                     {% if d.s_foreclosure.all.count < 1 %}
-                        <input type="submit" class="button" onclick="Upload_CUF({{d.id}}, 'create', 'single', event, this)" value="Create">
+                        <input type="submit" class="button" onclick="Upload_CUF({{d.id}}, 'create', 'single', event, this)"{% if d.update_status == "updated" %}value="Created" disabled{% else %}value="Create"{% endif %}>
                     {% endif %}
                     </td>
 

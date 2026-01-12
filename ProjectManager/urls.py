@@ -10,6 +10,7 @@ path('create-upload/', views.CreateUpload, name="create-upload"),
 path('preview-data/', views.PreviewData, name="preview-data"),
 path('upload-file/', views.import_foreclosures_from_excel, name="upload-file"),
 path('Upload-CUF/', views.UploadCUF, name="Upload-CUF"),
+path('mark-Instance/', views.markInstance, name="mark-Instance"),
 
 
 

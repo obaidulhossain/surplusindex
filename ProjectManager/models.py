@@ -251,6 +251,7 @@ class TemporaryData(Timelogger):
     middle_name = models.CharField(max_length=255, blank=True, verbose_name='Middle Name')
     last_name = models.CharField(max_length=255, blank=True, verbose_name='Last Name')
     name_suffix = models.CharField(max_length=10, blank=True, verbose_name='Suffix')
+
     s_foreclosure = models.ManyToManyField(Foreclosure, blank=True, related_name="suggested_fcl")
     s_property = models.ManyToManyField(Property, blank=True, related_name="suggested_prop")
     s_defendant = models.ManyToManyField(Contact, blank=True, related_name="suggested_def")
@@ -281,6 +282,32 @@ class TemporaryData(Timelogger):
             ]
         full_street = " ".join(filter(None, [part.strip() for part in street_parts if part]))
         return f"{full_street}, {self.city}, {self.state} {self.zip_code}"
+    @property
+    def full_defendant (self):
+        name_parts = [
+                self.name_prefix,
+                self.first_name,
+                self.middle_name,
+                self.last_name,
+                self.name_suffix,
+            ]
+        full_name = " ".join(filter(None, [part.strip() for part in name_parts if part]))
+        designation = self.designation.strip() if self.designation else ""
+        business = self.business_name.strip() if self.business_name else ""
+
+        # Build the final string smartly
+        if designation and business:
+            return f"{full_name} : {designation} : {business}"
+        elif designation:
+            return f"{full_name} : {designation}"
+        elif business:
+            if full_name:
+                return f"{full_name} : {business}"
+            else:
+                return business
+        else:
+            return full_name or "Unnamed Contact"
+        
         
 
 class Upload(Timelogger):

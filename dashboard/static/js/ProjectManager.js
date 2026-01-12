@@ -150,3 +150,30 @@ function Upload_CUF(id, action, volume, event, input) {
             }
         });
 }
+
+function markInstance(el, model, field, source, destination) {
+    const label = el.closest(".property-row");
+    fetch(`/Project-Manager/mark-Instance/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({ model, field, source, destination })
+    })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                label.style.transition = "background 0.5s";
+                label.style.background = "#ebe95bff"; // green
+                setTimeout(() => {
+                    label.style.transition = "background 0.5s";
+                    label.style.background = "#dcf8afff"; // green
+                }, 800);
+            } else {
+                // 4️⃣ Optional: flash red on error
+                label.style.background = "#f7a8a8ff"; // red
+                console.error(data.error);
+            }
+        });
+}

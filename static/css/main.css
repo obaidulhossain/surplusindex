@@ -292,6 +292,18 @@ a.sidebar-link:hover {
     transition: all .2s ease-out;
 }
 
+.sidebar-item.active>.sidebar-link {
+    background-color: #5c6a7e;
+    color: #ffffff;
+    font-weight: bold;
+    border-left: 5px solid #08c88e;
+}
+
+.sidebar-item.child.active>.sidebar-link {
+    background-color: #374151;
+    color: #ffffff;
+}
+
 /* a span {
     margin: 2px 5px;
     position: absolute;
@@ -457,4 +469,26 @@ a.sidebar-link:hover {
 
 .suggestions div:hover {
     background: #f0f0f0;
+}
+
+@keyframes blinkBorder {
+    0% {
+        border-color: #ff4d4d;
+        box-shadow: 0 0 5px #ff4d4d;
+    }
+
+    50% {
+        border-color: transparent;
+        box-shadow: none;
+    }
+
+    100% {
+        border-color: #ff4d4d;
+        box-shadow: 0 0 5px #ff4d4d;
+    }
+}
+
+.blink-border {
+    border: 2px solid #ff4d4d !important;
+    animation: blinkBorder 1.2s infinite;
 }

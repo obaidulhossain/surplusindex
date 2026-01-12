@@ -1043,3 +1043,57 @@ table.table .avatar {
     border-radius: 5px;
     padding: 10px;
 }
+
+.inline-form {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.inline-form input[type="text"] {
+    flex: 1;
+}
+
+.inline-form input[type="file"] {
+    flex: 1;
+    float: left;
+    border: none !important;
+}
+
+
+.address-preview {
+    padding: 0 10px;
+    text-align: left;
+    vertical-align: top;
+}
+
+.main-address {
+
+    text-align-last: left;
+    padding: 0px 35px;
+}
+
+
+.property-list {
+    font-weight: 600;
+    display: flex;
+    flex-direction: column;
+    padding: 0px 10px;
+}
+
+.property-row {
+    display: flex;
+    align-items: center;
+    /* vertical centering */
+    gap: 8px;
+    cursor: pointer;
+}
+
+.property-row input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+}
+
+.property-text {
+    line-height: 1.4;
+}
