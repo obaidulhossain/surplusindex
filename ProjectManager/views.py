@@ -1474,7 +1474,7 @@ def createForeclosure(id):
         case_number = source_data.case_number,
         case_number_ext = source_data.case_number_ext,
     )
-    if fcl_qs.exist():
+    if fcl_qs.exists():
         Fcl = fcl_qs.first()
     else:
         Fcl = Foreclosure.objects.create(
