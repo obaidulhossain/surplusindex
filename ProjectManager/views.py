@@ -1468,32 +1468,39 @@ def updateForeclosure(id):
 @transaction.atomic    
 def createForeclosure(id):
     source_data = TemporaryData.objects.get(pk=id)
-    Fcl, _ = Foreclosure.objects.get_or_create(
+    fcl_qs = Foreclosure.objects.filter(
         state = source_data.state,
         county = source_data.county,
         case_number = source_data.case_number,
         case_number_ext = source_data.case_number_ext,
-        defaults={
-            "sale_date": source_data.sale_date,
-            "sale_type": source_data.sale_type,
-            "appraised_value": source_data.appraised_value,
-            "fcl_final_judgment": source_data.fcl_final_judgment,
-            "sale_price": source_data.sale_price,
-            "possible_surplus": source_data.possible_surplus,
-            "verified_surplus": source_data.verified_surplus,
-            "sale_status": source_data.sale_status,
-            "surplus_status": source_data.surplus_status,
-            "notes": source_data.notes,
-            "auction_source": source_data.auction_source,
-        }
     )
+    if fcl_qs.exist():
+        Fcl = fcl_qs.first()
+    else:
+        Fcl = Foreclosure.objects.create(
+            state = source_data.state,
+            county = source_data.county,
+            case_number = source_data.case_number,
+            case_number_ext = source_data.case_number_ext,
+            sale_date = source_data.sale_date,
+            sale_type = source_data.sale_type,
+            appraised_value = source_data.appraised_value,
+            fcl_final_judgment = source_data.fcl_final_judgment,
+            sale_price = source_data.sale_price,
+            possible_surplus = source_data.possible_surplus,
+            verified_surplus = source_data.verified_surplus,
+            sale_status = source_data.sale_status,
+            surplus_status = source_data.surplus_status,
+            notes = source_data.notes,
+            auction_source = source_data.auction_source,
+        )
 
     
     if source_data.u_property.exists():
         for p in source_data.u_property.all():
             Fcl.property.add(p)
     else:
-        p, _ = Property.objects.get_or_create(
+        prop_qs = Property.objects.filter(
             parcel = source_data.parcel,
             state = source_data.state,
             county = source_data.county,
@@ -1504,16 +1511,31 @@ def createForeclosure(id):
             apt_unit = source_data.apt_unit,
             extention = source_data.extention,
             city = source_data.city,
-            defaults={
-                "zip_code": source_data.zip_code,
-            }
+            zip_code = source_data.zip_code,
         )
+        if prop_qs.exists():
+            p=prop_qs.first()
+        else:
+            p = Property.objects.create(
+                parcel = source_data.parcel,
+                state = source_data.state,
+                county = source_data.county,
+                house_number = source_data.house_number,
+                road_name = source_data.road_name,
+                road_type = source_data.road_type,
+                direction = source_data.direction,
+                apt_unit = source_data.apt_unit,
+                extention = source_data.extention,
+                city = source_data.city,
+                zip_code = source_data.zip_code,
+            )
         Fcl.property.add(p)
 
     if source_data.u_defendant.exists():
         for d in source_data.u_defendant.all():
             Fcl.defendant.add(d)
     else:
+        # lookup for defendant in sequense 
         check_sq_qs = Foreclosure.objects.filter(state=source_data.state, county=source_data.county, case_number=source_data.case_number)
         for sq_fcl in check_sq_qs:
             get_sq_def = sq_fcl.defendant.filter(
@@ -1528,21 +1550,9 @@ def createForeclosure(id):
 
             if get_sq_def.exists():
                 Fcl.defendant.add(*get_sq_def)
-        # for sq_fcl in check_sq_qs:
-        #     sq_defs =  sq_fcl.defendant.all()
-        #     get_sq_def = sq_defs.filter(
-        #         business_name = source_data.business_name,
-        #         designation = source_data.designation,
-        #         name_prefix = source_data.name_prefix,
-        #         first_name = source_data.first_name,
-        #         middle_name = source_data.middle_name,
-        #         last_name= source_data.last_name,
-        #         name_suffix = source_data.name_suffix,
-        #         )
-        #     if get_sq_def.exists():
-        #         Fcl.defendant.add(*get_sq_def)
         Fcl.refresh_from_db()
-
+            # lookup for defendant in sequense ----------------end
+        # lookup for defendant duplicate entry for property or plaintiff
         def_added_qs = Fcl.defendant.filter(
             business_name = source_data.business_name,
             designation = source_data.designation,
@@ -1553,18 +1563,16 @@ def createForeclosure(id):
             name_suffix = source_data.name_suffix,
         )
         if not def_added_qs.exists():
-
-            d, _ = Contact.objects.get_or_create(
+        
+            d = Contact.objects.create(
                 business_name = source_data.business_name,
-                defaults={
-                    "designation" : source_data.designation,
-                    "name_prefix" : source_data.name_prefix,
-                    "first_name" : source_data.first_name,
-                    "middle_name" : source_data.middle_name,
-                    "last_name" : source_data.last_name,
-                    "name_suffix" : source_data.name_suffix,
-                }
-            )
+                designation = source_data.designation,
+                name_prefix = source_data.name_prefix,
+                first_name = source_data.first_name,
+                middle_name = source_data.middle_name,
+                last_name = source_data.last_name,
+                name_suffix = source_data.name_suffix,
+                )
             Fcl.defendant.add(d)
             for p in Fcl.property.all():
                 d.mailing_address.add(p)
@@ -1574,13 +1582,11 @@ def createForeclosure(id):
         for p in source_data.u_plaintiff.all():
             Fcl.plaintiff.add(p)
     else:
-        p, _ = ForeclosingEntity.objects.get_or_create(
-            business_name = source_data.plaintiff,
-            defaults={
-            "individual_name": "",
-            "dba": "",
-            }
-        )
+        plt_qs = ForeclosingEntity.objects.filter(business_name=source_data.plaintiff)
+        if plt_qs.exists():
+            p = plt_qs.first()
+        else:
+            p = ForeclosingEntity.objects.create(business_name = source_data.plaintiff)
         Fcl.plaintiff.add(p)
     source_data.update_status = "updated"
     source_data.save()
