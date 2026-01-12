@@ -1554,14 +1554,16 @@ def createForeclosure(id):
         )
         if not def_added_qs.exists():
 
-            d = Contact.objects.create(
+            d, _ = Contact.objects.get_or_create(
                 business_name = source_data.business_name,
-                designation = source_data.designation,
-                name_prefix = source_data.name_prefix,
-                first_name = source_data.first_name,
-                middle_name = source_data.middle_name,
-                last_name= source_data.last_name,
-                name_suffix = source_data.name_suffix,
+                defaults={
+                    "designation" : source_data.designation,
+                    "name_prefix" : source_data.name_prefix,
+                    "first_name" : source_data.first_name,
+                    "middle_name" : source_data.middle_name,
+                    "last_name" : source_data.last_name,
+                    "name_suffix" : source_data.name_suffix,
+                }
             )
             Fcl.defendant.add(d)
             for p in Fcl.property.all():
