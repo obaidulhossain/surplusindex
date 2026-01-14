@@ -1097,3 +1097,22 @@ table.table .avatar {
 .property-text {
     line-height: 1.4;
 }
+
+/* Row highlight */
+tr.active-row>td {
+    background-color: #f4f288 !important;
+    /* soft yellow */
+}
+
+/* Save button highlight when row is dirty */
+.save-button.dirty {
+    background-color: #dc3545;
+    color: #fff;
+    border-color: #dc3545;
+}
+
+.save-button.saved {
+    background-color: #ece43d;
+    color: #000000;
+    border-color: #e8c828;
+}

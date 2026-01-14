@@ -50,14 +50,15 @@ function saveRow(button) {
         .then(data => {
             if (data.status === 'success') {
                 // Change button style to indicate success
-                button.innerHTML = "Saved!";
+                button.innerHTML = "Saved";
                 button.style.transition = "background-color 0.3s ease, color 0.3s ease";
                 button.style.backgroundColor = "#4CAF50"; // Green background
                 button.style.color = "#fff"; // White text
 
                 // Reset the button after a short delay
                 setTimeout(() => {
-                    button.innerHTML = "Save";
+                    button.classList.add("saved");
+                    button.classList.remove("dirty");
                     button.style.backgroundColor = ""; // Reset to original background
                     button.style.color = ""; // Reset to original text color
                 }, 1500); // Reset after 1.5 seconds

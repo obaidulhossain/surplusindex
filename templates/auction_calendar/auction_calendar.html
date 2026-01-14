@@ -184,6 +184,44 @@ Auction Calendar
         </form>
 
     </div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    let activeRow = null;
+
+    // ROW CLICK → highlight only one row
+    document.querySelectorAll("#leads-table tbody tr").forEach(row => {
+        row.addEventListener("click", function (e) {
+
+            // Ignore clicks on buttons / inputs so they still work
+            if (e.target.tagName === "INPUT" || e.target.tagName === "BUTTON") {
+                return;
+            }
+
+            if (activeRow) {
+                activeRow.classList.remove("active-row");
+            }
+
+            this.classList.add("active-row");
+            activeRow = this;
+        });
+    });
+
+    // INPUT CHANGE → highlight save button of that row
+    document.querySelectorAll("#leads-table tbody tr input[type='date']").forEach(input => {
+        input.addEventListener("change", function () {
+            const row = this.closest("tr");
+            const saveBtn = row.querySelector(".save-button");
+
+            if (saveBtn) {
+                saveBtn.classList.add("dirty");
+            }
+        });
+    });
+
+});
+
+</script>
     <script src="{% static 'js/nouislider.min.js' %}"></script>
     <script src="{% static 'js/Surplusindex.js' %}"></script>
     <script src="{% static 'js/auction_calendar.js' %}"></script>
