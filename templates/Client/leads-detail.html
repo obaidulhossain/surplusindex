@@ -39,8 +39,8 @@ Leads Detail
                         <td>{{status_instance.lead.county|title}}</td>
                         <td>{{status_instance.lead.case_number|upper}}</td>
                         <td>{{status_instance.lead.sale_date|date:"m/d/Y"}}</td>
-                        <td>{{status_instance.lead.sale_type|title}}</td>
-                        <td>{{status_instance.lead.sale_status|title}}</td>
+                        <td>{{status_instance.lead.get_sale_type_display}}</td>
+                        <td>{{status_instance.lead.get_sale_status_display}}</td>
                     </tr>
                 <tbody>
             </table>
@@ -98,7 +98,8 @@ Leads Detail
         </div>
     </div>
 </div>
-<div style="margin-top: 20px;" class="body-section">
+{% comment %} 
+<div style="margin-top: 20px;" class="body-section"> 
     <div class="client-sec-header">
         <h4>Prospecting Timeline</h4>
     </div>
@@ -130,7 +131,7 @@ Leads Detail
                 <div class="section-body-full">
                     <div class="onehalf" style="padding:10px;">
                         <label for="Pros_Status" >Lead Assignment Status</label>
-                        {% comment %} <select onchange="UpdateStatus(this)" name="find_contact_status" id="Pros_Status" for="find_contact_status" style="width:100%;"> {% endcomment %}
+                        
                         <select onchange="PostStatus(this, 'find_contact_status', this.id, 'Find Contact > Assignment')" id="Pros_Status" style="width:100%;">
                             <option value="not_assigned" {% if status_instance.find_contact_status == "not_assigned" %}selected{% endif %}>Not Assigned</option>
                             <option value="assigned" {% if status_instance.find_contact_status == "assigned" %}selected{% endif %}>Assigned</option>
@@ -553,7 +554,7 @@ Leads Detail
         }
     });
 </script>
-
+ {% endcomment %}
 
 </br>
 </br>
