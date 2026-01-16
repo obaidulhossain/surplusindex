@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'ProjectManager',
     'Communication',
     'CustomDelivery',
+    'Automation',
     
 ]
 

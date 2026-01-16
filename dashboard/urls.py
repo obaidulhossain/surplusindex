@@ -25,6 +25,7 @@ urlpatterns = [
     path('media-manager/', include('media_manager.urls')),
     path('Project-Manager/', include('ProjectManager.urls')),
     path('AllSettings/', include('AllSettings.urls')),
+    path('Automation/', include('Automation.urls')),
     path('', include('Admin.urls')),
     path('', include('Admin_Client.urls')),
     path('', include('Assistance.urls')),

@@ -1459,10 +1459,15 @@ def updateForeclosure(id):
 
         for field, value in data.items():
             setattr(fcl, field, value)
+        if source_data.notes:
+            if fcl.notes:
+                fcl.notes = f"{fcl.notes}\n{source_data.notes}"
+            else:
+                fcl.notes = source_data.notes
 
-        fcl.save(update_fields=fields_to_copy)
+        fcl.save(update_fields=fields_to_copy + ["notes"])
         source_data.update_status = "updated"
-        source_data.save()
+        source_data.save(update_fields=["update_status"])
         return fcl
 
 @transaction.atomic    
