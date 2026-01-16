@@ -123,22 +123,22 @@ Project Dashboard
                     <div class="filter-item-section" style="text-align-last: left;">
                         <h5>Sale Status</h5></br></br>
 
-                        <input type="checkbox" name="sale_status_active" value="Active" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusACTIVE == "Active" %}checked{% endif %}>
+                        <input type="checkbox" name="sale_status_active" value="active" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusACTIVE == "active" %}checked{% endif %}>
                         <label style="vertical-align: middle;">Active</label></br>
 
-                        <input type="checkbox" name="sale_status_sold" value="Sold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusSOLD == "Sold" %}checked{% endif %}>
+                        <input type="checkbox" name="sale_status_sold" value="sold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusSOLD == "sold" %}checked{% endif %}>
                         <label style="vertical-align: middle;">Sold</label></br>
 
-                        <input type="checkbox" name="sale_status_unsold" value="Unsold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusUNSOLD == "Unsold" %}checked{% endif %}>
+                        <input type="checkbox" name="sale_status_unsold" value="unsold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusUNSOLD == "unsold" %}checked{% endif %}>
                         <label style="vertical-align: middle;">Unsold</label></br>
 
-                        <input type="checkbox" name="sale_status_soldtoplaintiff" value="Sold To Plaintiff" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusSOLDTOPLT == "Sold To Plaintiff" %}checked{% endif %}>
+                        <input type="checkbox" name="sale_status_soldtoplaintiff" value="sold to plaintiff" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusSOLDTOPLT == "sold to plaintiff" %}checked{% endif %}>
                         <label style="vertical-align: middle;">Sold To Plaintiff</label></br>
 
-                        <input type="checkbox" name="sale_status_bankruptcy" value="Bankruptcy Hold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusBANKRUPTCY == "Bankruptcy Hold" %}checked{% endif %}>
+                        <input type="checkbox" name="sale_status_bankruptcy" value="bankruptcy hold" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusBANKRUPTCY == "bankruptcy hold" %}checked{% endif %}>
                         <label style="vertical-align: middle;">Bankruptcy Hold</label></br>
                         
-                        <input type="checkbox" name="sale_status_canceled" value="Cancelled" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusCANCELED == "Cancelled" %}checked{% endif %}>
+                        <input type="checkbox" name="sale_status_canceled" value="cancelled" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if saleStatusCANCELED == "cancelled" %}checked{% endif %}>
                         <label style="vertical-align: middle;">Cancelled</label></br>
 
                     </div></br>
@@ -147,25 +147,25 @@ Project Dashboard
                     <div class="filter-item-section" style="text-align-last: left;">
                         <h5>Surplus Status</h5></br></br>
                     
-                        <input type="checkbox" name="status_nd" value="Not Determined" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusND == "Not Determined" %}checked{% endif %}>
+                        <input type="checkbox" name="status_nd" value="not determined" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusND == "not determined" %}checked{% endif %}>
                         <label style="vertical-align: middle;" for="show_hidden">Not Determined</label></br>
 
-                        <input type="checkbox" name="status_ps" value="Possible Surplus" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusPS == "Possible Surplus" %}checked{% endif %}>
+                        <input type="checkbox" name="status_ps" value="possible surplus" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusPS == "possible surplus" %}checked{% endif %}>
                         <label style="vertical-align: middle;" for="show_hidden">Possible Surplus</label></br>
 
-                        <input type="checkbox" name="status_nps" value="No Possible Surplus" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusNPS == "No Possible Surplus" %}checked{% endif %}>
+                        <input type="checkbox" name="status_nps" value="no possible surplus" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusNPS == "no possible surplus" %}checked{% endif %}>
                         <label style="vertical-align: middle;" for="show_hidden">No Possible Surplus</label></br>
 
-                        <input type="checkbox" name="status_fa" value="Fund Available" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusFA == "Fund Available" %}checked{% endif %}>
+                        <input type="checkbox" name="status_fa" value="fund available" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusFA == "fund available" %}checked{% endif %}>
                         <label style="vertical-align: middle;" for="show_hidden">Fund Available</label></br>
 
-                        <input type="checkbox" name="status_mf" value="Motion Filed" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusMF == "Motion Filed" %}checked{% endif %}>
+                        <input type="checkbox" name="status_mf" value="motion filed" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusMF == "motion filed" %}checked{% endif %}>
                         <label style="vertical-align: middle;" for="show_hidden">Motion Filed</label></br>
 
-                        <input type="checkbox" name="status_fc" value="Fund Claimed" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusFC == "Fund Claimed" %}checked{% endif %}>
+                        <input type="checkbox" name="status_fc" value="fund claimed" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusFC == "fund claimed" %}checked{% endif %}>
                         <label style="vertical-align: middle;" for="show_hidden">Fund Claimed</label></br>
 
-                        <input type="checkbox" name="status_ns" value="No Surplus" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusNS == "No Surplus" %}checked{% endif %}>
+                        <input type="checkbox" name="status_ns" value="no surplus" style="vertical-align: middle; width: 20px;" onchange="this.form.submit()" {% if surplusStatusNS == "no surplus" %}checked{% endif %}>
                         <label style="vertical-align: middle;" for="show_hidden">No Surplus</label></br>
                     </div>
                 </div>
@@ -244,12 +244,12 @@ Project Dashboard
                             <td>
                                 <select onchange="saveField('{{ i.id }}', 'sale_status', this)">
                                     <option>No Status</option>
-                                    <option value="Active" {% if i.sale_status == "Active" or i.sale_status == "pending" %}selected{% endif %}>Active</option>
-                                    <option value="Sold" {% if i.sale_status == "Sold" or i.sale_status == "sold" %}selected{% endif %}>Sold</option>
-                                    <option value="Unsold" {% if i.sale_status == "Unsold" or i.sale_status == "unsold" %}selected{% endif %}>Unsold</option>
-                                    <option value="Sold To Plaintiff" {% if i.sale_status == "Sold To Plaintiff" or i.sale_status == "sold to plaintiff" %}selected{% endif %}>Sold to Plaintiff</option>
-                                    <option value="Bankruptcy Hold" {% if i.sale_status == "Bankruptcy Hold" or i.sale_status == "bankruptcy hold" %}selected{% endif %}>Bankruptcy</option>
-                                    <option value="Cancelled" {% if i.sale_status == "Cancelled" or i.sale_status == "cancelled" %}selected{% endif %}>Cancelled</option>
+                                    <option value="active" {% if i.sale_status == "active" %}selected{% endif %}>Active</option>
+                                    <option value="sold" {% if i.sale_status == "sold" %}selected{% endif %}>Sold</option>
+                                    <option value="unsold" {% if i.sale_status == "unsold" %}selected{% endif %}>Unsold</option>
+                                    <option value="sold to plaintiff" {% if i.sale_status == "sold to plaintiff" %}selected{% endif %}>Sold to Plaintiff</option>
+                                    <option value="bankruptcy hold" {% if i.sale_status == "bankruptcy hold" %}selected{% endif %}>Bankruptcy</option>
+                                    <option value="cancelled" {% if i.sale_status == "cancelled" %}selected{% endif %}>Cancelled</option>
                                 </select>
                             </td>
                             <td>
@@ -269,13 +269,13 @@ Project Dashboard
                             <td>
                                 <select onchange="saveField('{{ i.id }}', 'surplus_status', this)">
                                     <option>--No Surplus Status--</option>
-                                    <option value="Not Determined" {% if i.surplus_status == "Not Determined" or i.surplus_status == "not determined" %}selected{% endif %}>Not Determined</option>
-                                    <option value="Possible Surplus" {% if i.surplus_status == "Possible Surplus" or i.surplus_status == "possible surplus"  %}selected{% endif %}>Possible Surplus</option>
-                                    <option value="No Possible Surplus" {% if i.surplus_status == "No Possible Surplus" or i.surplus_status == "no possible surplus"  %}selected{% endif %}>No Possible Surplus</option>
-                                    <option value="Fund Available" {% if i.surplus_status == "Fund Available"  or i.surplus_status == "fund available" %}selected{% endif %}>Fund Available</option>
-                                    <option value="Motion Filed" {% if i.surplus_status == "Motion Filed" or i.surplus_status == "motion filed"  %}selected{% endif %}>Motion Filed</option>
-                                    <option value="Fund Claimed" {% if i.surplus_status == "Fund Claimed" or i.surplus_status == "fund claimed"  %}selected{% endif %}>Fund Claimed</option>
-                                    <option value="No Surplus" {% if i.surplus_status == "No Surplus" or i.surplus_status == "no surplus" %}selected{% endif %}>No Surplus</option>
+                                    <option value="not determined" {% if i.surplus_status == "not determined" %}selected{% endif %}>Not Determined</option>
+                                    <option value="possible surplus" {% if i.surplus_status == "possible surplus"  %}selected{% endif %}>Possible Surplus</option>
+                                    <option value="no possible surplus" {% if i.surplus_status == "no possible surplus"  %}selected{% endif %}>No Possible Surplus</option>
+                                    <option value="fund available" {% if i.surplus_status == "fund available" %}selected{% endif %}>Fund Available</option>
+                                    <option value="motion filed" {% if i.surplus_status == "motion filed"  %}selected{% endif %}>Motion Filed</option>
+                                    <option value="fund claimed" {% if i.surplus_status == "fund claimed"  %}selected{% endif %}>Fund Claimed</option>
+                                    <option value="no surplus" {% if i.surplus_status == "no surplus" %}selected{% endif %}>No Surplus</option>
                                 </select>
                             </td>
                             <td>
