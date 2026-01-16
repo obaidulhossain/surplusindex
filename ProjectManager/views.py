@@ -1351,7 +1351,7 @@ def import_foreclosures_from_excel(request):
     
     UploadInstance = Upload.objects.get(pk=UID)
     df = pd.read_excel(file)
-    df = df.dropna(subset=["CASE_LOOKUP"])
+    df = df.dropna(subset=["STATE"])
     results = {"created": 0, "updated": 0}
 
     foreclosures = Foreclosure.objects.all()
