@@ -48,6 +48,7 @@ class foreclosure_Events(models.Model):
     surrogate = models.URLField(blank=True)
     public_notice = models.URLField(blank=True)
     directory = models.ForeignKey(directoryData, on_delete=models.CASCADE, blank=True, null=True)
+    business_search = models.URLField(blank=True)
     # class Meta:
     #     unique_together = ("state", "county", "sale_type")
 
