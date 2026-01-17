@@ -45,6 +45,7 @@ Checklists
                 {% if event.assessor %}<option value="{{event.assessor}}">Assessor</option>{% endif %}
                 {% if event.tax_collector %}<option value="{{event.tax_collector}}">Tax Collector</option>{% endif %}
                 {% if event.gis %}<option value="{{event.gis}}">GIS Map</option>{% endif %}
+                {% if event.business_search %}<option value="{{event.business_search}}">Business Search</option>{% endif %}
             </select>
             <select onchange="CopyAndMsg(this, 'msg1')">
                 <option value="">Court Records</option>
