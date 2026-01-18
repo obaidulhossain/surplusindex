@@ -7,6 +7,7 @@ urlpatterns = [
 # Urls for Upload Data Section
 path('upload-manager/', views.UploadManager, name="upload-manager"),
 path('create-upload/', views.CreateUpload, name="create-upload"),
+path('delete-temp/', views.DeleteUploadedTemp, name="delete-temp"),
 path('preview-data/', views.PreviewData, name="preview-data"),
 path('upload-file/', views.import_foreclosures_from_excel, name="upload-file"),
 path('Upload-CUF/', views.UploadCUF, name="Upload-CUF"),
