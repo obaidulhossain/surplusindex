@@ -1410,24 +1410,24 @@ def import_foreclosures_from_excel(request):
             DataRow.s_foreclosure.add(*fcls)
             DataRow.update_type = "exist"
             DataRow.save()
-        
-        if defaults.get("business_name"):
-            defs = Contact.objects.filter(business_name=defaults.get("business_name"))
         else:
-            defs = Contact.objects.filter(first_name=defaults.get("first_name"), last_name=defaults.get("last_name"))
-        if len(defs)>0:
-            DataRow.s_defendant.add(*defs)
+                
+            if defaults.get("business_name"):
+                defs = Contact.objects.filter(business_name=defaults.get("business_name"))
+            else:
+                defs = Contact.objects.filter(first_name=defaults.get("first_name"), last_name=defaults.get("last_name"))
+            if len(defs)>0:
+                DataRow.s_defendant.add(*defs)
         
-        plts = ForeclosingEntity.objects.filter(business_name=defaults.get("plaintiff"))
-        if len(plts)>0:
-            DataRow.s_plaintiff.add(*plts)
+            plts = ForeclosingEntity.objects.filter(business_name=defaults.get("plaintiff"))
+            if len(plts)>0:
+                DataRow.s_plaintiff.add(*plts)
+            
+            props = Property.objects.filter(state=defaults.get("state"), county=defaults.get("county"), parcel=defaults.get("parcel"), house_number=defaults.get("house_number"), road_name=defaults.get("road_name"), road_type=defaults.get("road_type"),direction=defaults.get("direction"),apt_unit=defaults.get("apt_unit"),extention=defaults.get("extention"),city=defaults.get("city"), zip_code=defaults.get("zip_code"))
         
-        props = Property.objects.filter(state=defaults.get("state"), county=defaults.get("county"), parcel=defaults.get("parcel"), house_number=defaults.get("house_number"), road_name=defaults.get("road_name"), road_type=defaults.get("road_type"),direction=defaults.get("direction"),apt_unit=defaults.get("apt_unit"),extention=defaults.get("extention"),city=defaults.get("city"), zip_code=defaults.get("zip_code"))
-        print (len(props))
-
-        if props.exists():
-            print (len(props))
-            DataRow.s_property.add(*props)
+            if props.exists():
+                print (len(props))
+                DataRow.s_property.add(*props)
         results["created"] += 1
 
 
