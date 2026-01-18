@@ -194,12 +194,12 @@ class TemporaryData(Timelogger):
         (FUND_CLAIMED, 'Fund Claimed'),
         (NO_SURPLUS, 'No Surplus'),
         )
-    ACTIVE = 'pending'
+    ACTIVE = 'active'
     SOLD = 'sold'
     UNSOLD = 'unsold'
     CANCELLED = 'cancelled'
-    SOLD_TO_PLAINTIFF = 'sold_to_plaintiff'
-    BANKRUPTCY_HOLD = 'bankruptcy_hold'
+    SOLD_TO_PLAINTIFF = 'sold to plaintiff'
+    BANKRUPTCY_HOLD = 'bankruptcy hold'
     SALE_STATUS = (
         (ACTIVE, 'Active'),
         (SOLD, 'Sold'),
