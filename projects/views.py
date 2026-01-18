@@ -95,7 +95,7 @@ def filter_foreclosure(request):
         foreclosure = foreclosure.filter(sale_status__icontains=sale_status)
     foreclosure = foreclosure.order_by("state", "county", "sale_date", "sale_type")
 
-    results = list(foreclosure.values('id', 'state', 'county', 'case_number', 'sale_date', 'sale_type', 'sale_status','surplus_status', 'published'))
+    results = list(foreclosure.values('id', 'state', 'county', 'case_number','case_number_ext', 'sale_date', 'sale_type', 'sale_status','surplus_status', 'published'))
     is_admin_group = request.user.groups.filter(name="admin").exists()
     return JsonResponse({'foreclosure': results, 'is_admin_group': is_admin_group,})
 
