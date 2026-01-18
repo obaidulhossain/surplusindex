@@ -1336,8 +1336,6 @@ def clean_date(value):
 def normalize_choice(value):
     if pd.isna(value) or not isinstance(value, str):
         return None
-    if value.strip().lower()=="active":
-        value = "pending"
     return value.strip().lower()
 
 @transaction.atomic
@@ -1691,5 +1689,20 @@ def markInstance(request):
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
-        
+    
+@require_POST
+def DeleteUploadedTemp(request):
+    UID = request.POST.get("UID")
+    if not UID:
+        messages.info(request, "No UID Selected")
+        return redirect('upload-manager')
+    else:
+        Uploads = Upload.objects.get(pk=UID)
+        message = f"{Uploads.data.count()} temp items deleted from {Uploads.name}"
+        temp_qs = Uploads.data.all()
+        temp_qs.delete()
+        Uploads.delete()
+        messages.success(request, message)
+        return redirect('upload-manager')
+
         

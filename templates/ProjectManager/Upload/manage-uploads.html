@@ -51,6 +51,13 @@ Manage Uploads{% endblock title %}
                         <input type="submit" value="Preview" class="button">
                     </form>
                 </td>
+                <td>
+                    <form method="POST" action="{% url 'delete-temp' %}">
+                    {% csrf_token %}
+                        <input type="hidden" value="{{u.id}}" name="UID">
+                        <input type="submit" value="Delete Data" class="button">
+                    </form>
+                </td>
             </tr>
         {% endfor %}
         </tbody>
