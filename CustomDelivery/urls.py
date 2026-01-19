@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path("delivery_dashboard/", views.DeliveryDashboard, name="delivery_dashboard"),
     # ExportLeadFilter CRUD
     path("filters/", views.filter_list, name="filter_list"),
     path("filters/new/", views.filter_create, name="filter_create"),

@@ -8,6 +8,14 @@ from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 from authentication.decorators import allowed_users
 
+@login_required(login_url="login")
+@allowed_users(['admin'])
+def DeliveryDashboard(request):
+    return render(request, "custom_delivery/delivery_dashboard.html")
+
+
+
+
 # === ExportLeadFilter ===
 @login_required(login_url="login")
 @allowed_users(['admin'])

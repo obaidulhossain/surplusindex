@@ -12,7 +12,7 @@ Preview Data
 
 <div class="body-section">
     <div class="client-sec-header" style="margin-top:0px;">
-        <h4>Data Preview for {{UID}}: {{SelectedUpload.name}}</h4>
+        <h4>Data Preview for {{UID}}: {{SelectedUpload.name}} - {{ SelectedUpload.data.all.count }}</h4>
         <div>
             <form method="POST" action="{% url 'upload-file' %}" enctype="multipart/form-data" class="inline-form">
             {% csrf_token %}
