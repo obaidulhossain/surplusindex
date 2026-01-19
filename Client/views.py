@@ -28,6 +28,10 @@ from django.db.models.functions import TruncDate, ExtractYear, ExtractMonth
 
 def get_client_dashboard_context(request, user):
     statuses = Status.objects.filter(client=user)
+    fcls = Foreclosure.objects.filter(purchased_by=user)
+    fund_available = len(fcls.filter(surplus_status = "fund available"))
+    possible_surplus = len(fcls.filter(surplus_status = "possible surplus"))
+    motion_filed = len(fcls.filter(surplus_status = "motion filed"))
     activeLeads = statuses.filter(archived=False).exclude(closing_status__in=['closed_funded', 'closed_not_funded'])
     closedLeads = statuses.filter(closing_status__in=['closed_funded', 'closed_not_funded'])
     archivedLeads = statuses.filter(archived=True)
@@ -66,6 +70,9 @@ def get_client_dashboard_context(request, user):
         'stateData':stateData,
         'Actions':Actions,
         'Followups':Followups,
+        'motion_filed':motion_filed,
+        'possible_surplus':possible_surplus,
+        'fund_available':fund_available,
     }
     # Logic to get context data for client dashboard
     return context
