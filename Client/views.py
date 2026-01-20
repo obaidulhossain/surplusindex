@@ -38,15 +38,22 @@ def get_client_dashboard_context(request, user):
     closingDeals = activeLeads.filter(closing_status = 'conversion_in_progress')
     activeProspecting = activeLeads.exclude(find_contact_status='not_assigned').exclude(closing_status = 'conversion_in_progress')
     notAssigned = activeLeads.filter(find_contact_status='not_assigned')
+    payperlead_options = SubscriptionPlan.objects.filter(type="payperlead", active=True).order_by('amount')
+    transactions = UserTransactions.objects.filter(user=user).order_by("-created_at")
+    credit_usage = CreditUsage.objects.filter(user=user).order_by("-created_at")
 
-    
+
     stateData = (
         Foreclosure.objects.values('state').exclude(published=False).exclude(surplus_status__in=['fund claimed', 'no surplus'])
         .annotate(
             total_count = Count('id'),
             tax_count = Count('id', filter=Q(sale_type='tax')),
             mortgage_count=Count('id', filter=Q(sale_type='mortgage')),
-
+            total_purchased = Count('id', filter=Q(purchased_by=user)),
+            new_count = Count('id', filter=Q(surplus_status__in=['fund available', 'possible surplus', 'no possible surplus']) & Q(sale_status="sold") & ~Q(purchased_by=user)),
+            pre_foreclosure = Count('id', filter=Q(sale_status="active") & ~Q(purchased_by=user)),
+            post_foreclosure = Count('id', filter=Q(surplus_status__in=['possible surplus', 'no possible surplus']) & Q(sale_status="sold") & ~Q(purchased_by=user)),
+            verified = Count('id', filter=Q(surplus_status__in=['fund available']) & Q(sale_status="sold") & ~Q(purchased_by=user)),
 
         )
         .order_by('state')
@@ -73,6 +80,9 @@ def get_client_dashboard_context(request, user):
         'motion_filed':motion_filed,
         'possible_surplus':possible_surplus,
         'fund_available':fund_available,
+        'payperlead_options':payperlead_options,
+        'transactions':transactions,
+        'credit_usage':credit_usage,
     }
     # Logic to get context data for client dashboard
     return context

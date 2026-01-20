@@ -1116,3 +1116,59 @@ tr.active-row>td {
     color: #000000;
     border-color: #e8c828;
 }
+
+.blurb-small {
+    height: 200px;
+    width: 98%;
+    border: 1px solid #a9a9a9;
+    border-radius: 10px;
+    display: inline-block;
+    padding: 10px;
+    background-color: #e7ffe2;
+    margin-bottom: 20px;
+}
+
+.blurb-small:hover {
+    cursor: pointer;
+    background-color: #d2f8d6;
+    box-shadow: 0 0px 7px #393939;
+    transition: ease-in-out 350ms;
+}
+
+.blurb-btn {
+    padding: 4px 17px;
+    background-color: #42ba8e;
+    border-radius: 3px;
+    color: #f7f7f7;
+    min-width: 85% !important;
+}
+
+.blurb-btn:hover {
+    background-color: #108b57;
+    color: #f7f7f7;
+    transition: ease-in-out 350ms;
+}
+
+.si-blurb {
+    min-height: 100px;
+    width: 98%;
+    border: 1px solid #7d7d7d;
+    border-radius: 10px;
+    display: inline-block;
+    padding: 10px;
+    background-color: #ffffff;
+    margin: 10px 0px;
+    transition: ease-in-out 350ms;
+}
+
+.si-blurb h4 {
+    font-size: 18px;
+    font-weight: bold;
+    color: #075967;
+}
+
+.si-blurb:hover {
+    cursor: pointer;
+    background-color: #e2e2e2;
+    transition: ease-in-out 350ms;
+}

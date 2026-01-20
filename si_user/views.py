@@ -28,6 +28,7 @@ from collections import defaultdict
 from Client.resources import *
 from Communication.utils import notify
 from django.views.decorators.http import require_POST
+from ProjectManager.resources import DashboardCloneExportResource
 
 # Configure the logger
 
@@ -129,18 +130,32 @@ def export_leads_from_usage(request, usage_id):
         data = set()
         for status_instance in usage.leads.all():
             data.add(status_instance.lead)   # same way you were adding before
-        
-        # use your resource
-        resources = ClientModelResource()
-        dataset = resources.export(data)
+        resource = DashboardCloneExportResource(data)
+        filename, buffer, _ = resource.export_to_excel("SurplusIndex_Download")
 
-        # build response
-        response = HttpResponse(dataset.csv, content_type="text/csv")
-        response['Content-Disposition'] = f'attachment; filename="credit_usage_{usage.id}_leads.csv"'
-        return response
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response           
     else:
-        messages.error(request,"Unauthorized access detected! Please try again from your profile > Credit Usage Section")
-        return redirect('profile')
+        messages.error(request,"Unauthorized access detected! Please try again from your account dashboard > Credit Usage Section")
+        return redirect('dashboard')
+    
+
+
+    #     # use your resource
+    #     resources = ClientModelResource()
+    #     dataset = resources.export(data)
+
+    #     # build response
+    #     response = HttpResponse(dataset.csv, content_type="text/csv")
+    #     response['Content-Disposition'] = f'attachment; filename="credit_usage_{usage.id}_leads.csv"'
+    #     return response
+    # else:
+    #     messages.error(request,"Unauthorized access detected! Please try again from your account dashboard > Credit Usage Section")
+    #     return redirect('dashboard')
 
 
 @receiver(post_save, sender=User)

@@ -35,24 +35,138 @@
             <span>Applied to Claim : {{motion_filed|digits:4}}</span>
         </div>
     </div>
-    <div class="onethird dashboard-status-item">
-        {% comment %} <h4>Active Leads</h4>
-        <h1 style="font-size:3rem;">{{activeLeads.count|digits:5}}</h1><br>
-        <div class="dashboard-icon-row" style="color: #42ba8e;">
-            <i class="bi bi-menu-button-wide-fill "></i>
-            <span>Closing Deals : {{closingDeals.count|digits:4}}</span>
+    
+        <div class="onethird dashboard-status-item">
+            <h4>Top Up Credits</h4>
+            <i class="bi bi-cart3" style="font-size:3rem"></i>
+            {% for option in payperlead_options %}
+                <a href="#" class="buy-button" role="button" data-price-id="{{option.price_id}}" data-leads="{{option.lead_number}}" data-amount="{{option.amount}}">
+                <div class="dashboard-icon-row" style="color: #42ba8e;">
+                    <i class="bi bi-credit-card"></i>
+                    <span>{{option.description}}</span>
+                </div>
+                {% comment %} {{option.description}} {% endcomment %}
+                </a>
+            {% endfor %}
+            {% comment %} <h4>Active Leads</h4>
+            <h1 style="font-size:3rem;">{{activeLeads.count|digits:5}}</h1><br>
+            <div class="dashboard-icon-row" style="color: #42ba8e;">
+                <i class="bi bi-menu-button-wide-fill "></i>
+                <span>Closing Deals : {{closingDeals.count|digits:4}}</span>
+            </div>
+            <div class="dashboard-icon-row" style="color: #73b3df;">
+                <i class="bi bi-menu-button-wide "></i>
+                <span>Prospecting : {{activeProspecting.count|digits:4}}</span>
+            </div>
+            <div class="dashboard-icon-row" style="color: #e6c325;">
+                <i class="bi bi-menu-app "></i>
+                <span>Not Assigned : {{notAssigned.count|digits:4}}</span>
+            </div> {% endcomment %}
         </div>
-        <div class="dashboard-icon-row" style="color: #73b3df;">
-            <i class="bi bi-menu-button-wide "></i>
-            <span>Prospecting : {{activeProspecting.count|digits:4}}</span>
+    
+</div>
+
+<div style="display:flex;">
+<div class="body-section" style="margin-top:20px; width:64%; display:inline-block">
+{% for state in stateData %}
+<a href="{% url 'leads' %}?stateFilter={{state.state}}" target="blank" style="color: #1c1c1cff">
+    <div class="onethird">
+        <div class="blurb-small">
+            <h4>{{state.state|upper}}</h4>
+            <form method="POST" action="{% url 'leads' %}" target="blank">
+                {% csrf_token %}
+                <input type="hidden" name="stateFilter" value="{{state.state}}">
+                <input type="hidden" name="sale_status_active" value="Active">
+                <input type="submit" value="Pre Foreclosure: {{state.pre_foreclosure}}">
+            </form>
+            <form method="POST" action="{% url 'leads' %}" target="blank">
+                {% csrf_token %}
+                <input type="hidden" name="stateFilter" value="{{state.state}}">
+                <input type="hidden" name="status_ps" value="Possible Surplus">
+                <input type="hidden" name="status_nps" value="No Possible Surplus">
+                <input type="hidden" name="sale_status_sold" value="Sold">
+                <input type="submit" value="Post Foreclosure: {{state.post_foreclosure}}">
+            </form>
+            <form method="POST" action="{% url 'leads' %}" target="blank">
+                {% csrf_token %}
+                <input type="hidden" name="stateFilter" value="{{state.state}}">
+                <input type="hidden" name="status_fa" value="Fund Available">
+                <input type="hidden" name="sale_status_sold" value="Sold">
+                <input type="submit" value="Verified Lead: {{state.verified}}">
+            </form>
+            
+            <form method="POST" action="{% url 'downloaded-data' %}" target="blank">
+                {% csrf_token %}
+                <input type="hidden" name="stateFilter" value="{{state.state}}">
+                <input type="hidden" name="status_fa" value="Fund Available">
+                <input type="hidden" name="status_ps" value="Possible Surplus">
+                <input type="hidden" name="status_nps" value="No Possible Surplus">
+                <input type="hidden" name="sale_status_sold" value="Sold">
+                <input type="submit" value="Downloaded: {{state.total_purchased}}">
+            </form>
         </div>
-        <div class="dashboard-icon-row" style="color: #e6c325;">
-            <i class="bi bi-menu-app "></i>
-            <span>Not Assigned : {{notAssigned.count|digits:4}}</span>
-        </div> {% endcomment %}
+    </div>
+</a>
+{% endfor %}
+    <div class="onethird">
+        <div class="blurb-small" style="align-content: center;">
+            <h6>Can't find the location you're looking for? <a href="mailto:contact@surplusindex.com">Contact us</a> to request data coverage from your preferred State.</h6>
+
+        </div>
     </div>
 </div>
-{% comment %} <div style="margin:30px; justify-content: space-between!important; display:flex; ">
+<div style="width:36%; display:inline-block; margin-top:20px;">
+    <div class="body-section" style=" max-height:450px; overflow-y:auto;  border:1px solid #c1c1c1; border-radius: 10px; padding:20px; background: #545454;">
+    <h4 style="color: #ffffff;">Transaction History</h4>
+    {% if transactions.count > 0 %}
+        {% for transaction in transactions %}
+        <div class="si-blurb">
+            <h6>{{forloop.counter|stringformat:"03d"}}_{{transaction.id|stringformat:"04d"}} | {{transaction.created_at|date:"m/d/Y"}}  {% if transaction.has_paid == True %}<i class="bi bi-bag-check" style="color:green; font-size:22px;"></i>{% else %}<i class="bi bi-bag-x" style="color:red; font-size:22px;"></i>{% endif %}</h6>
+            <div class="onehalf">
+                <h4>Amount: {{transaction.amount|currency}}</h4>
+            </div>
+            <div class="onehalf">
+                <h4>Credits: {{transaction.number_of_leads}}</h4>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="si-blurb">
+            <h4>No Transaction History</h4>
+        </div>
+    {% endif %}
+        
+    </div>
+
+    <div class="body-section" style="margin-top:20px; border:1px solid #c1c1c1; border-radius: 10px; padding:20px; background: #545454;">
+        <h4 style="color: #ffffff;">Credit Usage History</h4>
+        <div class="body-section" style="max-height:450px; overflow-y:auto;">
+        {% if credit_usage.count > 0 %}
+            {% for usage in credit_usage %}
+            <div class="si-blurb">
+                <h4 style="text-align-last:left;">{{forloop.counter|stringformat:"03d"}}_{{usage.id|stringformat:"04d"}} | {{usage.created_at|date:"m/d/Y"}}</h4>
+                <div class="twothird">
+                    <h6 style="text-align-last:left;">Purchased {{usage.leads.count}} leads for {{usage.credits_used}}</h6>
+                </div>
+                <div class="onethird">
+                    <a href="{% url 'export_usage_leads' usage.id %}" class="btn btn-sm btn-primary">Download</a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="si-blurb">
+            
+                <h4>No Transaction History</h4>
+                    
+            </div>
+        {% endif %}
+            
+        </div>
+    </div>
+</div>
+
+{% comment %} 
+<div style="margin:30px; justify-content: space-between!important; display:flex; ">
     <div class="onefourth dashboard-status-item-small green">
         <div style="width:100%; height:auto; margin-bottom:20px; justify-item:space-between; display:flex; align-items: center; gap: 10px;">
             <div class="count-section" style="background-color: #0a6041;">
@@ -78,7 +192,9 @@
     </div>
     <div class="onefourth dashboard-status-item-small red">
     </div>
-</div> {% endcomment %}
+</div> 
+
+
 <div class="dashboard-table-section">
     <h4>Upcoming Followup Schedules</h4>
     <div class="dashboard-table-wrapper">
@@ -111,7 +227,7 @@
                         <input type="hidden" name="status_id" value="{{item.leads.id}}">
                         <button onclick="this.form.submit()" class="client-button dashboard-table-button">View</button></td>
                     </form>
-                    {% comment %} <button onclick="window.location.href='http://127.0.0.1:8000/leads-detail/?status_id={{item.leads.id}}'" class="client-button dashboard-table-button">View</button></td> {% endcomment %}
+                   
                 </tr>
                 {% endfor %}
             
@@ -139,7 +255,7 @@
                     <td>{{ item.mortgage_count }}</td>
                     <td>{{ item.total_count }}</td>
                     
-                    {% comment %} <td>{{ item.tax_count|add:item.mortgage_count|add:item.new_count }}</td> {% endcomment %}
+                    
                 </tr>
                 {% endfor %}
             </tbody>
@@ -160,3 +276,33 @@
 </div>
 <div>
 </div>
+ {% endcomment %}
+ <script src="https://js.stripe.com/v3/"></script>
+<script>
+    const buyButtons = document.querySelectorAll('.buy-button');
+
+    buyButtons.forEach(button => {
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+
+            const priceId = this.getAttribute('data-price-id');
+            const leads = this.getAttribute('data-leads');
+            const amount = this.getAttribute('data-amount');
+
+            fetch('/checkout/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}',  // CSRF token for Django
+                },
+                body: JSON.stringify({ price_id: priceId, leads: leads, amount: amount })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const stripe = Stripe(data.stripe_public_key);
+                    stripe.redirectToCheckout({ sessionId: data.session_id });
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
+</script>
