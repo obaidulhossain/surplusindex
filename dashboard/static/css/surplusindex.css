@@ -1124,13 +1124,13 @@ tr.active-row>td {
     border-radius: 10px;
     display: inline-block;
     padding: 10px;
-    background-color: #e7ffe2;
+    background-color: #b3ddd5;
     margin-bottom: 20px;
 }
 
 .blurb-small:hover {
     cursor: pointer;
-    background-color: #d2f8d6;
+    background-color: #98cfab;
     box-shadow: 0 0px 7px #393939;
     transition: ease-in-out 350ms;
 }

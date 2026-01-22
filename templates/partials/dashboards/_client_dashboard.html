@@ -68,9 +68,13 @@
 
 <div style="display:flex;">
 <div class="body-section" style="margin-top:20px; width:64%; display:inline-block">
+    <div style="display:flex; align-items:center; justify-content:space-between; padding:25px;">
+        <h4  style="margin:0;">Data Coverage by State</h4>
+        <input type="text" id="stateSearch" placeholder="Search state..." style="padding:6px 10px; border:1px solid #ccc; border-radius:4px; font-size:14px; width:180px; " onkeyup="filterStates()">
+    </div>
 {% for state in stateData %}
 <a href="{% url 'leads' %}?stateFilter={{state.state}}" target="blank" style="color: #1c1c1cff">
-    <div class="onethird">
+    <div class="onethird state-card" data-state="{{ state.state|lower }}">
         <div class="blurb-small">
             <h4>{{state.state|upper}}</h4>
             <form method="POST" action="{% url 'leads' %}" target="blank">
@@ -115,9 +119,26 @@
         </div>
     </div>
 </div>
+<script>
+function filterStates() {
+    const search = document.getElementById("stateSearch").value.toLowerCase();
+    const cards = document.querySelectorAll(".state-card");
+
+    cards.forEach(card => {
+        const state = card.getAttribute("data-state");
+
+        if (state.includes(search)) {
+            card.style.display = "inline-block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+</script>
+
 <div style="width:36%; display:inline-block; margin-top:20px;">
-    <div class="body-section" style=" max-height:450px; overflow-y:auto;  border:1px solid #c1c1c1; border-radius: 10px; padding:20px; background: #545454;">
-    <h4 style="color: #ffffff;">Transaction History</h4>
+    <div class="body-section" style=" max-height:450px; overflow-y:auto;  border:1px solid #c1c1c1; border-radius: 10px; padding:20px; background: #becde7;">
+    <h4>Transaction History</h4>
     {% if transactions.count > 0 %}
         {% for transaction in transactions %}
         <div class="si-blurb">
@@ -138,8 +159,8 @@
         
     </div>
 
-    <div class="body-section" style="margin-top:20px; border:1px solid #c1c1c1; border-radius: 10px; padding:20px; background: #545454;">
-        <h4 style="color: #ffffff;">Credit Usage History</h4>
+    <div class="body-section" style="margin-top:20px; border:1px solid #c1c1c1; border-radius: 10px; padding:20px; background: #becde7;">
+        <h4>Credit Usage History</h4>
         <div class="body-section" style="max-height:450px; overflow-y:auto;">
         {% if credit_usage.count > 0 %}
             {% for usage in credit_usage %}
