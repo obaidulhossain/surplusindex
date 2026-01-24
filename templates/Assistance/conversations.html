@@ -16,16 +16,16 @@ Get Assistance
         <div class="conversation-list">
         {% for c in conversations %}
             {% if c.status == "open" %}
-            <div class="conversation active {% if c.id == conv.id %}selected{% endif %}" data-conv-id="{{ c.id }}" onclick="loadConversation(this)">
-                <strong>{{ c.title }}</strong>
-                <i class="{% if c.unread > 0 and c.unread < 10 %}bi bi-{{ c.unread }}-circle-fill{% else %}bi bi-chat-dots{% endif %}" style="color:{% if c.unread > 9 %}#9d1010{% else %}#04212f{% endif %}"></i></br>
-                <p>{% if c.last_sender_id and c.last_sender_id != request.user.id %}Re: {% endif %}{{ c.last_msg|truncatechars:35 }}</p>
+            <div class="conversation active {% if c.id == conv.id %}selected{% endif %}" data-conv-id="{{ c.id }}" onclick="loadConversationAdmin(this)">
+                <strong>{{ c.client.username }}</strong>  <i class="bi bi-chat-dots"></i></br>
+                <p>{{ c.title|truncatechars:35 }}</p>
+                {% comment %} <p>{% if c.last_sender_id and c.last_sender_id != request.user.id %}Re: {% endif %}{{ c.last_msg|truncatechars:35 }}</p> {% endcomment %}
             </div>
             {% endif %}
         {% endfor %}
         {% for c in conversations %}
             {% if c.status == "closed" %}
-            <div class="conversation" data-conv-id="{{ c.id }}" onclick="loadConversation(this)">
+            <div class="conversation" data-conv-id="{{ c.id }}" onclick="loadConversationAdmin(this)">
                 <strong>{{ c.title }}</strong>  <i class="bi bi-chat-fill"></i></br>
                 <p>{% if c.last_sender_id and c.last_sender_id != request.user.id %}Re: {% endif %}{{ c.last_msg }}</p>
             </div>
@@ -45,7 +45,7 @@ Get Assistance
             {% for msg in con_messages %}
                 <div class="message {{ msg.msgtype }}">
                     <div class="msg-text">{{ msg.text }}</div>
-                    <div class="msg-time">{{ msg.message_time }}</div>
+                    <div class="msg-time">{{ msg.sender.username|upper }} - {{ msg.message_time }}</div>
                     
                 </div>
             {% endfor %}
