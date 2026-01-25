@@ -1,3 +1,6 @@
+const notificationSound = new Audio("/media/uploads/2026/01/25/surplusindex-notification.mp3");
+notificationSound.volume = 0.6;
+let hasPolledOnce = false;
 // CSRF helper
 function getCSRFToken() {
     return document.cookie
@@ -53,6 +56,7 @@ function loadConversation(el) {
             data.messages.forEach(msg => {
                 container.appendChild(createMessageElement(msg));
                 lastMessageId = msg.id;
+
                 //                const div = document.createElement("div");
 
                 //                div.classList.add("message");
@@ -66,6 +70,11 @@ function loadConversation(el) {
 
             // auto scroll to bottom
             scrollToBottom();
+            const unreadBlock = document.getElementById(`unread-${convId}`);
+            unreadBlock.style.display = "none";
+            unreadBlock.innerText = "";
+            const input = document.getElementById("chatInput");
+            input.focus()
         });
 }
 
@@ -138,38 +147,115 @@ function pollNewMessages() {
             if (!data.messages.length) return;
 
             const container = document.getElementById("chatMessages");
+            let shouldPlaySound = false;
 
             data.messages.forEach(msg => {
                 container.appendChild(createMessageElement(msg));
                 lastMessageId = msg.id;
-            });
+                shouldPlaySound = true;
 
+            });
+            if (hasPolledOnce && shouldPlaySound) {
+                notificationSound.play().catch(() => { });
+            }
+            hasPolledOnce = true;
             scrollToBottom();
         })
         .catch(err => console.error("Polling error:", err));
 }
+// let previousUnreadCounts = {};
+
+// function pollSidebar() {
+//     fetch("/support/poll/conversations/")
+//         .then(res => res.json())
+//         .then(data => {
+//             data.conversations.forEach(c => {
+//                 const prev = previousUnreadCounts[c.id] || 0;
+
+//                 if (
+//                     c.unread > prev &&
+//                     String(c.id) !== String(activeConversationId)
+//                 ) {
+//                     notificationSound.play().catch(() => { });
+//                 }
+
+//                 previousUnreadCounts[c.id] = c.unread;
+
+//                 const badge = document.getElementById(`unread-${c.id}`);
+//                 if (!badge) return;
+
+//                 badge.style.display = c.unread > 0 ? "inline-block" : "none";
+//                 badge.innerText = c.unread || "";
+//             });
+//         });
+// }
+
+let previousUnreadCounts = {};
+let sidebarInitialized = false;
 
 function pollSidebar() {
     fetch("/support/poll/conversations/")
         .then(res => res.json())
         .then(data => {
+            let shouldPlaySound = false;
+
             data.conversations.forEach(c => {
-                // Skip active conversation
                 if (String(c.id) === String(activeConversationId)) return;
 
                 const unreadEl = document.getElementById(`unread-${c.id}`);
                 if (!unreadEl) return;
 
+                const prev = previousUnreadCounts[c.id] || 0;
+
+                // 🔔 Detect increase
+                if (sidebarInitialized && c.unread > prev) {
+                    shouldPlaySound = true;
+                }
+
+                // Update UI
                 if (c.unread > 0) {
                     unreadEl.innerText = c.unread;
                     unreadEl.style.display = "inline-block";
                 } else {
                     unreadEl.style.display = "none";
+                    unreadEl.innerText = "";
                 }
+
+                // Store current state
+                previousUnreadCounts[c.id] = c.unread;
             });
+
+            if (shouldPlaySound) {
+                notificationSound.play().catch(() => { });
+            }
+
+            sidebarInitialized = true;
         })
         .catch(err => console.error("Sidebar poll error:", err));
 }
+
+
+// function pollSidebar() {
+//     fetch("/support/poll/conversations/")
+//         .then(res => res.json())
+//         .then(data => {
+//             data.conversations.forEach(c => {
+//                 // Skip active conversation
+//                 if (String(c.id) === String(activeConversationId)) return;
+
+//                 const unreadEl = document.getElementById(`unread-${c.id}`);
+//                 if (!unreadEl) return;
+
+//                 if (c.unread > 0) {
+//                     unreadEl.innerText = c.unread;
+//                     unreadEl.style.display = "inline-block";
+//                 } else {
+//                     unreadEl.style.display = "none";
+//                 }
+//             });
+//         })
+//         .catch(err => console.error("Sidebar poll error:", err));
+// }
 
 
 
@@ -186,14 +272,20 @@ function startPolling() {
         pollNewMessages();
         pollSidebar();
     }, 15000); // 15s
+    notificationSound.volume = 0.1;
 }
 
 function stopPolling() {
     if (!pollingInterval) return;
 
     clearInterval(pollingInterval);
-    pollingInterval = null;
+    pollingInterval = setInterval(() => {
+        pollNewMessages();
+        pollSidebar();
+    }, 60000); // 15s
+    notificationSound.volume = 0.9;
 }
+
 document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "visible") {
         startPolling();
