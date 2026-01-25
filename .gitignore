@@ -4,4 +4,3 @@ node/
 __pycache__/
 .env
 db.sqlite3
-static/
