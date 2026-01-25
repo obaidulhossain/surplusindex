@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 import json
 from django.http import JsonResponse
 from authentication.decorators import allowed_users
@@ -8,6 +8,7 @@ from django.db.models import OuterRef, Subquery, Count, Q, Case, When, Value, Ch
 from .models import*
 from django.utils import timezone
 import pytz
+
 
 
 def format_user_time(dt, user):
@@ -69,6 +70,8 @@ def getAssistance(request):
 @login_required
 def fetch_messages(request, conv_id):
     qs = Messages.objects.filter(conversation_id=conv_id).order_by('created_at')
+    if qs:
+        qs.filter(is_seen=False).exclude(sender=request.user).update(is_seen=True)
     messages = [
     {
         "id": m.id,
@@ -132,7 +135,64 @@ def send_message(request):
         
     })
 
+@login_required
+@require_GET
+def poll_messages(request, conv_id):
+    last_id = request.GET.get("last_id")
 
+    qs = Messages.objects.filter(conversation_id=conv_id)
+
+    if last_id:
+        qs = qs.filter(id__gt=last_id).order_by("id")
+
+    # messages = qs.order_by("id").values(
+    #     "id",
+    #     "text",
+    #     "sender_type",
+    #     "message_time"
+    # )
+    messages = [
+    {
+        "id": m.id,
+        "text": m.text,
+        "sender_type": m.sender_type,
+        "message_time": format_user_time(m.created_at, request.user)
+    }
+    for m in qs
+    ]
+
+    return JsonResponse({"messages": list(messages)})
+
+@login_required
+def poll_conversations(request):
+    conversations = (
+        Conversation.objects
+        .filter(client=request.user)
+        .annotate(
+            unread=Count(
+                "messages",
+                filter=Q(messages__is_seen=False, messages__sender_type="admin")
+            ),
+            last_msg=Subquery(
+                Messages.objects
+                .filter(conversation=OuterRef("pk"))
+                .order_by("-id")
+                .values("text")[:1]
+            ),
+            last_sender_id=Subquery(
+                Messages.objects
+                .filter(conversation=OuterRef("pk"))
+                .order_by("-id")
+                .values("sender_id")[:1]
+            )
+        )
+        .values("id", "unread", "last_msg", "last_sender_id", "status")
+    )
+
+    return JsonResponse({"conversations": list(conversations)})
+
+
+#-------------------------- Admin section starts from here -------------------------
 def ConversationView(request):
     params = request.POST if request.method == "POST" else request.GET
     selected_conv = params.get("selected_conv", None)

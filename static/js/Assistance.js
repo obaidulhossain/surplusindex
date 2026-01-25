@@ -22,7 +22,6 @@ function createMessageElement(msg) {
         <div class="msg-text">${msg.text}</div>
         <div class="msg-time">${msg.message_time}</div>
     `;
-
     return div;
 }
 
@@ -53,6 +52,7 @@ function loadConversation(el) {
 
             data.messages.forEach(msg => {
                 container.appendChild(createMessageElement(msg));
+                lastMessageId = msg.id;
                 //                const div = document.createElement("div");
 
                 //                div.classList.add("message");
@@ -101,6 +101,7 @@ function sendMessage() {
             );
             //        appendMessage(data.text, "sent");
             input.value = "";
+            lastMessageId = data.id;
             scrollToBottom();
         });
 }
@@ -120,6 +121,93 @@ function sendMessage() {
 document.getElementById("chatInput").addEventListener("keypress", function (e) {
     if (e.key === "Enter") sendMessage();
 });
+
+
+
+function pollNewMessages() {
+    if (!activeConversationId) return;
+
+    let url = `/support/poll/${activeConversationId}/`;
+    if (lastMessageId) {
+        url += `?last_id=${lastMessageId}`;
+    }
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.messages.length) return;
+
+            const container = document.getElementById("chatMessages");
+
+            data.messages.forEach(msg => {
+                container.appendChild(createMessageElement(msg));
+                lastMessageId = msg.id;
+            });
+
+            scrollToBottom();
+        })
+        .catch(err => console.error("Polling error:", err));
+}
+
+function pollSidebar() {
+    fetch("/support/poll/conversations/")
+        .then(res => res.json())
+        .then(data => {
+            data.conversations.forEach(c => {
+                // Skip active conversation
+                if (String(c.id) === String(activeConversationId)) return;
+
+                const unreadEl = document.getElementById(`unread-${c.id}`);
+                if (!unreadEl) return;
+
+                if (c.unread > 0) {
+                    unreadEl.innerText = c.unread;
+                    unreadEl.style.display = "inline-block";
+                } else {
+                    unreadEl.style.display = "none";
+                }
+            });
+        })
+        .catch(err => console.error("Sidebar poll error:", err));
+}
+
+
+
+
+let lastMessageId = null;
+let pollingInterval = null;
+function startPolling() {
+    if (pollingInterval) return;
+
+    pollNewMessages(); // instant fetch
+    pollSidebar();
+
+    pollingInterval = setInterval(() => {
+        pollNewMessages();
+        pollSidebar();
+    }, 15000); // 15s
+}
+
+function stopPolling() {
+    if (!pollingInterval) return;
+
+    clearInterval(pollingInterval);
+    pollingInterval = null;
+}
+document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === "visible") {
+        startPolling();
+    } else {
+        stopPolling();
+    }
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    if (document.visibilityState === "visible") {
+        startPolling();
+    }
+});
+// setInterval(pollNewMessages, 60000); // 1 minute
 
 
 //---------------------------------- Functions for Admin -------------------------------

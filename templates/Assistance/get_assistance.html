@@ -16,17 +16,24 @@ Get Assistance
         <div class="conversation-list">
         {% for c in conversations %}
             {% if c.status == "open" %}
-            <div class="conversation active {% if c.id == conv.id %}selected{% endif %}" data-conv-id="{{ c.id }}" onclick="loadConversation(this)">
+            <div class="conversation active {% if c.id == conv.id %}selected{% endif %}"
+                data-conv-id="{{ c.id }}"
+                id="conv-{{ c.id }}"
+                onclick="loadConversation(this)"
+            >
+                
                 <strong>{{ c.title }}</strong>
-                <i class="{% if c.unread > 0 and c.unread < 10 %}bi bi-{{ c.unread }}-circle-fill{% else %}bi bi-chat-dots{% endif %}" style="color:{% if c.unread > 9 %}#9d1010{% else %}#04212f{% endif %}"></i></br>
+                <span class="unread-badge" id="unread-{{ c.id }}"></span></br>
+                {% comment %} <i class="{% if c.unread > 0 and c.unread < 10 %}bi bi-{{ c.unread }}-circle-fill{% else %}bi bi-chat-dots{% endif %}" style="color:{% if c.unread > 9 %}#9d1010{% else %}#04212f{% endif %}"></i></br> {% endcomment %}
                 <p>{% if c.last_sender_id and c.last_sender_id != request.user.id %}Re: {% endif %}{{ c.last_msg|truncatechars:35 }}</p>
             </div>
             {% endif %}
         {% endfor %}
         {% for c in conversations %}
             {% if c.status == "closed" %}
-            <div class="conversation" data-conv-id="{{ c.id }}" onclick="loadConversation(this)">
-                <strong>{{ c.title }}</strong>  <i class="bi bi-chat-fill"></i></br>
+            <div class="conversation" id="conv-{{ c.id }}" data-conv-id="{{ c.id }}" onclick="loadConversation(this)">
+                <strong>{{ c.title }}</strong>
+                <span class="unread-badge" id="unread-{{ c.id }}"></span></br>
                 <p>{% if c.last_sender_id and c.last_sender_id != request.user.id %}Re: {% endif %}{{ c.last_msg }}</p>
             </div>
             {% endif %}

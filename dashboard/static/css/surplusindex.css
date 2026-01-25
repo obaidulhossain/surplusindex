@@ -1337,3 +1337,15 @@ tr.active-row>td {
     color: #5d5e5f;
     transition: ease-in-out 350ms;
 }
+
+.unread-badge {
+    border-radius: 15px;
+    text-align: center;
+    color: #fbfbfb;
+    font-weight: 600;
+    font-size: 12px;
+    background-color: #272727;
+    width: 25px;
+    height: 25px;
+    align-content: center;
+}
