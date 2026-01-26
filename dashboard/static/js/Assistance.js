@@ -193,6 +193,7 @@ function loadConversationAdmin(el) {
 
             data.messages.forEach(msg => {
                 container.appendChild(createMessageAdmin(msg));
+                lastMessageId = msg.id;
             });
             scrollToBottom();
         });
