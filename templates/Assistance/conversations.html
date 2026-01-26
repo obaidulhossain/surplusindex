@@ -14,10 +14,14 @@ Get Assistance
         <h4>Conversations</h4>
 
         <div class="conversation-list">
+        <div id="unread-container">
+
+        </div>
         {% for c in conversations %}
             {% if c.status == "open" %}
             <div class="conversation active {% if c.id == conv.id %}selected{% endif %}" data-conv-id="{{ c.id }}" onclick="loadConversationAdmin(this)">
-                <strong>{{ c.client.username }}</strong>  <i class="bi bi-chat-dots"></i></br>
+                <strong>{{ c.client.username }}</strong>
+                <span class="unread-badge" id="unread-{{ c.id }}"></span></br>
                 <p>{{ c.title|truncatechars:35 }}</p>
                 {% comment %} <p>{% if c.last_sender_id and c.last_sender_id != request.user.id %}Re: {% endif %}{{ c.last_msg|truncatechars:35 }}</p> {% endcomment %}
             </div>
@@ -26,8 +30,9 @@ Get Assistance
         {% for c in conversations %}
             {% if c.status == "closed" %}
             <div class="conversation" data-conv-id="{{ c.id }}" onclick="loadConversationAdmin(this)">
-                <strong>{{ c.title }}</strong>  <i class="bi bi-chat-fill"></i></br>
-                <p>{% if c.last_sender_id and c.last_sender_id != request.user.id %}Re: {% endif %}{{ c.last_msg }}</p>
+                <strong>{{ c.client.username }}</strong>
+                <span class="unread-badge" id="unread-{{ c.id }}"></span></br>
+                <p>{{ c.title|truncatechars:35 }}</p>
             </div>
             {% endif %}
         {% endfor %}
@@ -56,7 +61,7 @@ Get Assistance
         <div class="chat-input">
             <input type="hidden" id="selectedchat" value="{{conv.id}}">
             <input type="text" id="chatInput" placeholder="Type your message..." />
-            <button onclick="sendMessage()">Send <i class="bi bi-send"></i></button>
+            <button onclick="sendMessageAdmin()">Send <i class="bi bi-send"></i></button>
         </div>
     </div>
 </div>

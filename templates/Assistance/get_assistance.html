@@ -23,7 +23,12 @@ Get Assistance
             >
                 
                 <strong>{{ c.title }}</strong>
-                <span class="unread-badge" id="unread-{{ c.id }}"></span></br>
+                {% if c.unread > 0 %}
+                <span class="unread-badge" id="unread-{{ c.id }}">{{ c.unread }}</span></br>
+                {% else %}
+                <span class="unread-badge" id="unread-{{ c.id }}" style="display:none;"></span></br>
+                {% endif %}
+                
                 {% comment %} <i class="{% if c.unread > 0 and c.unread < 10 %}bi bi-{{ c.unread }}-circle-fill{% else %}bi bi-chat-dots{% endif %}" style="color:{% if c.unread > 9 %}#9d1010{% else %}#04212f{% endif %}"></i></br> {% endcomment %}
                 <p>{% if c.last_sender_id and c.last_sender_id != request.user.id %}Re: {% endif %}{{ c.last_msg|truncatechars:35 }}</p>
             </div>
@@ -67,6 +72,9 @@ Get Assistance
         </div>
     </div>
 </div>
+<script>
 
-<script src="{% static 'js/Assistance.js' %}"></script>
+
+</script>
+<script src="{% static 'js/Assistance_client.js' %}"></script>
 {% endblock content %}

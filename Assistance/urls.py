@@ -11,5 +11,8 @@ urlpatterns = [
     path("conversation", views.ConversationView, name="conversation"),
     path('conversation/<int:conv_id>/', views.fetch_messages_admin, name='fetch_messages_admin'),
     path("conversation/send/", views.send_message_admin, name="send_message_admin"),
+    path("conversation/poll/<int:conv_id>/", views.poll_messages_admin, name="poll_messages_admin"),
+    path("conversation/poll/conversations_admin/", views.poll_conversations_admin, name="poll_conversation_admin"),
+
     path("manage_conversation", views.ManageConversation, name="manage_conversation"),
 ]

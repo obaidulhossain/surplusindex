@@ -191,8 +191,10 @@ def poll_conversations(request):
 
     return JsonResponse({"conversations": list(conversations)})
 
-
+#------------------------------------------------------------------------###########
 #-------------------------- Admin section starts from here -------------------------
+#------------------------------------------------------------------------###########
+@login_required
 def ConversationView(request):
     params = request.POST if request.method == "POST" else request.GET
     selected_conv = params.get("selected_conv", None)
@@ -294,9 +296,49 @@ def send_message_admin(request):
     })
 
 
+@login_required
+def poll_conversations_admin(request):
+    # last_message_qs = Messages.objects.filter(conversation=OuterRef('pk')).order_by('-created_at')
+    qs = Conversation.objects.annotate(
+        # last_msg = Subquery(last_message_qs.values('text')[:1]),
+        # last_sender_id=Subquery(last_message_qs.values('sender_id')[:1]),
+        unread = Count('messages', filter=Q(messages__is_seen=False) & ~Q(messages__sender=request.user))
+    ).filter(unread__gt=0).order_by('-unread')
+    
+    conversations = [
+    {
+        "id": c.id,
+        "unread": c.unread,
+        "client":c.client.username,
+        "status":c.status,
+        "title":c.title,
+    }
+    for c in qs
+    ]
+    return JsonResponse({"conversations": list(conversations)})
 
+@login_required
+@require_GET
+def poll_messages_admin(request, conv_id):
+    last_id = request.GET.get("last_id")
 
+    qs = Messages.objects.filter(conversation_id=conv_id)
 
+    if last_id:
+        qs = qs.filter(id__gt=last_id).order_by("id")
+
+    messages = [
+    {
+        "id": m.id,
+        "text": m.text,
+        "sender": m.sender.username.upper(),
+        "sender_type": m.sender_type,
+        "message_time": format_user_time(m.created_at, request.user)
+    }
+    for m in qs
+    ]
+
+    return JsonResponse({"messages": list(messages)})
 
 
 def ManageConversation(request):
