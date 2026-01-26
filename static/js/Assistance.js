@@ -53,7 +53,7 @@ function unlockAudio() {
 
 //------------------------------------------------------------------------- Press Enter to send message
 document.getElementById("chatInput").addEventListener("keypress", function (e) {
-    if (e.key === "Enter") sendMessage();
+    if (e.key === "Enter") sendMessageAdmin();
 });
 //-------------------------------------------------------------------------
 
@@ -231,6 +231,7 @@ function sendMessageAdmin() {
             );
             //        appendMessage(data.text, "sent");
             input.value = "";
+            lastMessageId = data.id;
             scrollToBottom();
         });
 }
