@@ -3,7 +3,7 @@ from . import views
 
 
 urlpatterns = [
-
+path('run_publish_foreclosures/', views.run_publish_foreclosures, name="run_publish_foreclosures"),
 # Urls for Upload Data Section
 path('upload-manager/', views.UploadManager, name="upload-manager"),
 path('create-upload/', views.CreateUpload, name="create-upload"),

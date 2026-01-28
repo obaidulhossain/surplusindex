@@ -113,6 +113,18 @@
                     <span>Project Settings</span>
                 </a>
             </li>
+            <li class="sidebar-item child">
+            {% comment %} <form method="post" action="{% url 'run_publish_foreclosures' %}">
+                {% csrf_token %}
+                <button type="submit" class="sidebar-link btn btn-link p-0">
+                    <span>Update Database</span>
+                </button>
+            </form> {% endcomment %}
+                <a href="{% url 'run_publish_foreclosures' %}" class="sidebar-link">
+                    {% comment %} <i class="lni lni-sliders-horizontal-square-2"></i> {% endcomment %}
+                    <span>Update Database</span>
+                </a>
+            </li>
         </ul>
     </li>
     <li class="sidebar-item">

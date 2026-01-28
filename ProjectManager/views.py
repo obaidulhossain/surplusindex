@@ -28,7 +28,22 @@ from .utils import *
 import pandas as pd
 from django.db import transaction
 from django.forms.models import model_to_dict
+
+from django.core.management import call_command
 # Create your views here.
+#--------------------------run update_publish_status command
+@login_required(login_url="login")
+@allowed_users(['admin'])
+def run_publish_foreclosures(request):
+    try:
+        call_command("update_publish_status")  # command name = file name
+        messages.success(request, "Foreclosures publish job executed successfully.")
+    except Exception as e:
+        messages.error(request, f"Error running job: {e}")
+
+    return redirect(request.META.get("HTTP_REFERER", "/"))
+#-----------------------------------------------------------
+
 #-----------------------Project Manager---------------------
 @login_required(login_url="login")
 @allowed_users(['admin'])
