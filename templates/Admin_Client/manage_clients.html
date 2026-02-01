@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}
+Clients
+{% endblock title %}
+
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<link href="{% static 'css/admin.css' %}" rel="stylesheet">
+
+<h1 style="color: #fff; font-size:30px; text-align:center;">Communication</h1>
+<div class="section-dark">
+    <div class="grid seventy"style="max-height:400px;">
+    
+    </div>
+    <div class="grid thirty" style="max-height:400px;">
+        <h4>Emails</h4>
+        {% for e in emails %}
+        {% if e.in_reply_to == None or e.in_reply_to == "" %}
+        <a  style="width:100%" href="{% url 'conversation_view' e.thread_key EmailInstance.id %}">
+        {{e.get_folder_display}}: {{e.subject|title}}
+        </a>
+        {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+
+
+{% endblock content %}

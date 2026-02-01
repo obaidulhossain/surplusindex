@@ -4,6 +4,9 @@ from . import views
 
 
 urlpatterns = [
+    path('clients/', views.Clients, name="clients"),
+    path("clients/search/", views.search_clients, name="search_clients"),
+    path('clients/manage/', views.ManageClients, name="manage_client"),
     path('all_clients/', views.allClients, name="all_clients"),
     path('update_credits/', views.updateCredits, name="update_credits"),
     

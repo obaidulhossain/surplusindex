@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, HttpResponseRedirect
+from django.shortcuts import render, redirect, HttpResponseRedirect, get_object_or_404
 from django.contrib.auth.models import User, Group
 from django.core.paginator import Paginator
 from si_user.models import *
@@ -26,6 +26,72 @@ from authentication.utils import token_generator
 from si_user.models import UserDetail
 from django.contrib.auth.decorators import login_required
 from authentication.decorators import allowed_users
+from django.db.models import Q
+from Communication.models import*
+@allowed_users(['admin'])
+@login_required(login_url="login")
+def Clients(request):
+    context = {
+
+    }
+    return render(request, 'Admin_Client/clients.html', context)
+
+def search_clients(request):
+    query = request.GET.get("q", "").strip()
+
+    results = []
+
+    if query:
+        qs = UserDetail.objects.select_related("user").filter(
+            Q(user__username__icontains=query) |
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(phone__icontains=query) |
+            Q(user__id__icontains=query) |
+            Q(id__icontains=query)
+        )[:20]  # limit for performance
+
+        results = [
+            {
+                "id": ud.id,
+                "user_id": ud.user.id,
+                "username": ud.user.username,
+                "name": f"{ud.user.first_name} {ud.user.last_name}".strip(),
+                "email": ud.user.email,
+                "phone": ud.phone,
+                "user_type": ud.user_type,
+            }
+            for ud in qs
+        ]
+
+    return JsonResponse({"results": results})
+@allowed_users(['admin'])
+@login_required(login_url="login")
+def ManageClients(request):
+    params = request.POST if request.method == "POST" else request.GET
+    clid = params.get("clid")
+    if not clid:
+        messages.info(request, "No selected user")
+        return redirect("clients")
+    else:
+        client = UserDetail.objects.get(pk=clid)
+        emails = MailMessage.objects.filter(
+            Q(sender__icontains=client.user.email) |
+            Q(recipient__icontains=client.user.email)
+        )
+    EmailInstance = get_object_or_404(MailAccount, pk=1)
+
+    context = {
+        "client":client,
+        "emails":emails,
+        "EmailInstance":EmailInstance,
+
+    }
+    return render(request, 'Admin_Client/manage_clients.html', context)
+    
+
+
 
 @allowed_users(['admin'])
 @login_required(login_url="login")
@@ -62,7 +128,7 @@ def allClients(request):
             nearest_delivery = order.deliveries.filter(delivery_date__isnull=False).aggregate(Min('delivery_date'))
             order.nearest_delivery_date = nearest_delivery['delivery_date__min']
     total_client = client_queryset.count()
-    p = Paginator(client_queryset, 20)
+    p = Paginator(client_queryset, 2000)
     page = request.GET.get('page')
     clients = p.get_page(page)
 
@@ -191,6 +257,7 @@ def clientDetail(request):
         'motion_filed':motion_filed,
         'fund_claimed':fund_claimed,
         'no_surplus':no_surplus,
+        'purchased_leads':purchased_leads,
 
     }
     return render(request, 'Admin_Client/client_detail.html', context)

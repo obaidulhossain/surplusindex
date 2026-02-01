@@ -147,115 +147,142 @@ Clients
     </div>
 </div>
 
-    {% for order in orders %}
+{% for order in orders %}
 
-    <div class="section-header" style="margin-top:20px;" data-id="{{order.id}}">
-        <h4>Order id: {{order.id}}</h4>
-        
-        <select class="order_status" onchange="updateOrderStatus(this)" {% if order.undelivered_count > 0 %}disabled{% elif not order.payment_status == 'paid' %}disabled{% endif %}>
-            <option value="running" {% if order.order_status == 'running' %}selected{% endif %}>Running</option>
-            <option value="completed" {% if order.order_status == 'completed' %}selected{% endif %}>Completed</option>
+<div class="section-header" style="margin-top:20px;" data-id="{{order.id}}">
+    <h4>Order id: {{order.id}}</h4>
+    
+    <select class="order_status" onchange="updateOrderStatus(this)" {% if order.undelivered_count > 0 %}disabled{% elif not order.payment_status == 'paid' %}disabled{% endif %}>
+        <option value="running" {% if order.order_status == 'running' %}selected{% endif %}>Running</option>
+        <option value="completed" {% if order.order_status == 'completed' %}selected{% endif %}>Completed</option>
+    </select>
+</div>
+
+<div class="section-body-full">
+    <div class="onesixth">
+        <label for="date-ordered">Date Ordered</label>
+        <h4 id="date-ordered">{{order.date_ordered|date:"d/m/Y"}}</h4>
+    </div>
+    <div class="onesixth">
+        <label for="num-deliveries">Deliveries</label>
+        <h4 id="num-deliveries">{{deliveries}}</h4>
+    </div>
+    <div class="onesixth">
+        <label for="num-delivered">Completed</label>
+        <h4 id="num-delivered">{{delivered}}</h4>
+    </div>
+    <div class="onesixth">
+        <label for="num-pending">Pending</label>
+        <h4 id="num-pending">{{pending}}</h4>
+    </div>
+    <div class="onesixth">
+        <label for="order-price">Order Price</label>
+        <h4 id="order-price">{{order.order_price|currency}}</h4>
+    </div>
+    <div class="onesixth">
+        <label for="payment-status">Payment Status</label>
+        <form method="post" action='{% url 'UpdatePaymentStatus' %}'>
+        {% csrf_token %}
+        <input type="hidden" name="client" value="{{client_instance.pk}}">
+        <input type="hidden" name="order" value="{{order.id}}">
+        <input type="hidden" name="order-status" value="{{selected_orderstatus}}">
+        <select name="payment-status" onchange="this.form.submit()">
+            <option value="" {% if order.payment_status == "" %}selected{% endif %}>-- Select --</option>
+            <option value="requested" {% if order.payment_status == "requested" %}selected{% endif %}>Payment Requested</option>
+            <option value="in_escrow"  {% if order.payment_status == "in_escrow" %}selected{% endif %}>In Escrow Account</option>
+            <option value="paid"  {% if order.payment_status == "paid" %}selected{% endif %}>Paid</option>
+            <option value="not_paid"  {% if order.payment_status == "not_paid" %}selected{% endif %}>Not Paid</option>
         </select>
+        </form>
     </div>
-
-    <div class="section-body-full">
-        <div class="onesixth">
-            <label for="date-ordered">Date Ordered</label>
-            <h4 id="date-ordered">{{order.date_ordered|date:"d/m/Y"}}</h4>
-        </div>
-        <div class="onesixth">
-            <label for="num-deliveries">Deliveries</label>
-            <h4 id="num-deliveries">{{deliveries}}</h4>
-        </div>
-        <div class="onesixth">
-            <label for="num-delivered">Completed</label>
-            <h4 id="num-delivered">{{delivered}}</h4>
-        </div>
-        <div class="onesixth">
-            <label for="num-pending">Pending</label>
-            <h4 id="num-pending">{{pending}}</h4>
-        </div>
-        <div class="onesixth">
-            <label for="order-price">Order Price</label>
-            <h4 id="order-price">{{order.order_price|currency}}</h4>
-        </div>
-        <div class="onesixth">
-            <label for="payment-status">Payment Status</label>
-            <form method="post" action='{% url 'UpdatePaymentStatus' %}'>
-            {% csrf_token %}
-            <input type="hidden" name="client" value="{{client_instance.pk}}">
-            <input type="hidden" name="order" value="{{order.id}}">
-            <input type="hidden" name="order-status" value="{{selected_orderstatus}}">
-            <select name="payment-status" onchange="this.form.submit()">
-                <option value="" {% if order.payment_status == "" %}selected{% endif %}>-- Select --</option>
-                <option value="requested" {% if order.payment_status == "requested" %}selected{% endif %}>Payment Requested</option>
-                <option value="in_escrow"  {% if order.payment_status == "in_escrow" %}selected{% endif %}>In Escrow Account</option>
-                <option value="paid"  {% if order.payment_status == "paid" %}selected{% endif %}>Paid</option>
-                <option value="not_paid"  {% if order.payment_status == "not_paid" %}selected{% endif %}>Not Paid</option>
-            </select>
-            </form>
-        </div>
-    </div>
-    <div class="table-wrapper">
-        <table id="leads-table" class="table table-striped table-hover">
-            <thead>
-                <tr>
-                    <th>S_ID</th>
-                    <th>Delivery Date</th>
-                    <th>Delivered In</th>
-                    <th>Detail</th>
-                    <th>Delivery Status</th>
-                    <th>Action</th>
-                    
-                </tr>
-            </thead>
-            <tbody>
-            {% for delivery in order.deliveries.all %}
-                <tr data-id="{{delivery.id}}">
-                    <td>{{forloop.counter|stringformat:"02d"}}_{{delivery.id|stringformat:"02d"}}</td>
-                    <td><input type="date" name="delivery_date" value="{{delivery.delivery_date|date:'Y-m-d'}}"></td>
-                    <td><input type="date" name="delivered_date" value="{{delivery.delivered_in|date:'Y-m-d'}}"></td>
-                    <td><input type="text" name="delivery_note" value="{{delivery.delivery_note}}" style="min-width:700px;"></td>
-                    <td>
-                        <select class="delivery_status" name="delivery_status" onchange="saveDeliverystatus(this)">
-                            <option value=""{% if not delivery.delivery_status %}selected{% endif %}>Select Status</option>
-                            <option value="assigned" {% if delivery.delivery_status == 'assigned' %}selected{% endif %}>Assigned</option>
-                            <option value="ready" {% if delivery.delivery_status == 'ready' %}selected{% endif %}>Ready To Deliver</option>
-                            <option value="delivered" {% if delivery.delivery_status == 'delivered' %}selected{% endif %}>Delivered</option>
-                            <option value="revision" {% if delivery.delivery_status == 'revision' %}selected{% endif %}>Revision</option>
-                        </select>
-                    </td>
-                    <td><input type="submit" value="Save"></td>
-                    
-                </tr>
-            {% endfor %}
-                <tr>
-                    <form method="post" action="{% url 'createDelivery' %}">
-                    {% csrf_token %}
-                    <input type="hidden" name="order_id" value="{{order.id}}">
-                    <input type="hidden" name="client_id" value="{{client_instance.pk}}">
-                    <td></td>
-                    <td><input type="date" name="delivery_date"></td>
-                    <td><input type="date" name="delivered_date"></td>
-                    <td><input type="text" name="delivery_note" style="min-width:700px;" placeholder="Add Delivery Note"></td>
-                    
-                    <td>
-                        <select name="delivery_status">
-                            <option value="">Select Status</option>
-                            <option value="assigned">Assigned</option>
-                            <option value="ready">Ready To Deliver</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="revision">Revision</option>
-                        </select>
-                    </td>
-                    <td><input type="submit" value="Add Delivery"></td>
-                    </form>
-                <tr>
-            </tbody>
-        </table>
-    </div>
-    {% endfor %}
-    <script src="{% static 'js/Surplusindex.js' %}"></script>
+</div>
+<div class="table-wrapper">
+    <table id="leads-table" class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>S_ID</th>
+                <th>Delivery Date</th>
+                <th>Delivered In</th>
+                <th>Detail</th>
+                <th>Delivery Status</th>
+                <th>Action</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+        {% for delivery in order.deliveries.all %}
+            <tr data-id="{{delivery.id}}">
+                <td>{{forloop.counter|stringformat:"02d"}}_{{delivery.id|stringformat:"02d"}}</td>
+                <td><input type="date" name="delivery_date" value="{{delivery.delivery_date|date:'Y-m-d'}}"></td>
+                <td><input type="date" name="delivered_date" value="{{delivery.delivered_in|date:'Y-m-d'}}"></td>
+                <td><input type="text" name="delivery_note" value="{{delivery.delivery_note}}" style="min-width:700px;"></td>
+                <td>
+                    <select class="delivery_status" name="delivery_status" onchange="saveDeliverystatus(this)">
+                        <option value=""{% if not delivery.delivery_status %}selected{% endif %}>Select Status</option>
+                        <option value="assigned" {% if delivery.delivery_status == 'assigned' %}selected{% endif %}>Assigned</option>
+                        <option value="ready" {% if delivery.delivery_status == 'ready' %}selected{% endif %}>Ready To Deliver</option>
+                        <option value="delivered" {% if delivery.delivery_status == 'delivered' %}selected{% endif %}>Delivered</option>
+                        <option value="revision" {% if delivery.delivery_status == 'revision' %}selected{% endif %}>Revision</option>
+                    </select>
+                </td>
+                <td><input type="submit" value="Save"></td>
+                
+            </tr>
+        {% endfor %}
+            <tr>
+                <form method="post" action="{% url 'createDelivery' %}">
+                {% csrf_token %}
+                <input type="hidden" name="order_id" value="{{order.id}}">
+                <input type="hidden" name="client_id" value="{{client_instance.pk}}">
+                <td></td>
+                <td><input type="date" name="delivery_date"></td>
+                <td><input type="date" name="delivered_date"></td>
+                <td><input type="text" name="delivery_note" style="min-width:700px;" placeholder="Add Delivery Note"></td>
+                
+                <td>
+                    <select name="delivery_status">
+                        <option value="">Select Status</option>
+                        <option value="assigned">Assigned</option>
+                        <option value="ready">Ready To Deliver</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="revision">Revision</option>
+                    </select>
+                </td>
+                <td><input type="submit" value="Add Delivery"></td>
+                </form>
+            <tr>
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+<div class="table-wrapper">
+    <table id="leads-table" class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>FID</th>
+                <th>State</th>
+                <th>County</th>
+                <th>Case Num</th>
+                <th>Surplus</th>
+                <th>Status</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+        {% for f in purchased_leads %}
+            <tr>
+                <td>{{f.id}}</td>
+                <td>{{f.state}}</td>
+                <td>{{f.county}}</td>
+                <td>{{f.case_number}}</td>
+                <td>{% if f.verified_surplus and f.verified_surplus > 0 %}{{f.verified_surplus}}{% else %}{{f.possible_surplus}}(Apr){% endif %}</td>
+                <td>{{f.get_surplus_status_display}}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script src="{% static 'js/Surplusindex.js' %}"></script>
     <script src="{% static 'js/Admin_Client.js' %}"></script>
 </div>
 

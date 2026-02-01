@@ -24,11 +24,13 @@ Clients
 
     <div class="section-filter-full" id="filters">
     <div class="onefourth">
-    <form method="post" action="{% url 'update_credits' %}">
-    {% csrf_token %}
-        <input type="hidden" value="{{selectedClientType}}" name="clientType">
-        <button class="button" type="submit">Update Client Credit Usage</button>
-    </form>
+    <input
+        style="width:100%"
+        type="text"
+        id="tableSearch"
+        placeholder="Search clients..."
+        
+    >
     </div>
     <div class="onefourth">
     <form method="post">
@@ -41,6 +43,11 @@ Clients
     </form>
     </div>
     <div class="onefourth">
+    <form method="post" action="{% url 'update_credits' %}" >
+    {% csrf_token %}
+        <input type="hidden" value="{{selectedClientType}}" name="clientType">
+        <button class="button" type="submit" style="width:100%">Update Client Credit Usage</button>
+    </form>
     </div>
     <div class="onefourth">
     </div>
@@ -206,6 +213,17 @@ Clients
         </ul>
     </div>
 </div>
+<script>
+document.getElementById("tableSearch").addEventListener("keyup", function () {
+    const query = this.value.toLowerCase();
+    const rows = document.querySelectorAll("#leads-table tbody tr");
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(query) ? "" : "none";
+    });
+});
+</script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const buttons = document.querySelectorAll(".delete-user-btn");

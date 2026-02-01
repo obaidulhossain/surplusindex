@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}
+Clients
+{% endblock title %}
+
+
+{% block content %}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
+<div class="section-header">
+    <h4>Clients</h4>
+    <input
+        type="text"
+        id="clientSearch"
+        placeholder="Search by name, email, phone, ID..."
+        autocomplete="off"
+        style="width:50%"
+    />
+</div>
+<div class="section-body-full">
+    <div class="table-wraper">
+        <table id="leads-table" class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>CLID</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Full Name</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>View</th>
+                
+            </tr>
+        </thead>
+        <tbody id="searchResults" class="search-results">
+
+        </tbody>
+    </table>
+    </div>
+</div>
+<script>
+let searchTimeout = null;
+
+document.getElementById("clientSearch").addEventListener("input", function () {
+    const query = this.value.trim();
+    const tbody = document.getElementById("searchResults");
+
+    clearTimeout(searchTimeout);
+
+    if (query.length < 2) {
+        tbody.innerHTML = "";
+        return;
+    }
+
+    searchTimeout = setTimeout(() => {
+        fetch(`/clients/search/?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                tbody.innerHTML = "";
+
+                if (data.results.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center">No clients found</td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                data.results.forEach(client => {
+                    const tr = document.createElement("tr");
+
+                    tr.innerHTML = `
+                        <td>${client.user_id}</td>
+                        <td>${client.username}</td>
+                        <td>${client.email}</td>
+                        <td>${client.name || "—"}</td>
+                        <td>${client.phone || "—"}</td>
+                        <td>
+                            <span class="badge ${
+                                client.user_type === "si_client"
+                                    ? "bg-success"
+                                    : "bg-secondary"
+                            }">
+                                ${client.user_type === "si_client" ? "SI Client" : "Manual"}
+                            </span>
+                        </td>
+                        <td>
+                        <form method="POST" action="{% url "manage_client" %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="clid" value="${client.id}">
+                        <input type="submit" class="button" value="View">
+                        </form>
+                        </td>
+                    `;
+
+                    tbody.appendChild(tr);
+                });
+            });
+    }, 300);
+});
+</script>
+
+
+{% endblock content %}
