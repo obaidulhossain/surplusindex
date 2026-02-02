@@ -9,6 +9,30 @@ class Command(BaseCommand):
     help = "Update publish unpublish status."
 
     def handle(self, *args, **kwargs):
+        qs = Foreclosure.objects.filter(
+            Q(possible_surplus__isnull=True) | Q(possible_surplus=0),
+            sale_price__isnull=False,
+            fcl_final_judgment__isnull=False
+        ).exclude(
+            sale_price='',
+            fcl_final_judgment=''
+        )
+
+        updated = 0
+
+        for f in qs:
+            try:
+                float(f.sale_price)
+                float(f.fcl_final_judgment)
+                f.update_possible_surplus()
+                updated += 1
+            except (ValueError, TypeError):
+                continue
+
+        self.stdout.write(
+            self.style.SUCCESS(f"Updated {updated} foreclosure records")
+        )
+        
         PUBLISH_SALE_STATUSES = [
             Foreclosure.SOLD,
             Foreclosure.ACTIVE,

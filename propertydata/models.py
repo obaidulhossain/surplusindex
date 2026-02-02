@@ -315,11 +315,12 @@ class Foreclosure(OperationStat):
             sale_price = float(self.sale_price)
             fcl_final_judgment = float(self.fcl_final_judgment)
             self.possible_surplus = sale_price - fcl_final_judgment
+            self.save(update_fields=["possible_surplus"])
         except (ValueError, TypeError) as e:
             # Handle the error, log it, or set a default value
             self.possible_surplus = None
             print(f"Error calculating possible_surplus: {e}")
-            self.save()
+            self.save(update_fields=["possible_surplus"])
 
     class Meta:
         verbose_name = 'Foreclosure'
