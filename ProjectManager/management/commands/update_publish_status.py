@@ -68,12 +68,29 @@ class Command(BaseCommand):
             self.style.WARNING(f"Unpublished {unpublished_count} foreclosure records.")
         )
         
+        fix_possible_surplus = (
+            Foreclosure.objects
+            .filter(
+                possible_surplus__lt = 5000,
+                surplus_status="possible surplus",
+                )
+        )
+        fix_possible_surplus_count = fix_possible_surplus.update(surplus_status="no possible surplus")
+
+        fix_no_possible_surplus = (
+            Foreclosure.objects
+            .filter(
+                possible_surplus__gte = 5000,
+                surplus_status="no possible surplus",
+                )
+        )
+        fix_no_possible_surplus_count = fix_no_possible_surplus.update(surplus_status="possible surplus")
         today = timezone.now().date()
         try:                
             # STEP 2 — (Optional) Send via email
             email = EmailMessage(
                 subject=f"Status Updated - {published_count}/{unpublished_count}",
-                body=f"Published: {published_count} \nUnpublished: {unpublished_count} \nDate of action: {today}",
+                body=f"Published: {published_count} \nUnpublished: {unpublished_count}\nStatus Changed to No possible Surplus: {fix_possible_surplus_count} \nStatus Changed to Possible Surplus: {fix_no_possible_surplus_count}  \nDate of action: {today}",
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 to=["obaidulbiplob.bd@gmail.com"],
             )
