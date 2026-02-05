@@ -9,6 +9,19 @@ class Command(BaseCommand):
     help = "Update publish unpublish status."
 
     def handle(self, *args, **kwargs):
+        nsp_update = Foreclosure.objects.filter(
+            sale_price__isnull=True
+        ).exclude(
+            possible_surplus__gt = Decimal("0")
+        )
+        nsp_update.update(possible_surplus=Decimal("0"))
+        nj_update = Foreclosure.objects.filter(
+            fcl_final_judgment__isnull=True
+        ).exclude(
+            possible_surplus__gt = Decimal("0")
+        )
+        
+        nj_update.update(possible_surplus=Decimal("0"))
         qs = Foreclosure.objects.filter(
             sale_price__isnull=False,
             fcl_final_judgment__isnull=False,
