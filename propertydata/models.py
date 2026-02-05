@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.utils.timezone import now
 from Admin.utils.threadlocal import get_current_user
 from builtins import property as builtin_property
+from decimal import Decimal, InvalidOperation
 # ----- CHOICES FOR GLOBAL USE -------------------------------- # 
 ACTIVE = 'active'                                               # 
 INACTIVE = 'inactive'                                           # 
@@ -310,18 +311,34 @@ class Foreclosure(OperationStat):
     case_search_status = models.CharField(max_length=100, choices=CASE_SEARCH_STATUS, null=True, blank=True)
     published = models.BooleanField(default=False)
     auction_source = models.CharField(max_length=255, null=True, blank=True)
+    # def update_possible_surplus(self):
+    #     try:
+    #         sale_price = float(self.sale_price)
+    #         fcl_final_judgment = float(self.fcl_final_judgment)
+    #         self.possible_surplus = sale_price - fcl_final_judgment
+    #         self.save(update_fields=["possible_surplus"])
+    #     except (ValueError, TypeError) as e:
+    #         # Handle the error, log it, or set a default value
+    #         self.possible_surplus = None
+    #         print(f"Error calculating possible_surplus: {e}")
+    #         self.save(update_fields=["possible_surplus"])
     def update_possible_surplus(self):
         try:
-            sale_price = float(self.sale_price)
-            fcl_final_judgment = float(self.fcl_final_judgment)
-            self.possible_surplus = sale_price - fcl_final_judgment
-            self.save(update_fields=["possible_surplus"])
-        except (ValueError, TypeError) as e:
-            # Handle the error, log it, or set a default value
+            sale = Decimal(str(self.sale_price))
+            judgment = Decimal(str(self.fcl_final_judgment))
+            surplus = sale - judgment
+        except (InvalidOperation, TypeError, ValueError):
+            # Always store NULL, never ""
             self.possible_surplus = None
-            print(f"Error calculating possible_surplus: {e}")
             self.save(update_fields=["possible_surplus"])
+            return
 
+        # Optional business rule
+        if surplus < 0:
+            surplus = Decimal("0.00")
+
+        self.possible_surplus = surplus
+        self.save(update_fields=["possible_surplus"])
     class Meta:
         verbose_name = 'Foreclosure'
         verbose_name_plural = 'Foreclosures'
