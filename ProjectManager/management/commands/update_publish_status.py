@@ -9,7 +9,6 @@ class Command(BaseCommand):
     help = "Update publish unpublish status."
 
     def handle(self, *args, **kwargs):
-        print("STEP 1: start")
         qs = Foreclosure.objects.filter(
             sale_price__isnull=False,
             fcl_final_judgment__isnull=False,
@@ -17,19 +16,16 @@ class Command(BaseCommand):
             Q(possible_surplus__isnull=True) |
             Q(possible_surplus=Decimal("0"))
         )
-        print("STEP 2: qs built")
         updated = 0
 
         for f in qs:
             try:
-                print("STEP 3: loop", f.id)
                 float(f.sale_price)
                 float(f.fcl_final_judgment)
                 f.update_possible_surplus()
                 updated += 1
             except (ValueError, TypeError):
                 continue
-        print(f"STEP 4: after update loop. updated:{updated}")
         self.stdout.write(
             self.style.SUCCESS(f"Updated {updated} foreclosure records")
         )
