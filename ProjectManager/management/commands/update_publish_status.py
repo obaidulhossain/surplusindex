@@ -10,7 +10,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         qs = Foreclosure.objects.filter(
-            Q(possible_surplus__isnull=True) | Q(possible_surplus=0),
+            Q(possible_surplus__isnull=True) | Q(possible_surplus=Decimal("0")),
             sale_price__isnull=False,
             fcl_final_judgment__isnull=False
         ).exclude(
@@ -92,21 +92,23 @@ class Command(BaseCommand):
             self.style.WARNING(f"Unpublished {unpublished_count} foreclosure records.")
         )
         
-        fix_possible_surplus = (
-            Foreclosure.objects
-            .filter(
-                possible_surplus__lt = 5000,
-                surplus_status="possible surplus",
-                )
+        fix_possible_surplus = Foreclosure.objects.filter(
+            possible_surplus__isnull=False,
+            surplus_status=Foreclosure.POSSIBLE_SURPLUS,
+        ).exclude(
+            possible_surplus=""
+        ).filter(
+            possible_surplus__lt=Decimal("5000")
         )
         fix_possible_surplus_count = fix_possible_surplus.update(surplus_status="no possible surplus")
 
-        fix_no_possible_surplus = (
-            Foreclosure.objects
-            .filter(
-                possible_surplus__gte = 5000,
-                surplus_status="no possible surplus",
-                )
+        fix_no_possible_surplus = Foreclosure.objects.filter(
+            possible_surplus__isnull=False,
+            surplus_status=Foreclosure.NO_POSSIBLE_SURPLUS,
+        ).exclude(
+            possible_surplus=""
+        ).filter(
+            possible_surplus__gte=Decimal("5000")
         )
         fix_no_possible_surplus_count = fix_no_possible_surplus.update(surplus_status="possible surplus")
         today = timezone.now().date()
