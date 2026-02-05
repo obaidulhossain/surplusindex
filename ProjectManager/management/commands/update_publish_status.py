@@ -11,12 +11,11 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         print("STEP 1: start")
         qs = Foreclosure.objects.filter(
-            Q(possible_surplus__isnull=True) | Q(possible_surplus=Decimal("0")),
             sale_price__isnull=False,
-            fcl_final_judgment__isnull=False
-        ).exclude(
-            sale_price='',
-            fcl_final_judgment=''
+            fcl_final_judgment__isnull=False,
+        ).filter(
+            Q(possible_surplus__isnull=True) |
+            Q(possible_surplus=Decimal("0"))
         )
         print("STEP 2: qs built")
         updated = 0
@@ -30,7 +29,7 @@ class Command(BaseCommand):
                 updated += 1
             except (ValueError, TypeError):
                 continue
-        print("STEP 4: after update loop")
+        print(f"STEP 4: after update loop. updated:{updated}")
         self.stdout.write(
             self.style.SUCCESS(f"Updated {updated} foreclosure records")
         )
@@ -97,8 +96,6 @@ class Command(BaseCommand):
         fix_possible_surplus = Foreclosure.objects.filter(
             possible_surplus__isnull=False,
             surplus_status=Foreclosure.POSSIBLE_SURPLUS,
-        ).exclude(
-            possible_surplus=""
         ).filter(
             possible_surplus__lt=Decimal("5000")
         )
@@ -107,8 +104,6 @@ class Command(BaseCommand):
         fix_no_possible_surplus = Foreclosure.objects.filter(
             possible_surplus__isnull=False,
             surplus_status=Foreclosure.NO_POSSIBLE_SURPLUS,
-        ).exclude(
-            possible_surplus=""
         ).filter(
             possible_surplus__gte=Decimal("5000")
         )
