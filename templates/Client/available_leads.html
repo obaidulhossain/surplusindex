@@ -208,8 +208,15 @@ Available Leads
                             <td class="saletype {% if current_user in i.hidden_for.all %}highlight-row{% endif %}" >{{i.get_sale_type_display}}</td>
                             <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.get_sale_status_display}}</td>
                             <td class="amount {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.sale_price|currency}}</td>
-                            <td class="possible-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.possible_surplus|currency}}</td>
-                            <td class="verified-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.verified_surplus|currency}}</td>
+                            <td class="possible-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">
+                                {% if i.verified_surplus and not i.verified_surplus == 0 %}
+                                {{i.verified_surplus|currency}}
+                                {% else %}
+                                {{i.possible_surplus|currency}} Approx
+                                {% endif %}
+                            </td>
+                            {% comment %} <td class="possible-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.possible_surplus|currency}}</td>
+                            <td class="verified-surplus {% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.verified_surplus|currency}}</td> {% endcomment %}
                             <td class="{% if current_user in i.hidden_for.all %}highlight-row{% endif %}">{{i.get_surplus_status_display}}</td>
                         </tr>
                         {% endfor %}
