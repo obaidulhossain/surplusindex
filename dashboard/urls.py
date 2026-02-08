@@ -22,6 +22,7 @@ from . import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/v1/',  include('api.urls')),
     path('media-manager/', include('media_manager.urls')),
     path('Project-Manager/', include('ProjectManager.urls')),
     path('AllSettings/', include('AllSettings.urls')),

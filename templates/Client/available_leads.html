@@ -139,12 +139,18 @@ Available Leads
             </form>
         </div>
     <div class="client-sec-header" style="margin-top:20px;">
-        <h4>Available Data as Leads</h4>
+        <h4>Foreclosure Surplus Leads</h4>
     </div>
     <div class="section-body-full">
+        
         <form id="add-to-myleads" method="POST" action="{% url 'purchaseLeads' %}">
             {% csrf_token %}
             <div class="action-section">
+                <h6 style="display: inline-flex; text-align-last: left; float: left;">
+                To reveal the case detail, property information, owners and their contact information,</br>
+                Mark the checkboxes below to select leads and click download.</br>
+                Hide leads to keep this Foreclosure table and focus on the newer leads.
+                </h6>
                 <input type="hidden" name="unhide" value={{showHidden}}>
                 <input type="hidden" name="stateFilter" value={{selectedState}}>
                 <input type="hidden" name="countyFilter" value={{selectedCounty}}>
@@ -152,10 +158,17 @@ Available Leads
                 <input type="hidden" name="ps_min" value={{psmin}}>
                 <input type="hidden" name="vs_min" value={{vsmin}}>
                 <div class="action-item">
-                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmAddToMyLeads()">Download (<span data-selected-count>0</span>)</button>
+                    <button class="button" type="submit" formtarget="blank" formaction="{% url 'subscriptions' %}">Buy Credits</br>Available: {{ user_detail.Total_credits }}</button>
                 </div>
                 <div class="action-item">
-                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmHideLeads()" formaction="{% url 'hide-leads' %}">{% if showHidden == "show" %}Unhide{% else %}Hide{% endif %} (<span data-selected-count>0</span>)</button>
+                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmAddToMyLeads()">
+                        Download (<span data-selected-count>0</span>)</br>
+                        Credits left: <span id="credits-left" data-initial-credits="{{ user_detail.Total_credits }}">{{ user_detail.Total_credits }}</span>
+                </button>
+                    
+                </div>
+                <div class="action-item">
+                    <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmHideLeads()" formaction="{% url 'hide-leads' %}">{% if showHidden == "show" %}Unhide{% else %}Hide{% endif %} (<span data-selected-count>0</span>)</br>Hidden: {{hidden_count}}</button>
                 </div>
                 {% if user.is_authenticated %}
                 {% for group in user.groups.all %}

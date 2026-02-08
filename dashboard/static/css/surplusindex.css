@@ -130,6 +130,7 @@ table.table tr th {
     color: #fff;
 }
 
+
 table.table tr td {
     border: 1px solid #d3d3d3;
     padding: 0px 2px;
@@ -241,8 +242,11 @@ table.table tr td {
 .action-section {
     padding: 12px;
     display: block;
-    height: 60px;
-    background: #a6cbde;
+    height: 90px;
+    background: #d2e7e7;
+    color: #101010;
+    border: 2px solid #d9d9d9;
+    border-radius: 10px;
 
 }
 
@@ -424,8 +428,8 @@ button:disabled:hover {
     background: #fff;
     padding: 5px;
     margin: 10px 0px;
-    border-radius: 3px;
-    border: 5px solid #066066;
+    border-radius: 10px;
+    border: 3px solid #066066;
     box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
     overflow-y: auto;
     overflow-x: auto;
@@ -472,10 +476,12 @@ button:disabled:hover {
 
 table.table tr th:first-child {
     width: 48px;
+    border-top-left-radius: 6px;
 }
 
 table.table tr th:last-child {
     width: 100px;
+    border-top-right-radius: 6px;
 }
 
 table.table-striped tbody tr:nth-of-type(odd) {

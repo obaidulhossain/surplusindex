@@ -217,7 +217,8 @@ def availableLeads(request):
         .distinct()
         .values_list("sale_type", flat=True)
     )
-    
+    user_detail = UserDetail.objects.get(user=user)
+    hidden_count = len(Foreclosure.objects.filter(hidden_for=user))
     # ---------------------------------------------------------------------------------------------------------------
 
 
@@ -235,6 +236,8 @@ def availableLeads(request):
     client_settings, created = ClientSettings.objects.get_or_create(user=user)
     
     context = {
+        'hidden_count':hidden_count,
+        'user_detail':user_detail,
         'client_settings':client_settings,
         'current_user':user,
         'leads':leads,

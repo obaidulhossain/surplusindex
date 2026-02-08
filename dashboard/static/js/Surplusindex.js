@@ -180,46 +180,111 @@ function copyToClipboard_value(button) {
 // Reuseable function
 // -------------------------count checkbox checked-----(start)-----------------------------
 //Example Usage: <button class="button" id="archive-button" data-requires-selection disabled="disabled" type="submit" onclick="return confirmArchiveLeads()">Archive <span data-selected-count>0</span> Selected</button>
-
-function updateButtonStates() {
-    // Get all checkboxes with the class 'checkbox'
-    const checkboxes = document.querySelectorAll('.checkbox');
-    const selectedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
-
-    // Count the selected checkboxes
-    const selectedCount = selectedCheckboxes.length;
-
-    // Update all elements with the 'data-selected-count' attribute
-    document.querySelectorAll('[data-selected-count]').forEach(element => {
-        element.textContent = selectedCount;
-    });
-
-    // Enable or disable buttons based on selection
-    document.querySelectorAll('[data-requires-selection]').forEach(button => {
-        button.disabled = selectedCount === 0;
-    });
-}
-
-// Attach event listeners and initialize states
 document.addEventListener('DOMContentLoaded', () => {
     const checkboxes = document.querySelectorAll('.checkbox');
     const selectAllCheckbox = document.getElementById('selectAll');
 
-    checkboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateButtonStates);
+    const selectedCountEls = document.querySelectorAll('[data-selected-count]');
+    const creditsEl = document.getElementById('credits-left');
+
+    const INITIAL_CREDITS = parseInt(creditsEl.dataset.initialCredits, 10) || 0;
+
+    function updateUI() {
+        const selected = document.querySelectorAll('.checkbox:checked').length;
+        const creditsLeft = Math.max(INITIAL_CREDITS - selected, 0);
+
+        // Update counts
+        selectedCountEls.forEach(el => el.textContent = selected);
+        creditsEl.textContent = creditsLeft;
+        // Enable or disable buttons based on selection
+        document.querySelectorAll('[data-requires-selection]').forEach(button => {
+            button.disabled = selected === 0;
+        });
+        // Disable unchecked boxes if no credits left
+        checkboxes.forEach(cb => {
+            if (!cb.checked) {
+                cb.disabled = creditsLeft === 0;
+            }
+        });
+
+        // Handle Select All state
+        if (selectAllCheckbox) {
+            selectAllCheckbox.checked = selected > 0 && selected === checkboxes.length;
+            selectAllCheckbox.disabled = creditsLeft === 0 && selected === 0;
+        }
+    }
+
+    checkboxes.forEach(cb => {
+        cb.addEventListener('change', function () {
+            // Prevent selecting beyond credits
+            const selected = document.querySelectorAll('.checkbox:checked').length;
+            if (selected > INITIAL_CREDITS) {
+                this.checked = false;
+                return;
+            }
+            updateUI();
+        });
     });
 
-    // Attach listener to "Select All"
     if (selectAllCheckbox) {
         selectAllCheckbox.addEventListener('change', function () {
-            checkboxes.forEach(cb => cb.checked = this.checked);
-            updateButtonStates();
+            let selected = document.querySelectorAll('.checkbox:checked').length;
+
+            checkboxes.forEach(cb => {
+                if (!cb.checked && selected < INITIAL_CREDITS) {
+                    cb.checked = this.checked;
+                    if (this.checked) selected++;
+                }
+            });
+
+            updateUI();
         });
     }
 
-    // Initialize button states on page load
-    updateButtonStates();
+    updateUI(); // init
 });
+
+
+
+// function updateButtonStates() {
+//     // Get all checkboxes with the class 'checkbox'
+//     const checkboxes = document.querySelectorAll('.checkbox');
+//     const selectedCheckboxes = Array.from(checkboxes).filter(checkbox => checkbox.checked);
+
+//     // Count the selected checkboxes
+//     const selectedCount = selectedCheckboxes.length;
+
+//     // Update all elements with the 'data-selected-count' attribute
+//     document.querySelectorAll('[data-selected-count]').forEach(element => {
+//         element.textContent = selectedCount;
+//     });
+
+//     // Enable or disable buttons based on selection
+//     document.querySelectorAll('[data-requires-selection]').forEach(button => {
+//         button.disabled = selectedCount === 0;
+//     });
+// }
+
+// // Attach event listeners and initialize states
+// document.addEventListener('DOMContentLoaded', () => {
+//     const checkboxes = document.querySelectorAll('.checkbox');
+//     const selectAllCheckbox = document.getElementById('selectAll');
+
+//     checkboxes.forEach(checkbox => {
+//         checkbox.addEventListener('change', updateButtonStates);
+//     });
+
+//     // Attach listener to "Select All"
+//     if (selectAllCheckbox) {
+//         selectAllCheckbox.addEventListener('change', function () {
+//             checkboxes.forEach(cb => cb.checked = this.checked);
+//             updateButtonStates();
+//         });
+//     }
+
+//     // Initialize button states on page load
+//     updateButtonStates();
+// });
 
 // -------------------------count checkbox checked-----(end)-----------------------------
 
