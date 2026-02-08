@@ -2,8 +2,13 @@ from django.contrib import admin
 from .models import *
 
 class UserDetailAdmin(admin.ModelAdmin):
-    list_display = ('user','created_at','changed_at','user_type','phone', 'free_credit_balance','purchased_credit_balance','Total_credits')
-    search_fields = ('user.username','phone')
+    list_display = ('user','user_email','created_at','changed_at','user_type','phone', 'free_credit_balance','purchased_credit_balance','Total_credits')
+    search_fields = ('user__username','user__email', 'phone')
+    def user_email(self, obj):
+        return obj.user.email
+    user_email.short_description = 'Email'
+    user_email.admin_order_field = 'user__email'
+
 class UserPaymentAdmin(admin.ModelAdmin):
     list_display = ('stripe_customer_id','stripe_checkout_id', 'amount','number_of_leads','has_paid','currency')
 
