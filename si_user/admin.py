@@ -3,7 +3,7 @@ from .models import *
 
 class UserDetailAdmin(admin.ModelAdmin):
     list_display = ('user','created_at','changed_at','user_type','phone', 'free_credit_balance','purchased_credit_balance','Total_credits')
-    search_fields = ('user','phone')
+    search_fields = ('user.username','phone')
 class UserPaymentAdmin(admin.ModelAdmin):
     list_display = ('stripe_customer_id','stripe_checkout_id', 'amount','number_of_leads','has_paid','currency')
 
