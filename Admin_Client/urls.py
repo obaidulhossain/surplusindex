@@ -20,6 +20,7 @@ urlpatterns = [
     path('createDelivery', views.createDelivery, name="createDelivery"),
     
     path('resend-activation/', views.resend_activation_email, name='resend_activation_email'),
+    path('resend-activation-no-limit/', views.resend_activation_no_limit, name='resend_activation_no_limit'),
     path('delete-user/<int:user_id>/', views.delete_user, name='delete_user'),
 
 

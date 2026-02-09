@@ -525,6 +525,58 @@ def resend_activation_email(request):
         'attempts': detail.activation_attempt if detail else 1
     })
 
+
+
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
+@require_POST
+def resend_activation_no_limit(request):
+    user_id = request.POST.get('user_id')
+    if not user_id:
+        return JsonResponse({'success': False, 'error': 'Missing user_id'})
+
+    try:
+        user = User.objects.get(id=user_id)
+        detail = getattr(user, 'credits', None)
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'User not found'})
+
+    if user.is_active:
+        return JsonResponse({'success': False, 'error': 'Already active'})
+
+    if detail and detail.activation_attempt >= 10:
+        return JsonResponse({'success': False, 'error': 'Attempt limit reached'})
+
+    # build activation link
+    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+    domain = get_current_site(request).domain
+    link = reverse('activate', kwargs={'uidb64': uidb64, 'token': token_generator.make_token(user)})
+    activate_url = f"http://{domain}{link}"
+
+    # send mail
+    send_mail(
+        "Activate SurplusIndex Account",
+        f"Hi {user.username},\n\nYour SurplusIndex account is created successfully!\n\nPlease use this link to activate your account and get access to thousands of up to date surplus leads:\n{activate_url}\n\n\n\n Note that: Inactive user accounts will be deleted after 3rd activation remainder.",
+        "contact@surplusindex.com",
+        [user.email],
+        fail_silently=False
+    )
+
+    # increment attempts
+    if detail:
+        detail.activation_attempt += 1
+        detail.save()
+
+    return JsonResponse({
+        'success': True,
+        'message': f"Email sent to {user.email}",
+        'attempts': detail.activation_attempt if detail else 1
+    })
+
+
+
+
 @allowed_users(['admin'])
 @login_required(login_url="login")
 def delete_user(request, user_id):
