@@ -302,7 +302,7 @@ document.addEventListener('DOMContentLoaded', function () {
             btn.disabled = true;
             btn.textContent = 'Sending...';
 
-            fetch("{% url 'resend_activation_email' %}", {
+            fetch("{% url 'resend_activation_no_limit' %}", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/x-www-form-urlencoded",
