@@ -12,8 +12,13 @@ Clients
 <div class="body-section">
 
     <div class="section-header">
-        <h4>{{client_instance.user.first_name}} {{client_instance.user.last_name}}</h4>
         <h4>{{client_instance.user.username}} </h4>
+        <button 
+            class="btn btn-sm btn-warning resend-btn"
+            data-user-id="{{ client_instance.user.id }}"
+            data-attempt="{{ client_instance.activation_attempt }}">
+            Resend ({{ client_instance.activation_attempt }})
+        </button>
         
     </div>
 
@@ -285,6 +290,49 @@ Clients
 <script src="{% static 'js/Surplusindex.js' %}"></script>
     <script src="{% static 'js/Admin_Client.js' %}"></script>
 </div>
+<script>
 
+document.addEventListener('DOMContentLoaded', function () {
+    const buttons = document.querySelectorAll('.resend-btn');
+
+    buttons.forEach(btn => {
+        btn.addEventListener('click', function () {
+            const userId = this.dataset.userId;
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            fetch("{% url 'resend_activation_email' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: new URLSearchParams({ 'user_id': userId })
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        btn.textContent = `Sent (${data.attempts}) ✅`;
+                        btn.classList.remove('btn-warning');
+                        btn.classList.add('btn-success');
+                    } else {
+                        btn.textContent = data.error || 'Error';
+                        btn.classList.remove('btn-warning');
+                        btn.classList.add('btn-danger');
+                    }
+                })
+                .catch(err => {
+                    btn.textContent = 'Failed';
+                    btn.classList.remove('btn-warning');
+                    btn.classList.add('btn-danger');
+                })
+                .finally(() => {
+                    setTimeout(() => btn.disabled = false, 5000);
+                });
+        });
+    });
+});
+</script>
 
 {% endblock content %}
