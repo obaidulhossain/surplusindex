@@ -141,10 +141,6 @@ def complete_registration(request):
         registration_data = request.session.get("registration_data")      
         customer_id = request.session.get("stripe_customer_id")
 
-        # email = data.get("email")
-        # username = data.get("username")
-        # password = data.get("password")
-        # customer_id = data.get("customerId")
         if not registration_data or not customer_id:
             return JsonResponse({"error": "Session expired"}, status=400)
         # Create Django user
@@ -159,6 +155,20 @@ def complete_registration(request):
         # Save Stripe customer ID
         user.credits.stripe_customer_id = customer_id
         user.credits.save()
+        send_mail(
+            "New User Registered",
+            f"A new user registered. Username: {user.username}\nEmail: {user.email}",
+            "contact@surplusindex.com",
+            ["obaidulbiplob.bd@gmail.com","sanjidatarinbd@gmail.com"],
+            fail_silently=False
+            )
+        send_mail(
+            "Welcome Onboard | SurplusIndex",
+            f"Your SurplusIndex account have been successfully created. ",
+            "contact@surplusindex.com",
+            [user.email],
+            fail_silently=False
+            )
         # Clear session temp data
         del request.session["registration_data"]
         del request.session["stripe_customer_id"]
