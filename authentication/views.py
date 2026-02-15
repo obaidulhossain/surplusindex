@@ -50,28 +50,16 @@ def ValidateEmail(request):
         return JsonResponse({'email_error':'Email already in use, try another.'}, status=409)        
     return JsonResponse({'email_valid': True})
 
-# class UsernameValidationView(View):
-#     def post(self, request):
-#         data=json.loads(request.body)
-#         username=data['username']
+@csrf_exempt
+def ValidateResetEmail(request):
+    data = json.loads(request.body)
+    email = data['email']
+    if not validate_email(email):
+        return JsonResponse({'email_error':'Invalid email.'}, status=400)
+    if not User.objects.filter(email=email).exists():
+        return JsonResponse({'email_error':'Email address not found as a registered user'}, status=409)
+    return JsonResponse({'email_valid': True})
 
-#         if not str(username).isalnum():
-#             return JsonResponse({'username_error':'Only alphanumeric characters are allowed.'}, status=400)
-#         if User.objects.filter(username=username).exists():
-#             return JsonResponse({'username_error':'Username exists, try another.'}, status=409)
-#         return JsonResponse({'username_valid': True})
-
-
-# validates email while registering ------------
-# class EmailValidationView(View):
-#     def post(self, request):
-#         data = json.loads(request.body)
-#         email = data['email']
-#         if not validate_email(email):
-#             return JsonResponse({'email_error':'Invalid email'}, status=400)
-#         if User.objects.filter(email=email).exists():
-#             return JsonResponse({'email_error':'Email already in use, please provide another'}, status=409)        
-#         return JsonResponse({'email_valid': True})
 
 
 
@@ -253,95 +241,3 @@ def LoginAuthenticate(request):
 def user_logout(request):
     auth.logout(request)
     return redirect("homepage")
-
-
-
-
-
-# class RegistrationView(View):
-#     def get(self, request):
-#         context = {
-#                 "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLISHABLE_KEY
-#             }
-#         return render(request, 'authentication/registration.html',context)
-    
-#     def post(self, request):
-#         #GET USER DATA
-#         #VALIDATE
-#         #CREATE USER ACCOUNT
-
-#         username=request.POST['username']
-#         email=request.POST['email']
-#         password=request.POST['password']
-
-#         context={
-#             'fieldValues':request.POST
-
-#         }
-
-#         if not User.objects.filter(username=username).exists():
-#             if not User.objects.filter(email=email).exists():
-#                 if len(password)<6:
-#                     messages.error(request,'Password too short')
-#                     return render(request, 'authentication/registration.html', context)
-#                 user = User.objects.create_user(username=username, email=email)
-#                 user.set_password(password)
-#                 user.is_active=False
-#                 user.groups.add(Group.objects.get(name='clients'))
-#                 user.save()
-
-#                 #activation token
-#                 uidb64=urlsafe_base64_encode(force_bytes(user.pk))
-#                 domain = get_current_site(request).domain
-#                 link = reverse('activate',kwargs={'uidb64':uidb64, 'token':token_generator.make_token(user)})
-#                 activate_url='http://'+domain+link
-                
-#                 email_body='Hi '+user.username+' Please use this link to verify your email and activate your account.\n'+activate_url
-#                 email_subject = 'Verify Email and Activate SurplusIndex Account'
-#                 send_mail(email_subject,email_body,'contact@surplusindex.com',[email], fail_silently=False)
-                
-#                 notify(
-#                     n_subject="New Registration",
-#                     n_body=f"A new user registered with username {username} and email {email} (Not Activated)",
-#                     n_source="Registration")
-#                 messages.success(request,'Account Successfully Created')
-#                 messages.info(request, 'Account Inactive! Please Check your email to activate account')
-#                 return redirect('homepage')
-#             context = {
-#                 "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLISHABLE_KEY
-#             }
-
-#         return render(request, 'authentication/registration.html', context)
-    
-
-
-# class LoginView(View):
-#     def get(self,request):
-#         return render(request,'authentication/login.html')
-     
-#     def post(self, request):
-#         username_or_email = request.POST['username']
-#         password = request.POST['password']
-    
-#         if username_or_email and password:
-#             if "@" in username_or_email:
-#                 user_ins = User.objects.filter(email=username_or_email).first()
-#                 if user_ins:
-#                     username = user_ins.username
-#                 else:
-#                     username = username_or_email
-#             else:
-#                 username = username_or_email
-#             user=auth.authenticate(username=username,password=password)
-
-#             if user: 
-#                 if user.is_active:
-#                     auth.login(request, user)
-#                     messages.success(request, 'Welcome, '+user.username+' you are now logged in')
-#                     return redirect('dashboard')
-#                 messages.error(request,'Account is not active, please check your email to activate account')
-#                 return render(request,'authentication/login.html')
-#             messages.error(request,'Invalid Credentials')
-#             return render(request,'authentication/login.html')
-#         messages.error(request,'Please fill out all the fields')
-#         return render(request,'authentication/login.html')
