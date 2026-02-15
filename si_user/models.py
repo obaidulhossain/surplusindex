@@ -34,6 +34,17 @@ class UserDetail(Timelogger):
     purchased_credit_balance = models.IntegerField(default=0)
     Total_credits = models.IntegerField(default=0)
     activation_attempt = models.IntegerField(default=1)
+    NOT_ADDED = 'not added'
+    ADDED = 'added'
+    EXPIRED = 'expired'
+    NOT_WORKING = 'not working'
+    PMSTATUS = (
+        (NOT_ADDED,'Not Added'),
+        (ADDED,'Added'),
+        (EXPIRED,'Expired'),
+        (NOT_WORKING,'Not Working'),
+    )
+    payment_method = models.CharField(max_length=100, choices=PMSTATUS, default='not added', null=True)
     def update_total_credits(self):
         self.Total_credits = self.free_credit_balance + self.purchased_credit_balance
         self.save()
