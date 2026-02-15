@@ -13,6 +13,10 @@ urlpatterns = [
     path('subscriptions/',views.userSubscription, name='subscriptions'),
     path('checkout/', views.checkout, name='checkout'),
     path('stripe_webhook/', views.stripe_webhook, name='stripe_webhook'),
+    
+    # path('Ucheckout/', views.Ucheckout, name='Ucheckout'),
+    # path('UCheckoutSessionCompleted/', views.UCheckoutSessionCompleted, name='UCheckoutSessionCompleted'),
+
     path('subscriptions/cancel/<str:subscription_id>', views.cancel_subscription, name='cancel_subscription'),
     path('subscriptions/pause/', views.pause_subscription, name='pause_subscription'),
     path('subscriptions/resume/', views.resume_subscription, name='resume_subscription'),

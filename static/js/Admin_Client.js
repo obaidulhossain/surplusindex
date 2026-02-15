@@ -94,3 +94,10 @@ function updateOrderStatus(select) {
             alert("An error occurred while saving the row. Please try again.");
         });
 }
+
+// use the function like
+// <button class="btn btn-sm btn-warning resend-btn"
+//     data-user-id="{{ client.user.id }}"
+//     data-attempt="{{ client.activation_attempt }}">
+//     Resend ({{ client.activation_attempt }})
+// </button>

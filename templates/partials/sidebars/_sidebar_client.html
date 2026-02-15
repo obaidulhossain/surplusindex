@@ -42,39 +42,31 @@
             <span>Help</span>
         </a>
     </li>
-    <li class="sidebar-item">
-        <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#auth"
-            aria-expanded="false" aria-controls="auth">
-            <i class="bi bi-person-circle"></i>
-            <span>Account</span>
+
+
+
+    <li class="sidebar-item {% if request.resolver_match.url_name == 'subscriptions' %}active{% endif %}">
+        <a href="{% url 'subscriptions' %}" class="sidebar-link">
+            <i class="bi bi-bag-check"></i>
+            <span>Subscription</span>
         </a>
-        <ul id="auth" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
-            <li class="sidebar-item child {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
-                <a href="{% url 'profile' %}" class="sidebar-link">
-                    <i class="bi bi-person-lines-fill"></i>
-                    <span>Profile</span>
-                </a>
-            </li>
-            <li class="sidebar-item child {% if request.resolver_match.url_name == 'subscriptions' %}active{% endif %}">
-                <a href="{% url 'subscriptions' %}" class="sidebar-link">
-                    <i class="bi bi-bag-check"></i>
-                    <span>Subscription</span>
-                </a>
-            </li>
-            <li class="sidebar-item child {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
-                <a href="{% url 'settings' %}" class="sidebar-link">
-                    <i class="bi bi-gear"></i>
-                    <span>Settings</span>
-                </a>
-            </li>
-        </ul>
     </li>
-
-</ul>
-
-<div class="sidebar-footer">
-    <a href="{% url  'user-logout' %}" class="sidebar-link">
-        <i class="bi bi-box-arrow-left"></i>
-        <span>Logout</span>
-    </a>
-</div>
+    <li class="sidebar-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+        <a href="{% url 'settings' %}" class="sidebar-link">
+            <i class="bi bi-gear"></i>
+            <span>Settings</span>
+        </a>
+    </li>
+    <li class="sidebar-item {% if request.resolver_match.url_name == 'profile' %}active{% endif %}">
+        <a href="{% url 'profile' %}" class="sidebar-link">
+            <i class="bi bi-person-lines-fill"></i>
+            <span>Profile</span>
+        </a>
+    </li>
+    <li class="sidebar-item">
+        <a href="{% url 'user-logout' %}" class="sidebar-link">
+            <i class="bi bi-box-arrow-left"></i>
+            <span>Log out</span>
+        </a>
+    </li>
+    

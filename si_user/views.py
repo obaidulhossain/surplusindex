@@ -21,6 +21,8 @@ from django.db import transaction
 import logging #cgpt code
 import os
 from django.utils.timezone import datetime
+from datetime import timezone
+
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from datetime import datetime, timedelta, date
@@ -299,6 +301,235 @@ def checkout(request):
         return JsonResponse({'error': 'Invalid request method.'}, status=405)
 
 User = get_user_model()
+
+# Ucheckout only cover checkout.session.completed
+# from django.contrib.auth.hashers import make_password
+# def Ucheckout(request):
+#     if request.method == "POST":
+#         email = request.POST.get("email")
+#         password = request.POST.get("password")
+#         plan = request.POST.get("plan")
+#         plan_instance = SubscriptionPlan.objects.get(pk=plan)
+#         price_id = plan_instance.price_id
+#         if not price_id:
+#             return redirect("register")
+        
+#         # if plan == "starter":
+#         #     price_id = settings.STRIPE_PRICE_STARTER
+#         # elif plan == "growth":
+#         #     price_id = settings.STRIPE_PRICE_GROWTH
+#         # elif plan == "pro":
+#         #     price_id = settings.STRIPE_PRICE_PRO
+#         # else:
+#         #     return redirect("register")
+
+#         checkout_session = stripe.checkout.Session.create(
+#             payment_method_types=["card"],
+#             mode="subscription",
+#             customer_email=email,
+#             line_items=[{
+#                 "price": price_id,
+#                 "quantity": 1,
+#             }],
+#             metadata={
+#                 "email": email,
+#                 "password": make_password(password),
+#                 "plan": plan,
+#             },
+#             success_url=request.build_absolute_uri("/payment-success/"),
+#             cancel_url=request.build_absolute_uri("/register/"),
+#         )
+
+#         return redirect(checkout_session.url)
+
+
+
+# @csrf_exempt
+# def UCheckoutSessionCompleted(request): # U for ultimate
+#     logger.info("⚡ Stripe webhook triggered")
+#     payload = request.body
+#     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE")
+#     endpoint_secret = settings.STRIPE_WEBHOOK_ENDPOINT
+
+#     try:
+#         event = stripe.Webhook.construct_event(
+#             payload, sig_header, endpoint_secret
+#         )
+#     except ValueError:
+#         logger.error("Invalid payload in Stripe webhook")
+#         return HttpResponse("Invalid payload", status=400)
+#     except stripe.error.SignatureVerificationError:
+#         logger.error("Invalid Stripe signature")
+#         return HttpResponse("Invalid signature", status=400)
+#     except Exception:
+#         return HttpResponse(status=400)
+
+#     event_type = event["type"]
+#     data = event["data"]["object"]
+
+#     # ==========================================================
+#     # 1️⃣ CHECKOUT COMPLETED (Create User + Subscription ONLY)
+#     # ==========================================================
+#     if event_type == "checkout.session.completed":
+
+#         email = data["metadata"].get("email")
+#         password = data["metadata"].get("password")
+#         plan_id = data["metadata"].get("plan_id")
+
+#         stripe_customer_id = data.get("customer")
+#         stripe_subscription_id = data.get("subscription")
+
+#         if not email or not stripe_subscription_id:
+#             return HttpResponse(status=200)
+
+#         # Prevent duplicate user creation
+#         user, created = User.objects.get_or_create(
+#             email=email,
+#             defaults={
+#                 "username": email,
+#                 "password": password,
+#             },
+#         )
+
+#         # Prevent duplicate subscription record
+#         if not StripeSubscription.objects.filter(
+#             subscription_id=stripe_subscription_id
+#         ).exists():
+
+#             plan = SubscriptionPlan.objects.get(id=plan_id)
+
+#             StripeSubscription.objects.create(
+#                 user=user,
+#                 plan=plan,
+#                 customer_id=stripe_customer_id,
+#                 subscription_id=stripe_subscription_id,
+#                 status="active",
+#                 current_period_end=None,
+#             )
+
+#         return HttpResponse(status=200)
+
+#     # ==========================================================
+#     # 2️⃣ INVOICE PAYMENT SUCCEEDED (Add Credits + Transaction)
+#     # ==========================================================
+#     elif event_type == "invoice.payment_succeeded":
+
+#         stripe_subscription_id = data.get("subscription")
+#         stripe_invoice_id = data.get("id")
+#         stripe_customer_id = data.get("customer")
+
+#         if not stripe_subscription_id:
+#             return HttpResponse(status=200)
+
+#         # 🔐 Prevent duplicate processing
+#         if UserTransactions.objects.filter(
+#             stripe_invoice_id=stripe_invoice_id
+#         ).exists():
+#             return HttpResponse(status=200)
+
+#         try:
+#             subscription = StripeSubscription.objects.get(
+#                 subscription_id=stripe_subscription_id
+#             )
+#         except StripeSubscription.DoesNotExist:
+#             return HttpResponse(status=200)
+
+#         user = subscription.user
+#         plan = subscription.plan
+
+#         # ✅ Add credits ONLY here
+#         user.userdetail.purchased_credit_balance += plan.credits
+#         user.userdetail.save(update_fields=["purchased_credit_balance"])
+
+#         # ✅ Log transaction
+#         UserTransactions.objects.create(
+#             user=user,
+#             stripe_customer_id=stripe_customer_id,
+#             stripe_invoice_id=stripe_invoice_id,
+#             stripe_subscription_id=stripe_subscription_id,
+#             amount=data["amount_paid"] / 100,
+#             number_of_leads=plan.credits,
+#             currency=data["currency"],
+#             status="active",
+#             has_paid=True,
+#             transaction_source="subscription",
+#         )
+
+#         # ✅ Update subscription status & period end
+#         subscription.status = "active"
+#         subscription.current_period_end = datetime.fromtimestamp(
+#             data["lines"]["data"][0]["period"]["end"],
+#             tz=timezone.utc
+#         )
+#         subscription.save(update_fields=["status", "current_period_end"])
+
+#         return HttpResponse(status=200)
+
+#     # ==========================================================
+#     # 3️⃣ PAYMENT FAILED
+#     # ==========================================================
+#     elif event_type == "invoice.payment_failed":
+
+#         stripe_subscription_id = data.get("subscription")
+
+#         try:
+#             subscription = StripeSubscription.objects.get(
+#                 subscription_id=stripe_subscription_id
+#             )
+#             subscription.status = "past_due"
+#             subscription.save(update_fields=["status"])
+#         except StripeSubscription.DoesNotExist:
+#             pass
+
+#         return HttpResponse(status=200)
+
+#     # ==========================================================
+#     # 4️⃣ SUBSCRIPTION CANCELED
+#     # ==========================================================
+#     elif event_type == "customer.subscription.deleted":
+
+#         stripe_subscription_id = data.get("id")
+
+#         try:
+#             subscription = StripeSubscription.objects.get(
+#                 subscription_id=stripe_subscription_id
+#             )
+#             subscription.status = "canceled"
+#             subscription.hidden = True
+#             subscription.save(update_fields=["status", "hidden"])
+#         except StripeSubscription.DoesNotExist:
+#             pass
+
+#         return HttpResponse(status=200)
+
+#     # ==========================================================
+#     # 5️⃣ SUBSCRIPTION UPDATED (Optional but Recommended)
+#     # ==========================================================
+#     elif event_type == "customer.subscription.updated":
+
+#         stripe_subscription_id = data.get("id")
+#         status = data.get("status")
+
+#         try:
+#             subscription = StripeSubscription.objects.get(
+#                 subscription_id=stripe_subscription_id
+#             )
+#             subscription.status = status
+#             subscription.current_period_end = datetime.fromtimestamp(
+#                 data["current_period_end"],
+#                 tz=timezone.utc
+#             )
+#             subscription.save(update_fields=["status", "current_period_end"])
+#         except StripeSubscription.DoesNotExist:
+#             pass
+
+#         return HttpResponse(status=200)
+
+#     return HttpResponse(status=200)
+
+
+
+
 
 @csrf_exempt
 def stripe_webhook(request):
@@ -580,6 +811,300 @@ def stripe_webhook(request):
         logger.info(f"Unhandled event type: {event_type}")
 
     return HttpResponse(status=200)
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ----------------------old stripe webhook
+# @csrf_exempt
+# def stripe_webhook(request):
+#     logger.info("⚡ Stripe webhook triggered")
+#     endpoint_secret = settings.STRIPE_WEBHOOK_ENDPOINT
+
+#     if request.content_type != "application/json":
+#         logger.warning("Invalid content type on webhook request")
+#         return HttpResponse("Invalid content type", status=400)
+
+#     payload = request.body
+#     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
+
+#     try:
+#         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
+#     except ValueError:
+#         logger.error("Invalid payload in Stripe webhook")
+#         return HttpResponse("Invalid payload", status=400)
+#     except stripe.error.SignatureVerificationError:
+#         logger.error("Invalid Stripe signature")
+#         return HttpResponse("Invalid signature", status=400)
+
+#     event_type = event.get("type")
+#     data_object = event["data"]["object"]
+#     logger.info(f"Received Stripe event: {event_type}")
+
+#     # --- Helpers ---
+#     def create_or_update_transaction(user, amount, currency, status, source_type, stripe_ids, num_leads=0):
+#         """
+#         Create or update a subscription or PAYG transaction.
+#         """
+#         with transaction.atomic():
+#             if source_type == "subscription" and stripe_ids.get("subscription_id"):
+#                 try:
+#                     payment = UserTransactions.objects.get(stripe_subscription_id=stripe_ids.get("subscription_id"))
+#                     # Update fields only if provided
+#                     payment.user = user
+#                     payment.stripe_customer_id = stripe_ids.get("customer") or payment.stripe_customer_id
+#                     payment.stripe_checkout_id = stripe_ids.get("checkout_id") or payment.stripe_checkout_id
+#                     payment.stripe_invoice_id = stripe_ids.get("invoice_id") or payment.stripe_invoice_id
+#                     payment.amount = amount
+#                     payment.currency = currency
+#                     payment.number_of_leads = num_leads
+#                     payment.status = status
+#                     payment.transaction_source = source_type
+#                     payment.has_paid = (status == "active")
+#                     payment.save()
+#                     payment.refresh_from_db()
+#                     logger.info(f"Subscription transaction updated for {user.username}")
+#                     notify(
+#                         n_subject="Subscription Updated",
+#                         n_body=f"""
+#                         Subscription plan updated
+#                         User: {payment.user.username}
+#                         Stripe Customer ID: {payment.stripe_customer_id}
+#                         Invoice ID: {payment.stripe_invoice_id}
+#                         Amount: {payment.amount}
+#                         """,
+#                         n_source="Subscription Plan Update")
+#                 except UserTransactions.DoesNotExist:
+#                     payment = UserTransactions.objects.create(
+
+#                         user=user,
+#                         stripe_customer_id=stripe_ids.get("customer"),
+#                         stripe_checkout_id=stripe_ids.get("checkout_id"),
+#                         stripe_subscription_id=stripe_ids.get("subscription_id"),
+#                         stripe_invoice_id=stripe_ids.get("invoice_id"),
+#                         amount=amount,
+#                         currency=currency,
+#                         number_of_leads=num_leads,
+#                         status=status,
+#                         transaction_source=source_type,
+#                         has_paid=(status == "active")
+#                     )
+#                     logger.info(f"Subscription transaction created for {user.username}")
+#                     notify(
+#                         n_subject="New Subscription",
+#                         n_body=f"""
+#                         Started a Subscription plan
+#                         User: {user.username}
+#                         Stripe Customer ID: {stripe_ids.get("customer")}
+#                         Checkout ID: {stripe_ids.get("checkout_id")}
+#                         Subscription ID: {stripe_ids.get("subscription_id")}
+#                         Invoice ID: {stripe_ids.get("invoice_id")}
+#                         Amount: {amount}
+#                         """,
+#                         n_source="Subscription Plan Enrollment")
+#                 return payment
+#             else:
+#                 # PAYG or normal create
+#                 payment = UserTransactions.objects.create(
+#                     user=user,
+#                     stripe_customer_id=stripe_ids.get("customer"),
+#                     stripe_checkout_id=stripe_ids.get("checkout_id"),
+#                     stripe_subscription_id=stripe_ids.get("subscription_id"),
+#                     stripe_invoice_id=stripe_ids.get("invoice_id"),
+#                     amount=amount,
+#                     currency=currency,
+#                     number_of_leads=num_leads,
+#                     status=status,
+#                     transaction_source=source_type,
+#                     has_paid=(status == "active")
+#                 )
+#                 logger.info(f"PAYG transaction created for {user.username}")
+#                 notify(
+#                         n_subject="Credit Purchased",
+#                         n_body=f"""
+#                         {user.username} Purchased {num_leads} Credits in PAYG Plan
+#                         Stripe Customer ID: {stripe_ids.get("customer")}
+#                         Checkout ID: {stripe_ids.get("checkout_id")}
+#                         Subscription ID: {stripe_ids.get("subscription_id")}
+#                         Invoice ID: {stripe_ids.get("invoice_id")}
+#                         Amount: {amount}
+#                         """,
+#                         n_source="Credit Purchase")
+#                 return payment
+            
+            
+#     def update_subscription(subscription_id, status=None, period_end=None):
+#         try:
+#             sub = StripeSubscription.objects.get(subscription_id=subscription_id)
+#             if status:
+#                 sub.status = status
+#             if period_end:
+#                 sub.current_period_end = period_end
+#             sub.save()
+#             logger.info(f"Subscription {subscription_id} updated for {sub.user.username}")
+#         except StripeSubscription.DoesNotExist:
+#             logger.warning(f"Subscription {subscription_id} not found in DB")
+
+#     # --- Event Handlers ---
+#     if event_type == "checkout.session.completed":
+#         session = data_object
+#         user_id = session.get("client_reference_id")
+#         if not user_id:
+#             logger.error("checkout.session.completed missing client_reference_id")
+#             return HttpResponse("No user reference", status=400)
+
+#         try:
+#             user = User.objects.get(id=user_id)
+#         except User.DoesNotExist:
+#             logger.error(f"User with ID {user_id} not found")
+#             return HttpResponse("User not found", status=404)
+
+#         # Fetch line items to identify the plan
+#         try:
+#             line_items = stripe.checkout.Session.list_line_items(session["id"])
+#             if not line_items["data"]:
+#                 logger.error("No line items found in checkout session")
+#                 return HttpResponse("No line items found", status=400)
+#             price_id = line_items["data"][0]["price"]["id"]
+#         except Exception as e:
+#             logger.exception(f"Error fetching line items: {e}")
+#             return HttpResponse("Error fetching line items", status=400)
+
+#         amount_paid = session.get("amount_total", 0) / 100
+#         currency = session.get("currency")
+#         plan = SubscriptionPlan.objects.filter(price_id=price_id, active=True).first()
+
+#         if plan and plan.type == "subscription":
+#             subscription_id = session.get("subscription")
+#             stripe_sub_data = stripe.Subscription.retrieve(subscription_id)
+#             current_period_end = datetime.fromtimestamp(stripe_sub_data.current_period_end)
+
+#             StripeSubscription.objects.update_or_create(
+#                 user=user,
+#                 subscription_id=subscription_id,
+#                 defaults={
+#                     "plan": plan,
+#                     "customer_id": session.get("customer"),
+#                     "status": "active",
+#                     "current_period_end": current_period_end,
+#                 }
+#             )
+
+#             create_or_update_transaction(
+#                 user=user,
+#                 amount=amount_paid,
+#                 currency=currency,
+#                 status="active",
+#                 source_type="subscription",
+#                 stripe_ids={
+#                     "customer": session.get("customer"),
+#                     "checkout_id": session.get("id"),
+#                     "subscription_id": subscription_id,
+#                     "invoice_id": None
+#                 }
+#             )
+
+#         else:
+#             # Pay-as-you-go mapping
+#             # price_map = {
+#             #     os.getenv("TEN_LEADS"): 10,
+#             #     os.getenv("FIFTY_LEADS"): 50,
+#             #     os.getenv("HUNDRED_LEADS"): 100,
+#             #     os.getenv("THREEHUNDRED_LEADS"): 300
+#             # }
+#             # num_leads = price_map.get(price_id, 0)
+#             sub_instance = SubscriptionPlan.objects.get(price_id=price_id)
+#             num_leads = int(sub_instance.lead_number)
+            
+#             with transaction.atomic():
+#                 create_or_update_transaction(
+#                     user=user,
+#                     amount=amount_paid,
+#                     currency=currency,
+#                     status="active",
+#                     source_type="payg",
+#                     stripe_ids={
+#                         "customer": session.get("customer"),
+#                         "checkout_id": session.get("id"),
+#                         "subscription_id": None,
+#                         "invoice_id": None
+#                     },
+#                     num_leads=num_leads
+#                 )
+#                 user_detail = get_object_or_404(UserDetail, user=user)
+#                 user_detail.purchased_credit_balance += num_leads
+#                 user_detail.update_total_credits()
+#                 user_detail.save()
+#                 logger.info(f"Updated credits for {user.username} (+{num_leads} leads)")
+
+#     elif event_type in ("invoice.payment_succeeded", "invoice.paid", "invoice.payment_failed"):
+#         invoice_id = data_object["id"]
+#         invoice = stripe.Invoice.retrieve(invoice_id, expand=["lines.data"])
+#         subscription_id = invoice.get("subscription")
+#         amount_paid = invoice.get("amount_paid", 0) / 100
+#         currency = invoice.get("currency")
+#         status = "active" if event_type != "invoice.payment_failed" else "failed"
+
+#         period_end = None
+#         try:
+#             lines = invoice.get("lines", {}).get("data", [])
+#             if lines and "period" in lines[0]:
+#                 period_end = datetime.fromtimestamp(lines[0]["period"]["end"])
+#         except Exception as e:
+#             logger.warning(f"Could not parse period_end for {subscription_id}: {e}")
+
+#         update_subscription(subscription_id, status=status, period_end=period_end)
+
+#         try:
+#             sub = StripeSubscription.objects.get(subscription_id=subscription_id)
+#             user = sub.user
+#         except StripeSubscription.DoesNotExist:
+#             logger.warning(f"Subscription {subscription_id} not found for invoice {invoice.get('id')}")
+#             user = None
+
+#         if user:
+#             txn = create_or_update_transaction(
+#                 user=user,
+#                 amount=amount_paid,
+#                 currency=currency,
+#                 status=status,
+#                 source_type="subscription",
+#                 stripe_ids={
+#                     "customer": invoice.get("customer"),
+#                     "checkout_id": None,
+#                     "subscription_id": subscription_id,
+#                     "invoice_id": invoice.get("id")
+#                 }
+#             )
+#             if status == "active":
+#                 txn.mark_as_paid()
+#             else:
+#                 txn.mark_as_failed()
+#         else:
+#             # fallback log/creation to avoid losing data
+#             logger.error(f"Missing subscription {subscription_id}, could not attach invoice {invoice['id']} to user")
+#     elif event_type == "customer.subscription.updated":
+#         sub_data = data_object
+#         period_end = datetime.fromtimestamp(sub_data["current_period_end"]) if sub_data.get("current_period_end") else None
+#         update_subscription(sub_data.get("id"), status=sub_data.get("status"), period_end=period_end)
+
+#     elif event_type == "customer.subscription.deleted":
+#         sub_data = data_object
+#         update_subscription(sub_data.get("id"), status="canceled")
+
+#     else:
+#         logger.info(f"Unhandled event type: {event_type}")
+
+#     return HttpResponse(status=200)
 
 
 @login_required

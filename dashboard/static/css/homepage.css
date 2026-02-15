@@ -1,0 +1,181 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    height: 100vh;
+    background: url("/static/img/NYC.webp") center;
+}
+
+.container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.input-group {
+    position: relative;
+    width: 100%;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 45px 12px 12px;
+    /* extra right padding for icon */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+    user-select: none;
+    color: #666;
+}
+
+.toggle-password:hover {
+    color: #000;
+}
+
+/* Left Section (60%) */
+.left-section {
+    width: 70%;
+
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 40px;
+}
+
+.left-section h1 {
+    font-size: 40px;
+    margin-bottom: 20px;
+}
+
+.left-section p {
+    font-size: 25px;
+    max-width: 500px;
+    line-height: 1.6;
+}
+
+/* Right Section (40%) */
+.right-section {
+    width: 30%;
+    background-color: #000000b3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-box {
+    background: #0000006e;
+    padding: 40px;
+    width: 80%;
+    max-width: 350px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    color: #ccc
+}
+
+.login-box h2 {
+    margin-bottom: 30px;
+
+}
+
+.login-box p {
+    margin: 15px;
+
+}
+
+.login-box input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.login-box button {
+    width: 100%;
+    padding: 12px;
+    background-color: #2a5298;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-size: 16px;
+}
+
+.login-box button:hover {
+    background-color: #1e3c72;
+}
+
+.login-box button:disabled {
+    background-color: #353535;
+
+}
+
+.login-box a {
+    color: white;
+    cursor: pointer;
+    margin-top: 5px;
+    font-size: 16px;
+    text-decoration: none;
+}
+
+.login-box a:hover {
+    color: #2a5298;
+}
+
+.is-invalid {
+    background-color: coral;
+}
+
+.error-msg {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transform: translateY(-5px);
+    transition:
+        max-height 0.3s ease,
+        opacity 0.2s ease,
+        transform 0.2s ease;
+    color: coral;
+
+}
+
+.error-msg.show {
+    max-height: 100px;
+    /* enough space for text */
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .left-section,
+    .right-section {
+        width: 100%;
+        height: 50vh;
+        background-color: #ffffff00;
+    }
+
+    .left-section p {
+        font-size: 18px;
+    }
+}

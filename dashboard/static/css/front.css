@@ -1,6 +1,8 @@
 body {
-    background: url("/static/images/main-background.webp") no-repeat fixed;
+    background: url("/static/images/NYC.webp") no-repeat fixed;
 }
+
+
 
 h1 {
     font-family: sans-serif;
@@ -24,6 +26,27 @@ h5 {
     letter-spacing: 2px;
     font-family: monospace;
     font-size: 25px;
+}
+
+.blank-left {
+    display: inline-block;
+    width: 60%;
+}
+
+.option-right {
+    width: 70px;
+    /*changed to 270px */
+    min-width: 70px;
+    /*changed to 270px */
+    z-index: 1000;
+    transition: all 0.25s ease-in-out;
+    display: flex;
+    flex-direction: column;
+    background-color: #0e223e;
+    min-height: 100%;
+    min-height: 100% !important;
+    position: relative;
+
 }
 
 .card {
