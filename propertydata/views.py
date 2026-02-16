@@ -11,9 +11,10 @@ from Client.views import get_client_dashboard_context
 from Admin.views import get_admin_dashboard_context
 from django.contrib.auth.decorators import login_required
 from authentication.decorators import allowed_users
-
+from authentication.decorators import card_required
 # Create your views here.
 @login_required(login_url="login")
+@card_required
 def dashboard(request):
     if not request.user.is_authenticated:
         return redirect("login")  # Redirect unauthenticated users

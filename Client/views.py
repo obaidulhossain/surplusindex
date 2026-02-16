@@ -24,6 +24,7 @@ import calendar
 from AllSettings.models import*
 from ProjectManager.resources import *
 from django.db.models.functions import TruncDate, ExtractYear, ExtractMonth
+from authentication.decorators import card_required
 
 
 def get_client_dashboard_context(request, user):
@@ -90,6 +91,7 @@ def get_client_dashboard_context(request, user):
 
 @login_required(login_url="login")
 @allowed_users(['admin', 'clients'])
+@card_required
 def availableLeads(request):
     user = request.user
 
@@ -432,6 +434,7 @@ def hidefromallLeads(request):
 
 @login_required(login_url="login")
 @allowed_users(['admin', 'clients'])
+@card_required
 def DownloadedData(request):
     user = request.user
     params = request.POST if request.method == "POST" else request.GET
@@ -640,6 +643,7 @@ def DownloadedData(request):
 
 @login_required(login_url="login")
 @allowed_users(['admin', 'clients'])
+@card_required
 def myLeads(request):
     user = request.user
     params = request.POST if request.method == "POST" else request.GET
@@ -912,6 +916,7 @@ def updateAssignment(request):
 
 @login_required(login_url="login")
 @allowed_users(['admin', 'clients'])
+@card_required
 def leadsDetail(request):
     if request.method == "POST":
         selected_status = request.POST.get('status_id')

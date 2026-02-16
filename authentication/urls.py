@@ -11,6 +11,9 @@ urlpatterns = [
     # path('login', unauthenticated_user(LoginView.as_view()), name="login"),
     path('login', views.Login, name="login"),
     path('LoginAuthenticate',views.LoginAuthenticate, name="LoginAuthenticate"),
+    path("add-card/", views.add_card, name="add_card"),
+    path("create-setup-intent/", views.create_setup_intent, name="create_setup_intent"),
+    path("complete-add-card/", views.complete_add_card, name="complete_add_card"),
 
     path('register', views.Register, name="register"),
     path("register/start/", views.start_registration, name="start_registration"),

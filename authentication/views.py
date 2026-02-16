@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMessage, send_mail
 from django.http import JsonResponse, HttpResponse
 import stripe
+from stripe.error import InvalidRequestError
+
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
@@ -154,6 +156,7 @@ def complete_registration(request):
         user.save()
         # Save Stripe customer ID
         user.credits.stripe_customer_id = customer_id
+        user.credits.payment_method = UserDetail.ADDED
         user.credits.save()
         send_mail(
             "New User Registered",
@@ -243,6 +246,81 @@ def LoginAuthenticate(request):
         messages.error(request,'Please fill out all the fields')
         return redirect('homepage')
 
+@login_required
+def add_card(request):
+    return render(request, "authentication/add_card.html", {
+        "STRIPE_PUBLIC_KEY": settings.STRIPE_PUBLISHABLE_KEY
+    })
+
+@login_required
+def create_setup_intent(request):
+
+    stripe.api_key = settings.STRIPE_SECRET_KEY
+
+    
+    user_detail, created = UserDetail.objects.get_or_create(user=request.user)
+    create_new_customer = False
+    if not user_detail.stripe_customer_id:
+        create_new_customer = True
+    else:
+        # Check if customer exists in Stripe
+        try:
+            stripe.Customer.retrieve(user_detail.stripe_customer_id)
+        except InvalidRequestError:
+            # Customer not found → create a new one
+            create_new_customer = True
+
+    # ✅ 1. Create Stripe customer if not exists
+    if create_new_customer:
+        customer = stripe.Customer.create(
+            email=request.user.email,
+            name=request.user.username,
+        )
+        user_detail.stripe_customer_id = customer.id
+        user_detail.save()
+    
+    # ✅ 2. Verify card directly from Stripe
+    payment_methods = stripe.PaymentMethod.list(
+    customer=user_detail.stripe_customer_id,
+    type="card"
+    )
+    # ✅ 2. If payment method not added or deleted
+    if not payment_methods.data:
+        user_detail.payment_method = UserDetail.NOT_ADDED
+        user_detail.save()
+
+    setup_intent = stripe.SetupIntent.create(
+        customer=user_detail.stripe_customer_id,
+        payment_method_types=["card"],
+    )
+    return JsonResponse({
+        "clientSecret": setup_intent.client_secret
+    })
+
+# @login_required
+# def create_setup_intent(request):
+
+#     stripe.api_key = settings.STRIPE_SECRET_KEY
+#     user_detail = UserDetail.objects.get(user=request.user)
+
+#     setup_intent = stripe.SetupIntent.create(
+#         customer=user_detail.stripe_customer_id,
+#         payment_method_types=["card"],
+#     )
+
+#     return JsonResponse({
+#         "clientSecret": setup_intent.client_secret
+#     })
+
+@login_required
+def complete_add_card(request):
+
+    user_detail = UserDetail.objects.get(user=request.user)
+
+    user_detail.payment_method = UserDetail.ADDED
+    user_detail.save()
+
+    return JsonResponse({"status": "success"})
 #---------------------------------Login End
 
 
