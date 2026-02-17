@@ -77,12 +77,29 @@ function togglePassword() {
 <script>
 const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
 let elements;
-
+let clientSecret;
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 document.getElementById("nextBtn").addEventListener("click", async () => {
 
     const response = await fetch("/register/start/", {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: {"Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+            },
+        credentials: "same-origin",
         body: JSON.stringify({
             username: username.value,
             email: email.value,
@@ -91,8 +108,9 @@ document.getElementById("nextBtn").addEventListener("click", async () => {
     });
 
     const data = await response.json();
+    clientSecret = data.clientSecret;
 
-    elements = stripe.elements({ clientSecret: data.clientSecret });
+    elements = stripe.elements({ clientSecret });
     const paymentElement = elements.create("payment");
     paymentElement.mount("#payment-element");
 
@@ -118,10 +136,13 @@ document.getElementById("finishBtn").addEventListener("click", async () => {
         const response = await fetch("/register/complete/", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
             },
             credentials: "same-origin",
-            body: JSON.stringify({})
+            body: JSON.stringify({
+                setup_intent_id: setupIntent.id
+            })
         });
 
         const data = await response.json();

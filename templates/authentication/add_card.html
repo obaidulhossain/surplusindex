@@ -32,7 +32,21 @@
 <script>
 const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
 let elements;
-
+let clientSecret;
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
 // Create SetupIntent
 fetch("{% url 'create_setup_intent' %}", {
     method: "POST",
@@ -49,14 +63,14 @@ fetch("{% url 'create_setup_intent' %}", {
 
 
 document.getElementById("saveCardBtn").addEventListener("click", async () => {
-
+    const errorMsg = document.getElementById("card-errors")
     const { setupIntent, error } = await stripe.confirmSetup({
         elements,
         redirect: "if_required"
     });
 
     if (error) {
-        document.getElementById("card-errors").innerText = error.message;
+        errorMsg.innerText = error.message;
         return;
     }
 
@@ -66,15 +80,18 @@ document.getElementById("saveCardBtn").addEventListener("click", async () => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
-                "X-CSRFToken": "{{ csrf_token }}"
+                "X-CSRFToken": getCookie("csrftoken")
             },
-            credentials: "same-origin"
+            credentials: "same-origin",
+            body: JSON.stringify({setup_intent_id: setupIntent.id})
         });
 
         const data = await response.json();
 
         if (data.status === "success") {
             window.location.href = "/dashboard/";
+        } else {
+            errorMsg.innerText = data.error;
         }
     }
 });

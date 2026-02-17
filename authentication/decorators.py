@@ -41,7 +41,7 @@ def card_required(view_func):
 
             if user_detail.payment_method != UserDetail.ADDED:
                 return redirect("add_card")
-
+            
         return view_func(request, *args, **kwargs)
 
     return wrapper

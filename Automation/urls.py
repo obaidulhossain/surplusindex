@@ -3,7 +3,6 @@ from . import views
 
 
 urlpatterns = [
-
-# Urls for Upload Data Section
-path('', views.Automation, name="automation"),
+    path('', views.Automate, name="automate"),
+    path("direct-subscribe/", views.direct_subscribe, name="direct-subscribe"),
 ]

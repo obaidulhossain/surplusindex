@@ -103,7 +103,7 @@ def Register(request):
         }
     return render(request, 'authentication/registration.html',context)
 
-@csrf_exempt
+
 def start_registration(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -136,15 +136,40 @@ def start_registration(request):
             "clientSecret": setup_intent.client_secret
         })
 
-@csrf_exempt
+
 def complete_registration(request):
     if request.method == "POST":
+        data = json.loads(request.body)
+        setup_intent_id = data.get("setup_intent_id")
         # data = json.loads(request.body)
         registration_data = request.session.get("registration_data")      
         customer_id = request.session.get("stripe_customer_id")
 
         if not registration_data or not customer_id:
             return JsonResponse({"error": "Session expired"}, status=400)
+        try:
+            # 🔹 Retrieve SetupIntent from Stripe
+            setup_intent = stripe.SetupIntent.retrieve(setup_intent_id)
+
+            if setup_intent.status != "succeeded":
+                return JsonResponse({"error": "Card setup not completed"}, status=400)
+            if setup_intent.customer != customer_id:
+                return JsonResponse({"error": "Customer mismatch"}, status=400)
+
+            payment_method_id = setup_intent.payment_method
+
+            # 🔹 Set as default payment method
+            stripe.Customer.modify(
+                customer_id,
+                invoice_settings={
+                    "default_payment_method": payment_method_id
+                }
+            )
+
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+
         # Create Django user
         user = User.objects.create_user(
             username=registration_data["username"],
@@ -254,12 +279,9 @@ def add_card(request):
 
 @login_required
 def create_setup_intent(request):
-
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-
-    
     user_detail, created = UserDetail.objects.get_or_create(user=request.user)
     create_new_customer = False
+
     if not user_detail.stripe_customer_id:
         create_new_customer = True
     else:
@@ -281,9 +303,10 @@ def create_setup_intent(request):
     
     # ✅ 2. Verify card directly from Stripe
     payment_methods = stripe.PaymentMethod.list(
-    customer=user_detail.stripe_customer_id,
-    type="card"
-    )
+        customer=user_detail.stripe_customer_id,
+        type="card"
+        )
+    
     # ✅ 2. If payment method not added or deleted
     if not payment_methods.data:
         user_detail.payment_method = UserDetail.NOT_ADDED
@@ -297,30 +320,74 @@ def create_setup_intent(request):
         "clientSecret": setup_intent.client_secret
     })
 
-# @login_required
-# def create_setup_intent(request):
-
-#     stripe.api_key = settings.STRIPE_SECRET_KEY
-#     user_detail = UserDetail.objects.get(user=request.user)
-
-#     setup_intent = stripe.SetupIntent.create(
-#         customer=user_detail.stripe_customer_id,
-#         payment_method_types=["card"],
-#     )
-
-#     return JsonResponse({
-#         "clientSecret": setup_intent.client_secret
-#     })
 
 @login_required
 def complete_add_card(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        setup_intent_id = data.get("setup_intent_id")
+        user_detail = UserDetail.objects.get(user=request.user)
+        customer_id = user_detail.stripe_customer_id
+        try:
+            # 🔹 1. Retrieve SetupIntent from Stripe (secure)
+            setup_intent = stripe.SetupIntent.retrieve(setup_intent_id)
+            if setup_intent.status != "succeeded":
+                return JsonResponse({
+                    "status": "error",
+                    "error": "SetupIntent not successful"
+                }, status=400)
+            payment_method_id = setup_intent.payment_method
+            # Verify payment method
+            pm = stripe.PaymentMethod.retrieve(payment_method_id)
+            # If not attached, attach
+            if not pm.customer:
+                stripe.PaymentMethod.attach(
+                    payment_method_id,
+                    customer=customer_id,
+                )
+            # 🔹 2. Set as default payment method
+            stripe.Customer.modify(
+                customer_id,
+                invoice_settings={
+                    "default_payment_method": payment_method_id
+                }
+            )
+            updated_customer = stripe.Customer.retrieve(customer_id)
+            print("AFTER UPDATE:", updated_customer.invoice_settings)
 
-    user_detail = UserDetail.objects.get(user=request.user)
+            user_detail.payment_method = UserDetail.ADDED
+            user_detail.save()
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({
+                "status": "error",
+                "error": str(e)
+            }, status=400)
+        
+        #     # 1️⃣ Attach payment method
+        #     stripe.PaymentMethod.attach(
+        #         payment_method_id,
+        #         customer=customer_id,
+        #     )
+        #     # 2️⃣ Set as default for subscriptions & invoices
+        #     stripe.Customer.modify(
+        #         customer_id,
+        #         invoice_settings={
+        #             "default_payment_method": payment_method_id
+        #         }
+        #     )
 
-    user_detail.payment_method = UserDetail.ADDED
-    user_detail.save()
+        #     user_detail.payment_method = UserDetail.ADDED
+        #     user_detail.save()
 
-    return JsonResponse({"status": "success"})
+        #     return JsonResponse({"status": "success"})
+
+        # except Exception as e:
+        #     return JsonResponse({
+        #         "status": "error",
+        #         "error": str(e)
+        #     }, status=400)
+
 #---------------------------------Login End
 
 

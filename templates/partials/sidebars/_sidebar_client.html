@@ -30,6 +30,12 @@
             <span>Downloaded Data</span>
         </a>
     </li>
+    <li class="sidebar-item {% if request.resolver_match.url_name == 'automate' %}active{% endif %}">
+        <a href="{% url 'automate' %}" class="sidebar-link">
+            <i class="bi bi-rocket"></i>
+            <span>Automate</span>
+        </a>
+    </li>
     {% comment %} <li class="sidebar-item {% if request.resolver_match.url_name == 'myleads' %}active{% endif %}">
         <a href="{% url 'myleads' %}" class="sidebar-link">
             <i class="bi bi-journal-check"></i>

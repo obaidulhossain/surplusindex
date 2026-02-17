@@ -1,34 +1,19 @@
 from django.db import models
+class OperationStat(models.Model):                              #
+    created_at = models.DateTimeField(auto_now_add=True)        #
+    changed_at = models.DateTimeField(null=True, blank=True)            #
+    class Meta:                                                 #
+        abstract = True 
 
-# Create your models here.
-class SheriffAuction(models.Model):
-    state = models.CharField(max_length=100)
-    county = models.CharField(max_length=100)
-    sale_date = models.DateField()
-
-    case_number = models.CharField(max_length=50, unique=True)
-    case_status = models.CharField(max_length=50)
-
-    parcel = models.CharField(max_length=50, blank=True, null=True)
-    property_address = models.TextField()
-    fcl_final_judgment = models.DecimalField(
-        max_digits=15, decimal_places=2, null=True, blank=True
-    )
-    appraised_value = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True
-    )
-    opening_bid = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True
-    )
-    deposit = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True
-    )
-    sold_amount = models.DecimalField(
-        max_digits=12, decimal_places=2, null=True, blank=True
-    )
-    sold_to = models.CharField(max_length=100, blank=True, null=True)
-
-    scraped_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.case_number} – {self.property_address[:40]}"
+class Automation(OperationStat):
+    name = models.CharField(max_length=255, null=True,blank=True)
+    state = models.CharField(max_length=255, null=True,blank=True)
+    price_id = models.CharField(max_length=255, null=True,blank=True)
+    price_amount = models.IntegerField(default=0)
+    description = models.TextField(null=True, blank=True)
+    tax = models.BooleanField(default=False)
+    mortgage = models.BooleanField(default=False)
+    preforeclosure = models.BooleanField(default=False)
+    postforeclosure = models.BooleanField(default=False)
+    verified = models.BooleanField(default=False)
+    update_interval = models.CharField(max_length=255, null=True,blank=True)

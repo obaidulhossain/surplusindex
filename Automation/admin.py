@@ -1,3 +1,8 @@
 from django.contrib import admin
+from .models import *
 
-# Register your models here.
+
+@admin.register(Automation)
+class AutomationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'state', 'price_amount', 'tax', 'mortgage', 'preforeclosure', 'postforeclosure', 'verified')
+    list_filter = ('name', 'state', 'price_amount', 'tax', 'mortgage', 'preforeclosure', 'postforeclosure', 'verified')

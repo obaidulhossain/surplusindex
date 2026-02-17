@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}
+Automate Lead Generation
+{% endblock title %}
+
+
+{% block content%}
+{% load static %}
+{% load custom_filters %}
+<link href="{% static 'css/automate.css' %}" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<h1>Automate surplus lead generation</h1>
+<div class="container">
+    {% for atm in automations %}
+    <div class="grid">
+    <h2>{{atm.state|upper}}</h2></br>
+    <h6>Sale Type</h6>{% if atm.tax %}<span>Tax</span>{% endif %} {% if atm.mortgage %}<span>Mortgage</span>{% endif %}</br></br>
+    <h6>Surplus Type</h6>{% if atm.postforeclosure %}<span>Approximate</span>{% endif %} {% if atm.verified %}<span>Verified</span>{% endif %}</br></br>
+    <h6>Update Interval</h6>{% if atm.update_interval %}<span>{{atm.update_interval}}</span>{% endif %}</br></br>
+    <h6>Description</h6></br><span>{{atm.description}}</span>
+    <div class="action">
+        <div>
+            <button>Customize</button>
+        </div>
+        <div>
+            <button class="enroll-btn" data-automation-id="{{ atm.id }}" data-url="{% url 'direct-subscribe' %}">Enroll</button>
+        </div>
+        
+    </div>
+    </div>
+    {% endfor %}
+</div>
+
+<script src="{% static 'js/automate.js' %}"></script>
+
+
+
+{% endblock content%}
