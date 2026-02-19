@@ -5,3 +5,7 @@ from.models import*
 @admin.register(ClientSettings)
 class ClientSettingsAdmin(admin.ModelAdmin):
     list_display = ("user","manage_sub_show_hidden")
+
+@admin.register(Coverage)
+class CoverageAdmin(admin.ModelAdmin):
+    list_display = ("state","active")

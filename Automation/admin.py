@@ -4,5 +4,5 @@ from .models import *
 
 @admin.register(Automation)
 class AutomationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'state', 'price_amount', 'tax', 'mortgage', 'preforeclosure', 'postforeclosure', 'verified')
-    list_filter = ('name', 'state', 'price_amount', 'tax', 'mortgage', 'preforeclosure', 'postforeclosure', 'verified')
+    list_display = ('id', 'tax', 'mortgage', 'preforeclosure', 'postforeclosure', 'verified')
+    list_filter = ('tax', 'mortgage', 'preforeclosure', 'postforeclosure', 'verified')

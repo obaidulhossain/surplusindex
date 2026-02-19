@@ -9,28 +9,104 @@ Automate Lead Generation
 {% load custom_filters %}
 <link href="{% static 'css/automate.css' %}" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<h1>Automate surplus lead generation</h1>
-<div class="container">
-    {% for atm in automations %}
-    <div class="grid">
-    <h2>{{atm.state|upper}}</h2></br>
-    <h6>Sale Type</h6>{% if atm.tax %}<span>Tax</span>{% endif %} {% if atm.mortgage %}<span>Mortgage</span>{% endif %}</br></br>
-    <h6>Surplus Type</h6>{% if atm.postforeclosure %}<span>Approximate</span>{% endif %} {% if atm.verified %}<span>Verified</span>{% endif %}</br></br>
-    <h6>Update Interval</h6>{% if atm.update_interval %}<span>{{atm.update_interval}}</span>{% endif %}</br></br>
-    <h6>Description</h6></br><span>{{atm.description}}</span>
-    <div class="action">
-        <div>
-            <button>Customize</button>
+<h1>Automate surplus lead generation</h1><br><br>
+{% if automation.status == "active" %}
+<div class="automation-stat">
+<span>Activated</span>
+</div>
+{% endif %}
+<div class="automate-section" data-id="{{ automation.id }}">
+    <h5>Select States from Active Coverage</h5>
+    <div class="state-container">
+        {% for s in states %}
+        <div class="state">
+            <input type="checkbox" value="{{s.state|upper}}" onchange="toggleState(this)">
+            <label>{{s.state}}</label>
+            
         </div>
-        <div>
-            <button class="enroll-btn" data-automation-id="{{ atm.id }}" data-url="{% url 'direct-subscribe' %}">Enroll</button>
+        {% endfor %}
+    </div>
+    <div class="option-container">
+        <div class="option">
+            <h5>Foreclosure Type</h5>
+            <input type="checkbox" value="tax" onchange="updateAutomationField('tax', this.checked)"{% if automation.tax %}checked{% endif %}>
+            <label>Tax Foreclosure</label></br>
+            <input type="checkbox" value="mortgage" onchange="updateAutomationField('mortgage', this.checked)"{% if automation.mortgage %}checked{% endif %}>
+            <label>Mortgage Foreclosure</label>
         </div>
-        
+        <div class="option">
+            <h5>Surplus Type</h5>
+            <input type="checkbox" value="fund available" onchange="updateAutomationField('verified', this.checked)"{% if automation.verified %}checked{% endif %}>
+            <label>Verified (Court Record)</label></br>
+            <input type="checkbox" value="possible surplus" onchange="updateAutomationField('postforeclosure', this.checked)"{% if automation.postforeclosure %}checked{% endif %}>
+            <label>Approximate (Calculated)</label>
+        </div>
+        <div class="option">
+            <h5>Minimum Surplus</h5>
+            <input type="radio" id="fifteen" value="15000" name="min-surplus" onchange="updateAutomationField('surplus_capped', this.value)" {% if automation.surplus_capped == 15000 %}checked{% endif %}>
+            <label>$15,000.00</label></br>
+            <input type="radio" id="thirty" value="30000" name="min-surplus" onchange="updateAutomationField('surplus_capped', this.value)" {% if automation.surplus_capped == 30000 %}checked{% endif %}>
+            <label>$30,000.00</label>
+        </div>
+
     </div>
+    <div class="payment-container">
+        <label class="payment-option">
+            <input type="radio" id="starter" name="num-leads" value="{{p_Starter.id}}" onchange="updateSubscription(this.value, this.checked)"{% if automation.subscription.name == "Starter" %}checked{% endif %}>
+            <h5 style="display:inline-flex">Starter</h5></br>
+            <span><strong>Number of Leads:</strong> 100</span></br>
+            <span><strong>Duration:</strong> 1 Month (Max)</span></br>
+            <span><strong>Price:</strong> $50</span>
+        </label>
+        <label class="payment-option">
+            <input type="radio" id="growth" name="num-leads" value="{{p_Growth.id}}" onchange="updateSubscription(this.value, this.checked)"{% if automation.subscription.name == "Growth" %}checked{% endif %}>
+            <h5 style="display:inline-flex">Growth</h5></br>
+            <span><strong>Number of Leads:</strong> 500</span></br>
+            <span><strong>Duration:</strong> 2-3 Month (Max)</span></br>
+            <span><strong>Price:</strong> $199</span>
+        </label>
+        <label class="payment-option">
+            <input type="radio" id="professional" name="num-leads" value="{{p_Professional.id}}" onchange="updateSubscription(this.value, this.checked)" {% if automation.subscription.name == "Professional" %}checked{% endif %}>
+            <h5 style="display:inline-flex">Professional</h5></br>
+            <span><strong>Number of Leads:</strong> 1000</span></br>
+            <span><strong>Duration:</strong> 3-6 Month (Max)</span></br>
+            <span><strong>Price:</strong> $330</span>
+        </label>
+        <label class="payment-option">
+            <input type="radio" id="ultimate" name="num-leads" value="{{p_Ultimate.id}}" onchange="updateSubscription(this.value, this.checked)"{% if automation.subscription.name == "Ultimate" %}checked{% endif %}>
+            <h5 style="display:inline-flex">Ultimate</h5></br>
+            <span><strong>Number of Leads:</strong> 5000+</span></br>
+            <span><strong>Duration:</strong> Yearly</span></br>
+            <span><strong>Price:</strong> $999</span>
+        </label>
+
     </div>
-    {% endfor %}
+    <button id="startAutomationBtn">Pay and Automate</button>
+    <!--onclick="payAndAutomate()" id="pay-btn"-->
+    <!-- Confirmation / Alert Div (centered) -->
+    
+</div>
+<div id="confirmDiv" class="confirmDiv">
+    <p id="confirmMessage" style="margin-bottom: 20px; font-size: 16px;"></p>
+    <button class="confirm-no" id="confirmNo">Cancel</button>
+    <button class="confirm-yes" id="confirmYes">Confirm</button>
 </div>
 
+<!-- Processing Message Div (centered) -->
+<div id="message" style="display:none; 
+                        position: fixed; 
+                        top: 50%; 
+                        left: 50%; 
+                        transform: translate(-50%, -50%);
+                        background: #4caf50; 
+                        color: white; 
+                        padding: 20px 30px; 
+                        border-radius: 10px; 
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                        font-size: 16px;
+                        z-index: 1000;
+                        text-align: center;">
+</div>
 <script src="{% static 'js/automate.js' %}"></script>
 
 

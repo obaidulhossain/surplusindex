@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.decorators import login_required
 from si_user.models import UserDetail
+from functools import wraps
 
 def unauthenticated_user(view_func):
     def wrapper_func(request, *args, **kwargs):
@@ -30,18 +31,16 @@ def allowed_users(allowed_roles=[]):
 
 def card_required(view_func):
     @login_required
+    @wraps(view_func)
     def wrapper(request, *args, **kwargs):
 
         # Only check clients group
         if request.user.groups.filter(name="clients").exists():
-
-            user_detail, created = UserDetail.objects.get_or_create(
-                user=request.user
-            )
-
+            user_detail, created = UserDetail.objects.get_or_create(user=request.user)
             if user_detail.payment_method != UserDetail.ADDED:
                 return redirect("add_card")
-            
+            customer_id = user_detail.stripe_customer_id
+
         return view_func(request, *args, **kwargs)
 
     return wrapper

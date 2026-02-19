@@ -25,3 +25,12 @@ class ClientSettings(Timelogger):
     manage_sub_show_hidden = models.BooleanField(default=False)
     def __str__(self):
         return f"Client: {self.user.username}'s Settings"
+    
+class Coverage(Timelogger):
+    state = models.CharField(max_length=100)
+    tax = models.BooleanField(default=False)
+    mortgage = models.BooleanField(default=False)
+    preforeclosure = models.BooleanField(default=False)
+    postforeclosure = models.BooleanField(default=False)
+    verified = models.BooleanField(default=False)
+    active = models.BooleanField(default=False)
