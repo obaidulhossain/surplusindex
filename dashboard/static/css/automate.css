@@ -34,6 +34,28 @@ h6 {
     margin: 10px;
 }
 
+.automate-section input[type="checkbox"],
+.automate-section input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #16c5e0;
+    cursor: pointer;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    vertical-align: sub;
+}
+
+.payment-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #e0dd16;
+    border: 2px solid #fff;
+    cursor: pointer;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    vertical-align: sub;
+}
+
 .automation-stat {
     float: right;
     background-color: #00588f;
