@@ -20,7 +20,7 @@ Automate Lead Generation
     <div class="state-container">
         {% for s in states %}
         <div class="state">
-            <input type="checkbox" value="{{s.state|upper}}" onchange="toggleState(this)">
+            <input type="checkbox" value="{{s.state|upper}}" onchange="toggleState(this)"{% if s.state|upper in automation.states %}checked{% endif %}>
             <label>{{s.state}}</label>
             
         </div>
@@ -50,6 +50,7 @@ Automate Lead Generation
         </div>
 
     </div>
+    {% if not automation.status == "active" %}
     <div class="payment-container">
         <label class="payment-option">
             <input type="radio" id="starter" name="num-leads" value="{{p_Starter.id}}" onchange="updateSubscription(this.value, this.checked)"{% if automation.subscription.name == "Starter" %}checked{% endif %}>
@@ -82,6 +83,7 @@ Automate Lead Generation
 
     </div>
     <button id="startAutomationBtn">Pay and Automate</button>
+    {% endif %}
     <!--onclick="payAndAutomate()" id="pay-btn"-->
     <!-- Confirmation / Alert Div (centered) -->
     

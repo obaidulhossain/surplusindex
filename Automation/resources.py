@@ -8,7 +8,7 @@ from datetime import datetime
 from openpyxl.styles import PatternFill, Font, Alignment
 from openpyxl.utils import get_column_letter
 import json
-class CustomExportResource:
+class AutomationExportResource:
     """
     Dynamically generates Excel data for a given CustomExportOptions instance.
     Includes up to 4 related contacts with wireless & landline numbers.
@@ -21,18 +21,52 @@ class CustomExportResource:
         Build a queryset that matches each ExportLeadFilter exactly.
         Avoids mixing states/types between filters.
         """
-        filters = self.export_option.filter_option.all()
+        filters = self.export_option
         q_objects = Q()
+        # -------------------------
+        # State filter (JSON list)
+        # -------------------------
+        if filters.states:
+            q_objects &= Q(state__in=filters.states)
+        # -------------------------
+        # Sale type filters
+        # -------------------------
+        sale_types = []
 
-        for f in filters:
-            q = Q(state=f.state)
-            if f.sale_type:
-                q &= Q(sale_type=f.sale_type)
-            if f.sale_status:
-                q &= Q(sale_status=f.sale_status)
-            if f.surplus_status:
-                q &= Q(surplus_status=f.surplus_status)
-            q_objects |= q  # OR between filters, but AND inside each
+        if filters.tax:
+            sale_types.append("tax")
+
+        if filters.mortgage:
+            sale_types.append("mortgage")
+        if sale_types:
+            q_objects &= Q(sale_type__in=sale_types)
+        
+        # -------------------------
+        # Foreclosure stage filters
+        # -------------------------
+        
+        surplus_status = []
+        
+
+        if filters.postforeclosure:
+            surplus_status.append("possible surplus")
+        if filters.verified:
+            surplus_status.append("fund available")
+        if surplus_status:
+            q_objects &= Q(surplus_status__in=surplus_status)
+            q_objects &= Q(sale_status__in="sold")
+        if filters.surplus_capped:
+            q &= Q(surplus_amount__gte=filters.surplus_capped)
+
+        # for f in filters:
+        #     q = Q(state=f.state)
+        #     if f.sale_type:
+        #         q &= Q(sale_type=f.sale_type)
+        #     if f.sale_status:
+        #         q &= Q(sale_status=f.sale_status)
+        #     if f.surplus_status:
+        #         q &= Q(surplus_status=f.surplus_status)
+        #     q_objects |= q  # OR between filters, but AND inside each
 
         queryset = Foreclosure.objects.filter(q_objects).distinct()
         queryset = queryset.filter(published=True)
