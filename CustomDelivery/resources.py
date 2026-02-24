@@ -39,7 +39,7 @@ class CustomExportResource:
         # Omit already delivered or old leads
         queryset = self.exclude_delivered_and_old(queryset)
         # ⭐ Order newest first
-        queryset = queryset.order_by("-changed_at")
+        queryset = queryset.order_by("-sale_date")
 
     # ⭐ Limit results
         limit = getattr(self.export_option, "limit", None)
