@@ -26,6 +26,8 @@ class OperationStat(models.Model):                              #
         user = get_current_user()  # Get the user from thread-local storage
         if user and user.groups.filter(name="researcher").exists():
             self.changed_at = now()
+        elif user and user.groups.filter(name="admin").exists():
+            self.changed_at = now()
         else:
             if self.pk:
                 existing = self.__class__.objects.get(pk=self.pk)
