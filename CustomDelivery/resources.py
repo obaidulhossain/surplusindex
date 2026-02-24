@@ -38,6 +38,13 @@ class CustomExportResource:
         queryset = queryset.filter(published=True)
         # Omit already delivered or old leads
         queryset = self.exclude_delivered_and_old(queryset)
+        # ⭐ Order newest first
+        queryset = queryset.order_by("-changed_at")
+
+    # ⭐ Limit results
+        limit = getattr(self.export_option, "limit", None)
+        if limit:
+            queryset = queryset[:limit]
 
         return queryset
 

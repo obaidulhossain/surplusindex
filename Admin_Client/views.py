@@ -80,6 +80,7 @@ def ManageClients(request):
             Q(sender__icontains=client.user.email) |
             Q(recipient__icontains=client.user.email)
         )
+
     EmailInstance = get_object_or_404(MailAccount, pk=1)
 
     context = {
@@ -89,7 +90,24 @@ def ManageClients(request):
 
     }
     return render(request, 'Admin_Client/manage_clients.html', context)
-    
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
+def ManageDeliveries(request):
+    params = request.POST if request.method == "POST" else request.GET
+    clid = params.get("clid")
+    if not clid:
+        messages.info(request, "No selected user")
+        return redirect("clients")
+    else:
+        client = UserDetail.objects.get(pk=clid)
+
+    context = {
+        "client":client,
+        
+
+    }
+    return render(request, 'Admin_Client/manage_deliveries.html', context)
 
 
 

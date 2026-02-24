@@ -49,6 +49,8 @@ class CustomExportOptions(models.Model):
     old_leads = models.ManyToManyField(Foreclosure, related_name="not_delivered")
     filter_option = models.ManyToManyField(ExportLeadFilter)
     columns = models.JSONField(default=list, help_text="List of field names in desired order")
+    limit = models.IntegerField(default=100, help_text="Max leads per delivery")
+
     active = models.BooleanField(default=True)
     def __str__(self):
         return f"{self.client_name} - {self.delivery_type}"

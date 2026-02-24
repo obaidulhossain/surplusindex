@@ -14,7 +14,7 @@ class CustomExportOptionsForm(forms.ModelForm):
         model = CustomExportOptions
         fields = [
             "client","client_name", "client_email", "number_delivery", "next_delivery_date",
-            "delivery_type", "contact_align", "filter_option", "columns", "active"
+            "delivery_type", "contact_align", "filter_option", "columns", "limit", "active"
         ]
         widgets = {
             "client": forms.Select(attrs={"class": "form-select"}),
@@ -26,5 +26,6 @@ class CustomExportOptionsForm(forms.ModelForm):
             "contact_align": forms.Select(attrs={"class": "form-select"}),
             "filter_option": forms.SelectMultiple(attrs={"class": "form-select"}),
             "columns": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": '["id", "state", "sale_type", ...]'}),
+            "limit": forms.NumberInput(attrs={"class": "form-control"}),
             "active": forms.CheckboxInput(attrs={"class": "form-check-input"}),
         }

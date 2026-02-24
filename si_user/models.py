@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils.timezone import now
 from django.conf import settings
+from propertydata.models import Foreclosure
 class Timelogger(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Created')

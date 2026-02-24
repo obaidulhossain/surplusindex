@@ -9,6 +9,13 @@ Clients
 {% load custom_filters %}
 <link href="{% static 'css/surplusindex.css' %}" rel="stylesheet">
 <link href="{% static 'css/admin.css' %}" rel="stylesheet">
+<form method="POST" action="{% url 'manage-deliveries' %}">
+    {% csrf_token %}
+    <input type="hidden" value="{{client.id}}" name="clid">
+    <input type="submit" value="Manage Deliveries">
+</form>
+
+
 
 <h1 style="color: #fff; font-size:30px; text-align:center;">Communication</h1>
 <div class="section-dark">
