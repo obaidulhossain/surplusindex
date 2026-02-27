@@ -1,14 +1,14 @@
 {% extends 'base.html' %}
-{% block title %}
-Automate Lead Generation
-{% endblock title %}
-
-
-{% block content%}
+{% block title %}Automate Lead Generation{% endblock title %}
 {% load static %}
 {% load custom_filters %}
-<link href="{% static 'css/automate.css' %}" rel="stylesheet">
+{% block scripts %}<script src="https://js.stripe.com/v3/"></script>{% endblock %}
+{% block content%}
+<link href="{% static 'css/client_interface.css' %}" rel="stylesheet">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="{% static 'css/automate.css' %}" rel="stylesheet">
+
+
 <h1>Automate surplus lead generation</h1><br><br>
 {% if automation.status == "active" %}
 <div class="automation-stat">
@@ -82,13 +82,218 @@ Automate Lead Generation
         </label>
 
     </div>
-    <button id="startAutomationBtn">Pay and Automate</button>
+    <button id="startAutomationBtn" class="enroll-btn" data-plan-id="{{ automation.id }}" data-price-id="{{ automation.subscription.price_id }}" data-plan-name="{{ automation.name }}" data-price="{{ automation.price_amount }}">Pay and Automate</button>
     {% endif %}
     <!--onclick="payAndAutomate()" id="pay-btn"-->
     <!-- Confirmation / Alert Div (centered) -->
     
 </div>
-<div id="confirmDiv" class="confirmDiv">
+<div id="subscriptionModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+
+        <div class="modal-header">
+            <h3>Confirm Subscription</h3>
+            <span class="close-btn" onclick="closeModal()">×</span>
+        </div>
+
+        <div class="modal-body">
+
+            <div class="plan-summary">
+                <h4 id="modalPlanName"></h4>
+                <p id="modalPlanPrice"></p>
+            </div>
+
+            <div id="payment-methods"></div>
+
+            <div id="card-wrapper" style="display:none;">
+                <label>Card Details</label>
+                <div id="card-element"></div>
+            </div>
+
+            <div id="modal-error" class="error-box"></div>
+
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+            <button class="btn-confirm" id="confirmSubscription">
+                Confirm & Subscribe
+            </button>
+        </div>
+
+    </div>
+</div>
+<script>
+const stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+
+let selectedPriceId = null;
+let elements;
+let cardElement;
+let setupClientSecret = null;
+
+// Toggle card input when user selects payment method
+document.addEventListener("change", function(e) {
+    if (e.target.name === "payment_method") {
+        if (e.target.value === "new") {
+            document.getElementById("card-wrapper").style.display = "block";
+        } else {
+            document.getElementById("card-wrapper").style.display = "none";
+        }
+    }
+});
+
+
+function openModal() {
+    document.getElementById("subscriptionModal").style.display = "flex";
+}
+
+function closeModal() {
+    document.getElementById("subscriptionModal").style.display = "none";
+}
+
+function showError(message) {
+    const box = document.getElementById("modal-error");
+    box.style.display = "block";
+    box.innerText = message;
+}
+
+document.querySelectorAll(".enroll-btn").forEach(btn => {
+    btn.addEventListener("click", async function() {
+
+        selectedPriceId = this.dataset.priceId;
+
+        document.getElementById("modalPlanName").innerText =
+            this.dataset.planName;
+
+        document.getElementById("modalPlanPrice").innerText =
+            "$" + this.dataset.price + "/month";
+
+        openModal();
+
+        const response = await fetch("{% url 'get_payment_option' %}");
+        const data = await response.json();
+
+        document.getElementById("payment-methods").innerHTML = data.html;
+
+        setupClientSecret = data.setup_intent;
+
+        elements = stripe.elements();
+        cardElement = elements.create("card");
+        cardElement.mount("#card-element");
+    });
+});
+
+document.getElementById("confirmSubscription")
+.addEventListener("click", async function() {
+
+    document.getElementById("modal-error").style.display = "none";
+
+    const selected = document.querySelector(
+        'input[name="payment_method"]:checked'
+    );
+
+    if (!selected) {
+        showError("Please select a payment method.");
+        return;
+    }
+
+    let paymentMethodId;
+
+    if (selected.value === "new") {
+
+        const result = await stripe.confirmCardSetup(
+            setupClientSecret,
+            {
+                payment_method: { card: cardElement }
+            }
+        );
+
+        if (result.error) {
+            showError(result.error.message);
+            return;
+        }
+
+        paymentMethodId = result.setupIntent.payment_method;
+
+    } else {
+        paymentMethodId = selected.value;
+    }
+
+    const response = await fetch("{% url 'create_automation' %}", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")
+        },
+        body: JSON.stringify({
+            price_id: selectedPriceId,
+            payment_method_id: paymentMethodId,
+            
+        })
+    });
+
+    const data = await response.json();
+
+    if (data.requires_action) {
+
+        const result = await stripe.confirmCardPayment(
+            data.client_secret
+        );
+
+        if (result.error) {
+            showError(result.error.message);
+            return;
+        }
+
+        location.reload();
+
+    } else if (data.success) {
+        location.reload();
+    } else {
+        showError(data.error);
+    }
+});
+</script>
+{% comment %} 
+<!-- Payment Modal -->
+<!-- Automation Payment Modal -->
+<div id="automationModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+
+        <div class="modal-header">
+            <h3>Confirm Automation Payment</h3>
+            <span class="close-btn" onclick="closeAutomationModal()">×</span>
+        </div>
+
+        <div class="modal-body">
+
+            <div class="plan-summary">
+                <h4 id="modalAutomationName"></h4>
+                <p id="modalAutomationPrice"></p>
+            </div>
+
+            <div id="automation-payment-methods"></div>
+
+            <div id="automation-card-wrapper" style="display:none;">
+                <label>Card Details</label>
+                <div id="automation-card-element"></div>
+            </div>
+
+            <div id="automation-error" class="error-box"></div>
+
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeAutomationModal()">Cancel</button>
+            <button class="btn-confirm" id="confirmAutomation">
+                Confirm & Pay
+            </button>
+        </div>
+
+    </div>
+</div> {% endcomment %}
+
+{% comment %} <div id="confirmDiv" class="confirmDiv">
     <p id="confirmMessage" style="margin-bottom: 20px; font-size: 16px;"></p>
     <button class="confirm-no" id="confirmNo">Cancel</button>
     <button class="confirm-yes" id="confirmYes">Confirm</button>
@@ -108,7 +313,8 @@ Automate Lead Generation
                         font-size: 16px;
                         z-index: 1000;
                         text-align: center;">
-</div>
+</div> {% endcomment %}
+
 <script src="{% static 'js/automate.js' %}"></script>
 
 

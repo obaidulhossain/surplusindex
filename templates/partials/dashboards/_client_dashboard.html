@@ -114,10 +114,21 @@
 {% endfor %}
     <div class="onethird">
         <div class="blurb-small" style="align-content: center;">
+            <h6>Don't want to download lists manually?</h6>
+            <form method="POST" action="{% url 'automate' %}">
+                {% csrf_token %}
+                <input type="submit" value="Automate Now">
+            </form>
+            <h6>And start receiving lists directly in your Email Inbox.</h6>
+        </div>
+    </div>
+    <div class="onethird">
+        <div class="blurb-small" style="align-content: center;">
             <h6>Can't find the location you're looking for? <a href="mailto:contact@surplusindex.com">Contact us</a> to request data coverage from your preferred State.</h6>
 
         </div>
     </div>
+    
 </div>
 <script>
 function filterStates() {

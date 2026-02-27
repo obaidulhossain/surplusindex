@@ -32,7 +32,8 @@ from Communication.utils import notify
 from django.views.decorators.http import require_POST
 from ProjectManager.resources import DashboardCloneExportResource
 from Automation.models import Automation
-
+from .services.stripe_subscription_service import StripeSubscriptionService
+from django.template.loader import render_to_string
 # Configure the logger
 
 logging.basicConfig(level=logging.INFO)
@@ -165,54 +166,110 @@ def create_user_profile(sender, instance, created, **kwargs):
 def save_user_profile(sender, instance, **kwargs):
     instance.credits.save()
 
-
 @login_required(login_url="login")
 @csrf_exempt
 def userSubscription(request):
     user = request.user
-    UserSettings, created = ClientSettings.objects.get_or_create(
-        user=user,
-        defaults={'manage_sub_show_hidden': False}
-        )
-    
-    Plans = SubscriptionPlan.objects.filter(active=True).order_by('name').exclude(type="payperlead")
-    payperlead_options = SubscriptionPlan.objects.filter(type="payperlead", active=True).order_by('amount')
-    subscriptions = StripeSubscription.objects.filter(user=user).order_by('current_period_end')
-    if not UserSettings.manage_sub_show_hidden:
-        subscriptions = subscriptions.exclude(hidden=True)
-    # Get all transactions for this user in one query
-    transactions = UserTransactions.objects.filter(user=user).order_by('-created_at')
-    announcements = Announcements.objects.filter(effective_date__gte=date.today(), published=True).order_by('created_at')
-    # Group transactions by subscription ID
-    transactions_map = defaultdict(list)
-    for tx in transactions:
-        transactions_map[tx.stripe_subscription_id].append(tx)
-
-    # Attach transactions to each subscription
-    for subs in subscriptions:
-        subs.transactions = transactions_map.get(subs.subscription_id, [])
-
-    session_id = request.GET.get('session_id', None)
-    if session_id:
-
-        try:
-            session = stripe.checkout.Session.retrieve(session_id)
-
-            if session.payment_status == 'paid':
-                messages.success(request, "Payment Successful! Credits / Subscription Updated")
-            else:
-                messages.error(request,"Payment Failed. Please Try again.")
-
-        except Exception as e:
-            messages.error(request, "An error occured while verifying payment, Please try again.")
+    plans = Plans.objects.filter(active=True)
     context = {
-        'Plans':Plans,
-        'payperlead_options':payperlead_options,
-        'subscriptions':subscriptions,
-        'UserSettings':UserSettings,
-        'announcements':announcements,
+        'Plans':plans,
+        'STRIPE_PUBLIC_KEY':settings.STRIPE_PUBLISHABLE_KEY,
+
     }
     return render(request, 'si_user/subscription.html', context)
+@login_required
+def get_payment_options(request):
+    service = StripeSubscriptionService(request.user)
+
+    payment_methods = service.list_payment_methods()
+    setup_intent = service.create_setup_intent()
+
+    html = render_to_string(
+        "partials/payment_methods.html",
+        {"payment_methods": payment_methods},
+        request=request
+    )
+
+    return JsonResponse({
+        "html": html,
+        "setup_intent": setup_intent.client_secret
+    })
+
+@login_required
+def create_subscription(request):
+    data = json.loads(request.body)
+
+    service = StripeSubscriptionService(request.user)
+
+    result = service.create_subscription(
+        data["price_id"],
+        data["payment_method_id"]
+    )
+
+    payment_intent = result["payment_intent"]
+
+    if payment_intent.status == "requires_action":
+        return JsonResponse({
+            "requires_action": True,
+            "client_secret": payment_intent.client_secret
+        })
+
+    elif payment_intent.status == "succeeded":
+        return JsonResponse({"success": True})
+
+    return JsonResponse({
+        "error": "Payment failed. Please try again."
+    })
+
+
+
+# @login_required(login_url="login")
+# @csrf_exempt
+# def userSubscription(request):
+#     user = request.user
+#     UserSettings, created = ClientSettings.objects.get_or_create(
+#         user=user,
+#         defaults={'manage_sub_show_hidden': False}
+#         )
+    
+#     Plans = SubscriptionPlan.objects.filter(active=True).order_by('name').exclude(type="payperlead")
+#     payperlead_options = SubscriptionPlan.objects.filter(type="payperlead", active=True).order_by('amount')
+#     subscriptions = StripeSubscription.objects.filter(user=user).order_by('current_period_end')
+#     if not UserSettings.manage_sub_show_hidden:
+#         subscriptions = subscriptions.exclude(hidden=True)
+#     # Get all transactions for this user in one query
+#     transactions = UserTransactions.objects.filter(user=user).order_by('-created_at')
+#     announcements = Announcements.objects.filter(effective_date__gte=date.today(), published=True).order_by('created_at')
+#     # Group transactions by subscription ID
+#     transactions_map = defaultdict(list)
+#     for tx in transactions:
+#         transactions_map[tx.stripe_subscription_id].append(tx)
+
+#     # Attach transactions to each subscription
+#     for subs in subscriptions:
+#         subs.transactions = transactions_map.get(subs.subscription_id, [])
+
+#     session_id = request.GET.get('session_id', None)
+#     if session_id:
+
+#         try:
+#             session = stripe.checkout.Session.retrieve(session_id)
+
+#             if session.payment_status == 'paid':
+#                 messages.success(request, "Payment Successful! Credits / Subscription Updated")
+#             else:
+#                 messages.error(request,"Payment Failed. Please Try again.")
+
+#         except Exception as e:
+#             messages.error(request, "An error occured while verifying payment, Please try again.")
+#     context = {
+#         'Plans':Plans,
+#         'payperlead_options':payperlead_options,
+#         'subscriptions':subscriptions,
+#         'UserSettings':UserSettings,
+#         'announcements':announcements,
+#     }
+#     return render(request, 'si_user/subscription.html', context)
 
 
 @login_required(login_url="login")
@@ -302,15 +359,14 @@ User = get_user_model()
 @csrf_exempt
 def stripe_webhook(request):
     logger.info("⚡ Stripe webhook triggered")
-    endpoint_secret = settings.STRIPE_WEBHOOK_ENDPOINT
-
     if request.content_type != "application/json":
         logger.warning("Invalid content type on webhook request")
         return HttpResponse("Invalid content type", status=400)
-
-    payload = request.body
+    payload = request.body   
+    endpoint_secret = settings.STRIPE_WEBHOOK_ENDPOINT
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
 
+    logger.info("⚡ Constructing Event")
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
     except ValueError:
@@ -320,9 +376,11 @@ def stripe_webhook(request):
         logger.error("Invalid Stripe signature")
         return HttpResponse("Invalid signature", status=400)
 
-    event_type = event.get("type")
-    data_object = event["data"]["object"]
-    logger.info(f"Received Stripe event: {event_type}")
+    #event_type = event.get("type") #replaced this event type with the below 
+    event_type = event["type"]
+    #data_object = event["data"]["object"] #replaced this with below line
+    data = event["data"]["object"]
+    logger.info(f"⚡ Stripe webhook triggered: {event_type}")
 
     # --- Helpers ---
     def create_or_update_transaction(user, amount, currency, status, source_type, stripe_ids, num_leads=0):
@@ -429,8 +487,92 @@ def stripe_webhook(request):
             logger.warning(f"Subscription {subscription_id} not found in DB")
 
     # --- Event Handlers ---
-    if event_type == "checkout.session.completed":
-        session = data_object
+    if event_type in ("invoice.payment_succeeded","invoice.payment_failed"):
+        logger.info(f"⚡{event_type} Trigerred, Processing Event")
+        invoice_id = data["id"]
+        invoice = None
+        try:
+            invoice = stripe.Invoice.retrieve(invoice_id, expand=["lines.data"])
+        except stripe.error.InvalidRequestError as e:
+            logger.warning(f"Invoice {invoice_id} not found or invalid: {e}")
+            return HttpResponse(status=200)
+        # ==========================================================
+        # 🔥 AUTOMATION SUBSCRIPTION HANDLING
+        # ==========================================================
+        metadata = invoice.get("subscription_details", {}).get("metadata") or invoice.get("metadata", {})
+        
+        if metadata.get("product_type") == "automation":
+            logger.info("🚀 Automation Update is trigerred")
+            automation_id = metadata.get("automation_id")
+            user_id = metadata.get("user_id")
+
+            try:
+                with transaction.atomic():
+                    automation = Automation.objects.select_for_update().get(id=automation_id)
+                    user = automation.client
+                    
+                    # Determine status
+                    status = "active" if event_type != "invoice.payment_failed" else "failed"
+
+                    # Safe amount and currency
+                    amount_paid = (invoice.get("amount_paid") or 0) / 100
+                    currency = invoice.get("currency", "usd")
+                    subscription_id = invoice.get("subscription")
+                    if not subscription_id:
+                        logger.error("⚠️ No subscription ID in invoice")
+                        return HttpResponse(status=400)
+
+                    # Get billing period end safely
+                    period_end = None
+                    try:
+                        subscription = stripe.Subscription.retrieve(subscription_id)
+                        period_end = datetime.fromtimestamp(subscription["current_period_end"])
+                    except Exception:
+                        logger.error("Failed to retrieve subscription")
+                        return HttpResponse(status=500)
+                    logger.info(f"📦 Getting Period End: {period_end} from Subscription: {subscription_id}")
+
+                    # Create or update transaction
+                    txn = create_or_update_transaction(
+                        user=user,
+                        amount=amount_paid,
+                        currency=currency,
+                        status=status,
+                        source_type="subscription",
+                        stripe_ids={
+                            "customer": invoice.get("customer"),
+                            "checkout_id": None,
+                            "subscription_id": subscription_id,
+                            "invoice_id": invoice.get("id"),
+                        },
+                    )
+
+                    # Update Automation model
+                    automation.transaction.add(txn)
+                    automation.payment_status = Automation.PAID if event_type != "invoice.payment_failed" else Automation.FAILED
+                    automation.enrolled_stripe_subscrption = subscription_id
+                    automation.expiration = period_end if period_end and event_type != "invoice.payment_failed" else automation.expiration
+                    automation.status=Automation.ACTIVE if event_type != "invoice.payment_failed" else Automation.PENDING
+                    automation.save()
+                    if event_type != "invoice.payment_failed":
+                        logger.info(f"Payment Successful | Automation id: {automation_id} (updated)")
+                    else:
+                        logger.info(f"Payment Failed | Automation id: {automation_id} (updated)")
+                    return HttpResponse(status=200)
+                
+            except Exception as e:
+                logger.error(f"❌ Error processing Automation {automation_id}: {e}")
+                logger.error("Critical webhook error", exc_info=True)
+                return HttpResponse(status=500)
+                
+                
+        else:
+            logger.info(f"Other subscription logic other than automation will go here")
+            return HttpResponse(status=200)
+            
+
+    elif event_type == "checkout.session.completed":
+        session = data
         user_id = session.get("client_reference_id")
         if not user_id:
             logger.error("checkout.session.completed missing client_reference_id")
@@ -520,190 +662,72 @@ def stripe_webhook(request):
                 user_detail.save()
                 logger.info(f"Updated credits for {user.username} (+{num_leads} leads)")
 
-    elif event_type in ("invoice.payment_succeeded", "invoice.paid", "invoice.payment_failed", "invoice_payment.paid"):
-        logger.info("processing invoice update")
-        invoice_id = data_object["id"]
-        # invoice = stripe.Invoice.retrieve(invoice_id, expand=["lines.data"])
-        invoice = None
-        try:
-            invoice = stripe.Invoice.retrieve(invoice_id, expand=["lines.data"])
-        except stripe.error.InvalidRequestError as e:
-            logger.warning(f"Invoice {invoice_id} not found or invalid: {e}")
-            return HttpResponse(status=200)
-        # ==========================================================
-        # 🔥 AUTOMATION SUBSCRIPTION HANDLING
-        # ==========================================================
-        metadata = invoice.get("subscription_details", {}).get("metadata") or invoice.get("metadata", {})
-        logger.info(metadata)
-        if metadata.get("product_type") == "automation":
-            logger.info("Processing Automation subscription invoice")
+    # elif event_type in ("invoice.payment_succeeded", "invoice.paid", "invoice_payment.paid"):
+    #     invoice_id = data_object["id"]
+    #     subscription_id = data_object.get("subscription")
+    #     amount_paid = data_object.get("amount_paid", 0) / 100
+    #     currency = data_object.get("currency")
+    #     status = "active"
 
-            automation_id = metadata.get("automation_id")
-            user_id = metadata.get("user_id")
+    #     # Update subscription period
+    #     period_end = None
+    #     lines = data_object.get("lines", {}).get("data", [])
+    #     if lines and "period" in lines[0]:
+    #         period_end = datetime.fromtimestamp(lines[0]["period"]["end"])
 
-            try:
-                with transaction.atomic():
-                    automation = Automation.objects.select_for_update().get(id=automation_id)
-                    if not automation:
-                        logger.error(f"Automation {automation_id} not found")
-                        return HttpResponse(status=200)
-                    user = automation.client
-                    # Determine status
-                    status = "active" if event_type != "invoice.payment_failed" else "failed"
+    #     update_subscription(subscription_id, status=status, period_end=period_end)
 
-                    # Safe amount and currency
-                    amount_paid = getattr(invoice, "amount_paid", 0) / 100 if getattr(invoice, "amount_paid", None) else 0
-                    currency = getattr(invoice, "currency", "usd")
-                    subscription_id = getattr(invoice, "subscription", None)
+    #     # Update transaction
+    #     try:
+    #         sub = StripeSubscription.objects.get(subscription_id=subscription_id)
+    #         create_or_update_transaction(
+    #             user=sub.user,
+    #             amount=amount_paid,
+    #             currency=currency,
+    #             status=status,
+    #             source_type="subscription",
+    #             stripe_ids={
+    #                 "customer": data_object.get("customer"),
+    #                 "checkout_id": None,
+    #                 "subscription_id": subscription_id,
+    #                 "invoice_id": invoice_id
+    #             }
+    #         )
+    #     except StripeSubscription.DoesNotExist:
+    #         logger.warning(f"Subscription {subscription_id} not found for invoice {invoice_id}")
 
-                    # Get billing period end safely
-                    period_end = None
-                    try:
-                        lines = invoice.get("lines", {}).get("data", [])
-                        if lines and "period" in lines[0]:
-                            period_end = datetime.fromtimestamp(lines[0]["period"]["end"])
-                    except Exception as e:
-                        logger.warning(f"Could not parse period_end for automation {automation_id}: {e}")
+    # elif event_type == "invoice.payment_failed":
+    #     invoice_id = data_object["id"]
+    #     subscription_id = data_object.get("subscription")
+    #     status = "failed"
 
-                    # Create or update transaction
-                    txn = create_or_update_transaction(
-                        user=user,
-                        amount=amount_paid,
-                        currency=currency,
-                        status=status,
-                        source_type="subscription",
-                        stripe_ids={
-                            "customer": invoice.get("customer"),
-                            "checkout_id": None,
-                            "subscription_id": subscription_id,
-                            "invoice_id": invoice.get("id"),
-                        },
-                    )
+    #     update_subscription(subscription_id, status=status)
 
-                    # Update Automation model
-                    automation.transaction = txn
-
-                    if status == "active":
-                        automation.payment_status = Automation.PAID
-                        automation.status = Automation.ACTIVE
-                        if period_end:
-                            automation.expiration = period_end.date()
-                    else:
-                        automation.payment_status = Automation.FAILED
-                        automation.status = Automation.PENDING
-
-                    automation.save()
-
-            except Exception as e:
-                logger.error(f"Error processing Automation {automation_id}: {e}")
-                return HttpResponse(status=200)
-
-            logger.info(f"Automation {automation_id} updated successfully")
-            return HttpResponse(status=200)
-
-            # except Automation.DoesNotExist:
-            #     logger.error(f"Automation {automation_id} not found")
-            #     return HttpResponse(status=200)
-
-
-            # status = "active" if event_type != "invoice.payment_failed" else "failed"
-
-            # # Get billing period end
-            # period_end = None
-            # try:
-            #     lines = invoice.get("lines", {}).get("data", [])
-            #     if lines and "period" in lines[0]:
-            #         period_end = datetime.fromtimestamp(lines[0]["period"]["end"])
-            # except Exception as e:
-            #     logger.warning(f"Could not parse period_end for automation {automation_id}: {e}")
-
-
-            # # Create or update transaction
-            # txn = create_or_update_transaction(
-            #     user=user,
-            #     amount=amount_paid,
-            #     currency=currency,
-            #     status=status,
-            #     source_type="subscription",
-            #     stripe_ids={
-            #         "customer": invoice.get("customer"),
-            #         "checkout_id": None,
-            #         "subscription_id": subscription_id,
-            #         "invoice_id": invoice.get("id")
-            #     }
-            # )
-
-            # # Update Automation model
-            # with transaction.atomic():
-            #     automation.transaction = txn
-
-            #     if status == "active":
-            #         automation.payment_status = Automation.PAID
-            #         automation.status = Automation.ACTIVE
-            #         if period_end:
-            #             automation.expiration = period_end.date()
-            #     else:
-            #         automation.payment_status = Automation.FAILED
-            #         automation.status = Automation.PENDING
-
-            #     automation.save()
-
-            # logger.info(f"Automation {automation_id} updated successfully")
-
-            # return HttpResponse(status=200)
-        
-        # 🔥 AUTOMATION SUBSCRIPTION HANDLING end
-
-        subscription_id = invoice.get("subscription")
-        amount_paid = invoice.get("amount_paid", 0) / 100
-        currency = invoice.get("currency")
-        status = "active" if event_type != "invoice.payment_failed" else "failed"
-
-        period_end = None
-        try:
-            lines = invoice.get("lines", {}).get("data", [])
-            if lines and "period" in lines[0]:
-                period_end = datetime.fromtimestamp(lines[0]["period"]["end"])
-        except Exception as e:
-            logger.warning(f"Could not parse period_end for {subscription_id}: {e}")
-
-        update_subscription(subscription_id, status=status, period_end=period_end)
-
-        try:
-            sub = StripeSubscription.objects.get(subscription_id=subscription_id)
-            user = sub.user
-        except StripeSubscription.DoesNotExist:
-            logger.warning(f"Subscription {subscription_id} not found for invoice {invoice.get('id')}")
-            user = None
-
-        if user:
-            txn = create_or_update_transaction(
-                user=user,
-                amount=amount_paid,
-                currency=currency,
-                status=status,
-                source_type="subscription",
-                stripe_ids={
-                    "customer": invoice.get("customer"),
-                    "checkout_id": None,
-                    "subscription_id": subscription_id,
-                    "invoice_id": invoice.get("id")
-                }
-            )
-            if status == "active":
-                txn.mark_as_paid()
-            else:
-                txn.mark_as_failed()
-        else:
-            # fallback log/creation to avoid losing data
-            logger.error(f"Missing subscription {subscription_id}, could not attach invoice {invoice['id']} to user")
+    #     try:
+    #         sub = StripeSubscription.objects.get(subscription_id=subscription_id)
+    #         create_or_update_transaction(
+    #             user=sub.user,
+    #             amount=data_object.get("amount_due", 0) / 100,
+    #             currency=data_object.get("currency", "usd"),
+    #             status=status,
+    #             source_type="subscription",
+    #             stripe_ids={
+    #                 "customer": data_object.get("customer"),
+    #                 "checkout_id": None,
+    #                 "subscription_id": subscription_id,
+    #                 "invoice_id": invoice_id
+    #             }
+    #         )
+    #     except StripeSubscription.DoesNotExist:
+    #         logger.warning(f"Subscription {subscription_id} not found for failed invoice {invoice_id}")
+    
     elif event_type == "customer.subscription.updated":
-        sub_data = data_object
+        sub_data = data
         period_end = datetime.fromtimestamp(sub_data["current_period_end"]) if sub_data.get("current_period_end") else None
         update_subscription(sub_data.get("id"), status=sub_data.get("status"), period_end=period_end)
 
     elif event_type == "customer.subscription.deleted":
-        sub_data = data_object
+        sub_data = data
         update_subscription(sub_data.get("id"), status="canceled")
 
     else:

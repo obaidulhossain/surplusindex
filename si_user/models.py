@@ -76,12 +76,12 @@ class UserTransactions(Timelogger):
     def mark_as_paid(self):
         self.status = 'active'
         self.has_paid = True
-        self.save(update_fields=['status', 'has_paid', 'updated_at'])
+        self.save(update_fields=['status', 'has_paid'])
 
     def mark_as_failed(self):
         self.status = 'failed'
         self.has_paid = False
-        self.save(update_fields=['status', 'has_paid', 'updated_at'])
+        self.save(update_fields=['status', 'has_paid',])
 
     def __str__(self):
         return f"{self.user} - {self.amount} {self.currency} ({self.transaction_source}) - {self.status}"
@@ -114,12 +114,12 @@ class UserPayment(Timelogger):
     def mark_as_paid(self):
         self.status = 'active'
         self.has_paid = True
-        self.save(update_fields=['status', 'has_paid', 'updated_at'])
+        self.save(update_fields=['status', 'has_paid'])
 
     def mark_as_failed(self):
         self.status = 'failed'
         self.has_paid = False
-        self.save(update_fields=['status', 'has_paid', 'updated_at'])
+        self.save(update_fields=['status', 'has_paid'])
 
     def __str__(self):
         return f"{self.user} - {self.amount} {self.currency} ({self.transaction_source}) - {self.status}"
@@ -132,6 +132,20 @@ class CreditUsage(Timelogger):
     number_of_purchased = models.IntegerField(null=True, blank=True)
     leads = models.ManyToManyField('propertydata.Status', blank=True)
 
+class Plans(models.Model):
+    created_at = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=100)
+    state = models.CharField(max_length=100, blank=True, null=True)
+    sale_type = models.CharField(max_length=100, blank=True, null=True)
+    surplus_type = models.CharField(max_length=100, blank=True, null=True)
+    price = models.CharField(max_length=100, blank=True, null=True)
+    short_description = models.TextField( blank=True, null=True)
+    long_description = models.TextField( blank=True, null=True)
+    price_id = models.CharField(max_length=255)  # Stripe Price ID
+    stripe_product_id = models.CharField(max_length=255, blank=True, null=True)
+    interval = models.CharField(max_length=100, blank=True, null=True)
+    active = models.BooleanField(default=True)
+    
 class SubscriptionPlan(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     name = models.CharField(max_length=100)
@@ -160,6 +174,7 @@ class SubscriptionPlan(models.Model):
 class StripeSubscription(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     plan = models.ForeignKey(SubscriptionPlan, on_delete=models.SET_NULL, null=True)
+    plans = models.ForeignKey(Plans, on_delete=models.SET_NULL, null=True)
     customer_id = models.CharField(max_length=255)
     subscription_id = models.CharField(max_length=255)
     status = models.CharField(max_length=50)  # active, incomplete, canceled, etc.

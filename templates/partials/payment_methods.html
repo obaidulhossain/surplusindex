@@ -1,0 +1,11 @@
+{% for pm in payment_methods %}
+<label>
+    <input type="radio" name="payment_method" value="{{ pm.id }}">
+    **** {{ pm.card.last4 }} ({{ pm.card.brand }})
+</label><br>
+{% endfor %}
+
+<label>
+    <input type="radio" name="payment_method" value="new">
+    Use New Card
+</label>

@@ -31,11 +31,16 @@ class SubscriptionPlanAdmin(admin.ModelAdmin):
     list_filter = ("active", "interval")
     search_fields = ("name", "price_id", "stripe_product_id")
 
+@admin.register(Plans)
+class PlansAdmin(admin.ModelAdmin):
+    list_display = ("name", "state", "sale_type", "surplus_type", "price", "interval", "active")
+    list_filter = ("name", "state", "sale_type", "surplus_type", "price", "interval", "active")
+    search_fields = ("name", "state", "sale_type", "surplus_type", "price", "interval", "active","price_id", "stripe_product_id")
 
 @admin.register(StripeSubscription)
 class StripeSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('created_at','current_period_end',"user", "plan", "status", "current_period_end", "created_at")
-    list_filter = ("status", "plan")
+    list_display = ('created_at','current_period_end',"user", "plans", "status", "current_period_end", "created_at")
+    list_filter = ("status", "plans")
     search_fields = ("user__username", "subscription_id", "customer_id")
 
 

@@ -11,6 +11,10 @@ urlpatterns = [
     path('export-usage/<int:usage_id>/', views.export_leads_from_usage, name='export_usage_leads'),
 
     path('subscriptions/',views.userSubscription, name='subscriptions'),
+    path("subscriptions/get-payment-options/",views.get_payment_options,name="get_payment_options"),
+    path("subscriptions/create/",views.create_subscription,name="create_subscription"),
+
+
     path('checkout/', views.checkout, name='checkout'),
     path('stripe_webhook/', views.stripe_webhook, name='stripe_webhook'),
     

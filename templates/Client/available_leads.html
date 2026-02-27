@@ -158,7 +158,7 @@ Available Leads
                 <input type="hidden" name="ps_min" value={{psmin}}>
                 <input type="hidden" name="vs_min" value={{vsmin}}>
                 <div class="action-item">
-                    <button class="button" type="submit" formtarget="blank" formaction="{% url 'subscriptions' %}">Buy Credits</br>Available: {{ user_detail.Total_credits }}</button>
+                    <button class="button" type="submit" formtarget="blank" formaction="{% url 'dashboard' %}">Buy Credits</br>Available: {{ user_detail.Total_credits }}</button>
                 </div>
                 <div class="action-item">
                     <button class="button" id="archive-button" data-requires-selection type="submit" onclick="return confirmAddToMyLeads()">
