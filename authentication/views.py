@@ -235,9 +235,7 @@ def LoginAuthenticate(request):
                             return redirect('automate')
                         else:
                             return redirect('dashboard')
-                        
                     else:
-                            
                         messages.error(request,'Invalid Credentials')
                         return redirect('homepage')
                 else:
