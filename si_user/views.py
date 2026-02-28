@@ -630,14 +630,6 @@ def stripe_webhook(request):
             )
 
         else:
-            # Pay-as-you-go mapping
-            # price_map = {
-            #     os.getenv("TEN_LEADS"): 10,
-            #     os.getenv("FIFTY_LEADS"): 50,
-            #     os.getenv("HUNDRED_LEADS"): 100,
-            #     os.getenv("THREEHUNDRED_LEADS"): 300
-            # }
-            # num_leads = price_map.get(price_id, 0)
             sub_instance = SubscriptionPlan.objects.get(price_id=price_id)
             num_leads = int(sub_instance.lead_number)
             
@@ -662,65 +654,7 @@ def stripe_webhook(request):
                 user_detail.save()
                 logger.info(f"Updated credits for {user.username} (+{num_leads} leads)")
 
-    # elif event_type in ("invoice.payment_succeeded", "invoice.paid", "invoice_payment.paid"):
-    #     invoice_id = data_object["id"]
-    #     subscription_id = data_object.get("subscription")
-    #     amount_paid = data_object.get("amount_paid", 0) / 100
-    #     currency = data_object.get("currency")
-    #     status = "active"
 
-    #     # Update subscription period
-    #     period_end = None
-    #     lines = data_object.get("lines", {}).get("data", [])
-    #     if lines and "period" in lines[0]:
-    #         period_end = datetime.fromtimestamp(lines[0]["period"]["end"])
-
-    #     update_subscription(subscription_id, status=status, period_end=period_end)
-
-    #     # Update transaction
-    #     try:
-    #         sub = StripeSubscription.objects.get(subscription_id=subscription_id)
-    #         create_or_update_transaction(
-    #             user=sub.user,
-    #             amount=amount_paid,
-    #             currency=currency,
-    #             status=status,
-    #             source_type="subscription",
-    #             stripe_ids={
-    #                 "customer": data_object.get("customer"),
-    #                 "checkout_id": None,
-    #                 "subscription_id": subscription_id,
-    #                 "invoice_id": invoice_id
-    #             }
-    #         )
-    #     except StripeSubscription.DoesNotExist:
-    #         logger.warning(f"Subscription {subscription_id} not found for invoice {invoice_id}")
-
-    # elif event_type == "invoice.payment_failed":
-    #     invoice_id = data_object["id"]
-    #     subscription_id = data_object.get("subscription")
-    #     status = "failed"
-
-    #     update_subscription(subscription_id, status=status)
-
-    #     try:
-    #         sub = StripeSubscription.objects.get(subscription_id=subscription_id)
-    #         create_or_update_transaction(
-    #             user=sub.user,
-    #             amount=data_object.get("amount_due", 0) / 100,
-    #             currency=data_object.get("currency", "usd"),
-    #             status=status,
-    #             source_type="subscription",
-    #             stripe_ids={
-    #                 "customer": data_object.get("customer"),
-    #                 "checkout_id": None,
-    #                 "subscription_id": subscription_id,
-    #                 "invoice_id": invoice_id
-    #             }
-    #         )
-    #     except StripeSubscription.DoesNotExist:
-    #         logger.warning(f"Subscription {subscription_id} not found for failed invoice {invoice_id}")
-    
     elif event_type == "customer.subscription.updated":
         sub_data = data
         period_end = datetime.fromtimestamp(sub_data["current_period_end"]) if sub_data.get("current_period_end") else None

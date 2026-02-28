@@ -74,6 +74,7 @@ h6 {
     grid-template-columns: repeat(3, 1fr);
 }
 
+
 .state-container {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -205,16 +206,16 @@ h6 {
 
 .grid {
     /* flex: 1 1 33%; */
-    background-color: #0000002b;
+    background-color: #0000005e;
     border-radius: 15px;
-    border: 1px solid #86868638;
+    border: 1px solid #ffffff6b;
     padding: 15px;
     margin: 20px 15px;
 }
 
 .grid span {
     padding: 2px 10px 6px 10px;
-    background-color: #243043;
+    background-color: #0b1b32;
     border-radius: 8px;
 }
 
@@ -244,51 +245,233 @@ h6 {
 
 }
 
-/* ===============================
-   PROCESSING OVERLAY
-=================================*/
+.highlighted {
+    background-color: #404c59;
+    margin: 20px;
+    border: 1px solid lightslategrey;
+    border-radius: 15px;
+    padding: 20px;
+}
 
-.processing-overlay {
+.h-row {
+    margin: 5px 0px;
+    padding: 5px 0px;
+}
+
+
+/* automate modal */
+
+/* subscripton payment modal start */
+/* ===== Overlay ===== */
+.modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
-    display: none;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(6px);
+    display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 3000;
+    z-index: 9999;
+    animation: fadeIn 0.25s ease;
 }
 
-.processing-box {
-    background: white;
-    padding: 30px 40px;
-    border-radius: 16px;
+/* ===== Modal Card ===== */
+.modal-card {
+    width: 480px;
+    max-width: 95%;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: scaleIn 0.25s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ===== Header ===== */
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 5px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #0e2355;
+}
+
+/* Close Button */
+.close-btn {
+    font-size: 22px;
+    cursor: pointer;
+    color: #dae2ec;
+    transition: 0.2s ease;
+    border: 1px solid black;
+    width: 25px;
+    height: 25px;
     text-align: center;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    border-radius: 20px;
+    background-color: darkslategrey;
+    text-box-trim: trim-both;
 }
 
-.processing-box p {
+.close-btn:hover {
+    color: #ef4444;
+}
+
+/* ===== Body ===== */
+.modal-body {
+    padding: 24px;
+    color: black;
+    background-color: whitesmoke;
+}
+
+.modal-body input[type="radio"] {
+    width: 20px;
+    height: 20px;
+}
+
+.modal-body label {
+    margin: 10px;
+}
+
+/* Plan Summary Box */
+.plan-summary {
+    background: #f8fafc;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+}
+
+.plan-summary h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.plan-summary p {
+    margin: 5px 0 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* Stripe Card Wrapper */
+#card-wrapper {
     margin-top: 15px;
-    font-size: 15px;
+}
+
+#card-wrapper label {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #181d25;
+}
+
+#card-element {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+#card-element:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Error Box */
+.error-box {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    display: none;
+}
+
+/* ===== Footer ===== */
+.modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Cancel Button */
+.btn-cancel {
+    background: #f1f5f9;
+    color: #334155;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
     font-weight: 500;
+    transition: 0.2s ease;
 }
 
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #e5e7eb;
-    border-top: 4px solid #111827;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: auto;
+.btn-cancel:hover {
+    background: #e2e8f0;
 }
 
-@keyframes spin {
+/* Confirm Button */
+.btn-confirm {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+}
+
+/* Disabled State */
+.btn-confirm:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
     to {
-        transform: rotate(360deg);
+        opacity: 1;
     }
 }
 
-/* automate payment modal end */
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* automate modal end */
 
 
 @media (max-width: 1000px) {

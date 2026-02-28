@@ -25,8 +25,6 @@ def Automate(request):
     p_Ultimate = SubscriptionPlan.objects.get(name__iexact="Ultimate")
     if pending_automation:
         automation = pending_automation.first()
-    elif active_automation:
-        automation = active_automation.first()
     else:
         automation = Automation.objects.create(client = request.user)
     
@@ -34,6 +32,7 @@ def Automate(request):
     context={
         "states":states,
         "automation":automation,
+        "active_automation":active_automation,
         "p_Starter":p_Starter,
         "p_Growth":p_Growth,
         "p_Professional":p_Professional,
