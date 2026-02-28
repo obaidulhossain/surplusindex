@@ -112,6 +112,10 @@ def update_subscription(request, pk):
             try:
                 subscription = SubscriptionPlan.objects.get(pk=sub_id)
                 automation.subscription = subscription
+                automation.name = subscription.name
+                automation.price_amount = subscription.amount
+                automation.price_id = subscription.price_id
+                automation.description = subscription.description
                 automation.save()
                 return JsonResponse({"success": True})
             except SubscriptionPlan.DoesNotExist:
