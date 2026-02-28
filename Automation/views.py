@@ -5,14 +5,21 @@ import json
 from django.http import JsonResponse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-
 from AllSettings.models import Coverage
 from django.views.decorators.csrf import csrf_exempt
 from authentication.decorators import card_required
 from .services.stripe_subscription_service import StripeSubscriptionService
 from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
+from authentication.decorators import allowed_users
 stripe.api_key = settings.STRIPE_SECRET_KEY
-# Create your views here.
+
+@allowed_users(['admin'])
+@login_required(login_url="login")
+def AdminAutomation(request):
+    return render(request, "Automation/admin_automation.html")
+
+
 @card_required
 def Automate(request):
     states = Coverage.objects.filter(active=True).order_by("state")
@@ -151,7 +158,6 @@ def update_automation_setting(request):
         return JsonResponse({"success": True})
 
     return JsonResponse({"success": False})
-
 
 @login_required
 def get_payment_options(request):

@@ -4,6 +4,7 @@ from . import views
 
 urlpatterns = [
     path('', views.Automate, name="automate"),
+    path('admin_automation/', views.AdminAutomation, name="admin_automation"),
     # path("direct-subscribe/", views.direct_subscribe, name="direct-subscribe"),
     path("update/<int:pk>/", views.update_automation_field),
     path("update-state/<int:pk>/", views.update_automation_state),
