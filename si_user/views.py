@@ -553,6 +553,7 @@ def stripe_webhook(request):
                     automation.enrolled_stripe_subscrption = subscription_id
                     automation.expiration = period_end if period_end and event_type != "invoice.payment_failed" else automation.expiration
                     automation.status=Automation.ACTIVE if event_type != "invoice.payment_failed" else Automation.PENDING
+                    automation.name = subscription.OBJECT_NAME
                     automation.save()
                     if event_type != "invoice.payment_failed":
                         logger.info(f"Payment Successful | Automation id: {automation_id} (updated)")

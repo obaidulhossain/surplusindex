@@ -231,7 +231,7 @@ def LoginAuthenticate(request):
                     if active_user:
                         auth.login(request, active_user)
                         messages.success(request, 'Welcome back!')
-                        if "clients" in user.groups.all():
+                        if user.groups.filter(name="clients").exists():
                             return redirect('automate')
                         else:
                             return redirect('dashboard')
