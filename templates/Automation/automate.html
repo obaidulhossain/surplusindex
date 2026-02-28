@@ -4,7 +4,7 @@
 {% load custom_filters %}
 {% block scripts %}<script src="https://js.stripe.com/v3/"></script>{% endblock %}
 {% block content%}
-<link href="{% static 'css/client_interface.css' %}" rel="stylesheet">
+{% comment %} <link href="{% static 'css/client_interface.css' %}" rel="stylesheet"> {% endcomment %}
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link href="{% static 'css/automate.css' %}" rel="stylesheet">
 {% if active_automation %}
@@ -18,7 +18,12 @@
         <div class="h-row"><strong>Surplus:</strong> {% if active.postforeclosure %}<span>Post Foreclosure</span>{% endif %} {% if active.verified %}<span>Verified</span>{% endif %}</div>
         <div class="h-row"><strong>Validity:</strong> <span>{{active.expiration|date:"m/d/Y"}}</span></div>
         <div class="h-row"><strong>Update Interval:</strong> <span>{{active.update_interval}}</span></div>
-        <button>Manage</button>
+        <form method="POST" action="{% url "manage_automation" %}">
+        {% csrf_token %}
+            <input type="hidden" name="automation_id" value="{{ active.id }}">
+            <button type="submit">Manage</button>
+        </form>
+        {% comment %} <button>Manage</button> {% endcomment %}
         {% comment %} <button class="enroll-btn" data-plan-id="{{ active.id }}" data-price-id="{{ active.price_id }}" data-plan-name="{{ active.name }}" data-price="{{ active.price }}">Enroll Now</button> {% endcomment %}
     </div>
     

@@ -662,8 +662,15 @@ def stripe_webhook(request):
         update_subscription(sub_data.get("id"), status=sub_data.get("status"), period_end=period_end)
 
     elif event_type == "customer.subscription.deleted":
-        sub_data = data
-        update_subscription(sub_data.get("id"), status="canceled")
+        subscription_id = data.get("id") or data.get("subscription")
+        logger.info(f"⚡Subscription : ({subscription_id}) Deleting in progress")
+        automation = Automation.objects.filter(enrolled_stripe_subscrption=subscription_id).first()
+        if automation:
+            automation.status = Automation.CLOSED
+            automation.save()
+            logger.info(f"⚡Successfuly updated {automation.id} with subscription ({subscription_id})")
+        else:
+            logger.info(f"⚡Automation instance can not be located")
 
     else:
         logger.info(f"Unhandled event type: {event_type}")

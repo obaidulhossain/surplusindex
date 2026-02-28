@@ -41,6 +41,17 @@ def Automate(request):
     }
     return render(request,"Automation/automate.html",context)
 
+def ManageAutomation(request):
+    params = request.POST if request.method == "POST" else request.GET
+    automation_id = params.get("automation_id")
+    automation = Automation.objects.get(pk=automation_id)
+    states = Coverage.objects.filter(active=True).order_by("state")
+    context = {
+        "automation":automation,
+        "states":states,
+    }
+    return render(request,"Automation/manage_automations.html",context)
+
 @csrf_exempt
 def update_automation_field(request, pk):
     if request.method != "POST":
@@ -123,7 +134,23 @@ def update_subscription(request, pk):
     except Automation.DoesNotExist:
         return JsonResponse({"error": "Not found"}, status=404)
 
+@login_required
+def update_automation_setting(request):
+    data = json.loads(request.body)
+    field = data.get("field")
+    value = data.get("value")
 
+    automation = Automation.objects.get(
+        client=request.user,
+        status=Automation.ACTIVE
+    )
+
+    if field in ["auto_renew", "renew_when_expired", "renew_when_limit"]:
+        setattr(automation, field, value)
+        automation.save()
+        return JsonResponse({"success": True})
+
+    return JsonResponse({"success": False})
 
 
 @login_required
@@ -176,143 +203,26 @@ def create_subscription(request):
         "error": "Payment failed. Please try again."
     })
 
+@login_required
+def stop_automation(request):
+    data = json.loads(request.body)
+    subscription_id = data.get("subscription_id")
 
+    try:
+        # Cancel Stripe subscription
+        stripe.Subscription.delete(subscription_id)
 
-# @login_required
-# def pay_automation(request, pk):
-#     if request.method != "POST":
-#         return JsonResponse({"error": "POST only"}, status=400)
+        automation = Automation.objects.get(
+            client=request.user,
+            enrolled_stripe_subscrption=subscription_id
+        )
 
-#     try:
-#         automation = Automation.objects.get(pk=pk, client=request.user)
+        automation.status = Automation.PENDING
+        automation.payment_status = Automation.FAILED
+        automation.auto_renew = False
+        automation.save()
 
-#         if not automation.subscription:
-#             return JsonResponse({"error": "Select a plan first"})
+        return JsonResponse({"success": True})
 
-#         # Get Stripe customer id (you already store this)
-#         customer_id = request.user.credits.stripe_customer_id
-
-#         # Create subscription
-#         subscription = stripe.Subscription.create(
-#             customer=customer_id,
-#             items=[{
-#                 "price": automation.subscription.price_id
-#             }],
-#             expand=["latest_invoice.payment_intent"],
-#             metadata={
-#                 "automation_id": automation.id,
-#                 "user_id": request.user.id,
-#                 "product_type": "automation"
-#             }
-#         )
-
-#         # Save stripe subscription id
-#         automation.name = automation.subscription.name
-#         automation.save()
-
-#         return JsonResponse({"success": True})
-
-#     except Exception as e:
-#         return JsonResponse({"error": str(e)})
-
-# @login_required
-# def pay_automation(request, pk):
-#     if request.method != "POST":
-#         return JsonResponse({"error": "POST only"}, status=400)
-
-#     try:
-#         data = json.loads(request.body)
-#         payment_method_id = data.get("payment_method_id")
-
-#         automation = Automation.objects.get(pk=pk, client=request.user)
-
-#         if not automation.subscription:
-#             return JsonResponse({"success": False, "error": "Select a plan first"})
-
-#         customer_id = request.user.credits.stripe_customer_id
-
-#         if not payment_method_id:
-#             return JsonResponse({"success": False, "error": "No payment method provided"})
-
-#         # Attach payment method to customer (safe even if already attached)
-#         stripe.PaymentMethod.attach(
-#             payment_method_id,
-#             customer=customer_id
-#         )
-
-#         # OPTIONAL but recommended:
-#         # Set as default for future invoices
-#         stripe.Customer.modify(
-#             customer_id,
-#             invoice_settings={
-#                 "default_payment_method": payment_method_id
-#             }
-#         )
-
-#         # Create subscription using selected payment method
-#         subscription = stripe.Subscription.create(
-#             customer=customer_id,
-#             items=[{
-#                 "price": automation.subscription.price_id
-#             }],
-#             default_payment_method=payment_method_id,
-#             expand=["latest_invoice.payment_intent"],
-#             metadata={
-#                 "automation_id": automation.id,
-#                 "user_id": request.user.id,
-#                 "product_type": "automation"
-#             }
-#         )
-
-#         # Check if payment requires action (SCA)
-#         payment_intent = subscription["latest_invoice"]["payment_intent"]
-
-#         if payment_intent and payment_intent["status"] == "requires_action":
-#             return JsonResponse({
-#                 "success": False,
-#                 "requires_action": True,
-#                 "client_secret": payment_intent["client_secret"]
-#             })
-
-#         # Save subscription name (webhook still handles activation)
-#         automation.name = automation.subscription.name
-#         automation.save()
-
-#         return JsonResponse({"success": True})
-
-#     except stripe.error.CardError as e:
-#         return JsonResponse({"success": False, "error": str(e)})
-#     except Exception as e:
-#         return JsonResponse({"success": False, "error": str(e)})
-    
-
-
-# @login_required
-# def list_payment_methods(request):
-#     try:
-#         customer_id = request.user.credits.stripe_customer_id
-
-#         payment_methods = stripe.PaymentMethod.list(
-#             customer=customer_id,
-#             type="card"
-#         )
-
-#         customer = stripe.Customer.retrieve(customer_id)
-#         default_pm = customer.invoice_settings.default_payment_method
-
-#         methods = []
-
-#         for pm in payment_methods.data:
-#             methods.append({
-#                 "id": pm.id,
-#                 "brand": pm.card.brand,
-#                 "last4": pm.card.last4,
-#                 "exp_month": pm.card.exp_month,
-#                 "exp_year": pm.card.exp_year,
-#                 "is_default": pm.id == default_pm
-#             })
-
-#         return JsonResponse({"methods": methods})
-
-#     except Exception as e:
-#         return JsonResponse({"methods": [], "error": str(e)})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})

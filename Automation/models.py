@@ -45,3 +45,7 @@ class Automation(OperationStat):
     description = models.TextField(null=True, blank=True)
     
     update_interval = models.CharField(max_length=255, null=True,blank=True)
+
+    auto_renew = models.BooleanField(default=True)
+    renew_when_expired = models.BooleanField(default=False)
+    renew_when_limit = models.BooleanField(default=False)

@@ -206,9 +206,9 @@ h6 {
 
 .grid {
     /* flex: 1 1 33%; */
-    background-color: #0000005e;
+    background: linear-gradient(135deg, #044167, #052e48de);
     border-radius: 15px;
-    border: 1px solid #ffffff6b;
+    border: 3px solid #090909;
     padding: 15px;
     margin: 20px 15px;
 }
@@ -234,28 +234,78 @@ h6 {
     font-size: 20px;
     transition: ease-in-out 300ms;
     font-weight: 600;
-
-
 }
 
 .action button:hover {
-
     background-color: lightgreen;
     transition: ease-in-out 300ms;
-
 }
 
 .highlighted {
-    background-color: #404c59;
-    margin: 20px;
-    border: 1px solid lightslategrey;
+    background-color: #041322ab;
+    margin-bottom: 50px;
+    border: 1px solid #3b3d40;
     border-radius: 15px;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
 .h-row {
     margin: 5px 0px;
     padding: 5px 0px;
+}
+
+.grid button {
+    border: 1px solid #86868638;
+    margin-top: 20px;
+    background-color: #00588f;
+    border-radius: 5px;
+    height: 45px;
+    width: 100%;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 500;
+    float: right;
+    transition: ease-in-out 300ms;
+}
+
+.grid button:hover {
+    background-color: #0f7ec2;
+    transition: ease-in-out 300ms;
+}
+
+.automation-buttons {
+    display: flex;
+    /* arrange children in a row */
+    gap: 10px;
+    /* space between buttons */
+    justify-content: flex-end;
+    /* align all buttons to the right */
+    align-items: center;
+    /* vertically center if buttons are different heights */
+
+}
+
+.btn-stop-automation {
+    background: #dc3545;
+}
+
+.btn-stop-automation:hover {
+    opacity: 0.9;
+}
+
+.other-btn {
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.other-btn:hover {
+    opacity: 0.8;
 }
 
 

@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Automate Lead Generation{% endblock title %}
+{% load static %}
+{% load custom_filters %}
+{% block scripts %}<script src="https://js.stripe.com/v3/"></script>{% endblock %}
+{% block content%}
+
+{% comment %} <link href="{% static 'css/client_interface.css' %}" rel="stylesheet"> {% endcomment %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="{% static 'css/automate.css' %}" rel="stylesheet">
+<div class="highlighted">
+    <h2>⚙️ Automation Settings</h2>
+    <div class="automate-section" {% if automation.status == "closed" %} style="opacity:.5;" {% endif %}>
+        <h5>Renew Options</h5>
+        <div class="setting-item ">
+            <label>
+                <input type="checkbox" id="auto-renew-toggle"
+                    {% if automation.auto_renew %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+                Renew Automatically
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <label>
+                <input type="checkbox" id="renew-expired-toggle"
+                    {% if automation.renew_when_expired %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+                Renew When Expired
+            </label>
+        </div>
+
+        <div class="setting-item">
+            <label>
+                <input type="checkbox" id="renew-limit-toggle"
+                    {% if automation.renew_when_limit %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+                Renew When Lead Limit Reaches
+            </label>
+        </div>
+    </div>
+    <hr>
+    <div class="automation-buttons">
+        <button class="btn-stop-automation other-btn"
+                data-subscription-id="{{ automation.enrolled_stripe_subscrption }}"
+                {% if automation.status == "closed" %}disabled{% endif %}
+                {% if automation.status == "closed" %} style="opacity:.7;" {% endif %}>
+                {% if automation.status == "closed" %}Automation Stopped{% else %}❌ Stop Automation{% endif %}
+
+        </button>
+        {% if automation.status == "closed" %}
+        <form method="POST" action="{% url "automate" %}">
+            {% csrf_token %}
+            <button type="submit" class="other-btn" style="background-color:#00588f">Set up new Automation</button>
+        </form>
+        {% endif %}
+    </div>
+    
+</div>
+<div class="automate-section" data-id="{{ automation.id }}"{% if automation.status == "closed" %} style="opacity:.5;" {% endif %}>
+    <h5>Select States from Active Coverage</h5>
+    <div class="state-container">
+        {% for s in states %}
+        <div class="state">
+            <input type="checkbox" value="{{s.state|upper}}" onchange="toggleState(this)"{% if s.state|upper in automation.states %}checked{% endif %}{% if automation.status == "closed" %}disabled{% endif %}>
+            <label>{{s.state}}</label>
+            
+        </div>
+        {% endfor %}
+    </div>
+    <div class="option-container">
+        <div class="option">
+            <h5>Foreclosure Type</h5>
+            <input type="checkbox" value="tax" onchange="updateAutomationField('tax', this.checked)"{% if automation.tax %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+            <label>Tax Foreclosure</label></br>
+            <input type="checkbox" value="mortgage" onchange="updateAutomationField('mortgage', this.checked)"{% if automation.mortgage %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+            <label>Mortgage Foreclosure</label>
+        </div>
+        <div class="option">
+            <h5>Surplus Type</h5>
+            <input type="checkbox" value="fund available" onchange="updateAutomationField('verified', this.checked)"{% if automation.verified %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+            <label>Verified (Court Record)</label></br>
+            <input type="checkbox" value="possible surplus" onchange="updateAutomationField('postforeclosure', this.checked)"{% if automation.postforeclosure %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+            <label>Approximate (Calculated)</label>
+        </div>
+        
+        <div class="option">
+            <h5>Minimum Surplus</h5>
+            <input type="radio" id="fifteen" value="15000" name="min-surplus" onchange="updateAutomationField('surplus_capped', this.value)" {% if automation.surplus_capped == 15000 %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+            <label>$15,000.00</label></br>
+            <input type="radio" id="thirty" value="30000" name="min-surplus" onchange="updateAutomationField('surplus_capped', this.value)" {% if automation.surplus_capped == 30000 %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+            <label>$30,000.00</label>
+        </div>
+        
+
+    </div>
+</div>
+
+<script>
+    function updateSetting(field, value) {
+        fetch("/Automation/manage_automation/update-setting/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken
+            },
+            body: JSON.stringify({
+                field: field,
+                value: value
+            })
+        });
+    }
+    document.getElementById("auto-renew-toggle").addEventListener("change", function () {
+        updateSetting("auto_renew", this.checked);
+    });
+
+    document.getElementById("renew-expired-toggle").addEventListener("change", function () {
+        updateSetting("renew_when_expired", this.checked);
+    });
+
+    document.getElementById("renew-limit-toggle").addEventListener("change", function () {
+        updateSetting("renew_when_limit", this.checked);
+    });
+
+    document.querySelector(".btn-stop-automation").addEventListener("click", async function () {
+        if (!confirm("Are you sure you want to stop this automation?")) return;
+
+        const subscriptionId = this.dataset.subscriptionId;
+
+        const response = await fetch("/Automation/manage_automation/stop/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrftoken
+            },
+            body: JSON.stringify({ subscription_id: subscriptionId })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert("Automation stopped successfully.");
+            location.reload();
+        } else {
+            alert("Something went wrong.");
+        }
+    });
+</script>
+
+<script src="{% static 'js/automate.js' %}"></script>
+{% endblock content%}
