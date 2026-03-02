@@ -34,7 +34,7 @@ class Automation(OperationStat):
     surplus_capped = models.DecimalField(decimal_places=2, max_digits=15, null=True, blank=True, default=15000)
     subscription = models.ForeignKey(SubscriptionPlan, on_delete=models.CASCADE, null=True, blank=True)
     enrolled_stripe_subscrption = models.CharField(max_length=255, null=True, blank=True)
-    transaction = models.ManyToManyField(UserTransactions, null=True, blank=True)
+    transaction = models.ManyToManyField(UserTransactions)
     expiration = models.DateField(null=True, blank=True)
     payment_status = models.CharField(max_length=50, choices=PMTSTATUS, default='unpaid')
     status = models.CharField(max_length=50, choices=STATUS, default='pending')
