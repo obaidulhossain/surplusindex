@@ -23,8 +23,6 @@
             <input type="hidden" name="automation_id" value="{{ active.id }}">
             <button type="submit">Manage</button>
         </form>
-        {% comment %} <button>Manage</button> {% endcomment %}
-        {% comment %} <button class="enroll-btn" data-plan-id="{{ active.id }}" data-price-id="{{ active.price_id }}" data-plan-name="{{ active.name }}" data-price="{{ active.price }}">Enroll Now</button> {% endcomment %}
     </div>
     
     {% endfor %}
@@ -178,15 +176,43 @@
 
     document.querySelectorAll(".enroll-btn").forEach(btn => {
         btn.addEventListener("click", async function() {
+            let planID = this.dataset.planId
+            let finalPriceId
+            let planName
+            let planDescription
+            const getPriceIds = await fetch(`get-prices/?plan_id=${planID}`);
+            const PriceData = await getPriceIds.json();
 
-            selectedPriceId = this.dataset.priceId;
 
-            document.getElementById("modalPlanName").innerText =
-                this.dataset.planName;
+            //let basePriceId = this.dataset.priceId;
+            //let finalPriceId = basePriceId;
+            //const installmentResponse = await fetch(`check-installments/?price_id=${basePriceId}`);
+            //const installmentData = await installmentResponse.json();
+            //console.log("Installment data:", installmentData);
+            //console.log("Has installments?", installmentData.has_installments);
 
-            document.getElementById("modalPlanPrice").innerText =
-                "$" + this.dataset.price + "/month";
 
+            if (PriceData.has_installments) {
+                console.log("Entering installment block");
+                // Show installment selection modal/dialog
+                const selectedInstallment = await showInstallmentDialog(PriceData.options);
+
+                if (!selectedInstallment) {
+                    return; // user cancelled
+                }
+
+                finalPriceId = selectedInstallment.price_id; // override
+                planName = selectedInstallment.name;
+                planDescription = selectedInstallment.description;
+            } else {
+                finalPriceId = PriceData.no_installment_price_id;
+                planName = PriceData.planName;
+                planDescription = PriceData.planDescription;
+            }
+            selectedPriceId = finalPriceId;
+
+            document.getElementById("modalPlanName").innerText = planName;
+            document.getElementById("modalPlanPrice").innerText = planDescription;
             openModal();
 
             const response = await fetch("{% url 'get_payment_option' %}");
@@ -201,6 +227,77 @@
             cardElement.mount("#card-element");
         });
     });
+    function showInstallmentDialog(options) {
+        return new Promise((resolve) => {
+
+            // Create overlay
+            const overlay = document.createElement("div");
+            overlay.style.position = "fixed";
+            overlay.style.top = "0";
+            overlay.style.left = "0";
+            overlay.style.width = "100%";
+            overlay.style.height = "100%";
+            overlay.style.background = "rgba(0,0,0,0.5)";
+            overlay.style.display = "flex";
+            overlay.style.alignItems = "center";
+            overlay.style.justifyContent = "center";
+            overlay.style.zIndex = "9999";
+
+            // Create box
+            const box = document.createElement("div");
+            box.style.background = "#fff";
+            box.style.padding = "20px";
+            box.style.borderRadius = "8px";
+            box.style.width = "350px";
+
+            let html = "<h4>Select Payment Option</h4>";
+
+            options.forEach(opt => {
+                html += `
+                    <label style="display:block; margin-bottom:8px;">
+                        <input type="radio" name="installment_choice"
+                        value="${opt.price_id}"
+                        data-id="${opt.id}"
+                        data-name="${opt.planName}"
+                        data-description="${opt.planDescription}">
+                        ${opt.label}
+                    </label>
+                `;
+            });
+
+            html += `
+                <button id="installConfirm" style="margin-top:10px;">Continue</button>
+                <button id="installCancel" style="margin-left:10px;">Cancel</button>
+            `;
+
+            box.innerHTML = html;
+            overlay.appendChild(box);
+            document.body.appendChild(overlay);
+
+            document.getElementById("installConfirm").onclick = function () {
+                const selected = document.querySelector("input[name='installment_choice']:checked");
+                if (!selected) {
+                    resolve(null);
+                    return;
+                }
+                updateSubscription(selected.dataset.id, true);
+                const planName = selected.dataset.name;
+                const planDescription = selected.dataset.description;
+                document.body.removeChild(overlay);
+                //resolve(selected ? selected.value : null);
+                resolve({
+                    price_id: selected.value,
+                    name: planName,
+                    description:planDescription,
+                });
+            };
+
+            document.getElementById("installCancel").onclick = function () {
+                document.body.removeChild(overlay);
+                resolve(null);
+            };
+        });
+    }
 
     document.getElementById("confirmSubscription")
     .addEventListener("click", async function() {

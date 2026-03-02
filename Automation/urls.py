@@ -12,6 +12,9 @@ urlpatterns = [
     # path("pay/<int:pk>/", views.pay_automation, name="pay_automation"),
     # path("billing/payment-methods/", views.list_payment_methods),
     path("get-payment-options/",views.get_payment_options,name="get_payment_option"),
+    path("get-prices/", views.getPrices),
+
+    path("check-installments/", views.check_installments),
     path("create/",views.create_subscription,name="create_automation"),
 
     path('manage_automation', views.ManageAutomation, name="manage_automation"),

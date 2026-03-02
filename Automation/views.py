@@ -126,6 +126,7 @@ def update_subscription(request, pk):
         sub_id = data.get("sub_id")
         checked = data.get("checked")
         automation = Automation.objects.get(pk=pk)
+        print(f"sub id: {sub_id}")
         if checked:
             try:
                 subscription = SubscriptionPlan.objects.get(pk=sub_id)
@@ -175,6 +176,53 @@ def get_payment_options(request):
     return JsonResponse({
         "html": html,
         "setup_intent": setup_intent.client_secret
+    })
+
+def getPrices(request):
+    planID = request.GET.get("plan_id")
+    automation = Automation.objects.get(pk=planID)
+    options = SubscriptionPlan.objects.filter(stripe_product_id = automation.subscription.stripe_product_id)
+    installment_options = []
+    no_installment_price_id = None
+    planName = None
+    planDescription = None
+    if options.count() > 1:
+        for price in options:
+            installment_options.append({
+                "id":price.pk,
+                "price_id": price.price_id,
+                "label": f"{price.name} - {price.amount}",
+                "planName" : price.name,
+                "planDescription" : price.amount,
+            })
+    else:
+        no_installment_price_id = automation.price_id
+        planName = automation.name
+        planDescription = automation.price_amount
+    return JsonResponse({
+        "has_installments" : bool(installment_options),
+        "options" : installment_options,
+        "no_installment_price_id" : no_installment_price_id,
+        "planName" : planName,
+        "planDescription" : planDescription,
+    })
+
+def check_installments(request):
+    price_id = request.GET.get("price_id")
+    current_plan = SubscriptionPlan.objects.get(price_id = price_id)
+    options = SubscriptionPlan.objects.filter(stripe_product_id = current_plan.stripe_product_id)
+    print(options)
+    installment_options = []
+    if options.count() > 1:
+        for price in options:
+            installment_options.append({
+                "price_id": price.price_id,
+                "label": f"{price.name} - {price.amount}"
+            })
+    print(installment_options)        
+    return JsonResponse({
+        "has_installments": bool(installment_options),
+        "options": installment_options
     })
 
 @login_required

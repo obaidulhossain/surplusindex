@@ -11,29 +11,55 @@
 <div class="highlighted">
     <h2>⚙️ Automation Settings</h2>
     <div class="automate-section" {% if automation.status == "closed" %} style="opacity:.5;" {% endif %}>
-        <h5>Renew Options</h5>
-        <div class="setting-item ">
-            <label>
-                <input type="checkbox" id="auto-renew-toggle"
-                    {% if automation.auto_renew %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
-                Renew Automatically
-            </label>
-        </div>
+        
+        <div class="container">
+            <div>
+                <h5>Renew Options</h5>
+                <div class="setting-item ">
+                    <label>
+                        <input type="checkbox" id="auto-renew-toggle"
+                            {% if automation.auto_renew %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+                        Renew Automatically
+                    </label>
+                </div>
 
-        <div class="setting-item">
-            <label>
-                <input type="checkbox" id="renew-expired-toggle"
-                    {% if automation.renew_when_expired %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
-                Renew When Expired
-            </label>
-        </div>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="renew-expired-toggle"
+                            {% if automation.renew_when_expired %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+                        Renew When Expired
+                    </label>
+                </div>
 
-        <div class="setting-item">
-            <label>
-                <input type="checkbox" id="renew-limit-toggle"
-                    {% if automation.renew_when_limit %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
-                Renew When Lead Limit Reaches
-            </label>
+                <div class="setting-item">
+                    <label>
+                        <input type="checkbox" id="renew-limit-toggle"
+                            {% if automation.renew_when_limit %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
+                        Renew When Lead Limit Reaches
+                    </label>
+                </div>
+            </div>
+            <div>
+                
+                <h5>Update Interval</h5>
+                <label>
+                    <input type="checkbox" checked disabled>
+                    {{automation.update_interval}}
+                </label>
+
+            </div>
+            <div>
+                <h5>Current Plan ( {{automation.get_status_display}} )</h5>
+                <label>
+                    <input type="checkbox" checked disabled>
+                    {{automation.subscription.name}} / ${{automation.price_amount}}
+                </label>
+                <h5>Expiration</h5>
+                <label>
+                    <input type="checkbox" checked disabled>
+                    {{automation.expiration|date:"m/d/Y"}}
+                </label>
+            </div>
         </div>
     </div>
     <hr>
