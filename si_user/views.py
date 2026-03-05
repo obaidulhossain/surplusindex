@@ -487,7 +487,7 @@ def stripe_webhook(request):
             logger.warning(f"Subscription {subscription_id} not found in DB")
 
     # --- Event Handlers ---
-    if event_type in ("invoice.payment_succeeded","invoice.payment_failed"):
+    if event_type in ("invoice.payment_succeeded","invoice_payment.paid","invoice.payment_failed"):
         logger.info(f"⚡{event_type} Trigerred, Processing Event")
         invoice_id = data["id"]
         invoice = None

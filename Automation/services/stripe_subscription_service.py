@@ -48,6 +48,15 @@ class StripeSubscriptionService:
             customer=self.customer_id,
             items=[{"price": price_id}],
             metadata=metadata or {},
+            payment_behavior="default_incomplete",
+            payment_settings={
+                "payment_method_options": {
+                    "card": {
+                        "request_three_d_secure": "automatic"
+                    }
+                },
+                "save_default_payment_method": "on_subscription",
+            },
             expand=["latest_invoice.payment_intent"],
         )
         payment_intent = subscription.latest_invoice.payment_intent

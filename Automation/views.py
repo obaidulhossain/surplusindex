@@ -244,14 +244,20 @@ def create_subscription(request):
 
     payment_intent = result["payment_intent"]
 
-    if payment_intent.status == "requires_action":
+    if payment_intent.status in ["requires_action", "requires_confirmation"]:
         return JsonResponse({
             "requires_action": True,
             "client_secret": payment_intent.client_secret
         })
-
     elif payment_intent.status == "succeeded":
         return JsonResponse({"success": True})
+    elif payment_intent.status == "requires_payment_method":
+        error_message = None
+        if payment_intent.last_payment_error:
+            error_message = payment_intent.last_payment_error.get("message")
+        return JsonResponse({
+            "error": error_message or "Your card was declined."
+        })
 
     return JsonResponse({
         "error": "Payment failed. Please try again."
