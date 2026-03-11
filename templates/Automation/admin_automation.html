@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %}Automate Lead Generation{% endblock title %}
+{% load static %}
+{% load custom_filters %}
+{% block scripts %}
+<script src="https://js.stripe.com/v3/"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="{% static 'css/automate.css' %}" rel="stylesheet">
+{% endblock %}
+{% block content%}
+<div style="display:block; justify-content:space-between;">
+    <div style="display:inline-block;">
+        <h1>Active Automations</h1>
+    </div>
+    <button onclick="runAutomation(this)" class="run-automation">🚀 Run Automation</button>
+</div>
+<div class="container" id="ActiveAutomations">
+{% for active in automations_active %}
+    <div class="grid" data-id="{{ active.id }}">
+        <h6>{{active.name}}</h6>
+        <div class="h-row"><strong>Sale Type:</strong> {% if active.tax %}<span>Tax</span>{% endif %} {% if active.mortgage %}<span>Mortgage</span>{% endif %}</div>
+        <div class="h-row">
+        <strong>Surplus: </strong>
+        {% if active.postforeclosure %}
+         <span {% if active.post_f_to_deliver.count == 0 %}class="alert-span"{% endif %}>Post Foreclosure ({{active.post_f_to_deliver.count}})</span>
+        {% endif %}
+        {% if active.verified %}
+         <span {% if active.verified_s_to_deliver.count == 0 %}class="alert-span"{% endif %}>Verified ({{active.verified_s_to_deliver.count}})</span>
+        {% endif %}</div>
+        <div class="h-row"><strong>Validity:</strong> <span>{{active.expiration|date:"m/d/Y"}}</span></div>
+        <div class="h-row"><strong>Update Interval:</strong> <span>{{active.update_interval}}</span></div>
+        <div class="h-row"><strong>Update Interval:</strong> <span>{{active.update_interval}}</span></div>
+        <form method="POST" action="{% url "admin_manage_automation" %}">
+        {% csrf_token %}
+            <input type="hidden" name="automation_id" value="{{ active.id }}">
+            <button type="submit">Manage</button>
+        </form>
+    </div>
+{% endfor %}
+</div>
+
+
+
+
+
+
+
+
+
+<script>
+function runAutomation(button){
+    const screen = document.getElementById("ActiveAutomations")
+    const btn = button;
+    // disable button and change opacity
+    btn.disabled = true;
+    btn.style.opacity = 0.7;
+    screen.style.opacity = 0.2;
+    btn.innerHTML = "Processing.";
+
+    fetch("{% url 'run_automation_delivery' %}",{
+        method:"POST",
+        headers:{
+            "X-CSRFToken":"{{ csrf_token }}"
+        }
+    })
+    .then(res=>res.json())
+    .then(data=>{
+        btn.disabled = false;
+        btn.innerHTML = "🚀 Run Automation";
+        btn.style.opacity = 1;
+        screen.style.opacity = 1;
+        alert(data.message);
+    });
+}
+</script>
+
+
+{% endblock content%}

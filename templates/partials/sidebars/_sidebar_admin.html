@@ -19,6 +19,21 @@
         </a>
     </li>
     <li class="sidebar-item">
+        <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#automation" aria-expanded="false" aria-controls="automation">
+            <i class="bi bi-rocket"></i>
+            <span>Automation</span>
+        </a>
+        <ul id="automation" class="sidebar-dropdown List-unstyled collapse" data-bs-parent="#sidebar">
+            <li class="sidebar-item child">
+                <a href="{% url 'admin_automation' %}" class="sidebar-link">
+                    <i class="bi bi-rocket-takeoff"></i>
+                    <span>Automations</span>
+                </a>
+            </li>
+            
+        </ul>
+    </li>
+    <li class="sidebar-item">
         <a href="#" class="sidebar-link has-dropdown collapsed" data-bs-toggle="collapse" data-bs-target="#support" aria-expanded="false" aria-controls="support">
             <i class="bi bi-person-raised-hand"></i>
             <span>Support</span>

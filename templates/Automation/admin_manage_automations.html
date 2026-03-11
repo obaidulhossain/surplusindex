@@ -10,7 +10,7 @@
 <link href="{% static 'css/automate.css' %}" rel="stylesheet">
 <div class="highlighted">
     <h2>⚙️ Automation Settings</h2>
-    <div class="automate-section"  data-id="{{ automation.id }}" {% if automation.status == "closed" %} style="opacity:.5;" {% endif %}>
+    <div class="automate-section" id="automation" data-automation-id="{{ automation.id }}" {% if automation.status == "closed" %} style="opacity:.5;" {% endif %}>
         
         <div class="container">
             <div>
@@ -114,86 +114,201 @@
             <input type="radio" id="thirty" value="30000" name="min-surplus" onchange="updateAutomationField('surplus_capped', this.value)" {% if automation.surplus_capped == 30000 %}checked{% endif %} {% if automation.status == "closed" %}disabled{% endif %}>
             <label>$30,000.00</label>
         </div>
-        
-
     </div>
 </div>
-<div class="grid-two">
-    <div class="highlighted" style="margin: 10px; max-height:600px;">
-        <h2>Delivered Lists</h2>
-        {% for d in deliveries %}
-        <div class="horizontal-blurb">
-            <h5>{{d.created_at}}</h5>
-            <table>
-                <thead>
-                    <tr>
-                    <th style="width:300px">List Name</th>
-                    <th style="width:300px">Leads Count</th>
-                    <th style="width:300px"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                <tr style="width:100%">
-                    <td style="width:30%">{{d.get_list_type_display}}</td>
-                    <td style="width:30%">{{d.data.count}}</td>
-                    <td style="width:30%"><button class="small-btn" onclick="DownloadList(this, {{d.id}})">Download</button></td>
+{% if automation.postforeclosure %}
+<div class="highlighted">
+    <h2>⭐⭐ Post Foreclosure Delivery Treshold - (<span id="post-selected-count">{{automation.post_f_to_deliver.count}}</span> of {{post_f_qs.count}})</h2>
+    <div class="table-wrapper">
+        <table class="responsive-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" disabled></th>
+                    <th>Updated</th>
+                    <th>State</th>
+                    <th>County</th>
+                    <th>Case Number</th>
+                    <th>Surplus</th>
+                    <th>Status</th>
+                    <th></th>
                 </tr>
-                </tbody>
-            </table>
-        </div>
-        {% endfor %}
+            </thead>
+            <tbody>
+            {% for post_f in post_f_qs %}
+                <tr {% if post_f.in_delivery %}class="highlight-row"{% endif %}>
+                    <td><input type="checkbox" class="post-deliver-checkbox" data-id="{{ post_f.id }}" {% if post_f.in_delivery %}checked{% endif %}></td>
+                    <td>{{post_f.changed_at|date:"m/d/Y"}}</td>
+                    <td>{{post_f.state}}</td>
+                    <td>{{post_f.county}}</td>
+                    <td>{{post_f.case_number}}</td>
+                    <td>{% if post_f.verified_surplus and not post_f.verified_surplus == 0 %}V {{post_f.verified_surplus|currency}}{% else %}P {{post_f.possible_surplus|currency}}{% endif %}</td>
+                    <td>{{post_f.get_surplus_status_display}}</td>
+                    <td></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
-    <div class="highlighted"style="margin: 10px; max-height:600px;">
-        <h2>Transactions</h2>
-        {% for t in transactions %}
-        <div class="horizontal-blurb">
-            <h5>{{t.created_at}}</h5>
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width:300px">Paid For</th>
-                        <th style="width:300px">Amount</th>
-                        <th style="width:300px"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr style="width:100%">
-                        <td style="width:30%">{{t.get_transaction_source_display}}</td>
-                        <td style="width:30%">{{t.amount|currency}}</td>
-                        <td style="width:30%"><button class="small-btn" onclick="downloadInvoice(this, '{{t.stripe_invoice_id}}')">Download Invoice</button></td>            
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        {% endfor %}
+    <hr>
+    <div class="automation-buttons">
+        <button class="other-btn" style="background-color:#00588f" onclick="DownloadAtmData(this, 'post_f', {{automation.id}})" {% if automation.post_f_to_deliver.count < 1 %}disabled{% endif %}>Download</button>
+        <button class="other-btn" style="background-color:#ab0000">Deliver</button>
     </div>
 </div>
+{% endif %}
+
+{% if automation.verified %}
+
+<div class="highlighted" style="max-height:600px;">
+    <h2>⭐⭐⭐ Verified Surplus Delivery Treshold - (<span id="verified-selected-count">{{automation.verified_s_to_deliver.count}}</span> of {{verified_s_qs.count}})</h2>
+    <div class="table-wrapper">
+        <table class="responsive-table">
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAll" disabled></th>
+                    <th>Updated</th>
+                    <th>State</th>
+                    <th>County</th>
+                    <th>Case Number</th>
+                    <th>Surplus</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for verified_s in verified_s_qs %}
+                <tr {% if verified_s.in_delivery %}class="highlight-row"{% endif %}>
+                    <td><input type="checkbox" class="verified-deliver-checkbox" data-id="{{ verified_s.id }}" {% if verified_s.in_delivery %}checked{% endif %}></td>
+                    <td>{{verified_s.changed_at|date:"m/d/Y"}}</td>
+                    <td>{{verified_s.state}}</td>
+                    <td>{{verified_s.county}}</td>
+                    <td>{{verified_s.case_number}}</td>
+                    <td>{% if verified_s.verified_surplus and not verified_s.verified_surplus == 0 %}V {{verified_s.verified_surplus|currency}}{% else %}P {{verified_s.possible_surplus|currency}}{% endif %}</td>
+                    <td>{{verified_s.get_surplus_status_display}}</td>
+                    <td></td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <hr>
+    <div class="automation-buttons">
+        <button id="download-verified-s" class="other-btn" style="background-color:#00588f" onclick="DownloadAtmData(this, 'verified_s', {{automation.id}})" {% if automation.verified_s_to_deliver.count < 1 %}disabled{% endif %}>Download</button>
+        <button class="other-btn" style="background-color:#ab0000">Deliver</button>
+    </div>
+</div>
+
+{% endif %}
 
 <script>
-    function DownloadList(button, delivery_id){
-        button.disabled = true;
-        button.style.opacity = "0.5";
-        const originalText = button.innerText;
-        button.innerText = "Downloading...";
-        window.location.href = `/Automation/manage_automation/download-data/${delivery_id}/`;
-        setTimeout(() => {
-            button.disabled = false;
-            button.style.opacity = "1";
-            button.innerText = originalText;
-        }, 10000);
-    }
-    function downloadInvoice(button, invoiceId){
-        button.disabled = true;
-        button.style.opacity = "0.5";
-        const originalText = button.innerText;
-        button.innerText = "Processing...";
-        window.location.href = `/Automation/manage_automation/download-invoice/${invoiceId}/`;
-        setTimeout(() => {
-            button.disabled = false;
-            button.style.opacity = "1";
-            button.innerText = originalText;
-        }, 10000);
-    }
+function DownloadAtmData(button, field, atm){
+    const btn = button;
+    // disable button and change opacity
+    btn.disabled = true;
+    btn.style.opacity = 0.2;
+    // construct URL with query parameters
+    const url = `{% url 'download_automation_leads' %}?automation_id=${atm}&data_field=${field}`;
+    // trigger download
+    window.location.href = url;
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.style.opacity = 1;
+    }, 2000); // 2 seconds, adjust if needed
+}
+const automationId = {{ automation.id }};
+document.querySelectorAll(".post-deliver-checkbox").forEach(function(box){
+
+    box.addEventListener("change", function(){
+        const row = this.closest("tr");
+        const foreclosureId = this.dataset.id
+        const checked = this.checked
+        fetch("{% url 'toggle_post_delivery' %}", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+
+            body: JSON.stringify({
+                automation_id:automationId,
+                foreclosure_id: foreclosureId,
+                checked: checked
+            })
+
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                if(checked){
+                    row.classList.add("highlight-row");
+                }else{
+                    row.classList.remove("highlight-row");
+                }
+                //update counter
+                document.getElementById("post-selected-count").textContent = data.count;
+            }else{
+                alert("Something went wrong");
+                // revert checkbox state
+                this.checked = !checked;
+            }
+        });
+
+    });
+
+});
+
+document.querySelectorAll(".verified-deliver-checkbox").forEach(function(box){
+
+    box.addEventListener("change", function(){
+        const row = this.closest("tr");
+        const foreclosureId = this.dataset.id
+        const checked = this.checked
+        
+        fetch("{% url 'toggle_verified_delivery' %}", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+
+            body: JSON.stringify({
+                automation_id:automationId,
+                foreclosure_id: foreclosureId,
+                checked: checked
+            })
+
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success){
+                if(checked){
+                    row.classList.add("highlight-row");
+                }else{
+                    row.classList.remove("highlight-row");
+                }
+                //update counter
+                document.getElementById("verified-selected-count").textContent = data.count;
+                if(data.count !== "0"){
+                    document.getElementById("download-verified-s").disabled = false;
+                }
+            }else{
+                alert("Something went wrong");
+                // revert checkbox state
+                this.checked = !checked;
+            }
+        });
+
+    });
+
+});
+
+</script>
+
+<script>
     function updateSetting(field, value) {
         fetch("/Automation/manage_automation/update-setting/", {
             method: "POST",

@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from si_user.models import*
+from propertydata.models import Status
+
 class OperationStat(models.Model):                              #
     created_at = models.DateTimeField(auto_now_add=True)        #
     changed_at = models.DateTimeField(null=True, blank=True)            #
@@ -49,3 +51,21 @@ class Automation(OperationStat):
     auto_renew = models.BooleanField(default=True)
     renew_when_expired = models.BooleanField(default=False)
     renew_when_limit = models.BooleanField(default=False)
+    pre_f_to_deliver = models.ManyToManyField(Foreclosure, related_name="pre_to_deliver")
+    post_f_to_deliver = models.ManyToManyField(Foreclosure, related_name="post_to_deliver")
+    verified_s_to_deliver = models.ManyToManyField(Foreclosure, related_name="verified_to_deliver")
+
+class AutomationDeliveries(OperationStat):
+    automation = models.ForeignKey(Automation, on_delete=models.SET_NULL, null=True)
+    client = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    data = models.ManyToManyField(Status, related_name="DataDelivered")
+    delivered = models.BooleanField(default=False)
+    PREFORECLOSURE = 'pre foreclosure'
+    POSTFORECLOSURE = 'post foreclosure'
+    VERIFIEDSURPLUS = 'verified surplus'
+    LISTTYPE = (
+        (PREFORECLOSURE,'Pre Foreclosure'),
+        (POSTFORECLOSURE,'Post Foreclosure'),
+        (VERIFIEDSURPLUS,'Verified Surplus'),
+    )
+    list_type = models.CharField(max_length=100, choices=LISTTYPE, blank=True, null=True)

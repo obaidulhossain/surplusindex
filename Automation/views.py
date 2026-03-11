@@ -1,8 +1,8 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import*
 import stripe
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from AllSettings.models import Coverage
@@ -12,12 +12,165 @@ from .services.stripe_subscription_service import StripeSubscriptionService
 from django.template.loader import render_to_string
 from django.contrib.auth.decorators import login_required
 from authentication.decorators import allowed_users
+from django.db.models import Exists, OuterRef
+from ProjectManager.resources import DashboardCloneExportResource
+from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.management import call_command
+from .resources import CustomExportResource
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 @allowed_users(['admin'])
 @login_required(login_url="login")
 def AdminAutomation(request):
-    return render(request, "Automation/admin_automation.html")
+    automations_active = Automation.objects.filter(status=Automation.ACTIVE)
+    context = {
+        "automations_active":automations_active,
+    }
+    return render(request, "Automation/admin_automation.html",context)
+
+
+def AdminManageAutomation(request):
+    params = request.POST if request.method == "POST" else request.GET
+    automation_id = params.get("automation_id")
+    automation = Automation.objects.get(pk=automation_id)
+    states = Coverage.objects.filter(active=True).order_by("state")
+    user_detail = UserDetail.objects.get(user=automation.client)
+    sale_type = []
+    if automation.tax:
+        sale_type.append(Foreclosure.TAX)
+    if automation.mortgage:
+        sale_type.append(Foreclosure.MORTGAGE)
+    
+    base_filters = {
+        "published": True,
+        "state__in": automation.states
+    }
+    if sale_type:
+        base_filters["sale_type__in"] = sale_type
+    
+
+    pre_f_qs = (Foreclosure.objects
+                .filter(**base_filters, sale_status=Foreclosure.ACTIVE)
+                .exclude(pre_f_delivered=user_detail)
+                .annotate(in_delivery=Exists(automation.pre_f_to_deliver.filter(id=OuterRef("id"))))
+                )
+    post_f_qs = (Foreclosure.objects
+                 .filter(**base_filters, sale_status=Foreclosure.SOLD, surplus_status=Foreclosure.POSSIBLE_SURPLUS, possible_surplus__gte=automation.surplus_capped)
+                 .exclude(post_f_delivered=user_detail)
+                 .annotate(in_delivery=Exists(automation.post_f_to_deliver.filter(id=OuterRef("id"))))
+                 )
+    verified_s_qs = (Foreclosure.objects
+                     .filter(**base_filters, sale_status=Foreclosure.SOLD, surplus_status=Foreclosure.FUND_AVAILABLE, verified_surplus__gte=automation.surplus_capped)
+                     .exclude(verified_s_delivered=user_detail)
+                     .annotate(in_delivery=Exists(automation.verified_s_to_deliver.filter(id=OuterRef("id"))))
+                     )
+    
+    context = {
+        "automation":automation,
+        "states":states,
+        "pre_f_qs":pre_f_qs,
+        "post_f_qs":post_f_qs,
+        "verified_s_qs":verified_s_qs,
+    }
+    return render(request,"Automation/admin_manage_automations.html",context)
+
+@login_required
+def toggle_post_delivery(request):
+
+    if request.method == "POST":
+
+        data = json.loads(request.body)
+
+        foreclosure_id = data.get("foreclosure_id")
+        checked = data.get("checked")
+        automationId = data.get("automation_id")
+        automation = Automation.objects.get(pk=automationId)
+
+        foreclosure = Foreclosure.objects.get(id=foreclosure_id)
+
+        if checked:
+            automation.post_f_to_deliver.add(foreclosure)
+        else:
+            automation.post_f_to_deliver.remove(foreclosure)
+
+        return JsonResponse({
+            "success": True,
+            "count": automation.post_f_to_deliver.count()
+            })
+
+@login_required
+def toggle_verified_delivery(request):
+
+    if request.method == "POST":
+
+        data = json.loads(request.body)
+
+        foreclosure_id = data.get("foreclosure_id")
+        checked = data.get("checked")
+        automationId = data.get("automation_id")
+        automation = Automation.objects.get(pk=automationId)
+
+        foreclosure = Foreclosure.objects.get(id=foreclosure_id)
+
+        if checked:
+            automation.verified_s_to_deliver.add(foreclosure)
+        else:
+            automation.verified_s_to_deliver.remove(foreclosure)
+
+        return JsonResponse({
+            "success": True,
+            "count": automation.verified_s_to_deliver.count()
+            })
+
+
+@login_required(login_url="login")
+@allowed_users(['admin'])
+def download_automation_leads(request):
+    # if request.method == "POST":
+    # data = json.loads(request.body)
+    # field = data.get("data_field")
+    # atmID = data.get("automation_id")
+    field = request.GET.get("data_field")
+    atmID = request.GET.get("automation_id")
+    automation = Automation.objects.get(pk=atmID)
+    
+        
+    if field =="post_f":
+        queryset = automation.post_f_to_deliver.all()
+    elif field == "verified_s":
+        queryset = automation.verified_s_to_deliver.all()
+    elif field == "pre_f":
+        queryset = automation.pre_f_to_deliver.all()
+    else:
+        queryset = None
+        return JsonResponse({"error": "Field Name Not Matched!"}, status=400)
+    if len(queryset) <1:
+        return JsonResponse({"error": "Treshold is empty"}, status=400)
+    
+    resource = DashboardCloneExportResource(queryset)
+    filename, buffer, _ = resource.export_to_excel("Automation Leads")
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+
+@staff_member_required
+def run_automation_delivery(request):
+    if request.method == "POST":
+        try:
+            call_command("process_automation_delivery")
+            return JsonResponse({"status": "success", "message": "Automation delivery executed."})
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
 
 
 @card_required
@@ -53,9 +206,14 @@ def ManageAutomation(request):
     automation_id = params.get("automation_id")
     automation = Automation.objects.get(pk=automation_id)
     states = Coverage.objects.filter(active=True).order_by("state")
+    transactions = automation.transaction.all()
+    deliveries = AutomationDeliveries.objects.filter(automation=automation, client=automation.client)
     context = {
         "automation":automation,
         "states":states,
+        "transactions":transactions,
+        "deliveries":deliveries,
+
     }
     return render(request,"Automation/manage_automations.html",context)
 
@@ -286,3 +444,45 @@ def stop_automation(request):
 
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)})
+def download_invoice(request, invoice_id):
+
+    try:
+        invoice = stripe.Invoice.retrieve(invoice_id)
+
+        return redirect(invoice.invoice_pdf)
+
+    except stripe.error.StripeError:
+        return HttpResponse("Invoice not found", status=404)
+
+@login_required
+def download_delivery_data(request, delivery_id):
+
+    delivery = AutomationDeliveries.objects.select_related(
+        "automation", "client"
+    ).prefetch_related(
+        "data__lead"
+    ).get(id=delivery_id)
+
+    # convert Status → Foreclosure
+    queryset = [status.lead for status in delivery.data.all() if status.lead]
+
+    if not queryset:
+        return HttpResponse("No data found.", status=404)
+    
+    # reuse your existing export system
+    resource = CustomExportResource(
+        delivery.automation,
+        queryset,
+        delivery.get_list_type_display()
+    )
+
+    filename, buffer, df = resource.export_to_excel()
+
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+
+    return response

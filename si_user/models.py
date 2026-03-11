@@ -46,6 +46,9 @@ class UserDetail(Timelogger):
         (NOT_WORKING,'Not Working'),
     )
     payment_method = models.CharField(max_length=100, choices=PMSTATUS, default='not added', null=True)
+    pre_foreclosure_delivered = models.ManyToManyField(Foreclosure, related_name="pre_f_delivered")
+    post_foreclosure_delivered = models.ManyToManyField(Foreclosure, related_name="post_f_delivered")
+    verified_surplus_delivered = models.ManyToManyField(Foreclosure, related_name="verified_s_delivered")
     def update_total_credits(self):
         self.Total_credits = self.free_credit_balance + self.purchased_credit_balance
         self.save()

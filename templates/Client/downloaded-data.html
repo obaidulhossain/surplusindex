@@ -220,7 +220,7 @@ Available Leads
                             <td class="address {% if current_user in i.lead.hidden_for.all %}highlight-row{% endif %}" style="padding:0px 10px; max-width:400px;">
                             {% with address=i.lead.property.all %}
                                 {% if address %}
-                                    {{ address.0.street_address|title|truncatechars:35 }}, {{address.0.city}} {{address.0.zip_code}}
+                                    {{ address.0.street_address|title|truncatechars:35 }}, {{address.0.city|title}} {{address.0.zip_code}}
                                     {% if address|length > 1 %}
                                         <span style="color:#888;">(+)</span>
                                     {% endif %}
