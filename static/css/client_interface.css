@@ -1,0 +1,392 @@
+.main {
+
+    background-color: #0b1b32;
+    border-left: 2px solid black;
+    color: aliceblue;
+    font-family: system-ui;
+}
+
+h1 {
+    font-size: 28px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 28px;
+    text-align: center;
+}
+
+h2 {
+    font-size: 24px;
+    text-align: center;
+}
+
+h5 {
+    text-align: left;
+    font-weight: 600;
+    font-size: 20px;
+    color: #5870b9;
+}
+
+h6 {
+    text-align: center;
+    font-weight: 600;
+    font-size: 20px;
+    color: #5870b9;
+}
+
+.section {
+    margin: 10px;
+}
+
+.container {
+    display: grid;
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-5 {
+    grid-template-columns: repeat(5, 1fr);
+}
+
+.grid {
+    /* flex: 1 1 33%; */
+    background-color: #0000002b;
+    border-radius: 15px;
+    border: 1px solid #86868638;
+    padding: 15px;
+    margin: 20px 15px;
+}
+
+.grid span {
+    padding: 2px 10px 6px 10px;
+    background-color: #243043;
+    border-radius: 8px;
+}
+
+.grid button {
+    padding: 10px;
+    border: 1px solid #86868638;
+    margin-top: 20px;
+    background-color: #0b4163;
+    border-radius: 5px;
+    height: 50px;
+    width: 100%;
+    color: #fff;
+    font-size: 20px;
+    font-weight: 500;
+    transition: ease-in-out 300ms;
+}
+
+
+
+.grid button:hover {
+    background-color: #00588f;
+    transition: ease-in-out 300ms;
+}
+
+/* subscripton payment modal start */
+/* ===== Overlay ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.25s ease;
+}
+
+/* ===== Modal Card ===== */
+.modal-card {
+    width: 480px;
+    max-width: 95%;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+    animation: scaleIn 0.25s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+/* ===== Header ===== */
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 5px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #0e2355;
+}
+
+/* Close Button */
+.close-btn {
+    font-size: 22px;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: 0.2s ease;
+}
+
+.close-btn:hover {
+    color: #ef4444;
+}
+
+/* ===== Body ===== */
+.modal-body {
+    padding: 24px;
+    color: black;
+}
+
+.modal-body input[type="radio"] {
+    width: 20px;
+    height: 20px;
+}
+
+.modal-body label {
+    margin: 10px;
+}
+
+/* Plan Summary Box */
+.plan-summary {
+    background: #f8fafc;
+    padding: 18px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 20px;
+}
+
+.plan-summary h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.plan-summary p {
+    margin: 5px 0 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* Stripe Card Wrapper */
+#card-wrapper {
+    margin-top: 15px;
+}
+
+#card-wrapper label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: #334155;
+}
+
+#card-element {
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+#card-element:focus-within {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+/* Error Box */
+.error-box {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+    display: none;
+}
+
+/* ===== Footer ===== */
+.modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+/* Cancel Button */
+.btn-cancel {
+    background: #f1f5f9;
+    color: #334155;
+    padding: 10px 18px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+
+.btn-cancel:hover {
+    background: #e2e8f0;
+}
+
+/* Confirm Button */
+.btn-confirm {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.btn-confirm:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.35);
+}
+
+/* Disabled State */
+.btn-confirm:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ===== Animations ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+
+
+/* 
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal-card {
+    background: #fff;
+    width: 500px;
+    border-radius: 14px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    color: black;
+}
+
+.modal-header,
+.modal-footer {
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+    text-align: center;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    border-top: 1px solid #eee;
+    border-bottom: none;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-confirm {
+    background: #6366f1;
+    color: white;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+}
+
+.btn-cancel {
+    background: #f3f4f6;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: none;
+}
+
+.error-box {
+    margin-top: 15px;
+    padding: 10px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border-radius: 6px;
+    display: none;
+} */
+
+/* subscripton payment modal end */
+
+@media (max-width: 1000px) {
+    .grid-2 {
+        grid-template-columns: repeat(1, 1fr);
+    }
+
+    .grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-4 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-5 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+
+@media (max-width: 600px) {
+    .container {
+        grid-template-columns: repeat(1, 1fr) !important;
+    }
+}
