@@ -142,7 +142,7 @@
                     <td>{{post_f.changed_at|date:"m/d/Y"}}</td>
                     <td>{{post_f.state}}</td>
                     <td>{{post_f.county}}</td>
-                    <td>{{post_f.sale_date}}</td>
+                    <td>{{post_f.sale_date|date:"m/d/Y"}}</td>
                     <td>{{post_f.case_number}}</td>
                     <td>{% if post_f.verified_surplus and not post_f.verified_surplus == 0 %}V {{post_f.verified_surplus|currency}}{% else %}P {{post_f.possible_surplus|currency}}{% endif %}</td>
                     <td>{{post_f.get_surplus_status_display}}</td>
@@ -187,7 +187,7 @@
                     <td>{{verified_s.changed_at|date:"m/d/Y"}}</td>
                     <td>{{verified_s.state}}</td>
                     <td>{{verified_s.county}}</td>
-                    <td>{{verified_s.sale_date}}</td>
+                    <td>{{verified_s.sale_date|date:"m/d/Y"}}</td>
                     <td>{{verified_s.case_number}}</td>
                     <td>{% if verified_s.verified_surplus and not verified_s.verified_surplus == 0 %}V {{verified_s.verified_surplus|currency}}{% else %}P {{verified_s.possible_surplus|currency}}{% endif %}</td>
                     <td>{{verified_s.get_surplus_status_display}}</td>
