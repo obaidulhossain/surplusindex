@@ -54,16 +54,19 @@ def AdminManageAutomation(request):
                 .filter(**base_filters, sale_status=Foreclosure.ACTIVE)
                 .exclude(pre_f_delivered=user_detail)
                 .annotate(in_delivery=Exists(automation.pre_f_to_deliver.filter(id=OuterRef("id"))))
+                .order_by("-sale_date")
                 )
     post_f_qs = (Foreclosure.objects
                  .filter(**base_filters, sale_status=Foreclosure.SOLD, surplus_status=Foreclosure.POSSIBLE_SURPLUS, possible_surplus__gte=automation.surplus_capped)
                  .exclude(post_f_delivered=user_detail)
                  .annotate(in_delivery=Exists(automation.post_f_to_deliver.filter(id=OuterRef("id"))))
+                 .order_by("-sale_date")
                  )
     verified_s_qs = (Foreclosure.objects
                      .filter(**base_filters, sale_status=Foreclosure.SOLD, surplus_status=Foreclosure.FUND_AVAILABLE, verified_surplus__gte=automation.surplus_capped)
                      .exclude(verified_s_delivered=user_detail)
                      .annotate(in_delivery=Exists(automation.verified_s_to_deliver.filter(id=OuterRef("id"))))
+                     .order_by("-sale_date")
                      )
     
     context = {

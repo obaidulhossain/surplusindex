@@ -117,13 +117,14 @@
     </div>
 </div>
 {% if automation.postforeclosure %}
-<div class="highlighted">
+<div class="highlighted" style="max-height:700px;">
     <h2>⭐⭐ Post Foreclosure Delivery Treshold - (<span id="post-selected-count">{{automation.post_f_to_deliver.count}}</span> of {{post_f_qs.count}})</h2>
     <div class="table-wrapper">
         <table class="responsive-table">
             <thead>
                 <tr>
                     <th><input type="checkbox" id="selectAll" disabled></th>
+                    <th>Created</th>
                     <th>Updated</th>
                     <th>State</th>
                     <th>County</th>
@@ -137,9 +138,11 @@
             {% for post_f in post_f_qs %}
                 <tr {% if post_f.in_delivery %}class="highlight-row"{% endif %}>
                     <td><input type="checkbox" class="post-deliver-checkbox" data-id="{{ post_f.id }}" {% if post_f.in_delivery %}checked{% endif %}></td>
+                    <td>{{post_f.created_at|date:"m/d/Y"}}</td>
                     <td>{{post_f.changed_at|date:"m/d/Y"}}</td>
                     <td>{{post_f.state}}</td>
                     <td>{{post_f.county}}</td>
+                    <td>{{post_f.sale_date}}</td>
                     <td>{{post_f.case_number}}</td>
                     <td>{% if post_f.verified_surplus and not post_f.verified_surplus == 0 %}V {{post_f.verified_surplus|currency}}{% else %}P {{post_f.possible_surplus|currency}}{% endif %}</td>
                     <td>{{post_f.get_surplus_status_display}}</td>
@@ -159,13 +162,14 @@
 
 {% if automation.verified %}
 
-<div class="highlighted" style="max-height:600px;">
+<div class="highlighted" style="max-height:700px;">
     <h2>⭐⭐⭐ Verified Surplus Delivery Treshold - (<span id="verified-selected-count">{{automation.verified_s_to_deliver.count}}</span> of {{verified_s_qs.count}})</h2>
     <div class="table-wrapper">
         <table class="responsive-table">
             <thead>
                 <tr>
                     <th><input type="checkbox" id="selectAll" disabled></th>
+                    <th>Created</th>
                     <th>Updated</th>
                     <th>State</th>
                     <th>County</th>
@@ -179,9 +183,11 @@
             {% for verified_s in verified_s_qs %}
                 <tr {% if verified_s.in_delivery %}class="highlight-row"{% endif %}>
                     <td><input type="checkbox" class="verified-deliver-checkbox" data-id="{{ verified_s.id }}" {% if verified_s.in_delivery %}checked{% endif %}></td>
+                    <td>{{verified_s.created_at|date:"m/d/Y"}}</td>
                     <td>{{verified_s.changed_at|date:"m/d/Y"}}</td>
                     <td>{{verified_s.state}}</td>
                     <td>{{verified_s.county}}</td>
+                    <td>{{verified_s.sale_date}}</td>
                     <td>{{verified_s.case_number}}</td>
                     <td>{% if verified_s.verified_surplus and not verified_s.verified_surplus == 0 %}V {{verified_s.verified_surplus|currency}}{% else %}P {{verified_s.possible_surplus|currency}}{% endif %}</td>
                     <td>{{verified_s.get_surplus_status_display}}</td>
